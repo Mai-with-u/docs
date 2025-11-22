@@ -6,6 +6,7 @@ MaiBot 文件夹结构：
 ```
 MaiBot/
 ├── data/
+├── plugins/
 ├── config/
 │   ├── bot_config.toml
 │   └── model_config.toml
@@ -21,7 +22,9 @@ MaiBot/
 ### 3. `model_config.toml`文件
 - 用于存储调用的大模型信息，AI云服务提供商的KEY API
 ### 4. `.env` 文件
-- 存储`maim_message`端口和地址。
+- 存储MaiBot监听的地址和端口;以及webui的启用、监听的地址和端口、模式。
+### 5. `plugins` 文件夹（可选）
+- 存储MaiBot所有插件的本体，及其各自的配置文件和数据文件（如果有）
 
 ::: details 如果你使用的是低于0.7.0版本的MaiBot，那么点开这里
 ### MongoDB 数据库备份与恢复

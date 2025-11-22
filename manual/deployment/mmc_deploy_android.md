@@ -307,6 +307,28 @@ python3 main.py
 # 按 Ctrl+A 然后按 D 退出screen
 ```
 
+### 使用社区管理脚本启动
+作者：kanfandelong
+
+脚本放置位置参考
+
+```
+../
+├── MaiBot/
+├── MaiBot-Napcat-Adapter/
+├── maibot.sh
+└── ...
+```
+#### 获取脚本并运行
+```bash [apt]
+#安装unbuffer和wget
+sudo apt install expect wget
+#下载管理脚本
+wget https://github.com/kanfandelong/maimai_install/blob/main/maibot.sh
+#运行管理脚本
+bash maibot.sh
+```
+
 ## 九、命令速查表
 
 ### 基础命令

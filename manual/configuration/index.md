@@ -24,8 +24,14 @@ MaiBot 支持通过 OpenIE 技术导入知识库。文件命名需以 `-openie.j
 ```ini
 HOST=127.0.0.1
 PORT=8000
+
+# WebUI 配置
+WEBUI_ENABLED=true
+WEBUI_HOST=0.0.0.0
+WEBUI_PORT=8001
+WEBUI_MODE=production   # 生产模式
 ```
-.env文件中的这部分负责配置MaiBot监听的端口和地址。
+.env文件中的这部分负责配置MaiBot监听的地址和端口;以及webui的启用、监听的地址和端口、模式。
 
 ## 常见问题
 
