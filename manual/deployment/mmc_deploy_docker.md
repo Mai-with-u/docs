@@ -13,6 +13,8 @@
 新版的adapter需要将napcat改为客户端([配置示例](#_5-2-⚙%EF%B8%8F-napcat配置入口))**
 ::: -->
 
+
+
 ## 🛠️ 一、准备麦麦部署环境
 
 ### 1.1 📂 创建项目目录
@@ -65,7 +67,11 @@ wget https://github.com/MaiM-with-u/MaiBot-Napcat-Adapter/raw/refs/heads/main/te
 [//]: # (> - `ONEBOT_WS_URLS`配置可替换成`ws://maim-bot-napcat:8095`)
 [//]: # (> - `nonebot-qq`配置可替换成`http://maim-bot-adapters:18002/api/message`)
 
-**预留文件**
+
+
+### 2.2   **预留文件**
+
+- 这个文件是MaiBot运行统计报告。
 
 `MacOS/Linux`
 
@@ -79,7 +85,11 @@ mkdir -p data/MaiMBot && touch ./data/MaiMBot/maibot_statistics.html
 mkdir data\MaiMBot && type nul > .\data\MaiMBot\maibot_statistics.html
 ```
 
-### 2.2 ✏️ 修改相关配置
+
+
+### 2.3  ✏️ 修改相关配置
+
+- 修改麦麦主程序的环境变量文件
 
 ```bash
 vim docker-config/mmc/.env
@@ -90,12 +100,11 @@ vim docker-config/mmc/.env
 ```ini
 # 网络监听配置
 HOST=0.0.0.0
-
-# API 密钥配置（根据实际情况填写）
-SILICONFLOW_KEY=sk-xxxxxx
 ```
 
-修改config.toml
+
+
+- 修改适配器配置文件
 
 ```bash
 vim docker-config/adapters/config.toml
@@ -115,6 +124,8 @@ host = "core" # 麦麦在.env文件中设置的主机地址，即HOST字段
 port = 8000        # 麦麦在.env文件中设置的端口，即PORT字段
 ```
 
+
+
 ### 2.3 📜 取消注释docker-compose.yml的eula
 
 ```bash
@@ -124,7 +135,11 @@ vim docker-compose.yml
 - PRIVACY_AGREE=42dddb3cbe2b784b45a2781407b298a1 # 同意EULA
 ```
 
-**如果不使用sqlite-web则取消chat2db的注释并给sqlite-web部分加上注释（或者删除）**
+
+
+### 2.4  数据库管理工具
+
+- **如果不使用sqlite-web则取消chat2db的注释并给sqlite-web部分加上注释（或者删除）**
 
 
 ```bash
@@ -158,7 +173,9 @@ vim docker-compose.yml
 
 
 
-当前配置完成后目录结构应如下
+### 2.5  目录结构
+
+- 当前配置完成后目录结构应如下
 
 ```text
 .
@@ -175,26 +192,52 @@ vim docker-compose.yml
 
 ---
 
+
+
 ## 🚀 三、初始化容器环境
 
 ### 3.1 ⚡ 首次启动容器生成剩余配置文件
+
+- 会自动生成麦麦主程序的基础配置和模型配置文件
 
 ```bash
 docker compose up -d && sleep 15 && docker compose down
 ```
 
+
+
 ### 3.2 🔧 调整麦麦配置
+
+> 请根据需要自行修改
+> 配置文件相关说明见[配置指南](/manual/configuration/index.md)
+
+- `bot_config.toml`：基础配置文件，包含麦麦名字、qq号、人设等。
 
 ```bash
 vim docker-config/mmc/bot_config.toml
 ```
 
-> 请根据需要自行修改
-> 配置文件相关说明见[配置指南](/manual/configuration/index.md)
+
+
+- `model_config.toml`：模型配置文件，包含了服务商、使用哪个模型等。
+
+```bash
+vim docker-config/mmc/model_config.toml
+```
+
+
+
+
 
 ---
 
 ## 🎉 四、启动麦麦
+
+::: tip
+
+注意：以下操作都是在 `maim-bot`目录下执行的。
+
+:::
 
 ### 4.1 🏁 启动所有组件
 
@@ -208,7 +251,7 @@ docker compose up -d
 docker compose ps
 ```
 
-正常应显示 4 个容器（maim-bot-core、maim-bot-adapters、maim-bot-napcat、sqlite-web[或chat2db]）状态为 `running`
+- 正常应显示 4 个容器（maim-bot-core、maim-bot-adapters、maim-bot-napcat、sqlite-web[或chat2db]）状态为 `running`
 
 ```bash
 NAME                IMAGE                           COMMAND                  SERVICE     CREATED          STATUS          PORTS
@@ -218,11 +261,28 @@ maim-bot-napcat     mlikiowa/napcat-docker:latest   "bash entrypoint.sh"     nap
 sqlite-web          coleifer/sqlite-web             "/bin/ash -c 'sqlite…"   sqlite-web  34 minutes ago   Up 34 minutes   0.0.0.0:8120->8080/tcp   
 ```
 
+
+
 ### 4.3 📜 实时日志监控
+
+- 实时查看所有容器日志
 
 ```bash
 docker compose logs -f
 ```
+
+
+
+- 实时查看某个容器日志
+
+```bash
+# 例如只想看主程序日志
+docker compose logs -f core
+```
+
+
+
+
 
 ---
 
@@ -236,11 +296,16 @@ docker compose logs -f
 | ⏹️ 停止服务 | `docker compose down` |
 | 🔄 强制重建 | `docker compose up -d --force-recreate` |
 
+
+
 ### 5.2 ⚙️ Napcat配置入口
 
 访问 `http://<服务器IP>:6099` 完成 Napcat 的配置
 > 网络配置使用`websocket客户端`，`url`为`ws://adapters:8095`
 > 例：
+>
+> ![](/images/napcat_network_webcoket.png)
+>
 > ![Napcat配置](/images/mmc-napcat-client.png)
 
 
@@ -252,15 +317,21 @@ docker compose logs -f
 >![chat2db配置](/images/mmc-chat2db.png)
 
 
+
+
+
+
 ---
 
-## ❓ 常见问题排查
+## 六、❓ 常见问题排查
 
 1. ❌ **容器启动失败**：
    - 🔍 检查端口冲突（18002/8000/8095/6099/8120/10824）
       > 如未映射请忽略
    - 🔑 验证 `.env` 文件中的 API 密钥有效性
 
+   
+   
 2. 🔄 **配置文件更新**：
    修改配置后需执行：
 
@@ -287,9 +358,13 @@ docker compose logs -f
 > docker compose logs -f
 > ```
 
+
+
+
+
 ---
 
-## 本地构建流程
+## 七、本地构建流程
 
 ### 准备必要的文件
 
