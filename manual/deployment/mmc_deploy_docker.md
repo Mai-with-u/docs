@@ -100,6 +100,7 @@ vim docker-config/mmc/.env
 ```ini
 # 网络监听配置
 HOST=0.0.0.0
+WEBUI_HOST=0.0.0.0
 ```
 
 
