@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { MermaidPlugin, MermaidMarkdown } from "vitepress-plugin-mermaid";
+import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -11,6 +12,39 @@ export default defineConfig({
   themeConfig: {
     search: {
       provider: 'local',
+      options: {
+        locales: {
+          'zh-CN': {
+            translations: {
+              button: {
+                buttonText: '搜索文档',
+                buttonAriaLabel: '搜索文档'
+              },
+              modal: {
+                noResultsText: '无法找到相关结果',
+                resetButtonTitle: '清除搜索条件',
+                footer: {
+                  selectText: '选择',
+                  navigateText: '切换',
+                  closeText: '关闭'
+                }
+              }
+            }
+          }
+        },
+        detailedView: true,
+        miniSearch: {
+          searchOptions: {
+            fuzzy: 0.2,
+            prefix: true,
+            boost: {
+              title: 2,
+              description: 1.5,
+              content: 1
+            }
+          }
+        }
+      }
     },
     editLink: {
       pattern: "https://github.com/Mai-with-u/docs/edit/main/:path",
@@ -22,6 +56,7 @@ export default defineConfig({
       { text: '功能介绍',link: '/features/index'},
       { text: '用户手册', link: '/manual/' },
       { text: '开发文档', link: '/develop/' },
+      { text: '文档地图', link: '/sitemap' },
       {text: '官方Q群', link:'/manual/other/qq_group'},
       {text: '意见反馈', link:'https://docs.qq.com/form/page/DWGxycXdKWG9PS1NH'},
       {
@@ -112,6 +147,16 @@ export default defineConfig({
         { text: '更新日志', link: '/manual/other/changelog' },
       ],
  
+       '/features/': [
+        {
+          text: '功能介绍',
+          items: [
+            { text: '功能介绍', link: '/features/' },
+            { text: '插件广场', link: '/features/plugins' },
+          ]
+        },
+      ],
+
       '/develop/': [
         {
           text: '开发文档',
@@ -205,6 +250,7 @@ export default defineConfig({
   markdown: {
     config(md) {
       md.use(MermaidMarkdown);
+      md.use(tabsMarkdownPlugin);
     },
   },
   vite: {

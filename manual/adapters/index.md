@@ -1,3 +1,9 @@
+---
+title: MaiBot适配器列表
+description: MaiBot适配器完整列表：Napcat、GO-CQ、TTS等平台连接适配器
+keywords: [MaiBot, 适配器, Napcat, GO-CQ, TTS, 平台连接, 适配器配置]
+---
+
 # 适配器列表
 
 在这里，你可以找到关于麦麦 Adapters 的所有信息。
