@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { MermaidPlugin, MermaidMarkdown } from "vitepress-plugin-mermaid";
+import { tabsMarkdownPlugin } from "vitepress-plugin-tabs";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -22,7 +23,7 @@ export default defineConfig({
       { text: '功能介绍',link: '/features/index'},
       { text: '用户手册', link: '/manual/' },
       { text: '开发文档', link: '/develop/' },
-      {text: '官方Q群', link:'/manual/other/qq_group'},
+      {text: '官方Q群', link:'/manual/other/group'},
       {text: '意见反馈', link:'https://docs.qq.com/form/page/DWGxycXdKWG9PS1NH'},
       {
         text: 'GitHub', 
@@ -39,16 +40,14 @@ export default defineConfig({
           text: '安装方法',
           collapsed: false,
           items: [
-            { text: '快速入门', link: '/manual/deployment/' },
-            { text: 'Windows部署', link: '/manual/deployment/mmc_deploy_windows' },
-            { text: 'Linux部署', link: '/manual/deployment/mmc_deploy_linux' },
-            { text: 'macOS部署', link: '/manual/deployment/mmc_deploy_macos' },
+            { text: '安装方式', link: '/manual/deployment/' },
+            { text: '安装指南', link: '/manual/deployment/installation' },
             { text: 'Docker部署', link: '/manual/deployment/mmc_deploy_docker' },
             { text: '其他部署方式', 
               collapsed: true, 
               items: [
-                { text: 'Android部署', link: '/manual/deployment/mmc_deploy_android' },
-                { text: 'Kubernetes部署', link: '/manual/deployment/mmc_deploy_kubernetes' },
+                { text: 'Android部署', link: '/manual/deployment/community/mmc_deploy_android' },
+                { text: 'Kubernetes部署', link: '/manual/deployment/community/mmc_deploy_kubernetes' },
                 { text: '1Panel 部署(社区)', link: '/manual/deployment/community/1panel' },
                 { text: 'Linux一键部署(社区)', link: '/manual/deployment/community/linux_one_key' },
               ],
@@ -98,6 +97,9 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: 'FAQ 概览', link: '/manual/faq/' },
+            { text: 'Windows 常见问题', link: '/manual/faq/windows' },
+            { text: 'Linux 常见问题', link: '/manual/faq/linux' },
+            { text: 'macOS 常见问题', link: '/manual/faq/macos' },
           ]
         },
         {
@@ -105,7 +107,7 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: '如何高效提问', link: '/manual/other/smart-question-guide' },
-            { text: '官方Q群', link: '/manual/other/qq_group' },
+            { text: '官方Q群', link: '/manual/other/group' },
             { text: '最终用户许可协议', link: '/manual/other/EULA' },
           ]
         },
@@ -204,6 +206,7 @@ export default defineConfig({
   },
   markdown: {
     config(md) {
+      md.use(tabsMarkdownPlugin);
       md.use(MermaidMarkdown);
     },
   },
