@@ -12,7 +12,7 @@
 
 > 如无特殊说明，当出现 `(Y/I/N/O/D/Z)[default=?]` 或 `[Y/N]` 时，直接点击回车，选择默认选项即可。面向有一定Linux基础的用户，使用ZeroTermux搭建基于MaiBot的QQ机器人。
 
-开始之前，**强烈建议阅读 [MaiBot文档中心-Linux部署](./mmc_deploy_linux.md) 和 [如何高效提问](/manual/other/smart-question-guide)**，这对了解大致流程和提问来说很有帮助。
+开始之前，**强烈建议阅读 [MaiBot文档中心-安装指南](../installation.md) 和 [如何高效提问](/manual/other/smart-question-guide)**，这对了解大致流程和提问来说很有帮助。
 
 ::: info
 本教程推荐使用 [uv](https://docs.astral.sh/uv/) 作为 Python 包管理器，它提供了更快的包安装速度和更好的依赖管理体验。当然，传统的 pip 方式依然可用。

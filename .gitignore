@@ -144,3 +144,6 @@ package-lock.json
 .vscode/launch.json
 
 **/.vscode
+
+# OpenCode
+.sisyphus

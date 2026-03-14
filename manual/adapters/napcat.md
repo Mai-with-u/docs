@@ -11,6 +11,66 @@ python main.py
 ## 配置
 Napcat 适配器的配置样例文件位于 `template/config_template.toml`，你首先**需要复制这个文件并重命名为config.toml并放到根目录**，然后可以根据自己的需求进行修改。
 
+### 部署准备
+
+#### 文件夹结构
+
+典型的部署文件夹结构如下：
+
+```
+Maim-with-u
+├── MaiBot
+│   ├── changelogs
+│   ├── config
+│   ├── data
+│   ├── depends-data
+│   ├── src
+│   │   └── ...
+│   └── template
+└── MaiBot-Napcat-Adapter
+    ├── config.toml
+    └── template
+```
+
+#### 初始化配置文件
+
+你可以使用以下命令复制配置文件：
+
+```bash
+# Linux/macOS
+cp template/config_template.toml config.toml
+
+# Windows
+# 手动复制 template/config_template.toml 到根目录，重命名为 config.toml
+```
+
+### Napcat 设置
+
+1. **安装 Napcat**：请参考 [Napcat 官方文档](https://napneko.github.io/guide/boot/Shell) 安装 Shell 版或 Framework 版。
+
+2. **配置 Websocket 客户端**：
+   - 在 Napcat 中新建 `websocket客户端`
+   - 设置反向代理的 URL（例如：`ws://localhost:8095/`）
+   
+   > [!IMPORTANT]
+   > 配置示例：
+   > ![](/images/napcat_websockets_client.png)
+
+### 关键字段配置
+
+在编辑 `config.toml` 之前，需要了解以下关键字段的对应关系：
+
+- `[Napcat_Server]` 的 `port` 应该与 Napcat 设置的反向代理 URL 端口相同（默认 8095）
+- `[MaiBot_Server]` 的 `port` 应该与 MaiBot 本体的 `.env` 文件中的 `PORT` 相同（默认 8000）
+- `[Napcat_Server]` 的 `heartbeat` 应该与 Napcat 设置的反向代理的心跳间隔相同
+  - **注意**：Napcat 中的间隔单位为毫秒，配置文件中单位为秒（例如：Napcat 设置 30000 毫秒，则填入 30）
+
+**MaiBot .env 文件示例**：
+```ini
+HOST=127.0.0.1
+PORT=8000
+```
+
 具体的配置项说明如下：
 
 ```toml
