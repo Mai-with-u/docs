@@ -156,11 +156,12 @@ python bot.py
 
 麦麦支持通过 WebUI 进行配置：
 
-1. 启动程序后，在浏览器打开 `http://localhost:8000`（默认端口）
-2. 通过 WebUI 完成 bot 配置、模型配置和适配器配置
+1. 启动程序后，在浏览器打开 `http://localhost:8001`（默认端口）
+2. 通过 WebUI 完成 bot 配置、模型配置和适配器配置，具体教程可见[WebUI配置指南](/manual/configuration/config_windows_onekey_withwebui)。
+3. 接入 QQ 请前往 [Adapters 文档中心](/manual/adapters/)。
 
 ::: tip
-详细配置请参考 [配置指南](/manual/configuration/index)
+手动配置请参考 [配置指南](/manual/configuration/index)
 :::
 
 ## 后台运行（Linux）

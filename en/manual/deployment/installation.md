@@ -156,11 +156,12 @@ python bot.py
 
 MaiBot supports configuration through WebUI:
 
-1. After starting the program, open `http://localhost:8000` in your browser (default port)
-2. Complete bot configuration, model configuration, and adapter configuration through WebUI
+1. After starting the program, open `http://localhost:8001` in your browser (default port)
+2. Complete bot configuration, model configuration, and adapter configuration through WebUI, for detailed tutorial see [WebUI Configuration Guide](/en/manual/configuration/config_windows_onekey_withwebui).
+3. For QQ integration, go to [Adapters Documentation](/en/manual/adapters/).
 
 ::: tip
-For detailed configuration, refer to the [Configuration Guide](/en/manual/configuration/index)
+For manual configuration, refer to the [Configuration Guide](/en/manual/configuration/index)
 :::
 
 ## Background Running (Linux)
