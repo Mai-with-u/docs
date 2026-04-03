@@ -53,7 +53,11 @@ proot-distro login ubuntu     # 登录Ubuntu
 
 ```bash
 apt update
-apt install sudo vim git python3-dev python3.12-venv build-essential screen curl python3-pip
+apt upgrade #推荐升级最新版本包，也可不升级
+```
+
+```bash
+apt install sudo vim git python3-dev python3-venv build-essential screen curl python3-pip
 ```
 
 ### 用户账户配置 (可选但推荐)
