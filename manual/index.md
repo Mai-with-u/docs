@@ -43,4 +43,3 @@ title: 用户手册
 
 - [适配器概览](/manual/adapters/) - 了解平台适配器架构
 - [NapCat](/manual/adapters/napcat) - QQ 协议适配
-- [TTS](/manual/adapters/tts) - 语音合成适配器

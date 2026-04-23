@@ -1,4 +1,4 @@
-﻿---
+---
 layout: home
 
 hero:
@@ -6,7 +6,7 @@ hero:
   text: LLM-based Interactive Agent
   tagline: Not just a bot, but a digital life form active in conversations
   image:
-    src: /images/mai.png
+    src: /title_img/mai.png
     alt: MaiBot
   actions:
     - theme: brand

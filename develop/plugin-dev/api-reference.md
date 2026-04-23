@@ -4,105 +4,295 @@ title: API 参考
 
 # API 参考
 
-本文档列出 MaiBot 插件可用的全部能力 API。插件通过 Host-Runner IPC 机制调用这些 API，每个 API 按命名空间分组，调用格式为 `namespace.method`。
+MaiBot 插件通过 `self.ctx`（`PluginContext`）访问 15 种能力代理。所有调用自动通过 RPC 转发到 Host 处理，SDK 会自动解包结果。
 
-## 消息发送 — send
+```python
+self.ctx.send       # 发送消息
+self.ctx.db         # 数据库操作
+self.ctx.llm        # LLM 调用
+self.ctx.config     # 配置读取
+self.ctx.message    # 历史消息
+self.ctx.chat       # 聊天流
+self.ctx.person     # 用户信息
+self.ctx.emoji      # 表情包管理
+self.ctx.frequency  # 发言频率
+self.ctx.component  # 插件管理
+self.ctx.api        # 跨插件 API
+self.ctx.gateway    # 消息网关
+self.ctx.tool       # 工具定义
+self.ctx.render     # HTML 渲染
+self.ctx.knowledge  # 知识库搜索
+self.ctx.logger     # 日志记录（标准 logging.Logger）
+```
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `send.text` | `(text: str, stream_id: str, typing?: bool, set_reply?: bool, storage_message?: bool) → {success: bool}` | 向指定流发送文本消息 |
-| `send.emoji` | `(emoji_base64: str, stream_id: str, storage_message?: bool) → {success: bool}` | 向指定流发送表情图片 |
-| `send.image` | `(image_base64: str, stream_id: str, storage_message?: bool) → {success: bool}` | 向指定流发送图片 |
-| `send.command` | `(command: str, stream_id: str, display_message?: str, storage_message?: bool) → {success: bool}` | 向指定流发送命令消息 |
-| `send.custom` | `(message_type: str, content: Any, stream_id: str, display_message?: str, typing?: bool, storage_message?: bool) → {success: bool}` | 向指定流发送自定义消息 |
+## send — 消息发送
 
-所有 send 方法均支持 `sync_to_maisaka_history` 和 `maisaka_source_kind` 可选参数，用于控制是否同步到麦麦历史记录和消息来源分类。
+```python
+# 发送文本消息
+await self.ctx.send.text(text="你好！", stream_id=stream_id)
 
-## 消息查询 — message
+# 发送图片消息（base64 编码）
+await self.ctx.send.image(image_base64=base64_str, stream_id=stream_id)
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `message.get_by_time` | `(start_time: float, end_time: float, limit?: int, limit_mode?: str, filter_mai?: bool) → {success: bool, messages: list}` | 按时间范围查询消息 |
-| `message.get_by_time_in_chat` | `(chat_id: str, start_time: float, end_time: float, limit?: int, filter_mai?: bool, filter_command?: bool) → {success: bool, messages: list}` | 按时间范围查询指定聊天的消息 |
-| `message.get_recent` | `(chat_id: str, hours?: float, limit?: int, filter_mai?: bool) → {success: bool, messages: list}` | 获取指定聊天最近 N 小时的消息 |
-| `message.count_new` | `(chat_id: str, start_time?: float, end_time?: float) → {success: bool, count: int}` | 统计指定聊天的新消息数量 |
-| `message.build_readable` | `(messages?: list, chat_id?: str, replace_bot_name?: bool, timestamp_mode?: str, truncate?: bool) → {success: bool, text: str}` | 将消息构建为可读文本 |
+# 发送表情（base64 编码）
+await self.ctx.send.emoji(emoji_base64=base64_str, stream_id=stream_id)
 
-## 聊天会话 — chat
+# 发送混合消息
+await self.ctx.send.hybrid(parts=[...], stream_id=stream_id)
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `chat.get_all_streams` | `(platform?: str) → {success: bool, streams: list}` | 获取指定平台全部聊天会话 |
-| `chat.get_group_streams` | `(platform?: str) → {success: bool, streams: list}` | 获取群聊会话列表 |
-| `chat.get_private_streams` | `(platform?: str) → {success: bool, streams: list}` | 获取私聊会话列表 |
-| `chat.get_stream_by_group_id` | `(group_id: str, platform?: str) → {success: bool, stream: dict}` | 按 QQ 群号获取会话 |
-| `chat.get_stream_by_user_id` | `(user_id: str, platform?: str) → {success: bool, stream: dict}` | 按用户 ID 获取私聊会话 |
+# 发送转发消息
+await self.ctx.send.forward(messages=[...], stream_id=stream_id)
 
-每个 stream 对象包含 `session_id`、`platform`、`user_id`、`group_id`、`is_group_session` 字段。
+# 发送自定义类型消息
+await self.ctx.send.custom(custom_type="card", data={...}, stream_id=stream_id)
+```
 
-## LLM 服务 — llm
+所有 `send.*` 方法返回 `bool`，表示是否发送成功。
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `llm.generate` | `(prompt: str \| list, model?: str, temperature?: float, max_tokens?: int) → {success: bool, content?: str, reasoning?: str}` | 执行无工具的 LLM 生成 |
-| `llm.generate_with_tools` | `(prompt: str \| list, tools?: list, model?: str, temperature?: float, max_tokens?: int) → {success: bool, content?: str, tool_calls?: list}` | 执行带工具的 LLM 生成 |
-| `llm.get_available_models` | `() → {success: bool, models: list}` | 获取当前宿主可用的模型任务列表 |
+## db — 数据库操作
 
-`prompt` 参数支持字符串（纯文本提示）或消息列表（多轮对话）格式。`model` 参数指定模型任务名称，若不指定则使用默认模型。
+```python
+# 查询数据
+results = await self.ctx.db.query(model_name="my_data", filters={"key": "value"})
 
-## 数据库操作 — database
+# 保存数据
+await self.ctx.db.save(model_name="my_data", data={"key": "value", "count": 1})
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `database.query` | `(model_name: str, query_type: str, filters?: dict, data?: dict, limit?: int, order_by?: str, single_result?: bool) → {success: bool, result: Any}` | 通用数据库查询（支持 get/create/update/delete/count） |
-| `database.get` | `(model_name: str, filters?: dict, limit?: int, order_by?: str, single_result?: bool) → {success: bool, result: Any}` | 查询数据记录 |
-| `database.save` | `(model_name: str, data: dict, key_field?: str, key_value?: Any) → {success: bool, result: Any}` | 保存数据记录 |
-| `database.delete` | `(model_name: str, filters: dict) → {success: bool, result: Any}` | 删除数据记录（不允许无条件删除） |
-| `database.count` | `(model_name: str, filters?: dict) → {success: bool, count: int}` | 统计数据记录数量 |
+# 获取单条数据
+result = await self.ctx.db.get(model_name="my_data", filters={"key": "value"})
 
-`model_name` 对应 `src/common/database/database_model.py` 中定义的数据模型类名。
+# 删除数据
+await self.ctx.db.delete(model_name="my_data", filters={"key": "value"})
 
-## 配置访问 — config
+# 计数
+count = await self.ctx.db.count(model_name="my_data", filters={"status": "active"})
+```
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `config.get` | `(key: str, default?: Any) → {success: bool, value: Any}` | 读取宿主全局配置字段 |
-| `config.get_plugin` | `(plugin_name?: str, key?: str, default?: Any) → {success: bool, value: Any}` | 读取指定插件配置 |
-| `config.get_all` | `(plugin_name?: str) → {success: bool, value: dict}` | 读取指定插件全部配置 |
+## llm — LLM 调用
 
-## 表情操作 — emoji
+```python
+# 文本生成
+result = await self.ctx.llm.generate(prompt="请总结以下内容", model="gpt-4")
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `emoji.get_by_description` | `(description: str) → {success: bool, emoji: dict}` | 按描述获取表情包 |
-| `emoji.get_random` | `(count?: int) → {success: bool, emojis: list}` | 随机获取表情包 |
-| `emoji.get_count` | `() → {success: bool, count: int}` | 获取表情包总数 |
-| `emoji.get_emotions` | `() → {success: bool, emotions: list}` | 获取全部情绪标签 |
-| `emoji.get_all` | `() → {success: bool, emojis: list}` | 获取全部表情包 |
-| `emoji.get_info` | `() → {success: bool, info: dict}` | 获取表情包系统信息 |
-| `emoji.register` | `(emoji_base64: str) → {success: bool, message: str}` | 注册新表情包 |
-| `emoji.delete` | `(emoji_hash: str) → {success: bool, message: str}` | 删除指定表情包 |
+# 带工具的文本生成
+result = await self.ctx.llm.generate_with_tools(
+    prompt="搜索并回答",
+    tools=[...],
+    model="gpt-4",
+)
 
-## 人员数据 — person
+# 获取可用模型列表
+models = await self.ctx.llm.get_available_models()
+```
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `person.get_id` | `(platform: str, user_id: str) → {success: bool, person_id: str}` | 获取人员内部 ID |
-| `person.get_value` | `(person_id: str, field_name: str, default?: Any) → {success: bool, value: Any}` | 获取人员属性值 |
-| `person.get_id_by_name` | `(person_name: str) → {success: bool, person_id: str}` | 按名称获取人员 ID |
+## config — 配置读取
 
-## 日志能力 — logging
+```python
+# 读取配置值
+value = await self.ctx.config.get("key.subkey")
 
-插件在自己的 Runner 进程中使用标准 Python `logging` 模块输出日志。Host 侧通过 `src/common/logger.py` 提供 `get_logger(name)` 工具函数。日志默认使用简体中文输出。
+# 读取插件自身配置
+config = await self.ctx.config.get_plugin("com.example.my-plugin")
 
-## 其他能力
+# 读取所有配置
+all_config = await self.ctx.config.get_all()
+```
 
-| API | 签名（简化） | 说明 |
-|-----|-------------|------|
-| `tool.get_definitions` | `() → {success: bool, tools: list}` | 获取当前可用工具定义列表 |
-| `knowledge.search` | `(query: str, limit?: int, mode?: str, chat_id?: str) → {success: bool, content: str}` | 搜索长期记忆/知识库 |
-| `frequency.get_current_talk_value` | `(chat_id: str) → {success: bool, value: float}` | 获取当前说话频率值 |
-| `frequency.set_adjust` | `(chat_id: str, value: float) → {success: bool}` | 设置说话频率调整系数 |
-| `frequency.get_adjust` | `(chat_id: str) → {success: bool, value: float}` | 获取说话频率调整系数 |
-| `render.html2png` | `(html: str) → {success: bool, image: str}` | 将 HTML 渲染为 PNG 图片（base64） |
-| `api.call` / `api.get` / `api.list` / `api.replace_dynamic` | — | 外部 API 调用与动态替换能力 |
+## message — 历史消息
+
+```python
+# 获取最近消息
+messages = await self.ctx.message.get_recent(stream_id=stream_id, limit=20)
+
+# 按时间获取消息
+messages = await self.ctx.message.get_by_time(
+    stream_id=stream_id,
+    start_time="2024-01-01T00:00:00",
+    end_time="2024-01-02T00:00:00",
+)
+
+# 统计新消息数
+count = await self.ctx.message.count_new(stream_id=stream_id)
+
+# 构建可读文本
+text = await self.ctx.message.build_readable(messages=messages)
+```
+
+## chat — 聊天流
+
+```python
+# 获取所有聊天流
+streams = await self.ctx.chat.get_all_streams()
+
+# 获取群组聊天流
+streams = await self.ctx.chat.get_group_streams()
+
+# 获取私聊聊天流
+streams = await self.ctx.chat.get_private_streams()
+
+# 按 Group ID 获取聊天流
+stream = await self.ctx.chat.get_stream_by_group_id(group_id="123456")
+
+# 按用户 ID 获取聊天流
+stream = await self.ctx.chat.get_stream_by_user_id(user_id="789012")
+```
+
+## person — 用户信息
+
+```python
+# 获取用户 ID
+person_id = await self.ctx.person.get_id(name="用户名")
+
+# 按名称查找用户 ID
+person_id = await self.ctx.person.get_id_by_name(name="张三")
+
+# 获取用户属性值
+value = await self.ctx.person.get_value(person_id=person_id, key="nickname")
+```
+
+## emoji — 表情包管理
+
+```python
+# 获取随机表情
+emojis = await self.ctx.emoji.get_random(count=5)
+
+# 按描述搜索表情
+emoji = await self.ctx.emoji.get_by_description(description="开心")
+
+# 获取所有表情
+all_emojis = await self.ctx.emoji.get_all()
+
+# 获取表情数量
+count = await self.ctx.emoji.get_count()
+
+# 获取表情信息
+info = await self.ctx.emoji.get_info(emoji_id="emoji_001")
+
+# 获取情绪列表
+emotions = await self.ctx.emoji.get_emotions()
+```
+
+## frequency — 发言频率
+
+```python
+# 获取当前发言频率值
+value = await self.ctx.frequency.get_current_talk_value()
+
+# 设置频率调整值
+await self.ctx.frequency.set_adjust(value=0.5)
+
+# 获取频率调整值
+value = await self.ctx.frequency.get_adjust()
+```
+
+## component — 插件与组件管理
+
+```python
+# 加载插件
+await self.ctx.component.load_plugin(plugin_id="com.example.plugin")
+
+# 卸载插件
+await self.ctx.component.unload_plugin(plugin_id="com.example.plugin")
+
+# 重新加载插件
+await self.ctx.component.reload_plugin(plugin_id="com.example.plugin")
+
+# 获取所有插件信息
+plugins = await self.ctx.component.get_all_plugins()
+
+# 获取单个插件信息
+plugin = await self.ctx.component.get_plugin_info(plugin_id="com.example.plugin")
+
+# 列出已加载插件
+plugins = await self.ctx.component.list_loaded_plugins()
+
+# 列出已注册插件
+plugins = await self.ctx.component.list_registered_plugins()
+```
+
+## api — 跨插件 API
+
+```python
+# 调用其他插件的 API
+result = await self.ctx.api.call(
+    plugin_id="com.other.plugin",
+    api_name="render_html",
+    html="<h1>Hello</h1>",
+)
+
+# 获取 API 信息
+api_info = await self.ctx.api.get(
+    plugin_id="com.other.plugin",
+    api_name="render_html",
+)
+
+# 列出所有可用 API
+apis = await self.ctx.api.list()
+
+# 替换动态 API（由 sync_dynamic_apis 内部调用）
+await self.ctx.api.replace_dynamic_apis(
+    components=[...],
+    offline_reason="动态 API 已下线",
+)
+```
+
+## gateway — 消息网关
+
+```python
+# 注入入站消息到 Host
+accepted = await self.ctx.gateway.route_message(
+    gateway_name="my_gateway",
+    message={...},
+    route_metadata={...},
+    external_message_id="msg-001",
+    dedupe_key="msg-001",
+)
+
+# 上报网关状态
+await self.ctx.gateway.update_state(
+    gateway_name="my_gateway",
+    ready=True,
+    platform="qq",
+    account_id="10001",
+    scope="primary",
+)
+```
+
+详见 [消息网关](./message-gateway.md)。
+
+## tool — 工具定义
+
+```python
+# 获取 LLM 工具定义列表
+definitions = await self.ctx.tool.get_definitions()
+```
+
+## render — HTML 渲染
+
+```python
+# 将 HTML 渲染为 PNG 图片
+result = await self.ctx.render.html2png(html="<h1>Hello</h1><p>World</p>")
+```
+
+`html2png()` 返回渲染结果，适合卡片、榜单或分享图等需要图片化输出的场景。
+
+## knowledge — 知识库搜索
+
+```python
+# 搜索 LPMM 知识库
+content = await self.ctx.knowledge.search(query="MaiBot 配置方法")
+```
+
+## logger — 日志
+
+```python
+# 标准日志接口，Logger 名称为 "plugin.<plugin_id>"
+self.ctx.logger.info("插件已启动")
+self.ctx.logger.warning("配置缺失，使用默认值")
+self.ctx.logger.error("出错了", exc_info=True)
+self.ctx.logger.debug("调试信息: %s", data)
+```
+
+::: tip 日志自动转发
+Runner 进程中的日志会自动通过 IPC 传输到主进程，无需额外配置。在主进程日志中可以找到插件输出的所有日志。
+:::

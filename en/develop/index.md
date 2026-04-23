@@ -97,6 +97,15 @@ uv run ruff check .
 uv run ruff format .
 ```
 
+## Architecture Deep Dive
+
+Deep dive into the internal architecture and implementation principles of each subsystem:
+
+- [Message Pipeline](./architecture/message-pipeline.md): Complete processing flow for inbound messages — from platform adapters through Hook interception, filtering, command dispatch, HeartFlow, and outbound sending
+- [Maisaka Reasoning Engine](./architecture/maisaka-reasoning.md): Core of conversational reasoning — Timing Gate rhythm control, Planner planning loop, tool calls, and interruption mechanisms
+- [Memory System](./architecture/memory-system.md): A-Memorix long-term memory engine — dual-path retrieval, storage layer, memory strategies, and person profiling
+- [WebUI Internals](./architecture/webui-internals.md): FastAPI backend architecture — authentication security, WebSocket communication, plugin management, and configuration hot reload
+
 ## Next Steps
 
 - [Architecture Design](./architecture.md): Understand Runner/Worker process model and message processing pipeline

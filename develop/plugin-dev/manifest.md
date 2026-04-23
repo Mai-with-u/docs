@@ -1,10 +1,17 @@
 ---
-title: Manifest 系统
+title: Manifest
 ---
 
 # Manifest 系统
 
 每个 MaiBot 插件必须在其根目录下包含一个 `_manifest.json` 文件，用于声明插件的元信息、版本兼容性、依赖关系和能力需求。Host 侧的 `ManifestValidator` 会在加载前严格校验此文件。
+
+::: tip _manifest.json 与 config.toml 的区别
+- `_manifest.json`：插件**元信息**（ID、版本、依赖等），由 Host 校验和管理
+- `config.toml`：插件**运行时配置**（功能开关、参数等），由插件自身读取
+
+两者用途完全不同，不要混淆。
+:::
 
 ## _manifest.json 结构
 

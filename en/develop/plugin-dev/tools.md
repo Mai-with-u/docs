@@ -1,166 +1,253 @@
 ---
-title: Tool Components
+title: Tool Component
 ---
 
-# Tool Components
+# Tool Component
 
-Tool component is one of the most core component types in MaiBot's plugin system. It allows plugins to expose callable tool functions to LLM, enabling LLM to actively call external capabilities during reasoning - such as searching knowledge bases, querying databases, calling external APIs, etc.
+`@Tool` is the most core component type in MaiBot's plugin system. It allows plugins to expose callable tool functions to LLM, enabling LLM to actively invoke external capabilities during reasoning — such as searching knowledge bases, querying databases, calling external APIs, etc.
 
-## Core Concepts
+::: tip Tool vs Action
+`@Action` is the legacy decorator. The SDK internally auto-converts it to a `@Tool` declaration. New plugins should use `@Tool` directly instead of `@Action`. See [Action Component (Legacy)](./actions.md).
+:::
 
-### ToolInfo Data Class
-
-`ToolInfo` is the tool information snapshot used internally by Host, defined in `src/core/types.py`:
+## Decorator Signature
 
 ```python
-@dataclass(slots=True)
-class ToolInfo(ComponentInfo):
-    parameters_schema: Dict[str, Any] | None = None
-    component_type: ComponentType = field(init=False, default=ComponentType.TOOL)
+from maibot_sdk import Tool
+from maibot_sdk.types import ToolParameterInfo, ToolParamType
+
+@Tool(
+    name: str,                                              # Tool name (required)
+    description: str = "",                                  # Compatibility param, equivalent to brief_description
+    brief_description: str = "",                            # Brief description for LLM quick judgment
+    detailed_description: str = "",                         # Detailed description, including parameter docs
+    parameters: list[ToolParameterInfo] | dict | None = None,  # Parameter definition
+    **metadata,                                             # Additional metadata
+)
 ```
 
-It inherits from `ComponentInfo` and contains the following key fields:
+### Parameter Description
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | `str` | Tool name, must be globally unique |
-| `description` | `str` | Tool description, for LLM to decide whether to call |
-| `parameters_schema` | `Dict[str, Any] \| None` | Object-level tool parameter Schema |
-| `enabled` | `bool` | Whether tool is enabled, default `True` |
-| `plugin_name` | `str` | Plugin ID it belongs to |
-| `component_type` | `ComponentType` | Fixed as `ComponentType.TOOL` |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `str` | Tool name, must be unique within the plugin. LLM calls the tool by this name |
+| `description` | `str` | Legacy parameter, recommend using `brief_description` directly |
+| `brief_description` | `str` | Brief description. Passed to LLM as tool description summary, helping LLM decide whether to call it |
+| `detailed_description` | `str` | Detailed description. Can include parameter usage notes, caveats, etc. The SDK automatically merges parameter Schema to generate complete description |
+| `parameters` | `list \| dict \| None` | Tool parameter definition, supports two formats (see below) |
 
-### parameters_schema and LLM Tool Definition
+## Parameter Definition
 
-`parameters_schema` is parameter description in JSON Schema format, used to declare parameters required by the tool to LLM. For example:
+### Method 1: Structured Parameters (Recommended)
+
+Declare parameters using a `ToolParameterInfo` list. The SDK automatically generates JSON Schema:
 
 ```python
-parameters_schema = {
-    "type": "object",
-    "properties": {
-        "query": {
-            "type": "string",
-            "description": "Search keywords"
+from maibot_sdk import Tool, MaiBotPlugin
+from maibot_sdk.types import ToolParameterInfo, ToolParamType
+
+class MyPlugin(MaiBotPlugin):
+    @Tool(
+        "search",
+        brief_description="Search the internet for information",
+        detailed_description="Use a search engine to find related information. Parameter details:\n- query: string, required. Search keywords.\n- limit: integer, optional. Maximum number of results to return.",
+        parameters=[
+            ToolParameterInfo(
+                name="query",
+                param_type=ToolParamType.STRING,
+                description="Search keywords",
+                required=True,
+            ),
+            ToolParameterInfo(
+                name="limit",
+                param_type=ToolParamType.INTEGER,
+                description="Maximum number of results to return",
+                required=False,
+                default=5,
+            ),
+        ],
+    )
+    async def handle_search(self, query: str, limit: int = 5, **kwargs):
+        results = await self._do_search(query, limit)
+        return {"results": results}
+```
+
+### Method 2: Dict Parameters (Legacy Format)
+
+Directly pass a JSON Schema-style dictionary:
+
+```python
+class MyPlugin(MaiBotPlugin):
+    @Tool(
+        "search",
+        brief_description="Search the internet for information",
+        parameters={
+            "query": {"type": "string", "description": "Search keywords"},
+            "limit": {"type": "integer", "description": "Maximum number of results to return", "default": 5},
         },
-        "limit": {
-            "type": "integer",
-            "description": "Maximum number of results to return",
-            "default": 5
-        }
-    },
-    "required": ["query"]
-}
+    )
+    async def handle_search(self, query: str, limit: int = 5, **kwargs):
+        results = await self._do_search(query, limit)
+        return {"results": results}
 ```
 
-The `ToolInfo.get_llm_definition()` method combines `name`, `description`, and `parameters_schema` into a normalized tool definition dictionary for LLM use:
-
-```python
-def get_llm_definition(self) -> Dict[str, Any]:
-    definition = {
-        "name": self.name,
-        "description": self.description,
-    }
-    if self.parameters_schema is not None:
-        definition["parameters_schema"] = copy.deepcopy(self.parameters_schema)
-    return definition
-```
-
-## Unified Tool Abstraction Layer
-
-### ToolSpec
-
-`ToolSpec` is the unified tool declaration, defined in `src/core/tooling.py`. It is a higher-level encapsulation of `ToolInfo`, adding richer metadata:
+## ToolParameterInfo Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | `str` | Tool name |
-| `brief_description` | `str` | Brief description |
-| `detailed_description` | `str` | Detailed description |
-| `parameters_schema` | `Dict[str, Any] \| None` | Parameter Schema |
-| `output_schema` | `Dict[str, Any] \| None` | Output Schema |
-| `provider_name` | `str` | Source Provider name |
-| `provider_type` | `str` | Source Provider type |
-| `enabled` | `bool` | Whether enabled |
-| `annotation` | `ToolAnnotation \| None` | Tool annotation information |
+| `name` | `str` | Parameter name |
+| `param_type` | `ToolParamType` | Parameter type enum |
+| `description` | `str` | Parameter description |
+| `required` | `bool` | Whether required, default `True` |
+| `enum_values` | `list \| None` | Optional enum value list |
+| `default` | `Any` | Default value |
+| `items_schema` | `dict \| None` | Array element Schema (used when `param_type=ARRAY`) |
+| `properties` | `dict \| None` | Object property definitions (used when `param_type=OBJECT`) |
+| `required_properties` | `list[str]` | Required fields within the object |
+| `additional_properties` | `bool \| dict \| None` | Whether additional fields are allowed |
 
-The `ToolSpec.to_llm_definition()` method generates a `ToolDefinitionInput` object that can be directly used by the model layer.
+## ToolParamType Enum
 
-### ToolProvider Protocol
+| Enum Value | JSON Schema Type | Description |
+|------------|-----------------|-------------|
+| `STRING` | `string` | String |
+| `INTEGER` | `integer` | Integer |
+| `NUMBER` | `number` | Number (integer or float) |
+| `FLOAT` | `number` | Float (equivalent to NUMBER) |
+| `BOOLEAN` | `boolean` | Boolean |
+| `ARRAY` | `array` | Array |
+| `OBJECT` | `object` | Object |
 
-`ToolProvider` is the unified tool provider protocol, defined as a `Protocol` class:
+## Handler Function
 
-```python
-@runtime_checkable
-class ToolProvider(Protocol):
-    provider_name: str
-    provider_type: str
-
-    async def list_tools(self) -> list[ToolSpec]: ...
-    async def invoke(self, invocation: ToolInvocation, context: Optional[ToolExecutionContext] = None) -> ToolExecutionResult: ...
-    async def close(self) -> None: ...
-```
-
-Any class implementing this protocol can be registered as a tool provider to `ToolRegistry`.
-
-### ToolRegistry
-
-`ToolRegistry` is the unified tool registry, responsible for managing all tool providers and providing unified query and invocation interfaces:
-
-- **`register_provider(provider)`**: Register tool provider (same name Provider will replace old one)
-- **`list_tools()`**: List all deduplicated tools in Provider order (skip tools with `enabled=False`)
-- **`get_llm_definitions()`**: Get tool definition list for LLM use
-- **`invoke(invocation, context)`**: Find target tool in Provider order and execute invocation
-
-When duplicate tool names are detected, it will keep the first registered tool and log warning.
-
-## PluginToolProvider
-
-`PluginToolProvider` (defined in `src/plugin_runtime/tool_provider.py`) is the bridge class that exposes plugin Tools as unified tool Providers:
-
-- `provider_name = "plugin_runtime"`
-- `provider_type = "plugin"`
-- `list_tools()`: Delegates to `component_query_service.get_llm_available_tool_specs()`
-- `invoke()`: Delegates to `component_query_service.invoke_tool_as_tool()`
-
-It connects plugin declaratively registered Tool components with MaiSaka's internal tool invocation pipeline.
-
-## Declaring Tools in Plugins
-
-When declaring Tool components in plugin manifest, you need to provide `name`, `description`, and `parameters_schema`. MaiBot will call the corresponding handler function in plugin Runner through IPC when the tool is selected by LLM.
-
-### Invocation Flow
-
-1. LLM outputs tool call request (`tool_call`) during reasoning process
-2. Host finds corresponding Provider in `ToolRegistry` based on `tool_name`
-3. `PluginToolProvider` converts the call to IPC message and sends to plugin Runner
-4. Runner executes actual logic and returns `ToolExecutionResult`
-5. Result is written to conversation history for LLM to continue reasoning
-
-## Tool Invocation Related Types
-
-### ToolInvocation
+Tool handler functions are async methods on the plugin class that receive named parameters matching the parameter names and `**kwargs`:
 
 ```python
-@dataclass(slots=True)
-class ToolInvocation:
-    tool_name: str
-    arguments: Dict[str, Any] = field(default_factory=dict)
-    call_id: str = ""
-    session_id: str = ""
-    stream_id: str = ""
+@Tool("greet", brief_description="Greet the user",
+      detailed_description="Parameter details:\n- stream_id: string, required. Current chat stream ID.",
+      parameters=[
+          ToolParameterInfo(name="stream_id", param_type=ToolParamType.STRING,
+                          description="Current chat stream ID", required=True),
+      ])
+async def handle_greet(self, stream_id: str, **kwargs):
+    await self.ctx.send.text("Hello!", stream_id)
+    return {"success": True, "message": "Replied"}
 ```
 
-### ToolExecutionResult
+### Return Value
+
+The return value of a Tool handler is returned to LLM as the tool execution result. The return value can be:
+
+- `dict`: Recommended, LLM can understand structured data
+- `str`: Simple text result
+- Other serializable values
+
+LLM will decide the next action based on the return value (e.g., reply to user, call other tools, etc.).
+
+### Common Extra Parameters in kwargs
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `stream_id` | `str` | Current chat stream ID, can be used with `ctx.send.text()` etc. to send messages |
+| `message` | `dict` | Original message that triggered this tool call |
+
+::: tip stream_id
+`stream_id` is one of the most important parameters in Tool components. It identifies the current conversation stream. Use `ctx.send.text("message", stream_id)` to send messages to the corresponding chat stream.
+:::
+
+## Description Generation Rules
+
+The SDK automatically generates complete description information for tools:
+
+1. If `detailed_description` is provided, the SDK appends parameter Schema documentation to the end of `detailed_description`
+2. If only `brief_description` (or `description`) is provided, the SDK automatically generates parameter documentation based on the parameter Schema
+3. Auto-generated parameter documentation format:
+   ```
+   Parameter details:
+   - query: string, required. Search keywords
+   - limit: integer, optional. Maximum number of results to return. Default: 5
+   ```
+
+## Complete Example
 
 ```python
-@dataclass(slots=True)
-class ToolExecutionResult:
-    tool_name: str
-    success: bool
-    content: str = ""
-    error_message: str = ""
-    structured_content: Any = None
-    content_items: list[ToolContentItem] = field(default_factory=list)
+from typing import Any
+
+from maibot_sdk import MaiBotPlugin, Tool
+from maibot_sdk.types import ToolParameterInfo, ToolParamType
+
+
+class SearchPlugin(MaiBotPlugin):
+    async def on_load(self) -> None:
+        self.ctx.logger.info("Search plugin loaded")
+
+    async def on_unload(self) -> None:
+        pass
+
+    async def on_config_update(self, scope: str, config_data: dict, version: str) -> None:
+        pass
+
+    @Tool(
+        "search_web",
+        brief_description="Search the internet for information",
+        detailed_description="Use a search engine to find related information. Returns a list of results that best match the keywords.",
+        parameters=[
+            ToolParameterInfo(
+                name="query",
+                param_type=ToolParamType.STRING,
+                description="Search keywords",
+                required=True,
+            ),
+            ToolParameterInfo(
+                name="limit",
+                param_type=ToolParamType.INTEGER,
+                description="Maximum number of results to return",
+                required=False,
+                default=5,
+            ),
+        ],
+    )
+    async def search(self, query: str, limit: int = 5, **kwargs):
+        """Search the internet"""
+        results = await self._do_search(query, limit)
+        return {"results": results, "count": len(results)}
+
+    @Tool(
+        "get_weather",
+        brief_description="Get weather information for a specified city",
+        parameters=[
+            ToolParameterInfo(
+                name="city",
+                param_type=ToolParamType.STRING,
+                description="City name",
+                required=True,
+            ),
+        ],
+    )
+    async def get_weather(self, city: str, **kwargs):
+        """Query weather"""
+        weather = await self._fetch_weather(city)
+        return {"city": city, "weather": weather}
+
+    async def _do_search(self, query: str, limit: int) -> list:
+        # Actual search logic
+        return []
+
+    async def _fetch_weather(self, city: str) -> dict:
+        # Actual weather query logic
+        return {}
+
+
+def create_plugin():
+    return SearchPlugin()
 ```
 
-The `ToolExecutionResult.get_history_content()` method returns result text suitable for writing to conversation history by priority: text content > content item summary > structured content > error information.
+## Relationship with Legacy Action
+
+The `@Action` decorator is deprecated in SDK 2.0 and internally auto-converts to `@Tool` declaration:
+
+- `action_parameters` → converted to Tool's `parameters` Schema (all parameter types become `string`)
+- `activation_type` / `activation_keywords` → preserved as Tool `metadata`
+- Using `@Action` triggers a `DeprecationWarning`
+
+New plugins should use `@Tool` directly to enjoy richer parameter type support and more standardized Schema generation.

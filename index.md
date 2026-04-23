@@ -1,4 +1,4 @@
-﻿---
+---
 layout: home
 
 hero:
@@ -6,7 +6,7 @@ hero:
   text: 基于 LLM 的交互式智能体
   tagline: 不仅仅是一个机器人，而是一个活跃在对话中的"生命体"
   image:
-    src: /images/mai.png
+    src: /title_img/mai.png
     alt: MaiBot
   actions:
     - theme: brand

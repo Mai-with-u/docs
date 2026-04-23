@@ -4,105 +4,295 @@ title: API Reference
 
 # API Reference
 
-This document lists all available capability APIs for MaiBot plugins. Plugins call these APIs through the Host-Runner IPC mechanism, each API is grouped by namespace, call format is `namespace.method`.
+MaiBot plugins access 15 capability proxies through `self.ctx` (`PluginContext`). All calls are automatically forwarded to Host via RPC, and the SDK automatically unwraps results.
 
-## Message Sending — send
+```python
+self.ctx.send       # Send messages
+self.ctx.db         # Database operations
+self.ctx.llm        # LLM calls
+self.ctx.config     # Configuration reading
+self.ctx.message    # Historical messages
+self.ctx.chat       # Chat streams
+self.ctx.person     # User information
+self.ctx.emoji      # Emoji management
+self.ctx.frequency  # Talk frequency
+self.ctx.component  # Plugin management
+self.ctx.api        # Cross-plugin API
+self.ctx.gateway    # Message gateway
+self.ctx.tool       # Tool definitions
+self.ctx.render     # HTML rendering
+self.ctx.knowledge  # Knowledge base search
+self.ctx.logger     # Logging (standard logging.Logger)
+```
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `send.text` | `(text: str, stream_id: str, typing?: bool, set_reply?: bool, storage_message?: bool) → {success: bool}` | Send text message to specified stream |
-| `send.emoji` | `(emoji_base64: str, stream_id: str, storage_message?: bool) → {success: bool}` | Send emoji image to specified stream |
-| `send.image` | `(image_base64: str, stream_id: str, storage_message?: bool) → {success: bool}` | Send image to specified stream |
-| `send.command` | `(command: str, stream_id: str, display_message?: str, storage_message?: bool) → {success: bool}` | Send command message to specified stream |
-| `send.custom` | `(message_type: str, content: Any, stream_id: str, display_message?: str, typing?: bool, storage_message?: bool) → {success: bool}` | Send custom message to specified stream |
+## send — Message Sending
 
-All send methods support optional parameters `sync_to_maisaka_history` and `maisaka_source_kind` to control whether to sync to Maisaka history and message source classification.
+```python
+# Send text message
+await self.ctx.send.text(text="Hello!", stream_id=stream_id)
 
-## Message Query — message
+# Send image message (base64 encoded)
+await self.ctx.send.image(image_base64=base64_str, stream_id=stream_id)
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `message.get_by_time` | `(start_time: float, end_time: float, limit?: int, limit_mode?: str, filter_mai?: bool) → {success: bool, messages: list}` | Query messages by time range |
-| `message.get_by_time_in_chat` | `(chat_id: str, start_time: float, end_time: float, limit?: int, filter_mai?: bool, filter_command?: bool) → {success: bool, messages: list}` | Query messages in specified chat by time range |
-| `message.get_recent` | `(chat_id: str, hours?: float, limit?: int, filter_mai?: bool) → {success: bool, messages: list}` | Get recent N hours messages in specified chat |
-| `message.count_new` | `(chat_id: str, start_time?: float, end_time?: float) → {success: bool, count: int}` | Count new messages in specified chat |
-| `message.build_readable` | `(messages?: list, chat_id?: str, replace_bot_name?: bool, timestamp_mode?: str, truncate?: bool) → {success: bool, text: str}` | Build messages into readable text |
+# Send emoji (base64 encoded)
+await self.ctx.send.emoji(emoji_base64=base64_str, stream_id=stream_id)
 
-## Chat Session — chat
+# Send hybrid message
+await self.ctx.send.hybrid(parts=[...], stream_id=stream_id)
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `chat.get_all_streams` | `(platform?: str) → {success: bool, streams: list}` | Get all chat sessions for specified platform |
-| `chat.get_group_streams` | `(platform?: str) → {success: bool, streams: list}` | Get group chat session list |
-| `chat.get_private_streams` | `(platform?: str) → {success: bool, streams: list}` | Get private chat session list |
-| `chat.get_stream_by_group_id` | `(group_id: str, platform?: str) → {success: bool, stream: dict}` | Get session by QQ group ID |
-| `chat.get_stream_by_user_id` | `(user_id: str, platform?: str) → {success: bool, stream: dict}` | Get private chat session by user ID |
+# Send forward message
+await self.ctx.send.forward(messages=[...], stream_id=stream_id)
 
-Each stream object contains fields: `session_id`, `platform`, `user_id`, `group_id`, `is_group_session`.
+# Send custom type message
+await self.ctx.send.custom(custom_type="card", data={...}, stream_id=stream_id)
+```
 
-## LLM Service — llm
+All `send.*` methods return `bool`, indicating whether the send was successful.
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `llm.generate` | `(prompt: str \| list, model?: str, temperature?: float, max_tokens?: int) → {success: bool, content?: str, reasoning?: str}` | Execute LLM generation without tools |
-| `llm.generate_with_tools` | `(prompt: str \| list, tools?: list, model?: str, temperature?: float, max_tokens?: int) → {success: bool, content?: str, tool_calls?: list}` | Execute LLM generation with tools |
-| `llm.get_available_models` | `() → {success: bool, models: list}` | Get current available model task list for Host |
+## db — Database Operations
 
-The `prompt` parameter supports string (plain text prompt) or message list (multi-turn conversation) format. The `model` parameter specifies model task name, if not specified uses default model.
+```python
+# Query data
+results = await self.ctx.db.query(model_name="my_data", filters={"key": "value"})
 
-## Database Operations — database
+# Save data
+await self.ctx.db.save(model_name="my_data", data={"key": "value", "count": 1})
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `database.query` | `(model_name: str, query_type: str, filters?: dict, data?: dict, limit?: int, order_by?: str, single_result?: bool) → {success: bool, result: Any}` | General database query (supports get/create/update/delete/count) |
-| `database.get` | `(model_name: str, filters?: dict, limit?: int, order_by?: str, single_result?: bool) → {success: bool, result: Any}` | Query data records |
-| `database.save` | `(model_name: str, data: dict, key_field?: str, key_value?: Any) → {success: bool, result: Any}` | Save data records |
-| `database.delete` | `(model_name: str, filters: dict) → {success: bool, result: Any}` | Delete data records (unconditional deletion not allowed) |
-| `database.count` | `(model_name: str, filters?: dict) → {success: bool, count: int}` | Count data records |
+# Get single record
+result = await self.ctx.db.get(model_name="my_data", filters={"key": "value"})
 
-`model_name` corresponds to data model class names defined in `src/common/database/database_model.py`.
+# Delete data
+await self.ctx.db.delete(model_name="my_data", filters={"key": "value"})
 
-## Configuration Access — config
+# Count
+count = await self.ctx.db.count(model_name="my_data", filters={"status": "active"})
+```
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `config.get` | `(key: str, default?: Any) → {success: bool, value: Any}` | Read Host global configuration field |
-| `config.get_plugin` | `(plugin_name?: str, key?: str, default?: Any) → {success: bool, value: Any}` | Read specified plugin configuration |
-| `config.get_all` | `(plugin_name?: str) → {success: bool, value: dict}` | Read all configuration for specified plugin |
+## llm — LLM Calls
 
-## Emoji Operations — emoji
+```python
+# Text generation
+result = await self.ctx.llm.generate(prompt="Summarize the following", model="gpt-4")
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `emoji.get_by_description` | `(description: str) → {success: bool, emoji: dict}` | Get emoji by description |
-| `emoji.get_random` | `(count?: int) → {success: bool, emojis: list}` | Get random emojis |
-| `emoji.get_count` | `() → {success: bool, count: int}` | Get total emoji count |
-| `emoji.get_emotions` | `() → {success: bool, emotions: list}` | Get all emotion tags |
-| `emoji.get_all` | `() → {success: bool, emojis: list}` | Get all emojis |
-| `emoji.get_info` | `() → {success: bool, info: dict}` | Get emoji system information |
-| `emoji.register` | `(emoji_base64: str) → {success: bool, message: str}` | Register new emoji |
-| `emoji.delete` | `(emoji_hash: str) → {success: bool, message: str}` | Delete specified emoji |
+# Text generation with tools
+result = await self.ctx.llm.generate_with_tools(
+    prompt="Search and answer",
+    tools=[...],
+    model="gpt-4",
+)
 
-## Person Data — person
+# Get available model list
+models = await self.ctx.llm.get_available_models()
+```
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `person.get_id` | `(platform: str, user_id: str) → {success: bool, person_id: str}` | Get person internal ID |
-| `person.get_value` | `(person_id: str, field_name: str, default?: Any) → {success: bool, value: Any}` | Get person attribute value |
-| `person.get_id_by_name` | `(person_name: str) → {success: bool, person_id: str}` | Get person ID by name |
+## config — Configuration Reading
 
-## Logging Capability — logging
+```python
+# Read config value
+value = await self.ctx.config.get("key.subkey")
 
-Plugins use standard Python `logging` module to output logs in their own Runner processes. The Host side provides `get_logger(name)` utility function through `src/common/logger.py`. Logs default to Simplified Chinese output.
+# Read plugin's own configuration
+config = await self.ctx.config.get_plugin("com.example.my-plugin")
 
-## Other Capabilities
+# Read all configuration
+all_config = await self.ctx.config.get_all()
+```
 
-| API | Signature (Simplified) | Description |
-|-----|------------------------|-------------|
-| `tool.get_definitions` | `() → {success: bool, tools: list}` | Get current available tool definition list |
-| `knowledge.search` | `(query: str, limit?: int, mode?: str, chat_id?: str) → {success: bool, content: str}` | Search long-term memory/knowledge base |
-| `frequency.get_current_talk_value` | `(chat_id: str) → {success: bool, value: float}` | Get current talk frequency value |
-| `frequency.set_adjust` | `(chat_id: str, value: float) → {success: bool}` | Set talk frequency adjustment coefficient |
-| `frequency.get_adjust` | `(chat_id: str) → {success: bool, value: float}` | Get talk frequency adjustment coefficient |
-| `render.html2png` | `(html: str) → {success: bool, image: str}` | Render HTML to PNG image (base64) |
-| `api.call` / `api.get` / `api.list` / `api.replace_dynamic` | — | External API calling and dynamic replacement capabilities
+## message — Historical Messages
+
+```python
+# Get recent messages
+messages = await self.ctx.message.get_recent(stream_id=stream_id, limit=20)
+
+# Get messages by time
+messages = await self.ctx.message.get_by_time(
+    stream_id=stream_id,
+    start_time="2024-01-01T00:00:00",
+    end_time="2024-01-02T00:00:00",
+)
+
+# Count new messages
+count = await self.ctx.message.count_new(stream_id=stream_id)
+
+# Build readable text
+text = await self.ctx.message.build_readable(messages=messages)
+```
+
+## chat — Chat Streams
+
+```python
+# Get all chat streams
+streams = await self.ctx.chat.get_all_streams()
+
+# Get group chat streams
+streams = await self.ctx.chat.get_group_streams()
+
+# Get private chat streams
+streams = await self.ctx.chat.get_private_streams()
+
+# Get chat stream by Group ID
+stream = await self.ctx.chat.get_stream_by_group_id(group_id="123456")
+
+# Get chat stream by User ID
+stream = await self.ctx.chat.get_stream_by_user_id(user_id="789012")
+```
+
+## person — User Information
+
+```python
+# Get user ID
+person_id = await self.ctx.person.get_id(name="username")
+
+# Find user ID by name
+person_id = await self.ctx.person.get_id_by_name(name="John")
+
+# Get user attribute value
+value = await self.ctx.person.get_value(person_id=person_id, key="nickname")
+```
+
+## emoji — Emoji Management
+
+```python
+# Get random emojis
+emojis = await self.ctx.emoji.get_random(count=5)
+
+# Search emoji by description
+emoji = await self.ctx.emoji.get_by_description(description="happy")
+
+# Get all emojis
+all_emojis = await self.ctx.emoji.get_all()
+
+# Get emoji count
+count = await self.ctx.emoji.get_count()
+
+# Get emoji information
+info = await self.ctx.emoji.get_info(emoji_id="emoji_001")
+
+# Get emotion list
+emotions = await self.ctx.emoji.get_emotions()
+```
+
+## frequency — Talk Frequency
+
+```python
+# Get current talk frequency value
+value = await self.ctx.frequency.get_current_talk_value()
+
+# Set frequency adjustment value
+await self.ctx.frequency.set_adjust(value=0.5)
+
+# Get frequency adjustment value
+value = await self.ctx.frequency.get_adjust()
+```
+
+## component — Plugin and Component Management
+
+```python
+# Load plugin
+await self.ctx.component.load_plugin(plugin_id="com.example.plugin")
+
+# Unload plugin
+await self.ctx.component.unload_plugin(plugin_id="com.example.plugin")
+
+# Reload plugin
+await self.ctx.component.reload_plugin(plugin_id="com.example.plugin")
+
+# Get all plugins info
+plugins = await self.ctx.component.get_all_plugins()
+
+# Get single plugin info
+plugin = await self.ctx.component.get_plugin_info(plugin_id="com.example.plugin")
+
+# List loaded plugins
+plugins = await self.ctx.component.list_loaded_plugins()
+
+# List registered plugins
+plugins = await self.ctx.component.list_registered_plugins()
+```
+
+## api — Cross-plugin API
+
+```python
+# Call another plugin's API
+result = await self.ctx.api.call(
+    plugin_id="com.other.plugin",
+    api_name="render_html",
+    html="<h1>Hello</h1>",
+)
+
+# Get API information
+api_info = await self.ctx.api.get(
+    plugin_id="com.other.plugin",
+    api_name="render_html",
+)
+
+# List all available APIs
+apis = await self.ctx.api.list()
+
+# Replace dynamic APIs (called internally by sync_dynamic_apis)
+await self.ctx.api.replace_dynamic_apis(
+    components=[...],
+    offline_reason="Dynamic API offline",
+)
+```
+
+## gateway — Message Gateway
+
+```python
+# Inject inbound message to Host
+accepted = await self.ctx.gateway.route_message(
+    gateway_name="my_gateway",
+    message={...},
+    route_metadata={...},
+    external_message_id="msg-001",
+    dedupe_key="msg-001",
+)
+
+# Report gateway state
+await self.ctx.gateway.update_state(
+    gateway_name="my_gateway",
+    ready=True,
+    platform="qq",
+    account_id="10001",
+    scope="primary",
+)
+```
+
+See [Message Gateway](./message-gateway.md) for details.
+
+## tool — Tool Definitions
+
+```python
+# Get LLM tool definition list
+definitions = await self.ctx.tool.get_definitions()
+```
+
+## render — HTML Rendering
+
+```python
+# Render HTML to PNG image
+result = await self.ctx.render.html2png(html="<h1>Hello</h1><p>World</p>")
+```
+
+`html2png()` returns a rendering result, suitable for scenarios requiring image output such as cards, leaderboards, or share images.
+
+## knowledge — Knowledge Base Search
+
+```python
+# Search LPMM knowledge base
+content = await self.ctx.knowledge.search(query="MaiBot configuration guide")
+```
+
+## logger — Logging
+
+```python
+# Standard logging interface, Logger name is "plugin.<plugin_id>"
+self.ctx.logger.info("Plugin started")
+self.ctx.logger.warning("Config missing, using default")
+self.ctx.logger.error("Something went wrong", exc_info=True)
+self.ctx.logger.debug("Debug info: %s", data)
+```
+
+::: tip Automatic Log Forwarding
+Logs in the Runner process are automatically transmitted to the main process via IPC, no extra configuration needed. All plugin output logs can be found in the main process logs.
+:::

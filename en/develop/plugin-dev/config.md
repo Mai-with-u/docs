@@ -4,132 +4,254 @@ title: Configuration
 
 # Configuration
 
-MaiBot plugins support declarative configuration management, allowing plugins to define their own configuration Schema and read/write configuration data through Host's `config` capability API. At the same time, plugin configuration can integrate with WebUI to provide visual editing interface.
+MaiBot plugins support a declarative configuration management mechanism. Through `PluginConfigBase` and `Field`, you define strongly-typed configuration models. The Runner automatically generates default configuration, fills in missing fields, and exposes a renderable configuration Schema to the WebUI.
 
 ## Configuration File Location
 
-Each plugin's configuration file is located at `config.toml` under the plugin directory, with the following path structure:
+Each plugin's configuration file is located at `config.toml` under the plugin directory:
 
 ```
-plugins/
-└── my_plugin/
-    ├── plugin.toml          # Plugin manifest
-    ├── config.toml          # Plugin configuration file
-    └── ...
+my_plugin/
+├── plugin.py          # Plugin entry
+├── config.toml        # Plugin configuration (optional)
+└── _manifest.json     # Plugin metadata
 ```
 
-Configuration files use TOML format, consistent with MaiBot main program's configuration style.
+::: tip config.toml vs _manifest.json
+- `config.toml`: Plugin's **runtime configuration** (feature toggles, parameters, etc.), read by the plugin itself
+- `_manifest.json`: Plugin's **metadata** (ID, version, dependencies, etc.), validated and managed by Host
 
-## Configuration Schema
+These serve completely different purposes — do not confuse them.
+:::
 
-Plugins can declare configuration structure through the `config_schema` field in manifest (`plugin.toml`). Schema describes the type, default value, and description of each configuration item, used for:
+## PluginConfigBase Configuration Model
 
-- **Configuration validation**: Ensure user-provided configuration values match expected types
-- **WebUI rendering**: Automatically generate configuration editing interface
-- **Default value filling**: Automatically use default values for unconfigured items
+### Basic Usage
 
-### Schema Declaration Example
+```python
+from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
+
+
+class MyPluginConfig(PluginConfigBase):
+    """Plugin complete configuration"""
+    __ui_label__ = "Plugin Config"
+
+    enabled: bool = Field(default=True, description="Whether to enable the plugin")
+    greeting: str = Field(default="Hello!", description="Default greeting")
+    max_retries: int = Field(default=3, description="Maximum retry count")
+
+
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_load(self) -> None:
+        # Access strongly-typed config via self.config
+        self.ctx.logger.info("Current greeting: %s", self.config.greeting)
+        self.ctx.logger.info("Max retries: %d", self.config.max_retries)
+```
+
+### Nested Configuration
+
+Implement grouped configuration by nesting `PluginConfigBase` classes:
+
+```python
+from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
+
+
+class PluginSection(PluginConfigBase):
+    """Plugin basic configuration"""
+    __ui_label__ = "Basic Settings"
+
+    enabled: bool = Field(default=True, description="Whether to enable the plugin")
+    greeting: str = Field(default="Hello!", description="Default greeting")
+
+
+class AdvancedSection(PluginConfigBase):
+    """Advanced configuration"""
+    __ui_label__ = "Advanced Settings"
+
+    max_retries: int = Field(default=3, description="Maximum retry count")
+    timeout: float = Field(default=30.0, description="Timeout (seconds)")
+
+
+class MyPluginConfig(PluginConfigBase):
+    """Plugin complete configuration"""
+    plugin: PluginSection = Field(default_factory=PluginSection)
+    advanced: AdvancedSection = Field(default_factory=AdvancedSection)
+
+
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_load(self) -> None:
+        # Access nested configuration
+        self.ctx.logger.info("Greeting: %s", self.config.plugin.greeting)
+        self.ctx.logger.info("Timeout: %s", self.config.advanced.timeout)
+```
+
+## Field
+
+`Field` is used to declare metadata for configuration fields:
+
+```python
+from maibot_sdk import Field
+
+Field(
+    default=...,          # Default value
+    default_factory=...,   # Default value factory function (for mutable defaults)
+    description="...",     # Field description (displayed in WebUI)
+)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `default` | `Any` | Field default value |
+| `default_factory` | `Callable` | Default value factory function, used for mutable types like `list`, `dict`, nested `PluginConfigBase` |
+| `description` | `str` | Field description, displayed as form label in WebUI |
+
+### __ui_label__
+
+`PluginConfigBase` subclasses can set the group title displayed in WebUI through the `__ui_label__` class attribute:
+
+```python
+class PluginSection(PluginConfigBase):
+    __ui_label__ = "Basic Settings"  # Title displayed in WebUI
+    enabled: bool = Field(default=True, description="Whether to enable the plugin")
+```
+
+## Accessing Configuration
+
+### Strongly-typed Access (self.config)
+
+```python
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_load(self) -> None:
+        # Strongly-typed access with code completion and type checking
+        greeting = self.config.plugin.greeting
+        timeout = self.config.advanced.timeout
+```
+
+::: warning Note
+- Calling `self.config` without declaring `config_model` raises `RuntimeError`
+- Calling `self.config` before configuration is injected also raises `RuntimeError`
+:::
+
+### Raw Dict Access
+
+```python
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_load(self) -> None:
+        # Get raw configuration dictionary
+        raw = self.get_plugin_config_data()
+        greeting = raw.get("plugin", {}).get("greeting", "default value")
+```
+
+`get_plugin_config_data()` is always available and returns `dict[str, Any]`. No need to declare `config_model`.
+
+## Configuration Hot-reload
+
+When the `config.toml` file changes, the Runner automatically triggers the `on_config_update()` callback:
+
+```python
+from maibot_sdk import MaiBotPlugin, CONFIG_RELOAD_SCOPE_SELF
+
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_config_update(self, scope: str, config_data: dict, version: str) -> None:
+        if scope == CONFIG_RELOAD_SCOPE_SELF:
+            # self.config is automatically updated to the latest value
+            self.ctx.logger.info("Config updated, new greeting: %s", self.config.plugin.greeting)
+```
+
+::: important
+`self.config` is automatically updated when `on_config_update(scope="self")` is called. No need to manually re-read.
+:::
+
+For more about configuration hot-reload, see [Lifecycle](./lifecycle.md#on-config-update).
+
+## config.toml Format
+
+Configuration files use TOML format, corresponding to `PluginConfigBase` nesting structure:
 
 ```toml
-[config_schema]
-[config_schema.api_endpoint]
-type = "string"
-description = "External API address"
-default = "https://api.example.com"
+[plugin]
+config_version = "1.0.0"
+enabled = true
+greeting = "Hello!"
 
-[config_schema.timeout]
-type = "integer"
-description = "Request timeout (seconds)"
-default = 30
-
-[config_schema.debug_mode]
-type = "boolean"
-description = "Whether to enable debug mode"
-default = false
+[advanced]
+max_retries = 3
+timeout = 30.0
 ```
 
-## Configuration Capability API
+### config_version
 
-Plugins access configuration through the capability system, Host provides the following configuration-related capabilities:
+`config_version` is a special field used to track configuration version. The Runner preserves this field when merging default configuration.
 
-### config.get — Read Host Global Configuration
+## Default Configuration and Schema Generation
 
-Read a single field from Host (MaiBot main program) global configuration.
+### Auto-fill
+
+When `config.toml` is missing certain fields, the Runner auto-fills them based on `config_model` defaults:
 
 ```python
-# Capability call parameters
-{
-    "key": "bot.name",        # Dot-separated configuration path
-    "default": "麦麦"          # Optional, default value when not found
-}
+# If config.toml only has:
+# [plugin]
+# enabled = false
+
+# Runner will automatically fill in greeting and advanced section defaults
 ```
 
-**Return value**:
+### WebUI Schema
+
+After declaring `config_model`, the Runner automatically generates a WebUI-renderable configuration Schema:
 
 ```python
-{"success": True, "value": "麦麦"}
+# Method on the plugin class (usually no need to call manually)
+schema = MyPlugin.build_config_schema(
+    plugin_id="com.example.my-plugin",
+    plugin_name="My Plugin",
+    plugin_version="1.0.0",
+)
 ```
 
-Supports nested path access, for example `"emoji.max_reg_num"` will sequentially access `global_config.emoji.max_reg_num`.
+The WebUI renders configuration forms based on the Schema. Users can edit configuration directly in the browser.
 
-### config.get_plugin — Read Plugin Configuration
+## Reading Configuration via API
 
-Read configuration data for specified plugin. If `plugin_name` is not specified, it defaults to reading the current caller's own configuration.
+In addition to `self.config` and `self.get_plugin_config_data()`, you can also read configuration through capability proxies:
 
 ```python
-# Capability call parameters
-{
-    "plugin_name": "my_plugin",  # Optional, defaults to current plugin ID
-    "key": "api_endpoint",       # Optional, read specific field; omit to return all configuration
-    "default": "https://fallback.example.com"  # Optional
-}
+# Read plugin's own configuration
+value = await self.ctx.config.get("plugin.greeting")
+
+# Read another plugin's configuration
+value = await self.ctx.config.get_plugin("com.other.plugin")
+
+# Read global Bot configuration
+all_config = await self.ctx.config.get_all()
 ```
 
-**Return value**:
+## Not Using config_model
+
+If the plugin configuration is very simple, you can skip declaring `config_model` and use `ctx.config` and `get_plugin_config_data()` directly:
 
 ```python
-{"success": True, "value": "https://api.example.com"}
+class SimplePlugin(MaiBotPlugin):
+    # No config_model declared
+
+    async def on_load(self) -> None:
+        # Can only read through raw dict or ctx.config
+        raw = self.get_plugin_config_data()
+        name = raw.get("name", "default name")
+
+        # self.config will raise RuntimeError
+        # Do not call self.config
 ```
 
-### config.get_all — Read Plugin All Configuration
-
-Read complete configuration dictionary for specified plugin.
-
-```python
-# Capability call parameters
-{
-    "plugin_name": "my_plugin"  # Optional, defaults to current plugin ID
-}
-```
-
-**Return value**:
-
-```python
-{"success": True, "value": {"api_endpoint": "https://api.example.com", "timeout": 30, "debug_mode": false}}
-```
-
-## WebUI Integration
-
-Plugin configuration Schema will be automatically rendered as visual editing forms in WebUI. Users can directly modify configuration in WebUI's plugin management page without manually editing TOML files.
-
-### Component Capability Support
-
-Host also provides the following capabilities related to plugin configuration Schema for inter-plugin collaboration:
-
-| Capability Name | Description |
-|-----------------|-------------|
-| `component.get_plugin_config_schema` | Get configuration Schema for specified plugin |
-| `component.get_plugin_info` | Get plugin details (including configuration information) |
-| `component.get_all_plugins` | Get information for all plugins |
-
-## Configuration Best Practices
-
-1. **Always declare Schema**: Even with few configuration items, declare `config_schema` in manifest to ensure WebUI can correctly render editing interface.
-
-2. **Provide reasonable default values**: Each configuration item should have default values so plugins can run normally without additional configuration.
-
-3. **Use dot path to access nested configuration**: `config.get` supports dot-separated path access to nested objects, avoiding reading entire configuration tree at once.
-
-4. **Don't hard-code sensitive information**: Sensitive fields like API keys, passwords should be managed through configuration system rather than hard-coded in code.
-
-5. **Only modify template for configuration file changes**: Follow project conventions, configuration file changes should be controlled through templates and version numbers, don't directly edit user's runtime configuration files.
+However, it is recommended to always use `config_model` for better type safety and WebUI integration.

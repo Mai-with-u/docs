@@ -1,141 +1,204 @@
 ---
-title: Command Components
+title: Command Component
 ---
 
-# Command Components
+# Command Component
 
-Command is a regex-based command component in MaiBot's plugin system. When a user's sent message matches a Command's regex pattern, MaiBot schedules the execution of the corresponding Command handler function.
+`@Command` is a regex-based command component. When a user's sent message matches a Command's regex pattern, MaiBot schedules the execution of the corresponding Command handler function.
 
-## CommandInfo Data Structure
-
-Each Command is represented on the Host side by the `CommandInfo` data class, inheriting from `ComponentInfo`:
+## Decorator Signature
 
 ```python
-@dataclass(slots=True)
-class CommandInfo(ComponentInfo):
-    component_type: ComponentType  # Fixed as COMMAND
+from maibot_sdk import Command
+
+@Command(
+    name: str,                    # Command name (required)
+    description: str = "",        # Command description
+    pattern: str = "",            # Regex matching pattern
+    aliases: list[str] | None = None,  # Command alias list
+    **metadata,                   # Additional metadata
+)
 ```
 
-### Fields Inherited from ComponentInfo
+### Parameter Description
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `str` | Command name, must be unique within the plugin |
+| `description` | `str` | Command description |
+| `pattern` | `str` | Regex matching pattern string. When a user message matches this pattern, the command is triggered |
+| `aliases` | `list[str] \| None` | Command alias list, providing additional trigger methods |
+
+## Basic Usage
+
+```python
+from maibot_sdk import MaiBotPlugin, Command
+
+
+class MyPlugin(MaiBotPlugin):
+    @Command("hello", pattern=r"^/hello")
+    async def handle_hello(self, **kwargs):
+        await self.ctx.send.text("Hello!", kwargs["stream_id"])
+        return True, "Hello!", 2
+```
+
+### Command with Aliases
+
+```python
+@Command("greet", pattern=r"^/greet", aliases=["/hi", "/hey"])
+async def handle_greet(self, **kwargs):
+    await self.ctx.send.text("Hello!", kwargs["stream_id"])
+    return True, "Hello!", 2
+```
+
+Using `/greet`, `/hi`, or `/hey` will all trigger this command.
+
+### Command with Regex Capture Groups
+
+```python
+import re
+
+@Command("echo", pattern=r"^/echo\s+(?P<text>.+)$")
+async def handle_echo(self, **kwargs):
+    matched = kwargs.get("matched_groups", {})
+    text = matched.get("text", "").strip()
+    stream_id = kwargs["stream_id"]
+    await self.ctx.send.text(f"Echo: {text}", stream_id)
+    return True, f"Echo: {text}", 1
+```
+
+## Handler Function Parameters
+
+Command handler functions receive `**kwargs`, which contains the following parameters:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `stream_id` | `str` | Current chat stream ID, used for sending messages |
+| `matched_groups` | `dict` | Regex named capture group matching results |
+| `raw_message` | `str` | Raw message text sent by the user |
+| `message` | `dict` | Complete message object |
+
+### Return Value
+
+Command handler functions must return a triple:
+
+```python
+return success, response, weight
+```
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Component name |
-| `description` | string | Component description |
-| `enabled` | bool | Whether component is enabled, default `True` |
-| `plugin_name` | string | Plugin ID it belongs to |
-
-## Command Routing Mechanism
-
-MaiBot's command routing is implemented through `ComponentRegistry`:
-
-1. **Registration Phase**: Plugin declares Command components and their regex patterns in `plugin.py`, Runner registers them to Host's `ComponentRegistry` through RPC
-2. **Matching Phase**: When receiving user messages, `PluginRuntimeManager.find_command_by_text()` traverses all Supervisors' `ComponentRegistry`, calls `find_command_by_text()` for regex matching
-3. **Execution Phase**: After successful matching, Host routes the call request to the corresponding component in Runner through `invoke_plugin()`
-
-### Command Matching Return Values
-
-When matching succeeds, `find_command_by_text()` returns the following information:
-
-| Field | Description |
-|-------|-------------|
-| `name` | Command name |
-| `full_name` | Command full name (with plugin prefix) |
-| `component_type` | Component type (`command`) |
-| `plugin_id` | Command's plugin ID |
-| `metadata` | Command metadata |
-| `enabled` | Whether command is enabled |
-| `matched_groups` | Regex named capture results |
-
-## Command Processing Hooks
-
-There are built-in Hooks before and after command execution, allowing plugins to intercept or rewrite command processing flow:
-
-### chat.command.before_execute
-
-Triggered after command matches successfully, before actual execution:
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `message` | object | Current command message's serialized SessionMessage |
-| `command_name` | string | Matched command name |
-| `plugin_id` | string | Command's plugin ID |
-| `matched_groups` | object | Command regex named capture results |
-
-This Hook allows abort (`allow_abort=True`) and parameter rewriting (`allow_kwargs_mutation=True`), default timeout 5000ms. You can:
-- Modify `message` to rewrite message content received by command
-- Intercept command execution through `abort`
-
-### chat.command.after_execute
-
-Triggered after command execution ends:
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `message` | object | Current command message's serialized SessionMessage |
-| `command_name` | string | Command name |
-| `result` | — | Command execution result |
-
-This Hook also allows abort and parameter rewriting, default timeout 5000ms. You can:
-- Modify command's return result
-- Execute additional logic after command execution (like logging, statistics, etc.)
-
-## Component Type Enumeration
-
-MaiBot defines three component types, distinguished by `ComponentType` enumeration:
-
-| Type | Value | Description |
-|------|-------|-------------|
-| `ACTION` | `"action"` | Action component, for Planner to call |
-| `COMMAND` | `"command"` | Command component, based on regex matching |
-| `TOOL` | `"tool"` | Tool component, for LLM to call directly |
-
-`CommandInfo`'s `component_type` is fixed as `ComponentType.COMMAND`.
-
-## Development Example
-
-### Register Simple Command
+| `success` | `bool` | Whether the command executed successfully |
+| `response` | `str` | Text description of the command execution result |
+| `weight` | `int` | Command priority weight, higher values mean higher priority |
 
 ```python
-from maibot_plugin_sdk import create_plugin
+# Command executed successfully
+return True, "Operation successful", 2
 
-plugin = create_plugin()
-
-@plugin.command(pattern=r"^/hello(?P<name>.+)?$")
-async def hello_command(text, matched_groups, **kwargs):
-    name = matched_groups.get("name", "world").strip()
-    return True, f"Hello, {name}!", False
+# Command execution failed
+return False, "Parameter error", 1
 ```
 
-### Command Return Values
+## Regex Pattern Guide
 
-Command handler functions typically return a triple:
-
-1. **Whether to continue main chain processing** (bool): `True` means continue subsequent processing, `False` means abort
-2. **Reply text** (string): Text displayed to user after command execution
-3. **Whether to reply** (bool): `True` means send as quote reply
-
-### Intercept Commands Through Hook
+### Recommended Patterns
 
 ```python
-@plugin.hook_handler(
-    hook_name="chat.command.before_execute",
-    mode="blocking",
-)
-async def on_before_command(message, command_name, **kwargs):
-    plugin.logger.info(f"Command {command_name} about to execute")
-    # Return modified_kwargs can rewrite parameters
-    # Return action="abort" can intercept command execution
-    return {"action": "continue"}
+# Exact match /hello
+pattern=r"^/hello$"
+
+# Match /hello with optional parameter
+pattern=r"^/hello(?P<name>.+)?$"
+
+# Match /echo with required parameter
+pattern=r"^/echo\s+(?P<text>.+)$"
+
+# Match /set with key-value pair
+pattern=r"^/set\s+(?P<key>\w+)\s+(?P<value>.+)$"
 ```
 
-## Differences from Action Components
+### Using Named Capture Groups
 
-| Feature | Command | Action |
-|---------|---------|--------|
-| Trigger Method | User message regex matching | Planner actively selects and calls |
-| Caller | User | LLM Planner |
-| Applicable Scenarios | Explicit command-style interaction | Intelligent tool calling |
-| Activation Control | Determined by regex pattern | Controlled by `ActionActivationType` |
+It is recommended to use `(?P<name>...)` named capture groups. Match results can be accessed by name through `kwargs["matched_groups"]`:
 
-For more information about Action, please refer to [Action Components](./actions.md), for detailed Hook information please refer to [Hook System](./hooks.md).
+```python
+@Command("ban", pattern=r"^/ban\s+(?P<user>\w+)(?:\s+(?P<reason>.+))?$")
+async def handle_ban(self, **kwargs):
+    matched = kwargs.get("matched_groups", {})
+    user = matched.get("user", "")
+    reason = matched.get("reason", "No reason")
+    await self.ctx.send.text(f"Banned {user}, reason: {reason}", kwargs["stream_id"])
+    return True, f"Banned {user}", 2
+```
+
+## Command Execution Flow
+
+```mermaid
+sequenceDiagram
+    participant User as User
+    participant Host as Host Main Process
+    participant Runner as Runner Subprocess
+    participant Plugin as Plugin
+
+    User->>Host: Send message
+    Host->>Host: Regex match command
+    Host->>Runner: invoke_plugin(command)
+    Runner->>Plugin: Call Command handler function
+    Plugin->>Plugin: Execute command logic
+    Plugin-->>Runner: Return (success, response, weight)
+    Runner-->>Host: Return result
+```
+
+## Command-related Hooks
+
+There are built-in Hook points before and after command execution that `@HookHandler` can subscribe to:
+
+- `chat.command.before_execute`: Triggered before command execution, can abort or rewrite parameters
+- `chat.command.after_execute`: Triggered after command execution, can rewrite return results
+
+## Complete Example
+
+```python
+from maibot_sdk import MaiBotPlugin, Command, Tool
+from maibot_sdk.types import ToolParameterInfo, ToolParamType
+
+
+class AdminPlugin(MaiBotPlugin):
+    async def on_load(self) -> None:
+        self.ctx.logger.info("Admin plugin loaded")
+
+    async def on_unload(self) -> None:
+        pass
+
+    async def on_config_update(self, scope: str, config_data: dict, version: str) -> None:
+        pass
+
+    @Command("status", pattern=r"^/status$")
+    async def handle_status(self, **kwargs):
+        """Check system status"""
+        stream_id = kwargs["stream_id"]
+        await self.ctx.send.text("System running normally ✅", stream_id)
+        return True, "System running normally", 1
+
+    @Command("echo", pattern=r"^/echo\s+(?P<text>.+)$")
+    async def handle_echo(self, **kwargs):
+        """Echo message"""
+        matched = kwargs.get("matched_groups", {})
+        text = matched.get("text", "").strip()
+        stream_id = kwargs["stream_id"]
+        await self.ctx.send.text(text, stream_id)
+        return True, text, 1
+
+    @Command("help", pattern=r"^/help$", aliases=["/帮助"])
+    async def handle_help(self, **kwargs):
+        """Show help information"""
+        stream_id = kwargs["stream_id"]
+        help_text = "Available commands:\n/status - Check status\n/echo <text> - Echo message\n/help - Show help"
+        await self.ctx.send.text(help_text, stream_id)
+        return True, "Help information sent", 1
+
+
+def create_plugin():
+    return AdminPlugin()
+```

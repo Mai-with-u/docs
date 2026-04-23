@@ -4,132 +4,254 @@ title: 配置管理
 
 # 配置管理
 
-MaiBot 插件支持声明式的配置管理机制，允许插件定义自己的配置 Schema，并通过 Host 的 `config` 能力 API 读写配置数据。同时，插件配置可与 WebUI 集成，提供可视化编辑界面。
+MaiBot 插件支持声明式的配置管理机制，通过 `PluginConfigBase` 和 `Field` 定义强类型配置模型，Runner 会自动生成默认配置、补齐缺失字段，并向 WebUI 暴露可渲染的配置 Schema。
 
 ## 配置文件位置
 
-每个插件的配置文件位于插件目录下的 `config.toml`，路径结构如下：
+每个插件的配置文件位于插件目录下的 `config.toml`：
 
 ```
-plugins/
-└── my_plugin/
-    ├── plugin.toml          # 插件 manifest
-    ├── config.toml          # 插件配置文件
-    └── ...
+my_plugin/
+├── plugin.py          # 插件入口
+├── config.toml        # 插件配置（可选）
+└── _manifest.json     # 插件元信息
 ```
 
-配置文件使用 TOML 格式，与 MaiBot 主程序的配置风格保持一致。
+::: tip config.toml vs _manifest.json
+- `config.toml`：插件的**运行时配置**（功能开关、参数等），由插件自身读取
+- `_manifest.json`：插件的**元信息**（ID、版本、依赖等），由 Host 校验和管理
 
-## 配置 Schema
+两者用途完全不同，不要混淆。
+:::
 
-插件可以在 manifest（`plugin.toml`）中通过 `config_schema` 字段声明配置结构。Schema 描述了各配置项的类型、默认值和说明，用于：
+## PluginConfigBase 配置模型
 
-- **配置验证**：确保用户提供的配置值符合预期类型
-- **WebUI 渲染**：自动生成配置编辑界面
-- **默认值填充**：未配置的项自动使用默认值
+### 基本用法
 
-### Schema 声明示例
+```python
+from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
+
+
+class MyPluginConfig(PluginConfigBase):
+    """插件完整配置"""
+    __ui_label__ = "插件配置"
+
+    enabled: bool = Field(default=True, description="是否启用插件")
+    greeting: str = Field(default="你好！", description="默认问候语")
+    max_retries: int = Field(default=3, description="最大重试次数")
+
+
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_load(self) -> None:
+        # 通过 self.config 访问强类型配置
+        self.ctx.logger.info("当前问候语: %s", self.config.greeting)
+        self.ctx.logger.info("最大重试: %d", self.config.max_retries)
+```
+
+### 嵌套配置
+
+通过嵌套 `PluginConfigBase` 类实现分组配置：
+
+```python
+from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
+
+
+class PluginSection(PluginConfigBase):
+    """插件基础配置"""
+    __ui_label__ = "基础设置"
+
+    enabled: bool = Field(default=True, description="是否启用插件")
+    greeting: str = Field(default="你好！", description="默认问候语")
+
+
+class AdvancedSection(PluginConfigBase):
+    """高级配置"""
+    __ui_label__ = "高级设置"
+
+    max_retries: int = Field(default=3, description="最大重试次数")
+    timeout: float = Field(default=30.0, description="超时时间（秒）")
+
+
+class MyPluginConfig(PluginConfigBase):
+    """插件完整配置"""
+    plugin: PluginSection = Field(default_factory=PluginSection)
+    advanced: AdvancedSection = Field(default_factory=AdvancedSection)
+
+
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_load(self) -> None:
+        # 访问嵌套配置
+        self.ctx.logger.info("问候语: %s", self.config.plugin.greeting)
+        self.ctx.logger.info("超时: %s", self.config.advanced.timeout)
+```
+
+## Field 字段
+
+`Field` 用于声明配置字段的元数据：
+
+```python
+from maibot_sdk import Field
+
+Field(
+    default=...,          # 默认值
+    default_factory=...,   # 默认值工厂函数（用于可变默认值）
+    description="...",     # 字段描述（显示在 WebUI 中）
+)
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `default` | `Any` | 字段默认值 |
+| `default_factory` | `Callable` | 默认值工厂函数，用于 `list`、`dict`、嵌套 `PluginConfigBase` 等可变类型 |
+| `description` | `str` | 字段描述，WebUI 中显示为表单标签 |
+
+### __ui_label__
+
+`PluginConfigBase` 子类可通过 `__ui_label__` 类属性设置在 WebUI 中显示的分组标题：
+
+```python
+class PluginSection(PluginConfigBase):
+    __ui_label__ = "基础设置"  # WebUI 中显示的标题
+    enabled: bool = Field(default=True, description="是否启用插件")
+```
+
+## 访问配置
+
+### 强类型访问（self.config）
+
+```python
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_load(self) -> None:
+        # 强类型访问，有代码补全和类型检查
+        greeting = self.config.plugin.greeting
+        timeout = self.config.advanced.timeout
+```
+
+::: warning 注意
+- 未声明 `config_model` 时调用 `self.config` 会抛出 `RuntimeError`
+- 配置尚未注入时调用 `self.config` 也会抛出 `RuntimeError`
+:::
+
+### 原始字典访问
+
+```python
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_load(self) -> None:
+        # 获取原始配置字典
+        raw = self.get_plugin_config_data()
+        greeting = raw.get("plugin", {}).get("greeting", "默认值")
+```
+
+`get_plugin_config_data()` 始终可用，返回 `dict[str, Any]`，无需声明 `config_model`。
+
+## 配置热重载
+
+当 `config.toml` 文件变更时，Runner 会自动触发 `on_config_update()` 回调：
+
+```python
+from maibot_sdk import MaiBotPlugin, CONFIG_RELOAD_SCOPE_SELF
+
+class MyPlugin(MaiBotPlugin):
+    config_model = MyPluginConfig
+
+    async def on_config_update(self, scope: str, config_data: dict, version: str) -> None:
+        if scope == CONFIG_RELOAD_SCOPE_SELF:
+            # self.config 会自动更新为最新值
+            self.ctx.logger.info("配置已更新，新问候语: %s", self.config.plugin.greeting)
+```
+
+::: important
+`self.config` 在 `on_config_update(scope="self")` 调用时已自动更新，无需手动重新读取。
+:::
+
+更多关于配置热重载的内容，参见 [生命周期](./lifecycle.md#on-config-update)。
+
+## config.toml 格式
+
+配置文件使用 TOML 格式，与 `PluginConfigBase` 的嵌套结构对应：
 
 ```toml
-[config_schema]
-[config_schema.api_endpoint]
-type = "string"
-description = "外部 API 地址"
-default = "https://api.example.com"
+[plugin]
+config_version = "1.0.0"
+enabled = true
+greeting = "你好！"
 
-[config_schema.timeout]
-type = "integer"
-description = "请求超时时间（秒）"
-default = 30
-
-[config_schema.debug_mode]
-type = "boolean"
-description = "是否开启调试模式"
-default = false
+[advanced]
+max_retries = 3
+timeout = 30.0
 ```
 
-## 配置能力 API
+### config_version
 
-插件通过能力系统访问配置，Host 提供以下配置相关能力：
+`config_version` 是一个特殊字段，用于跟踪配置版本。Runner 在合并默认配置时会保留此字段。
 
-### config.get — 读取宿主全局配置
+## 默认配置与 Schema 生成
 
-读取宿主（MaiBot 主程序）的全局配置中的单个字段。
+### 自动补齐
+
+当 `config.toml` 中缺少某些字段时，Runner 会根据 `config_model` 的默认值自动补齐：
 
 ```python
-# 能力调用参数
-{
-    "key": "bot.name",        # 以点号分隔的配置路径
-    "default": "麦麦"          # 可选，未命中时返回的默认值
-}
+# 如果 config.toml 只有:
+# [plugin]
+# enabled = false
+
+# Runner 会自动补齐 greeting 和 advanced 部分的默认值
 ```
 
-**返回值**：
+### WebUI Schema
+
+声明 `config_model` 后，Runner 会自动生成 WebUI 可渲染的配置 Schema：
 
 ```python
-{"success": True, "value": "麦麦"}
+# 插件类上的方法（通常不需要手动调用）
+schema = MyPlugin.build_config_schema(
+    plugin_id="com.example.my-plugin",
+    plugin_name="我的插件",
+    plugin_version="1.0.0",
+)
 ```
 
-支持嵌套路径访问，例如 `"emoji.max_reg_num"` 会依次访问 `global_config.emoji.max_reg_num`。
+WebUI 会根据 Schema 渲染配置表单，用户可以在浏览器中直接编辑配置。
 
-### config.get_plugin — 读取插件配置
+## 通过 API 读取配置
 
-读取指定插件的配置数据。若不指定 `plugin_name`，默认读取当前调用者自身的配置。
+除了通过 `self.config` 和 `self.get_plugin_config_data()` 外，还可以通过能力代理读取配置：
 
 ```python
-# 能力调用参数
-{
-    "plugin_name": "my_plugin",  # 可选，默认为当前插件 ID
-    "key": "api_endpoint",       # 可选，读取特定字段；不传则返回全部配置
-    "default": "https://fallback.example.com"  # 可选
-}
+# 读取插件自身配置
+value = await self.ctx.config.get("plugin.greeting")
+
+# 读取其他插件配置
+value = await self.ctx.config.get_plugin("com.other.plugin")
+
+# 读取全局 Bot 配置
+all_config = await self.ctx.config.get_all()
 ```
 
-**返回值**：
+## 不使用 config_model
+
+如果插件配置非常简单，可以不声明 `config_model`，直接使用 `ctx.config` 和 `get_plugin_config_data()`：
 
 ```python
-{"success": True, "value": "https://api.example.com"}
+class SimplePlugin(MaiBotPlugin):
+    # 不声明 config_model
+
+    async def on_load(self) -> None:
+        # 只能通过原始字典或 ctx.config 读取
+        raw = self.get_plugin_config_data()
+        name = raw.get("name", "默认名称")
+
+        # self.config 会抛出 RuntimeError
+        # 不要调用 self.config
 ```
 
-### config.get_all — 读取插件全部配置
-
-读取指定插件的完整配置字典。
-
-```python
-# 能力调用参数
-{
-    "plugin_name": "my_plugin"  # 可选，默认为当前插件 ID
-}
-```
-
-**返回值**：
-
-```python
-{"success": True, "value": {"api_endpoint": "https://api.example.com", "timeout": 30, "debug_mode": false}}
-```
-
-## WebUI 集成
-
-插件的配置 Schema 会在 WebUI 中自动渲染为可视化编辑表单。用户可以在 WebUI 的插件管理页面中直接修改配置，而无需手动编辑 TOML 文件。
-
-### 组件能力支持
-
-Host 还提供了以下与插件配置 Schema 相关的能力，供插件间协同使用：
-
-| 能力名称 | 说明 |
-|----------|------|
-| `component.get_plugin_config_schema` | 获取指定插件的配置 Schema |
-| `component.get_plugin_info` | 获取插件详情（含配置信息） |
-| `component.get_all_plugins` | 获取所有插件信息 |
-
-## 配置最佳实践
-
-1. **始终声明 Schema**：即使配置项很少，也应在 manifest 中声明 `config_schema`，确保 WebUI 能正确渲染编辑界面。
-
-2. **提供合理的默认值**：每个配置项都应设置默认值，使插件在无需额外配置的情况下即可正常运行。
-
-3. **使用点号路径访问嵌套配置**：`config.get` 支持以点号分隔的路径访问嵌套对象，避免一次性读取整个配置树。
-
-4. **不要硬编码敏感信息**：API 密钥、密码等敏感字段应通过配置系统管理，而非在代码中硬编码。
-
-5. **配置文件改动只改模版**：遵循项目约定，配置文件的变更应通过模版和版本号控制，不要直接编辑用户的运行时配置文件。
+但建议始终使用 `config_model`，以获得更好的类型安全和 WebUI 集成体验。
