@@ -36,7 +36,7 @@ features:
 
 ## Get More Support
 
-- Visit the [GitHub repository](https://github.com/MaiM-with-u/MaiBot) to report issues or contribute
+- Visit the [GitHub repository](https://github.com/Mai-with-u/MaiBot) to report issues or contribute
 - Join our user group for help
 
 <style scoped>

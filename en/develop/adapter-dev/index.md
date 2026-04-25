@@ -31,7 +31,7 @@ Core Components:
 
 ## maim-message Integration
 
-MaiBot uses [maim-message](https://github.com/MaiM-with-u/maim-message) as the unified message format standard. `MessageServer` is the message middleware provided by maim-message, responsible for passing messages between platform adapters and MaiBot.
+MaiBot uses [maim-message](https://github.com/Mai-with-u/maim-message) as the unified message format standard. `MessageServer` is the message middleware provided by maim-message, responsible for passing messages between platform adapters and MaiBot.
 
 ### Message Segment (Seg)
 

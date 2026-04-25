@@ -39,7 +39,7 @@ MaiBot 提供 2 种安装方式，任选其一即可：
 
 ```bash
 # 1. 下载 MaiBot
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 
 # 2. 安装依赖

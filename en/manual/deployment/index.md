@@ -39,7 +39,7 @@ If you already have Python environment and AI API ready, you can start right awa
 
 ```bash
 # 1. Download MaiBot
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 
 # 2. Install dependencies

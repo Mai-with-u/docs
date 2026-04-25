@@ -15,14 +15,20 @@ Connect to QQ through NapCat, with the most complete features:
 - ✅ Image messages
 - ✅ Group and private chats
 - ✅ File transfers
+- ✅ Supports plugin mode (recommended, more stable and simpler)
 
-**Easy setup**: Install NapCat, fill in IP address, and you're ready!
+**Easy setup**: Plugin mode for one-click install, or standalone mode - just install NapCat and fill in IP address!
 
-### 🔊 Voice Synthesis
-Let your bot "speak":
-- Text-to-speech
-- Multiple voice options
-- Support for various languages
+## Other Adapters
+
+### GoCQ Adapter
+A QQ adapter based on go-cqhttp, suitable for accounts with lower risk control:
+- [GoCQ Adapter Documentation](./gocq)
+
+### Community Third-Party Adapters
+Community-developed adapters for other platforms, including WeChat, Discord, Telegram, etc.:
+- Follow the [MaiBot GitHub organization](https://github.com/Mai-with-u) for the latest adapters
+- Get third-party adapter info in the community chat groups
 
 ## Coming Soon
 
@@ -43,8 +49,8 @@ Future support may include:
 
 ### Step 1: Choose Adapter
 Each platform has its corresponding "adapter":
-- QQ → NapCat adapter
-- Voice → TTS adapter
+- QQ → NapCat adapter (supports plugin mode, recommended!)
+- Other platforms → Community adapters (WeChat, Discord, etc.)
 
 ### Step 2: Configure Connection
 Fill in the config file:
@@ -60,22 +66,20 @@ Save config, restart MaiBot, and it connects automatically!
 | Platform | Ease of Use | Features | Stability | Recommendation |
 |----------|-------------|----------|-----------|----------------|
 | QQ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Voice | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
 | WeChat | In Development | In Development | In Development | Coming Soon |
 
 ## Usage Recommendations
 
 ### For Beginners
-**Start with QQ**:
+**Start with QQ**, recommended to use plugin mode:
 - Easiest setup
 - Most complete documentation
 - Best community support
 
 ### Advanced Play
-**QQ + Voice**:
-- Text chat with QQ
-- Voice replies with TTS
-- Richer experience
+**Multi-Platform**:
+- QQ chat as primary
+- Extend with community adapters for more platforms
 
 ### Multi-Platform Deployment
 Can connect multiple platforms simultaneously:
@@ -105,5 +109,5 @@ A: Any platform has risks, recommended to use secondary accounts and follow plat
 
 ## Next Steps
 
-- [NapCat Adapter](./napcat.md) - Detailed QQ connection tutorial
-- [TTS Adapter](./tts.md) - Voice synthesis feature introduction
+- [NapCat Adapter](./napcat) - Detailed QQ connection tutorial
+- [GoCQ Adapter](./gocq) - QQ adapter based on go-cqhttp

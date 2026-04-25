@@ -43,4 +43,4 @@ If you're using MaiBot for the first time, we recommend reading in this order:
 
 - [Adapter Overview](/en/manual/adapters/) - Learn about platform adapter architecture
 - [NapCat](/en/manual/adapters/napcat) - QQ protocol adaptation
-- [TTS](/en/manual/adapters/tts) - Text-to-speech adapter
+- [GoCQ](/en/manual/adapters/gocq) - GoCQ protocol adaptation

@@ -54,7 +54,6 @@ export default defineConfig({
                 { text: '部署概览', link: '/manual/deployment/' },
                 { text: '安装指南', link: '/manual/deployment/installation' },
                 { text: 'Docker 部署', link: '/manual/deployment/docker' },
-                { text: 'NapCat 适配器', link: '/manual/adapters/napcat' },
               ]
             },
             {
@@ -63,9 +62,6 @@ export default defineConfig({
               items: [
                 { text: '配置概览', link: '/manual/configuration/' },
                 { text: 'Bot 配置', link: '/manual/configuration/bot-config' },
-                { text: '人格配置', link: '/manual/configuration/bot-config' },
-                { text: '聊天配置', link: '/manual/configuration/bot-config' },
-                { text: '记忆配置', link: '/manual/configuration/bot-config' },
                 { text: '模型配置', link: '/manual/configuration/model-config' },
               ]
             },
@@ -99,7 +95,7 @@ export default defineConfig({
               items: [
                 { text: '适配器概览', link: '/manual/adapters/' },
                 { text: 'QQ 连接', link: '/manual/adapters/napcat' },
-                { text: '语音合成', link: '/manual/adapters/tts' },
+                { text: 'GoCQ 适配器', link: '/manual/adapters/gocq' },
               ]
             },
             {
@@ -207,7 +203,6 @@ export default defineConfig({
                 { text: 'Deployment Overview', link: '/en/manual/deployment/' },
                 { text: 'Installation Guide', link: '/en/manual/deployment/installation' },
                 { text: 'Docker Deployment', link: '/en/manual/deployment/docker' },
-                { text: 'NapCat Adapter', link: '/en/manual/adapters/napcat' },
               ]
             },
             {
@@ -216,9 +211,6 @@ export default defineConfig({
               items: [
                 { text: 'Configuration Overview', link: '/en/manual/configuration/' },
                 { text: 'Bot Config', link: '/en/manual/configuration/bot-config' },
-                { text: 'Personality Config', link: '/en/manual/configuration/bot-config' },
-                { text: 'Chat Config', link: '/en/manual/configuration/bot-config' },
-                { text: 'Memory Config', link: '/en/manual/configuration/bot-config' },
                 { text: 'Model Config', link: '/en/manual/configuration/model-config' },
               ]
             },
@@ -252,7 +244,7 @@ export default defineConfig({
               items: [
                 { text: 'Adapters Overview', link: '/en/manual/adapters/' },
                 { text: 'QQ Connection', link: '/en/manual/adapters/napcat' },
-                { text: 'Voice Synthesis', link: '/en/manual/adapters/tts' },
+                { text: 'GoCQ Adapter', link: '/en/manual/adapters/gocq' },
               ]
             },
             {

@@ -31,7 +31,7 @@ MaiBot 的平台 IO 层（`src/platform_io/`）采用**驱动抽象 + 路由表 
 
 ## maim-message 集成
 
-MaiBot 使用 [maim-message](https://github.com/MaiM-with-u/maim-message) 作为统一消息格式标准。`MessageServer` 是 maim-message 提供的消息中间件，负责在平台适配器与 MaiBot 之间传递消息。
+MaiBot 使用 [maim-message](https://github.com/Mai-with-u/maim-message) 作为统一消息格式标准。`MessageServer` 是 maim-message 提供的消息中间件，负责在平台适配器与 MaiBot 之间传递消息。
 
 ### 消息段（Seg）
 

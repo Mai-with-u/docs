@@ -6,17 +6,17 @@ title: 安装指南
 
 ## 下载 MaiBot
 
-从 [GitHub Release](https://github.com/MaiM-with-u/MaiBot/releases/) 下载最新版本，或者直接克隆仓库：
+从 [GitHub Release](https://github.com/Mai-with-u/MaiBot/releases/) 下载最新版本，或者直接克隆仓库：
 
 ::: code-group
 
 ```bash [稳定版 (推荐)]
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 
 ```bash [开发版 (尝鲜)]
-git clone -b dev https://github.com/MaiM-with-u/MaiBot.git
+git clone -b dev https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 

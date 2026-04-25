@@ -28,8 +28,8 @@ MaiBot project is open source on GitHub, welcome to participate in contributions
 
 | Project | Link | Description |
 |------|------|------|
-| MaiBot Main Repository | [MaiM-with-u/MaiBot](https://github.com/MaiM-with-u/MaiBot) | Core project code |
-| Mailauncher | [MaiM-with-u/mailauncher](https://github.com/MaiM-with-u/mailauncher) | MaiBot launcher (MacOS only, early development) |
+| MaiBot Main Repository | [Mai-with-u/MaiBot](https://github.com/Mai-with-u/MaiBot) | Core project code |
+| Mailauncher | [Mai-with-u/mailauncher](https://github.com/Mai-with-u/mailauncher) | MaiBot launcher (MacOS only, early development) |
 | Plugin SDK | [Mai-with-u/maibot-plugin-sdk](https://github.com/Mai-with-u/maibot-plugin-sdk) | Plugin development documentation and SDK |
 
 ### Participate in Contributions
@@ -56,7 +56,7 @@ Follow MaiBot's latest developments and progress:
 
 | Platform | Description |
 |------|------|
-| GitHub Discussions | [MaiM-with-u/MaiBot Discussions](https://github.com/MaiM-with-u/MaiBot/discussions) |
+| GitHub Discussions | [Mai-with-u/MaiBot Discussions](https://github.com/Mai-with-u/MaiBot/discussions) |
 | DeepWiki | [MaiBot DeepWiki](https://deepwiki.com/DrSmoothl/MaiBot) |
 
 ## Derivative Projects
@@ -65,9 +65,9 @@ There are multiple interesting derivative projects in the MaiBot ecosystem:
 
 | Project | Link | Description |
 |------|------|------|
-| Amaidesu | [MaiM-with-u/Amaidesu](https://github.com/MaiM-with-u/Amaidesu) | Let Maimai broadcast on Bilibili |
+| Amaidesu | [Mai-with-u/Amaidesu](https://github.com/Mai-with-u/Amaidesu) | Let Maimai broadcast on Bilibili |
 | MoFox_Bot | [MoFox-Studio/MoFox-Core](https://github.com/MoFox-Studio/MoFox-Core) | Enhanced Fork based on MaiCore 0.10.0, more stable and interesting |
-| MaiCraft | [MaiM-with-u/Maicraft](https://github.com/MaiM-with-u/Maicraft) | Let Maimai play Minecraft with you (temporarily stopped maintenance) |
+| MaiCraft | [Mai-with-u/Maicraft](https://github.com/Mai-with-u/Maicraft) | Let Maimai play Minecraft with you (temporarily stopped maintenance) |
 
 ## Documentation and Resources
 

@@ -4,7 +4,7 @@ title: Changelog
 
 # Changelog
 
-This page records the major version updates of MaiBot. For the complete changelog, please refer to [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
+This page records the major version updates of MaiBot. For the complete changelog, please refer to [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases).
 
 ## v1.0.0
 
@@ -73,4 +73,4 @@ This page records the major version updates of MaiBot. For the complete changelo
 
 ## Earlier Versions
 
-For changelogs of earlier versions, please refer to [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases) or the `changelogs/` directory in the project repository.
+For changelogs of earlier versions, please refer to [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases) or the `changelogs/` directory in the project repository.

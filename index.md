@@ -36,7 +36,7 @@ features:
 
 ## 获取更多支持
 
-- 访问[GitHub仓库](https://github.com/MaiM-with-u/MaiBot)提交问题或贡献代码
+- 访问[GitHub仓库](https://github.com/Mai-with-u/MaiBot)提交问题或贡献代码
 - 加入用户交流群获取帮助
 
 <style scoped>

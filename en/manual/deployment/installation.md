@@ -8,17 +8,17 @@ This guide will walk you through installing and starting MaiBot, like assembling
 
 ## 📥 Download MaiBot
 
-Download from [GitHub Release](https://github.com/MaiM-with-u/MaiBot/releases/), or clone the repository directly:
+Download from [GitHub Release](https://github.com/Mai-with-u/MaiBot/releases/), or clone the repository directly:
 
 ::: code-group
 
 ```bash [Stable (Recommended)]
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 
 ```bash [Development (Beta)]
-git clone -b dev https://github.com/MaiM-with-u/MaiBot.git
+git clone -b dev https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 

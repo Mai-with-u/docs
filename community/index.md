@@ -28,8 +28,8 @@ MaiBot 项目在 GitHub 上开源，欢迎参与贡献和反馈：
 
 | 项目 | 链接 | 说明 |
 |------|------|------|
-| MaiBot 主仓库 | [MaiM-with-u/MaiBot](https://github.com/MaiM-with-u/MaiBot) | 核心项目代码 |
-| Mailauncher | [MaiM-with-u/mailauncher](https://github.com/MaiM-with-u/mailauncher) | MaiBot 启动器（仅 MacOS，早期开发中） |
+| MaiBot 主仓库 | [Mai-with-u/MaiBot](https://github.com/Mai-with-u/MaiBot) | 核心项目代码 |
+| Mailauncher | [Mai-with-u/mailauncher](https://github.com/Mai-with-u/mailauncher) | MaiBot 启动器（仅 MacOS，早期开发中） |
 | 插件 SDK | [Mai-with-u/maibot-plugin-sdk](https://github.com/Mai-with-u/maibot-plugin-sdk) | 插件开发文档与 SDK |
 
 ### 参与贡献
@@ -56,7 +56,7 @@ MaiBot 项目在 GitHub 上开源，欢迎参与贡献和反馈：
 
 | 平台 | 说明 |
 |------|------|
-| GitHub Discussions | [MaiM-with-u/MaiBot Discussions](https://github.com/MaiM-with-u/MaiBot/discussions) |
+| GitHub Discussions | [Mai-with-u/MaiBot Discussions](https://github.com/Mai-with-u/MaiBot/discussions) |
 | DeepWiki | [MaiBot DeepWiki](https://deepwiki.com/DrSmoothl/MaiBot) |
 
 ## 衍生项目
@@ -65,9 +65,9 @@ MaiBot 生态中有多个有趣的衍生项目：
 
 | 项目 | 链接 | 说明 |
 |------|------|------|
-| Amaidesu | [MaiM-with-u/Amaidesu](https://github.com/MaiM-with-u/Amaidesu) | 让麦麦在 B 站开播 |
+| Amaidesu | [Mai-with-u/Amaidesu](https://github.com/Mai-with-u/Amaidesu) | 让麦麦在 B 站开播 |
 | MoFox_Bot | [MoFox-Studio/MoFox-Core](https://github.com/MoFox-Studio/MoFox-Core) | 基于 MaiCore 0.10.0 的增强型 Fork，更稳定更有趣 |
-| MaiCraft | [MaiM-with-u/Maicraft](https://github.com/MaiM-with-u/Maicraft) | 让麦麦陪你玩 Minecraft（暂时停止维护中） |
+| MaiCraft | [Mai-with-u/Maicraft](https://github.com/Mai-with-u/Maicraft) | 让麦麦陪你玩 Minecraft（暂时停止维护中） |
 
 ## 文档与资源
 

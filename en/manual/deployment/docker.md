@@ -17,7 +17,7 @@ You need to install:
 ### 1. Download MaiBot
 
 ```bash
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 
@@ -81,7 +81,7 @@ Docker will save important data in these locations on your computer:
 
 ```bash
 # 1. Download
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 
 # 2. First startup (will generate config files)

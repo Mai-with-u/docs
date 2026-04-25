@@ -4,7 +4,7 @@ title: 更新日志
 
 # 更新日志
 
-本页记录 MaiBot 的主要版本更新内容。完整更新日志请参阅 [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases)。
+本页记录 MaiBot 的主要版本更新内容。完整更新日志请参阅 [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases)。
 
 ## v1.0.0
 
@@ -73,4 +73,4 @@ title: 更新日志
 
 ## 更早版本
 
-更早版本的更新日志请参阅 [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases) 或项目仓库中的 `changelogs/` 目录。
+更早版本的更新日志请参阅 [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases) 或项目仓库中的 `changelogs/` 目录。
