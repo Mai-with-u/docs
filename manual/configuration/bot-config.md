@@ -87,14 +87,14 @@ multiple_probability = 0.3
 [visual]
 planner_mode = "auto"
 replyer_mode = "auto"
-visual_style = "请用中文描述这张图片的内容。如果有文字，请把文字描述概括出来，请留意其主题，直观感受，输出为一段平文本，最多30字，请注意不要分点，就输出一段文本"
 ```
+
+识图提示词由 Prompt 模板 `prompts/<locale>/image_description.prompt` 管理。
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
 | `planner_mode` | `"text" \| "multimodal" \| "auto"` | `"auto"` | 规划器视觉模式，`auto` 会根据模型信息自动选择 |
 | `replyer_mode` | `"text" \| "multimodal" \| "auto"` | `"auto"` | 回复器视觉模式，`auto` 会根据模型信息自动选择 |
-| `visual_style` | `str` | 见默认配置 | 识图提示词，一般不建议修改 |
 
 ## 聊天 [chat]
 

@@ -87,14 +87,14 @@ multiple_probability = 0.3
 [visual]
 planner_mode = "auto"
 replyer_mode = "auto"
-visual_style = "请用中文描述这张图片的内容。如果有文字，请把文字描述概括出来，请留意其主题，直观感受，输出为一段平文本，最多30字，请注意不要分点，就输出一段文本"
 ```
+
+The image description prompt is managed by the Prompt template `prompts/<locale>/image_description.prompt`.
 
 | Field | Type | Default | Description |
 |--------|------|--------|------|
 | `planner_mode` | `"text" \| "multimodal" \| "auto"` | `"auto"` | Planner visual mode. `auto` chooses based on model metadata |
 | `replyer_mode` | `"text" \| "multimodal" \| "auto"` | `"auto"` | Replyer visual mode. `auto` chooses based on model metadata |
-| `visual_style` | `str` | See default config | Visual prompt. Usually not recommended to modify |
 
 ## Chat [chat]
 
