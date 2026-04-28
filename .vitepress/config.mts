@@ -41,19 +41,22 @@ export default defineConfig({
         sidebar: {
           '/manual/': [
             {
-              text: '快速入门',
-              collapsed: false,
-              items: [
-                { text: '五分钟快速上手', link: '/manual/getting-started/' },
-              ]
-            },
-            {
               text: '部署与安装',
               collapsed: false,
               items: [
                 { text: '部署概览', link: '/manual/deployment/' },
-                { text: '安装指南', link: '/manual/deployment/installation' },
-                { text: 'Docker 部署', link: '/manual/deployment/docker' },
+                { text: '源码安装', link: '/manual/deployment/installation' },
+                { text: 'Docker安装', link: '/manual/deployment/docker' },
+                { text: '适配器安装', link: '/manual/adapters/' },
+              ]
+            },
+            {
+              text: '适配器',
+              collapsed: false,
+              items: [
+                { text: '适配器概览', link: '/manual/adapters/' },
+                { text: 'QQ 连接', link: '/manual/adapters/napcat' },
+                { text: 'GoCQ 适配器', link: '/manual/adapters/gocq' },
               ]
             },
             {
@@ -87,15 +90,6 @@ export default defineConfig({
                 { text: '记忆管理', link: '/manual/webui/memory-management' },
                 { text: '插件管理', link: '/manual/webui/plugin-management' },
                 { text: '聊天与统计', link: '/manual/webui/chat-stats' },
-              ]
-            },
-            {
-              text: '适配器',
-              collapsed: false,
-              items: [
-                { text: '适配器概览', link: '/manual/adapters/' },
-                { text: 'QQ 连接', link: '/manual/adapters/napcat' },
-                { text: 'GoCQ 适配器', link: '/manual/adapters/gocq' },
               ]
             },
             {
