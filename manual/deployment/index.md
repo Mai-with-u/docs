@@ -48,6 +48,7 @@ MaiBot 本体 提供 2 种安装方式，任选其一即可：
 | Telegram | Telegram | Telegram 平台适配器 | - |
 | [更多适配器...](../adapters/index.md) | 微信、Discord 等 | - | - |
 
+具体安装和配置步骤请看 [适配器安装](./adapters_installation.md)。
 
 ## 📦 3.确认 MaiBot 与适配器连接成功
 

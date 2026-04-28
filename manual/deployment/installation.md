@@ -44,7 +44,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 :::
 
-### 安装项目依赖（给机器人装零件）
+### 安装项目依赖
 
 ::: code-group
 
@@ -59,21 +59,6 @@ pip install -r requirements.txt
 :::
 
 
-
-## 配置
-
-MaiBot 的配置文件在 `config/` 目录下：
-
-| 文件 | 作用 | 看这里 |
-|------|------|------|
-| `bot_config.toml` | 基础配置 | [配置概览](../configuration/index.md) |
-| `model_config.toml` | 模型设置 | [模型配置](../configuration/model-config.md) |
-
-第一次启动时，MaiBot 会自动生成默认配置。你需要改两个地方：
-
-1. **设置 QQ 账号**：在 `bot_config.toml` 中填写 `qq_account`（麦麦交互的QQ号）
-2. **设置 AI 模型**：在 `model_config.toml` 中填写 `api_key`，并配置模型，最后为模型指派任务
-
 ## 启动
 
 ```bash
@@ -86,19 +71,6 @@ uv run python bot.py
 
 **在终端输入"同意"就行！** 
 
-## 常见问题（新手别怕）
+## 常见问题
 
-### Python 版本不对？
-
-MaiBot 需要 Python 3.13 以上。检查版本：
-
-```bash
-python --version
-```
-
-### 依赖装不上？
-
-```bash
-# 清除缓存重新装
-uv sync --reinstall
-```
+### 待补充

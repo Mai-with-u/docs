@@ -47,7 +47,7 @@ export default defineConfig({
                 { text: '部署概览', link: '/manual/deployment/' },
                 { text: '源码安装', link: '/manual/deployment/installation' },
                 { text: 'Docker安装', link: '/manual/deployment/docker' },
-                { text: '适配器安装', link: '/manual/adapters/' },
+                { text: '适配器安装', link: '/manual/deployment/adapters_installation' },
               ]
             },
             {
