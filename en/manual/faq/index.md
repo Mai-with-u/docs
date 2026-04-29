@@ -115,17 +115,18 @@ This document summarizes common problems and solutions during MaiBot usage, orga
 
 ### NapCat WebSocket Connection Failed
 
-**Symptom**: NapCat cannot connect to MaiBot, or connection frequently drops.
+**Symptom**: NapCat cannot connect to adapter/MaiBot, or connection frequently drops.
 
-**Cause**: NapCat and MaiBot WebSocket configurations don't match.
+**Cause**: NapCat and adapter/MaiBot WebSocket configurations don't match, depending on running mode.
 
 **Solution**:
 1. Confirm `platform` in `[bot]` section of `bot_config.toml` is set to `"qq"`
 2. Confirm `qq_account` matches NapCat login QQ number
-3. Check if `ws_server_host` and `ws_server_port` in `[maim_message]` section match NapCat's reverse WebSocket configuration (default `127.0.0.1:8080`)
-4. Confirm firewall doesn't block WebSocket connection
-5. Check if NapCat version is compatible with current MaiBot version
-6. View NapCat and MaiBot logs, confirm specific connection error information
+3. **Plugin Mode**: Check adapter's `napcat_server.host` and `napcat_server.port` settings. Adapter connects to NapCat's Forward WebSocket server (typically `ws://127.0.0.1:3001`). Verify NapCat has Forward WebSocket server enabled on the correct port.
+4. **Standalone Mode**: Check adapter's `napcat_server.host` and `napcat_server.port` (default `localhost:8095`). NapCat should connect to the adapter via Reverse WebSocket at `ws://127.0.0.1:8095`. Also verify the adapter's `maibot_server.port` matches MaiBot's `.env` PORT (default `8000`).
+5. Confirm firewall doesn't block WebSocket connection
+6. Check if NapCat version is compatible with current MaiBot version
+7. View NapCat, adapter, and MaiBot logs for specific connection error information
 
 ### Port Occupied
 

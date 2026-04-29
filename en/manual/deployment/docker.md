@@ -74,7 +74,7 @@ Docker will save important data in these locations on your computer:
 | Service | Port | Purpose |
 |------|------|------|
 | Web interface | 18001 | Open http://localhost:18001 in browser |
-| QQ connection | 6099 | Used for robot to connect to QQ |
+| NapCat Web UI | 6099 | NapCat web configuration panel |
 | Database tool | 8120 | Used to view robot data |
 
 ## 📋 Complete Steps (Step by Step)
