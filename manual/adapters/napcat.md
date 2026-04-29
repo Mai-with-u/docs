@@ -36,21 +36,23 @@ NapCat 适配器支持两种运行方式，选一个适合你的就行！
 
 适配器直接运行在 MaiBot 内部，像一个"内置翻译官"：
 - 只需一层网络连接（NapCat → 适配器）
+- 适配器作为 WebSocket 客户端连接 NapCat 的正向 WebSocket 服务器
 - 适配器和 MaiBot 之间通过内部通信，不走网络
 - **更稳定**：少一个连接点，就不容易断
 - **更简单**：不用再配适配器和 MaiBot 之间的连接
 - **更低延迟**：消息少走一层网络，回复更快
 
-消息流转：**QQ → NapCat → 适配器插件（MaiBot 内部）→ MaiBot**
+消息流转：**QQ → NapCat（WS 服务器）→ 适配器插件（WS 客户端，MaiBot 内部）→ MaiBot**
 
 ### 🔧 独立模式
 
 适配器作为独立程序运行，像一个"中间人"：
 - 需要两层网络连接（NapCat → 适配器，适配器 → MaiBot）
-- 适配器和 MaiBot 之间还需要额外一个 WebSocket 连接
+- 适配器作为 WebSocket 服务器监听端口 `8095`，NapCat 作为客户端连接
+- 适配器通过 MMC 协议连接 MaiBot 的端口 `8000`
 - 适合需要独立部署或有特殊需求的场景
 
-消息流转：**QQ → NapCat → 适配器 → MaiBot**
+消息流转：**QQ → NapCat（WS 客户端）→ 适配器（WS 服务器 / MMC 客户端）→ MaiBot（MMC 服务器）**
 
 ### 对比一下 ✨
 
@@ -88,15 +90,17 @@ git checkout plugin
 
 插件模式下，适配器已经在 MaiBot 内部运行了，不需要再配置适配器和 MaiBot 之间的连接。你只需要配置适配器和 NapCat 之间的连接信息，在适配器的配置文件中填写 NapCat 的地址和端口。
 
+适配器作为 WebSocket 客户端，会主动连接到 NapCat 的正向 WebSocket 服务器。你需要在适配器的 `config.toml` 中设置 `napcat_server.host` 和 `napcat_server.port`（默认连接 `127.0.0.1:3001`）。
+
 ### 第三步：配置 NapCat
 
 1. 打开 NapCat 的网页界面
-2. 找到 "反向 WebSocket" 设置
-3. 填上适配器的监听地址
+2. 找到 "正向 WebSocket" 设置
+3. 启用正向 WebSocket 服务器，监听端口默认为 `3001`
 
 具体配置方法请参考 [NapCat 官方文档](https://napneko.github.io/guide/boot/Shell)。
 
-💡 **提示**：反向 WebSocket 地址通常填 `ws://127.0.0.1:8095`，具体端口以适配器配置为准。
+💡 **提示**：正向 WebSocket 服务器默认端口为 `3001`，确保适配器的配置文件中的端口设置与此一致。
 
 ### 第四步：启动
 
@@ -140,8 +144,10 @@ auth_token = []                 # 认证令牌，空着就行
 | 配置项 | 什么意思 | 怎么填 |
 |--------|----------|--------|
 | `ws_server_host` | 服务器地址 | 本地用 `127.0.0.1`，服务器用实际 IP |
-| `ws_server_port` | 端口号 | 默认 `8080`，改了就记住这个数字 |
+| `ws_server_port` | 端口号 | 默认 `8080`，这是 legacy WebSocket 服务端口 |
 | `auth_token` | 密码验证 | 空着就行，不用管 |
+
+> 💡 **注意**：`maim_message` 配置的是 legacy WebSocket 服务（端口 8080）。适配器通过 MMC 协议连接 MaiBot，默认连接 MaiBot 的 `.env` 文件中设置的 `PORT`（通常是 8000）。确保适配器的 `config.toml` 中 `maibot_server.port` 与 MaiBot 的 `PORT` 设置一致。
 
 ### 安装 NapCat
 
@@ -157,11 +163,11 @@ docker compose up -d
 
 1. 打开 NapCat 的网页界面
 2. 找到 "反向 WebSocket" 设置
-3. 填上 MaiBot 地址：`ws://127.0.0.1:8080/ws`
+3. 填上适配器地址：`ws://127.0.0.1:8095`
 
 具体配置方法请参考 [NapCat 官方文档](https://napneko.github.io/guide/boot/Shell)。
 
-💡 **提示**：如果 NapCat 和 MaiBot 都在 Docker Compose 里运行，请确认 MaiBot 的 `maim_message.ws_server_host` 监听地址允许容器网络访问。
+💡 **提示**：在独立模式下，适配器作为 WebSocket 服务器运行在端口 `8095`，NapCat 作为客户端连接到这个地址。确保适配器已启动并监听端口 `8095`。
 
 ### 登录 QQ
 
@@ -177,9 +183,9 @@ docker compose up -d
 推荐启动顺序：
 
 1. **启动 NapCat** → 等 QQ 登录成功
-2. **启动 MaiBot** → 等 WebSocket 服务启动
-3. **启动适配器** → 适配器连接到 NapCat 和 MaiBot
-4. **自动连接** → NapCat 会自动连上适配器
+2. **启动 MaiBot** → 等 MMC 服务启动
+3. **启动适配器** → 适配器作为 WebSocket 服务器监听端口 8095，并连接到 MaiBot 的 MMC 服务
+4. **自动连接** → NapCat 会自动连接到适配器的 WebSocket 服务器
 
 ```bash
 # Docker 一键启动（推荐）
@@ -187,8 +193,8 @@ docker compose up -d
 
 # 手动启动
 # 终端 1：启动 NapCat
-# 终端 2：启动适配器 (进入适配器目录运行)
-# 终端 3：uv run python bot.py
+# 终端 2：启动 MaiBot (uv run python bot.py)
+# 终端 3：启动适配器 (进入适配器目录运行)
 ```
 
 ## 验证连接 ✅

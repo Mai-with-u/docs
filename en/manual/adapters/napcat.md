@@ -16,6 +16,18 @@ NapCat is like a "translator" that helps MaiBot and QQ chat:
 
 Simply put: NapCat lets MaiBot "understand" QQ messages and "speak" back to QQ!
 
+## Adapter Repository 📦
+
+The NapCat adapter source is at: [Mai-with-u/MaiBot-Napcat-Adapter](https://github.com/Mai-with-u/MaiBot-Napcat-Adapter)
+
+This adapter is cloned into the `MaiBot-Napcat-Adapter/` directory in this project.
+
+> 💡 **Branch Difference**: The adapter has **two branches** for different running modes:
+> - `main` branch → **Standalone Mode** (adapter runs as a separate program)
+> - `plugin` branch → **Plugin Mode** (adapter runs as a MaiBot plugin)
+>
+> Make sure to switch to the correct branch for your chosen mode after cloning!
+
 ## Two Running Modes ⚡
 
 NapCat adapter supports two running modes, pick whichever suits you!
@@ -31,6 +43,8 @@ The adapter runs directly inside MaiBot, like a "built-in translator":
 
 Message flow: **QQ → NapCat → Adapter Plugin (inside MaiBot) → MaiBot**
 
+💡 **WebSocket Roles**: NapCat acts as WebSocket server (Forward WebSocket), adapter acts as WebSocket client connecting to NapCat.
+
 ### 🔧 Standalone Mode
 
 The adapter runs as a separate program, like a "middleman":
@@ -39,6 +53,8 @@ The adapter runs as a separate program, like a "middleman":
 - Suitable for scenarios requiring separate deployment or special needs
 
 Message flow: **QQ → NapCat → Adapter → MaiBot**
+
+💡 **WebSocket Roles**: Adapter acts as WebSocket server (Reverse WebSocket), NapCat acts as WebSocket client connecting to adapter.
 
 ### Let's Compare ✨
 
@@ -56,24 +72,35 @@ Message flow: **QQ → NapCat → Adapter → MaiBot**
 
 ### Step 1: Install the Adapter
 
-1. Get MaiBot-Napcat-Adapter
+Plugin mode uses the `plugin` branch:
+
+1. Clone or switch to the plugin branch:
+```bash
+# Clone the plugin branch
+git clone -b plugin https://github.com/Mai-with-u/MaiBot-Napcat-Adapter.git
+
+# Or if already cloned, switch to plugin branch
+cd MaiBot-Napcat-Adapter
+git checkout plugin
+```
+
 2. Put the adapter directory into MaiBot's `plugins/` folder
 
 Or, you can install the plugin through MaiBot's WebUI interface - even easier!
 
 ### Step 2: Configure NapCat Connection
 
-In plugin mode, the adapter already runs inside MaiBot, so no need to configure connection between adapter and MaiBot. You only need to configure connection between adapter and NapCat - fill in NapCat's address and port in the adapter's config file.
+In plugin mode, the adapter already runs inside MaiBot, so no need to configure connection between adapter and MaiBot. You only need to configure connection between adapter and NapCat - fill in NapCat's address and port in the adapter's config file. In plugin mode, the adapter's config tells it WHERE to find NapCat's forward WebSocket server. This is the address the adapter connects TO, not a listening address.
 
 ### Step 3: Configure NapCat
 
 1. Open NapCat's web interface
-2. Find "Reverse WebSocket" settings
-3. Fill in the adapter's listening address
+2. Find "Forward WebSocket" settings
+3. Enable the Forward WebSocket server, default listening port is `3001`
 
 For detailed configuration, please refer to [NapCat official documentation](https://napneko.github.io/guide/boot/Shell).
 
-💡 **Tip**: Reverse WebSocket address usually fill in `ws://127.0.0.1:8095`, specific port depends on adapter configuration.
+💡 **Tip**: Forward WebSocket server default port is `3001`. Make sure this port matches the `napcat_server.port` setting in your adapter's configuration file.
 
 ### Step 4: Start Up
 
@@ -82,6 +109,17 @@ Just start MaiBot and the adapter will auto-load! No need to start adapter separ
 ## Standalone Mode Guide 🔧
 
 If you need to run the adapter independently, follow these steps.
+
+Uses the `main` branch:
+
+```bash
+# Clone main branch (default)
+git clone https://github.com/Mai-with-u/MaiBot-Napcat-Adapter.git
+
+# Or if already cloned, make sure you're on main branch
+cd MaiBot-Napcat-Adapter
+git checkout main
+```
 
 ### Configure MaiBot
 
@@ -109,6 +147,8 @@ auth_token = []                 # Auth token, leave empty
 | `ws_server_port` | Port number | Default `8080`, remember if you change it |
 | `auth_token` | Password verification | Leave empty, don't worry about it |
 
+💡 **Note**: The `ws_server_port = 8080` is for MaiBot's legacy maim_message service, NOT used by the adapter. The adapter connects to MaiBot's MMC on .env PORT=8000. Make sure your adapter's config.toml `maibot_server.port` matches MaiBot's .env PORT=8000.
+
 ### Install NapCat
 
 Please refer to [NapCat official documentation](https://napneko.github.io/guide/boot/Shell) to install NapCat.
@@ -123,11 +163,11 @@ docker compose up -d
 
 1. Open NapCat's web interface
 2. Find "Reverse WebSocket" settings
-3. Fill in MaiBot address: `ws://127.0.0.1:8080/ws`
+3. Fill in adapter address: `ws://127.0.0.1:8095`
 
 For detailed configuration, please refer to [NapCat official documentation](https://napneko.github.io/guide/boot/Shell).
 
-💡 **Tip**: If NapCat and MaiBot both run in Docker Compose, make sure MaiBot's `maim_message.ws_server_host` listens on an address reachable from the container network.
+💡 **Tip**: In standalone mode, the adapter runs a WebSocket server that NapCat connects to as a reverse WebSocket client. The adapter listens on port 8095 by default. If NapCat and adapter both run in Docker Compose, make sure the adapter's listening address is reachable from the container network.
 
 ### Login to QQ
 
@@ -144,8 +184,8 @@ Recommended startup order:
 
 1. **Start NapCat** → Wait for QQ login success
 2. **Start MaiBot** → Wait for WebSocket service startup
-3. **Start Adapter** → Adapter connects to NapCat and MaiBot
-4. **Auto-connect** → NapCat automatically connects to adapter
+3. **Start Adapter** → NapCat connects to Adapter (reverse WebSocket), and Adapter connects to MaiBot
+4. **Auto-connect** → NapCat automatically connects to adapter as WebSocket client
 
 ```bash
 # Docker one-click startup (recommended)
