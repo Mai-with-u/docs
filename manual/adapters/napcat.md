@@ -60,6 +60,8 @@ git checkout plugin
 
 插件模式下，适配器已经在 MaiBot 内部运行了，不需要再配置适配器和 MaiBot 之间的连接。你只需要配置适配器和 NapCat 之间的连接信息，在适配器的配置文件中填写 NapCat 的地址和端口。
 
+> 💡 **插件配置文件位置**：适配器的配置文件在 `plugins/MaiBot-Napcat-Adapter/config.toml`，包含 NapCat 连接地址、端口、token 等设置。
+
 ### 第三步：配置 NapCat
 
 1. 打开 NapCat 的网页界面
@@ -73,6 +75,36 @@ git checkout plugin
 ### 第四步：启动
 
 直接启动 MaiBot 就行，适配器会自动加载并连接。
+
+### ⚠️ 重要：插件默认未启用 
+
+NapCat 适配器插件安装后**默认是禁用的**，需要手动启用才能连接 QQ。
+
+#### 方式一：编辑配置文件（推荐）
+
+编辑 `plugins/MaiBot-Napcat-Adapter/config.toml`，将 `enabled` 改为 `true`：
+
+```toml
+[plugin]
+enabled = true   # 改为 true
+config_version = "0.1.0"
+
+[napcat_server]
+host = "127.0.0.1"    # NapCat WebSocket 地址
+port = 3001           # NapCat WebSocket 端口
+token = ""            # NapCat 访问令牌（有则填写）
+```
+
+然后重启 MaiBot 即可。
+
+#### 方式二：通过 WebUI 启用
+
+1. 浏览器访问 `http://127.0.0.1:8001`，输入 Access Token 登录
+2. 点击左侧菜单 **"插件管理"**
+3. 找到 **"NapCat 适配器"**，点击启用开关
+4. 保存配置后重启 MaiBot（或等待插件热重载）
+
+> 💡 **验证是否启用**：启动 MaiBot 后，查看日志中是否出现 `插件 maibot-team.napcat-adapter ... 激活`，如果看到 `已在配置中禁用，跳过激活` 则说明未启用。
 
 ## 独立模式使用指南 🔧
 

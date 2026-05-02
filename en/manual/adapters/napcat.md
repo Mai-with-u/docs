@@ -92,6 +92,8 @@ Or, you can install the plugin through MaiBot's WebUI interface - even easier!
 
 In plugin mode, the adapter already runs inside MaiBot, so no need to configure connection between adapter and MaiBot. You only need to configure connection between adapter and NapCat - fill in NapCat's address and port in the adapter's config file. In plugin mode, the adapter's config tells it WHERE to find NapCat's forward WebSocket server. This is the address the adapter connects TO, not a listening address.
 
+> 💡 **Plugin Config Location**: The adapter's config file is at `plugins/MaiBot-Napcat-Adapter/config.toml`, which contains NapCat connection address, port, token, and other settings.
+
 ### Step 3: Configure NapCat
 
 1. Open NapCat's web interface
@@ -105,6 +107,36 @@ For detailed configuration, please refer to [NapCat official documentation](http
 ### Step 4: Start Up
 
 Just start MaiBot and the adapter will auto-load! No need to start adapter separately 🎉
+
+### ⚠️ Important: Plugin is Disabled by Default
+
+The NapCat adapter plugin is **disabled by default** after installation. You must manually enable it before it can connect to QQ.
+
+#### Method 1: Edit Config File (Recommended)
+
+Edit `plugins/MaiBot-Napcat-Adapter/config.toml` and set `enabled` to `true`:
+
+```toml
+[plugin]
+enabled = true   # Change to true
+config_version = "0.1.0"
+
+[napcat_server]
+host = "127.0.0.1"    # NapCat WebSocket address
+port = 3001           # NapCat WebSocket port
+token = ""            # NapCat access token (fill in if set)
+```
+
+Then restart MaiBot.
+
+#### Method 2: Enable via WebUI
+
+1. Open browser at `http://127.0.0.1:8001`, log in with Access Token
+2. Click **"Plugin Management"** in the left menu
+3. Find **"NapCat Adapter"**, click the enable toggle
+4. Save config and restart MaiBot (or wait for hot reload)
+
+> 💡 **How to verify it's enabled**: After starting MaiBot, check the logs. If you see `plugin maibot-team.napcat-adapter ... activated`, it's enabled. If you see `plugin ... disabled, skipping activation`, it's still disabled.
 
 ## Standalone Mode Guide 🔧
 

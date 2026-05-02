@@ -88,32 +88,72 @@ First startup will ask you to agree to the user agreement, it's simple:
 
 **Just type "agree" in the terminal!** No need to remember any hash values.
 
-## 🔍 Common Problems (Don't be scared, beginners)
+## 🔍 Common Problems
 
-### Wrong Python Version?
+### First startup says config file not found?
 
-MaiBot needs Python 3.10 or above. Check version:
+Some versions may not auto-generate config files on first startup, showing:
 
-```bash
-python --version
+```
+FileNotFoundError: [Errno 2] No such file or directory: 'config/bot_config.toml'
 ```
 
-::: tip 💡 Not sure which version to pick?
-Choose the latest Python 3.13 and you'll be fine!
-:::
-
-### Dependencies won't install?
+**Solution**: Manually create the `config/` directory and a minimal config file, then restart. The program will detect the old version and upgrade to the full config.
 
 ```bash
-# Clear cache and reinstall
-uv sync --reinstall
+mkdir -p config
+echo -e '[inner]\nversion = "0.0.1"' > config/bot_config.toml
+echo -e '[inner]\nversion = "0.0.1"' > config/model_config.toml
+uv run python bot.py
 ```
 
-### Startup stuck?
+The program will show "config file updated" and exit. Start again to load properly.
 
-- Check if configuration files are filled correctly
-- See if it's a network issue
-- Try restarting: Ctrl+C to stop, then run again
+### "Model list cannot be empty" error on startup?
+
+`model_config.toml` must contain at least one model configuration. If auto-upgrade fails, manually create the model config file with:
+- At least one API provider (`[[api_providers]]`)
+- At least one text model (`[[models]]`)
+- One vision model (`[[models]]`, set `visual = true`)
+- One embedding model (`[[models]]`)
+- Corresponding task assignments (`[model_task_config.xxx]`)
+
+See the [Model Configuration docs](../configuration/model-config.md) for setup.
+
+### uv command not found?
+
+After installing uv, add it to your PATH:
+
+```bash
+# Linux/macOS
+source $HOME/.local/bin/env
+
+# Or reopen your terminal
+
+# Verify
+uv --version
+```
+
+### How to accept EULA in non-interactive environments?
+
+On servers or headless environments without a terminal, use environment variables to skip the prompt:
+
+```bash
+# Method 1: Use the hash values shown in terminal (may differ each time)
+export EULA_AGREE=<hash shown in terminal>
+export PRIVACY_AGREE=<hash shown in terminal>
+
+# Method 2: Run once to see the hash, then restart with env vars
+uv run python bot.py  # Shows required environment variables
+```
+
+### How to check if the adapter plugin is enabled?
+
+Check the logs after starting MaiBot:
+- ✅ Enabled: `plugin maibot-team.napcat-adapter ... activated`
+- ❌ Disabled: `plugin ... disabled, skipping activation`
+
+Plugins are disabled by default — you need to enable them manually. See the [NapCat Adapter Guide](../adapters/napcat.md#⚠️-important-plugin-is-disabled-by-default).
 
 ### Want to restart the bot?
 

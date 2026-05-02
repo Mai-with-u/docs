@@ -103,7 +103,35 @@ MaiBot 已配置清华镜像源，`uv sync` 会自动使用，无需手动设置
 uv run python bot.py
 ```
 
-**首次启动时，终端会显示用户协议（EULA）和隐私协议，输入 `同意` 并回车以继续。** 之后系统检测到配置文件不存在，自动生成默认配置到 `config/` 目录，然后退出——**这是正常行为**。
+**首次启动时，终端会显示用户协议（EULA）和隐私协议，输入 `同意` 并回车以继续。**
+
+::: warning ⚠️ 注意
+如果第一次启动提示配置文件不存在（`FileNotFoundError: config/bot_config.toml`），说明自动生成配置未触发。可以先手动创建配置目录和最小配置文件：
+
+```bash
+mkdir -p config
+echo -e '[inner]\nversion = "0.0.1"' > config/bot_config.toml
+echo -e '[inner]\nversion = "0.0.1"' > config/model_config.toml
+```
+
+然后重新运行 `uv run python bot.py`，程序会自动检测旧版本并升级到完整配置。
+:::
+
+之后系统检测到配置文件不存在，自动生成默认配置到 `config/` 目录，然后退出——**这是正常行为**。
+
+::: tip 💡 服务器/无头环境
+如果在没有交互终端的服务器上部署，无法输入"同意"，可以使用环境变量跳过协议确认：
+
+```bash
+# 先运行一次，终端会显示需要的 hash 值
+uv run python bot.py
+# 复制终端显示的 EULA_AGREE=xxx 和 PRIVACY_AGREE=xxx
+# 然后设置环境变量重新启动
+export EULA_AGREE=<显示的hash>
+export PRIVACY_AGREE=<显示的hash>
+uv run python bot.py
+```
+:::
 
 ### 第 6 步：再次启动，进入 WebUI
 
@@ -149,6 +177,16 @@ MaiBot 核心启动后，还需要连接 QQ 才能收发消息。MaiBot 通过 *
 3. 点击安装
 
 安装完成后，根据适配器的配置说明填写 NapCat 的连接地址即可。
+
+::: warning ⚠️ 重要：插件默认不启用
+**无论是通过 WebUI 安装还是手动克隆到 `plugins/` 目录，插件安装后默认都是禁用状态。** 安装完成不等于就能用了！
+
+需要在 WebUI 的 **"插件管理"** 页面中，找到 NapCat 适配器，**手动点击启用开关**。
+
+或者直接编辑 `plugins/MaiBot-Napcat-Adapter/config.toml`，将 `[plugin] enabled` 改为 `true`，然后重启 MaiBot。
+
+> 如何确认是否启用？启动后看日志：出现「激活」说明已启用，出现「跳过激活」说明还是禁用状态。
+:::
 
 ::: tip 💡 更多适配器信息
 详细的 NapCat 适配器安装和配置请参考 [NapCat 适配器文档](../adapters/napcat.md)。

@@ -108,6 +108,32 @@ uv run python bot.py
 
 **On the first launch, you'll be prompted to accept the EULA and Privacy Policy. Type `同意` (or `confirmed`) and press Enter.** The system will auto-generate default configs in `config/`, then exit — **this is normal behavior**.
 
+::: warning ⚠️ Note
+If the first startup shows `FileNotFoundError: config/bot_config.toml`, auto-generation didn't trigger. You can manually create the config directory and minimal config files:
+
+```bash
+mkdir -p config
+echo -e '[inner]\nversion = "0.0.1"' > config/bot_config.toml
+echo -e '[inner]\nversion = "0.0.1"' > config/model_config.toml
+```
+
+Then run `uv run python bot.py` again — it will auto-detect the old version and upgrade to the full config.
+:::
+
+::: tip 💡 Server / Headless Environments
+If deploying on a server without an interactive terminal and you can't type "agree", use environment variables to skip the prompt:
+
+```bash
+# Run once to see the required hash values
+uv run python bot.py
+# Copy the EULA_AGREE=xxx and PRIVACY_AGREE=xxx shown in terminal
+# Then set them and restart
+export EULA_AGREE=<hash shown>
+export PRIVACY_AGREE=<hash shown>
+uv run python bot.py
+```
+:::
+
 ### Step 6: Launch Again, Enter WebUI
 
 ```bash
@@ -152,6 +178,16 @@ In the MaiBot WebUI (browser at `http://127.0.0.1:8001`):
 3. Click Install
 
 After installation, configure the connection address following the adapter's instructions.
+
+::: warning ⚠️ Important: Plugins Are Disabled by Default
+**Whether installed via WebUI or manually cloned to `plugins/`, the adapter plugin is DISABLED by default.** Installation alone does NOT make it work!
+
+You must go to the WebUI **"Plugin Management"** page, find the NapCat Adapter, and **manually toggle the enable switch**.
+
+Or edit `plugins/MaiBot-Napcat-Adapter/config.toml` directly, changing `[plugin] enabled` to `true`, then restart MaiBot.
+
+> How to verify? Check the startup logs: "activated" means enabled, "disabled, skipping activation" means still disabled.
+:::
 
 ::: tip 💡 More Details
 See the [NapCat Adapter Guide](../adapters/napcat.md) for complete installation and configuration instructions.
