@@ -147,7 +147,7 @@ auth_token = []                 # Auth token, leave empty
 | `ws_server_port` | Port number | Default `8080`, remember if you change it |
 | `auth_token` | Password verification | Leave empty, don't worry about it |
 
-💡 **Note**: The `ws_server_port = 8080` is for MaiBot's legacy maim_message service, NOT used by the adapter. The adapter connects to MaiBot's MMC on .env PORT=8000. Make sure your adapter's config.toml `maibot_server.port` matches MaiBot's .env PORT=8000.
+💡 **Note**: The `ws_server_port = 8080` is for MaiBot's legacy maim_message service, NOT used by the adapter. The adapter connects to MaiBot's MMC on `[maim_message].ws_server_port` (default 8000) in `config/bot_config.toml`. Make sure your adapter's config.toml `maibot_server.port` matches MaiBot's `ws_server_port`.
 
 ### Install NapCat
 
