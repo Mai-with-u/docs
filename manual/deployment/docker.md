@@ -4,6 +4,10 @@ title: Docker 部署
 
 # 🐳 Docker 部署指南
 
+> 💡 **小白用户推荐**：下载可视化交互部署脚本，一问一答式引导，零基础也能部署！
+> - Windows 用户：[mai-deploy.ps1](./mai-deploy.ps1)（右键 → 运行 with PowerShell 或 `pwsh .\mai-deploy.ps1`）
+> - Linux / macOS 用户：[mai-deploy.sh](./mai-deploy.sh)（`chmod +x mai-deploy.sh && ./mai-deploy.sh`）
+
 Docker 就像一个大盒子，把 MaiBot 和所有它需要的东西都打包好，一键就能跑起来！
 
 ## 📋 准备工作
