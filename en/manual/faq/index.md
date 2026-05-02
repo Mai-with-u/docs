@@ -123,7 +123,7 @@ This document summarizes common problems and solutions during MaiBot usage, orga
 1. Confirm `platform` in `[bot]` section of `bot_config.toml` is set to `"qq"`
 2. Confirm `qq_account` matches NapCat login QQ number
 3. **Plugin Mode**: Check adapter's `napcat_server.host` and `napcat_server.port` settings. Adapter connects to NapCat's Forward WebSocket server (typically `ws://127.0.0.1:3001`). Verify NapCat has Forward WebSocket server enabled on the correct port.
-4. **Standalone Mode**: Check adapter's `napcat_server.host` and `napcat_server.port` (default `localhost:8095`). NapCat should connect to the adapter via Reverse WebSocket at `ws://127.0.0.1:8095`. Also verify the adapter's `maibot_server.port` matches MaiBot's `.env` PORT (default `8000`).
+4. **Standalone Mode**: Check adapter's `napcat_server.host` and `napcat_server.port` (default `localhost:8095`). NapCat should connect to the adapter via Reverse WebSocket at `ws://127.0.0.1:8095`. Also verify the adapter's `maibot_server.port` matches MaiBot's `[maim_message].ws_server_port` in `config/bot_config.toml` (default `8000`).
 5. Confirm firewall doesn't block WebSocket connection
 6. Check if NapCat version is compatible with current MaiBot version
 7. View NapCat, adapter, and MaiBot logs for specific connection error information
