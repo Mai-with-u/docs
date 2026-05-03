@@ -77,6 +77,30 @@ Docker 会把重要数据保存在你电脑的这些位置：
 | NapCat 管理面板 | 6099 | NapCat 网页配置面板 |
 | 数据库工具 | 8120 | 查看机器人数据用的 |
 
+::: tip WebUI 配置位置
+WebUI 的启用状态、监听地址和容器内端口现在都在 `./docker-config/mmc/bot_config.toml` 的 `[webui]` 配置段中设置，不再通过单独的 WebUI 配置文件或环境变量配置。
+:::
+
+默认情况下，`docker-compose.yml` 会把宿主机的 `18001` 端口映射到容器内的 `8001` 端口：
+
+```yaml
+ports:
+  - "18001:8001"
+```
+
+Docker 部署时，建议确认 `./docker-config/mmc/bot_config.toml` 中的 WebUI 配置如下：
+
+```toml
+[webui]
+enabled = true
+host = "0.0.0.0"
+port = 8001
+```
+
+- `host` 是 WebUI 在容器内绑定的地址。Docker 部署时建议使用 `0.0.0.0`，这样宿主机端口映射才能访问到 WebUI。
+- `port` 是 WebUI 在容器内监听的端口，需要和 `docker-compose.yml` 端口映射右侧保持一致。例如 `18001:8001` 中的 `8001`。
+- 如果你想修改浏览器访问端口，通常只需要改端口映射左侧。例如把 `18001:8001` 改成 `28001:8001` 后，通过 `http://localhost:28001` 访问。
+
 ## 📋 完整步骤（一步一步来）
 
 ```bash
@@ -89,6 +113,7 @@ docker compose up -d
 
 # 3. 改配置（重要！）
 # 打开 ./docker-config/mmc/bot_config.toml 填 QQ 号
+# WebUI 配置也在 ./docker-config/mmc/bot_config.toml 的 [webui] 段
 # 打开 ./docker-config/mmc/model_config.toml 填 API 密钥
 
 # 4. 重启让配置生效
