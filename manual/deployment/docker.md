@@ -76,7 +76,7 @@ Docker 会把重要数据保存在你电脑的这些位置：
 1. 打开 NapCat 管理面板：`http://localhost:6099`
 2. 登录 NapCat 管理面板。如果需要 token，请查看 `./docker-config/napcat/webui.json` 中的 `token` 字段。
 3. 在 NapCat 管理面板中登录 QQ 小号。
-4. 在 NapCat 的网络配置中启用 **正向 WebSocket** 或 **WebSocket 服务器**，监听端口一般用 `3001`。
+4. 在 NapCat 的网络配置中启用 **正向 WebSocket** 或 **WebSocket 服务器**，主机(host)填 `0.0.0.0` 或 `::`，监听端口一般用 `3001`。
 5. 在 MaiBot WebUI 的插件管理中启用 **NapCat 适配器**，或编辑宿主机上的 `./data/MaiMBot/plugins/MaiBot-Napcat-Adapter/config.toml`：
 
 ```toml
