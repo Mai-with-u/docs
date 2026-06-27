@@ -69,6 +69,86 @@ Docker will save important data in these locations on your computer:
 - **NapCat Web UI** — Port 6099, NapCat web configuration panel
 - **Database tool** — Port 8120, used to view robot data
 
+## 🔗 Connect NapCat
+
+`docker compose up -d` only starts the MaiBot and NapCat containers. You still need to finish NapCat login, WebSocket setup, and adapter configuration before MaiBot can actually receive QQ messages.
+
+1. Open the NapCat Web UI: `http://localhost:6099`
+2. Log in to the NapCat Web UI. If a token is required, check the `token` field in `./docker-config/napcat/webui.json`.
+3. Log in to your QQ bot account in the NapCat Web UI.
+4. In NapCat network settings, enable **Forward WebSocket** or **WebSocket Server**, set host to `0.0.0.0` or `::`, and usually use `3001` as the listening port.
+5. Enable the **NapCat Adapter** in MaiBot WebUI plugin management, or edit `./data/MaiMBot/plugins/MaiBot-Napcat-Adapter/config.toml` on the host:
+
+```toml
+[plugin]
+enabled = true
+
+[napcat_server]
+host = "napcat"
+port = 3001
+token = ""
+```
+
+::: warning Docker Network Address
+In Docker Compose, the MaiBot container should access the NapCat container by using the service name `napcat`. Therefore, `napcat_server.host` in the adapter configuration is usually `napcat`, not `127.0.0.1`.
+`127.0.0.1` inside a container only means the current container itself.
+:::
+
+### Group messages are not received
+
+The NapCat Adapter enables chat list filtering by default, and group chats use whitelist mode by default. If the group ID is not in the whitelist, group messages will be dropped directly by the adapter, which can look like NapCat is connected but MaiBot does not respond.
+
+Edit the `[chat]` section in `./data/MaiMBot/plugins/MaiBot-Napcat-Adapter/config.toml`:
+
+```toml
+[chat]
+enable_chat_list_filter = true
+show_dropped_chat_list_messages = true
+group_list_type = "whitelist"
+group_list = ["your QQ group ID"]
+```
+
+For local testing, you can also temporarily disable chat list filtering:
+
+```toml
+[chat]
+enable_chat_list_filter = false
+```
+
+Restart the core container after changing the configuration:
+
+```bash
+docker compose restart core
+```
+
+::: tip WebUI Configuration Location
+The WebUI enabled state, listening address, and container port are now configured in the `[webui]` section of `./docker-config/mmc/bot_config.toml`, instead of a separate WebUI config file or environment variables.
+:::
+
+By default, `docker-compose.yml` maps host port `18001` to container port `8001`:
+
+```yaml
+ports:
+  - "18001:8001"
+```
+
+For Docker deployment, it is recommended to confirm that the WebUI configuration in `./docker-config/mmc/bot_config.toml` is:
+
+```toml
+[webui]
+enabled = true
+host = "0.0.0.0"
+port = 8001
+```
+
+::: warning ⚠️ host must be changed to 0.0.0.0
+The default WebUI `host` value is `127.0.0.1` (only listening on the loopback address). **Inside a Docker container, this means only the container itself can access WebUI, and the host machine cannot reach it through port mapping**. For Docker deployment, make sure to set `host` to `0.0.0.0`; otherwise the browser will not be able to open WebUI.
+:::
+
+- `host` is the address WebUI binds to inside the container. For Docker deployment, `0.0.0.0` is recommended so host port mapping can access WebUI.
+- `port` is the port WebUI listens on inside the container. It must match the right side of the port mapping in `docker-compose.yml`. For example, in `18001:8001`, it is `8001`.
+- If you want to change the browser access port, usually you only need to change the left side of the port mapping. For example, change `18001:8001` to `28001:8001`, then visit `http://localhost:28001`.
+
 ## 📋 Complete Steps (Step by Step)
 
 ```bash
@@ -81,7 +161,11 @@ docker compose up -d
 
 # 3. Change config (important!)
 # Open ./docker-config/mmc/bot_config.toml and fill in QQ number
+# WebUI configuration is also in the [webui] section of ./docker-config/mmc/bot_config.toml
 # Open ./docker-config/mmc/model_config.toml and fill in API key
+# Open http://localhost:6099, log in to NapCat, and enable Forward WebSocket
+# Enable the NapCat Adapter and set the adapter's napcat_server.host to napcat
+# For group chats, add the group ID to the NapCat Adapter group_list, or disable chat list filtering
 
 # 4. Restart to apply config
 docker compose restart core
@@ -118,3 +202,11 @@ docker compose down
 ```bash
 docker compose restart
 ```
+
+### Command error: `unknown shorthand flag: 'd' in -d`?
+
+This means your server has the **Standalone** version of Docker Compose installed. Replace the space in the command with a hyphen:
+```bash
+docker-compose up -d
+```
+Similarly, all later commands in this document written as `docker compose command` need to be written as `docker-compose command` on your server, such as `docker-compose restart core`.

@@ -19,6 +19,7 @@ title: Manifest
 
 ```json
 {
+  "$schema": "../_manifest.schema.json",
   "manifest_version": 2,
   "id": "com.example.my-plugin",
   "version": "1.0.0",
@@ -59,6 +60,21 @@ title: Manifest
   }
 }
 ```
+
+## 使用 Manifest Schema
+
+MaiBot 仓库在 `plugins/_manifest.schema.json` 提供了 `_manifest.json` 的 JSON Schema，用于编辑器自动补全、字段说明和格式检查。
+
+插件位于 `plugins/<plugin-name>/_manifest.json` 时，在文件顶层加入：
+
+```json
+{
+  "$schema": "../_manifest.schema.json",
+  "manifest_version": 2
+}
+```
+
+`../_manifest.schema.json` 会指向 MaiBot 内置的 `plugins/_manifest.schema.json`。支持 JSON Schema 的编辑器会自动读取它并提示字段、类型和格式错误；Host 运行时会忽略 `$schema` 字段，不影响插件加载。
 
 ## 必填字段
 

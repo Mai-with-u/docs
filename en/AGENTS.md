@@ -84,3 +84,4 @@ The structure under `en/` is a complete mirror of the Chinese version, containin
 ## Documentation Writing Conventions
 
 - **Do not use Markdown tables in content pages**. Markdown tables render poorly in VitePress (not mobile-friendly, column widths uncontrollable). Only `index.md` pages may use tables. For content pages, use definition lists instead, e.g. `**`field`** — Description. Default X`
+- **Chinese and English documentation must be updated together**. When changing Chinese docs, update the corresponding English docs under `en/`; when changing English docs, check and update the corresponding Chinese docs. Both versions should communicate the same information, avoiding one-sided documentation updates.

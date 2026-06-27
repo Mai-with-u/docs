@@ -12,6 +12,7 @@ Here is a complete Manifest example:
 
 ```json
 {
+  "$schema": "../_manifest.schema.json",
   "manifest_version": 2,
   "id": "com.example.my-plugin",
   "version": "1.0.0",
@@ -52,6 +53,21 @@ Here is a complete Manifest example:
   }
 }
 ```
+
+## Using the Manifest Schema
+
+The MaiBot repository provides the JSON Schema for `_manifest.json` at `plugins/_manifest.schema.json`. It is used for editor completion, field descriptions, and format checks.
+
+When the plugin is located at `plugins/<plugin-name>/_manifest.json`, add this at the top level:
+
+```json
+{
+  "$schema": "../_manifest.schema.json",
+  "manifest_version": 2
+}
+```
+
+`../_manifest.schema.json` points to MaiBot's built-in `plugins/_manifest.schema.json`. Editors that support JSON Schema will automatically use it to show available fields, types, and format errors. The Host ignores `$schema` at runtime, so it does not affect plugin loading.
 
 ## Required Fields
 
