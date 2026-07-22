@@ -233,8 +233,35 @@ class SendInterceptorPlugin(MaiBotPlugin):
 - **`maisaka.replyer.before_request`** — Maisaka replyer 请求模型前；可读取或改写本次 `reply_tool_args` — 允许 abort ❌ · 允许改参 ✅
 - **`maisaka.replyer.before_model_request`** — Maisaka replyer 构造完最终 `messages` 后、请求模型前；可改写实际发送给模型的消息列表 — 允许 abort ❌ · 允许改参 ✅
 - **`maisaka.replyer.after_response`** — Maisaka replyer 收到模型响应后；可改写回复或要求重生成 — 允许 abort ❌ · 允许改参 ✅
+- **`maisaka.reply.before_post_process`** — 最终可见回复执行文本后处理前；可按单次回复改写正文或调整后处理策略 — 允许 abort ❌ · 允许改参 ✅
 
 `reply_tool_args` 会在表达方式选择链、`maisaka.replyer.before_request` 和 `maisaka.replyer.after_response` 中保持可见。它包含 reply 工具里除 `msg_id`、`set_quote`、`reference_info` 外的额外参数；`before_request` 返回的 `reply_tool_args` 修改会继续传递给后续 replyer hook。
+
+#### 按单次回复控制文本后处理
+
+`maisaka.reply.before_post_process` 在最终回复已经确定、但尚未执行文本拆分和错别字注入时触发。阻塞模式处理器可以读取 `response`、`session_id`、`reply_message_id` 和 `reply_tool_args`，并修改以下字段：
+
+- **`response`** `str` — 本次最终可见回复正文。
+- **`skip_post_process`** `bool` — 设为 `true` 时，本次回复完全跳过 `process_llm_response`，包括文本拆分、中文错别字注入、括号内容清理和长度限制。
+- **`enable_splitter`** `bool` — 是否允许本次回复按照全局配置进行文本拆分。
+- **`enable_chinese_typo`** `bool` — 是否允许本次回复按照全局配置注入中文错别字。
+
+`skip_post_process` 只跳过正文文本后处理，不会跳过图片、At 或表情等富回复附件的组装。处理器必须保留其余 `kwargs`，并且三个策略字段必须返回布尔值。
+
+```python
+from maibot_sdk import HookHandler
+from maibot_sdk.types import HookMode
+
+
+@HookHandler("maisaka.reply.before_post_process", mode=HookMode.BLOCKING)
+async def preserve_selected_reply(self, **kwargs):
+    response = kwargs.get("response", "")
+    if response.startswith("[保持原文]"):
+        kwargs["response"] = response.removeprefix("[保持原文]").lstrip()
+        kwargs["skip_post_process"] = True
+
+    return {"action": "continue", "modified_kwargs": kwargs}
+```
 
 #### 在 replyer 请求前切换模型或追加提示词
 

@@ -215,8 +215,35 @@ class SendInterceptorPlugin(MaiBotPlugin):
 - **`maisaka.replyer.before_request`** — Before the Maisaka replyer sends the model request; can read or rewrite this call's `reply_tool_args`
 - **`maisaka.replyer.before_model_request`** — After the Maisaka replyer builds the final `messages` and before the model request; can rewrite the actual message list sent to the model
 - **`maisaka.replyer.after_response`** — After the Maisaka replyer receives the model response; can rewrite the reply or request regeneration
+- **`maisaka.reply.before_post_process`** — Before text post-processing of the final visible reply; can rewrite the body or adjust post-processing for this reply only
 
 `reply_tool_args` remains visible in the expression selection chain, `maisaka.replyer.before_request`, and `maisaka.replyer.after_response`. It contains extra reply tool arguments other than `msg_id`, `set_quote`, and `reference_info`; modifications returned from `before_request` continue to later replyer hooks.
+
+#### Controlling Text Post-Processing Per Reply
+
+`maisaka.reply.before_post_process` runs after the final reply has been selected but before text splitting and Chinese typo injection. A blocking handler can read `response`, `session_id`, `reply_message_id`, and `reply_tool_args`, and can modify these fields:
+
+- **`response`** `str` — The final visible body for this reply.
+- **`skip_post_process`** `bool` — When `true`, this reply completely bypasses `process_llm_response`, including text splitting, Chinese typo injection, parenthesized-content cleanup, and length limiting.
+- **`enable_splitter`** `bool` — Whether this reply may be split according to the global configuration.
+- **`enable_chinese_typo`** `bool` — Whether Chinese typo injection may run for this reply according to the global configuration.
+
+`skip_post_process` only bypasses body text processing. Rich-reply attachments such as images, mentions, and emoji are still assembled. The handler must preserve the remaining `kwargs`, and all three policy fields must remain booleans.
+
+```python
+from maibot_sdk import HookHandler
+from maibot_sdk.types import HookMode
+
+
+@HookHandler("maisaka.reply.before_post_process", mode=HookMode.BLOCKING)
+async def preserve_selected_reply(self, **kwargs):
+    response = kwargs.get("response", "")
+    if response.startswith("[keep-raw]"):
+        kwargs["response"] = response.removeprefix("[keep-raw]").lstrip()
+        kwargs["skip_post_process"] = True
+
+    return {"action": "continue", "modified_kwargs": kwargs}
+```
 
 #### Switching Models or Appending Prompts Before Replyer Requests
 
