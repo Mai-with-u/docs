@@ -116,6 +116,7 @@ export const sidebar: DefaultTheme.Sidebar = {
       items: [
         { text: '适配器概览', link: '/manual/adapters/' },
         { text: 'NapCat QQ 连接', link: '/manual/adapters/napcat' },
+        { text: 'LLOneBot(LLBot) 适配器', link: '/manual/adapters/LLOneBot' },
         { text: 'GoCQ 适配器', link: '/manual/adapters/gocq' },
         { text: 'SnowLuma 适配器', link: '/manual/adapters/snowluma' },
         { text: 'Telegram 适配器', link: '/manual/adapters/telegram' },
