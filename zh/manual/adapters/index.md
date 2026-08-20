@@ -83,9 +83,6 @@ title: 适配器概览
 2. 适配器是否正常启动。
 3. 适配器是否成功连接消息平台。
 4. 独立版适配器是否成功连接 MaiBot。
-<<<<<<< Updated upstream
-5. MaiBot 是否已经完成初始化并正常运行。
-=======
 5. MaiBot 是否已经完成初始化并正常运行。
 
 ## 适配器账号与身份
@@ -115,4 +112,3 @@ title: 适配器概览
 
 - [WebUI 适配器管理](./../webui/adapter-management.md) — 已发现账号、在线状态、软禁用 / 恢复
 - [消息服务器与适配器对接](../../develop/message-server-and-adapters.md) — 身份持久化、自动获取 ID 与访问策略的实现细节
->>>>>>> Stashed changes

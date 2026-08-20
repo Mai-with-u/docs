@@ -231,7 +231,7 @@ Debug 配置位于 `[debug]` 段，`__ui_parent__` 为 `log`，在 WebUI 中与�
 
 **`show_maisaka_thinking`** — 是否在日志中显示麦麦的思考过程（Planner 规划细节、工具调用的推理链条），默认 `true`。如果你想压日志长度，可以关闭此开关。
 
-**`enable_reply_effect_tracking`** — 是否记录回复效果评分，默认 `false`。开启后系统会为每条回复计算效果指标并写入数据库，配合 `maisaka_reply_effect_limit` 限制每聊天的记录数。适合调优 Prompt 或对比模型表现时使用。
+**`enable_reply_effect_tracking`** — 是否记录回复效果评分，默认 `false`。开启后系统会为每条回复计算效果指标并写入数据库，配合 `maisaka_reply_effect_limit` 限制每聊天的记录数。适合调优 Prompt 或对比模型表现时使用。评分语义当前为 v6（回应度不再考虑用户回应速度、无关联信息不生成置信度、未走完观察窗口的记录不参与评分），WebUI 查看见 [聊天与统计 · 回复效果评估](../manual/webui/chat-stats.md#reply-effect-evaluation)。
 
 **`keep_prompt_preview_json_base64`** — 是否在 Prompt 预览中保留图片的 base64 数据，默认 `false`。开启后可在预览中看到发送给模型的完整图片内容，方便排查视觉模型输出异常，但会占用较多磁盘空间。
 

@@ -35,7 +35,7 @@ self.ctx.logger     # Logging (standard logging.Logger)
 
 :::
 
-## send — Message Sending
+## send — Message Sending {#send}
 
 ::: code-group
 
@@ -61,7 +61,23 @@ await self.ctx.send.custom(custom_type="card", data={...}, stream_id=stream_id)
 
 :::
 
-All `send.*` methods return `bool`, indicating whether the send was successful.
+All `send.*` methods return `bool` by default, indicating whether the send was successful. Since 1.2.0, passing `return_details=True` returns a detailed result that includes the platform-confirmed final message ID, useful for later references (e.g. recalling):
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+# Default: returns bool
+ok = await self.ctx.send.text("Hi", stream_id)
+
+# return_details=True returns {"success": bool, "sent": bool, "message_id": str | None}
+result = await self.ctx.send.text("Hi", stream_id, return_details=True)
+if result["sent"] and result["message_id"]:
+    platform_msg_id = result["message_id"]
+```
+
+:::
+
+`return_details` works for all seven methods: `send.text`, `send.emoji`, `send.image`, `send.forward`, `send.hybrid`, `send.command`, `send.custom`. `message_id` is the platform-side final message ID reported back by the adapter (`platform_message_id`); it is `None` when the send failed or the platform did not report one back.
 
 ## db — Database Operations
 

@@ -156,9 +156,9 @@ All reasoning process endpoints require Cookie auth and are mounted under the `/
 **`search`** — Fuzzy search (matches stage, session, output summary, model name, etc.)
 **`action`** — Filter by action name (only effective for planner and jargon learning stages)
 
-The response body includes `items` (log entry list), `total`, `stages`, `stage_infos`, `sessions`, `session_infos`, etc. Each entry contains `stage`, `session_id`, `stem` (filename stem), `output_preview` (replyer stage), `action_preview` (planner stage), `model_name`, `duration_ms`, and other info.
+The response body includes `items` (log entry list), `total`, `stages`, `stage_infos`, `sessions`, `session_infos`, etc. Each entry contains `stage`, `session_id`, `stem` (filename stem), `output_preview` (replyer stage), `action_preview` (planner stage), `model_name`, `duration_ms`, and (since 1.2.0) token usage stats such as `prompt_tokens`, `completion_tokens`, `total_tokens`.
 
-**`GET /api/webui/reasoning-process/file?path=<relative_path>`** — Read the complete text content of a single reasoning log (txt or json). Returns `content`, `size`, `modified_at`, `model_name`, `duration_ms`, and the message sender avatar map `message_avatars`
+**`GET /api/webui/reasoning-process/file?path=<relative_path>`** — Read the complete text content of a single reasoning log (txt or json). Returns `content`, `size`, `modified_at`, `model_name`, `duration_ms`, `prompt_tokens`, `completion_tokens`, `total_tokens` (since 1.2.0), and the message sender avatar map `message_avatars`
 
 **`GET /api/webui/reasoning-process/html?path=<relative_path>`** — Preview a reasoning log as HTML. Returns a `text/html` file stream, suitable for rendering a structured preview of the prompt directly in the browser
 

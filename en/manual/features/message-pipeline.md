@@ -101,6 +101,18 @@ MaiBot: I think hiking is pretty great! But it depends on the weather,
 - The atmosphere is quite serious or tense
 - It feels it's inappropriate to chime in
 
+## Viewing Nested Forwarded Messages
+
+Sometimes a forwarded message in a group itself contains **more forwards nested inside** — like Russian dolls. For example, someone forwards a collection of chat records, and each record may be part of another forward.
+
+Since 1.2.0, MaiBot can **expand and view the full content of nested forwarded messages**:
+
+- It doesn't just see "there's a forward here"; it sees the actual messages inside the forward
+- Nested layers are expanded one by one, so MaiBot understands the whole story of the forward
+- This lets it join in and respond better when a forwarded thread is being discussed
+
+Think of it as MaiBot learning to "unwrap the Russian dolls" — no matter how many layers a forwarded message is nested, it can read the real content inside.
+
 ## How Fast Is the Reply?
 
 This depends on the situation:

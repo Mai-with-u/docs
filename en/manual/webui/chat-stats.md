@@ -124,6 +124,51 @@ Stickers in the WebUI are uniformly displayed in four states:
 
 Stickers manually uploaded via the WebUI are directly marked as "Claimed". The tag list filled in during upload is merged into the sticker description; if the image already exists in the database, the original record is reused, the description is updated, the ban is lifted, and it is marked as registered. Deleting unregistered stickers synchronously deletes the database record and local file; deleting registered stickers first unloads them from the available sticker library, then deletes the database record and file.
 
+## Reply Effect Evaluation {#reply-effect-evaluation}
+
+Reply effect evaluation measures how good each of MaiBot's replies is — whether it responded to the user and whether it responded appropriately. It's an important reference for tuning prompts or comparing model performance.
+
+### Enabling
+
+Enable it in the `[debug]` section of `bot_config.toml`:
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
+[debug]
+enable_reply_effect_tracking = true
+```
+
+:::
+
+Once enabled, a **Reply Effects** page (`/reply-effects`) appears under the "Advanced Tools" group in the WebUI sidebar.
+
+### Scoring Semantics (currently v6)
+
+The evaluation standard has been upgraded over several rounds; the current implementation is **v6**:
+
+- **Responsiveness** — measures whether the reply responds to the user; "how fast the user replied" is no longer used as evidence, and the remaining responsiveness evidence is normalized by its original weight ratio
+- **Total score** — the raw total score without clear semantics has been removed; only per-dimension evidence is shown
+- **No related info** — when no info related to the reply is found, no confidence is generated and the record is marked "completed / no info"
+- **Incomplete records** — records that haven't finished the observation window (still watching subsequent feedback) are marked "incomplete" and excluded from scoring and aggregate stats
+- **Failure retry** — records that failed during evaluation (e.g. prompt truncation) are automatically retried after a restart
+
+### Viewing and Operations
+
+- **Score distribution** — scores are shown as a per-sample scatter plot, clearly exposing zero-score clustering, outliers and within-model fluctuation
+- **Delete / clear scores** — you can delete a single score record, or clear all score data for a chat / globally
+- **Record limit** — each chat keeps at most `maisaka_reply_effect_limit` records (default 256); older records are cleaned up automatically
+
+## Reasoning Process Token Display
+
+In the **Reasoning Process** page (`/reasoning-process`), the log list and details now show the following for each LLM request:
+
+- **Input tokens** — tokens sent to the model in the request
+- **Output tokens** — tokens returned by the model
+- **Total tokens** — input + output
+
+This makes the reasoning cost of a single reply easy to evaluate, especially cost growth in high-activity group chats.
+
 ## Usage Recommendations
 
 ### Daily Checks

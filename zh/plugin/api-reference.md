@@ -37,7 +37,7 @@ self.ctx.logger     # 日志记录器
 
 `ctx.paths` 详见下方的 paths 章节；`ctx.logger` 提供标准 `logging.Logger` 实例，详见 logger 章节。
 
-## send — 消息发送
+## send — 消息发送 {#send}
 
 ::: code-group
 
@@ -47,13 +47,13 @@ send = self.ctx.send
 
 :::
 
-- `await send.text(text, stream_id)` — 发送文本消息
-- `await send.image(image_data, stream_id)` — 发送图片
-- `await send.emoji(emoji_data, stream_id)` — 发送表情
-- `await send.command(command, stream_id)` — 发送指令消息
-- `await send.forward(messages, stream_id)` — 发送转发消息
-- `await send.hybrid(segments, stream_id)` — 发送图文混合消息
-- `await send.custom(custom_type, data, stream_id)` — 发送自定义类型消息
+- `await send.text(text, stream_id, **kwargs)` — 发送文本消息
+- `await send.image(image_data, stream_id, **kwargs)` — 发送图片
+- `await send.emoji(emoji_data, stream_id, **kwargs)` — 发送表情
+- `await send.command(command, stream_id, **kwargs)` — 发送指令消息
+- `await send.forward(messages, stream_id, **kwargs)` — 发送转发消息
+- `await send.hybrid(segments, stream_id, **kwargs)` — 发送图文混合消息
+- `await send.custom(custom_type, data, stream_id, **kwargs)` — 发送自定义类型消息
 
 ::: code-group
 
@@ -78,7 +78,23 @@ await self.ctx.send.hybrid([
 
 说明：`send.custom()` 会同时携带 `custom_type/data` 和 `message_type/content` 两套字段名，用于兼容不同版本的 Host 实现。插件侧只需要继续传 `custom_type` 与 `data`。
 
-所有 `send.*` 方法返回 `bool`，表示是否发送成功。
+**返回值（1.2.0 起）**：默认情况下所有 `send.*` 方法返回 `bool`，表示是否发送成功。传入 `return_details=True` 时，返回包含平台确认的最终消息 ID 的详细结果，便于后续引用（如撤回）：
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+# 默认返回 bool
+ok = await self.ctx.send.text("你好", stream_id)
+
+# return_details=True 返回 {"success": bool, "sent": bool, "message_id": str | None}
+result = await self.ctx.send.text("你好", stream_id, return_details=True)
+if result["sent"] and result["message_id"]:
+    platform_msg_id = result["message_id"]
+```
+
+:::
+
+`return_details` 对 `send.text`、`send.emoji`、`send.image`、`send.forward`、`send.hybrid`、`send.command`、`send.custom` 七个方法均生效。`message_id` 为适配器回传的平台侧最终消息 ID（`platform_message_id`），未成功发送或平台未回传时为 `None`。
 
 ## db — 数据库操作
 

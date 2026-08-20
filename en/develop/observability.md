@@ -231,7 +231,7 @@ Debug configuration is in the `[debug]` section, with `__ui_parent__` set to `lo
 
 **`show_maisaka_thinking`** — Whether to show MaiMai's thinking process in logs (Planner planning details, tool call reasoning chains), default `true`. You can disable this if you want to reduce log volume.
 
-**`enable_reply_effect_tracking`** — Whether to record reply effect scores, default `false`. When enabled, the system calculates effect metrics for each reply and writes them to the database, with `maisaka_reply_effect_limit` limiting the number of records per chat. Useful when tuning prompts or comparing model performance.
+**`enable_reply_effect_tracking`** — Whether to record reply effect scores, default `false`. When enabled, the system calculates effect metrics for each reply and writes them to the database, with `maisaka_reply_effect_limit` limiting the number of records per chat. Useful when tuning prompts or comparing model performance. The scoring semantics are currently v6 (responsiveness no longer considers user reply speed; no confidence is generated when no related info is found; records that haven't finished the observation window are excluded from scoring). See [Chat & Stats · Reply Effect Evaluation](../manual/webui/chat-stats.md#reply-effect-evaluation) for the WebUI view.
 
 **`keep_prompt_preview_json_base64`** — Whether to retain image base64 data in prompt previews, default `false`. When enabled, you can see the complete image content sent to the model in previews, useful for troubleshooting visual model output anomalies, but consumes significant disk space.
 

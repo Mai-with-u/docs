@@ -2,6 +2,18 @@
 
 For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
 
+::: timeline 2026-08-18
+- [1.2.0] Maisaka: Replyer now uses different reply modes per scenario for more diverse replies; improved Replyer organization
+- Reply effect evaluation upgraded (currently v6): responsiveness no longer considers reply speed, removed the raw total score without clear semantics, records without related info are marked "completed / no info", records that didn't finish the observation window are marked "incomplete" and excluded from scoring; score distribution is now a per-sample scatter plot; supports deleting / clearing score records
+- Models: official support for the Response endpoint; model context and output upgraded to a flat Item-first structure, keeping body, reasoning, function calls, tool results and provider-native activities separate
+- Expression: fixed repeated abnormal restarts after expression vector index corruption; optimized online index maintenance (incremental assignment, k-means++, lock-free atomic writes)
+- Adapters: bot platform accounts now persist the identity reported by the adapter, so multiple accounts on one instance are reliably recognized; adapters can auto-discover their ID; access policy adds independent group and private default actions (allow by default, switchable to deny)
+- WebUI [1.7.0]: new dedicated adapter management and unified command management pages; improved model configuration layout; fixed local model testing bug; settings page shows discovered adapter accounts with online status and soft disable / restore; group frequency can be set per mode (with wildcard and default config); reasoning logs now show input, output and total tokens
+- Messages: nested forwarded messages can now be viewed
+- Plugin SDK: `send.text`, `send.emoji`, `send.image`, `send.forward`, `send.hybrid`, `send.command` and `send.custom` support `return_details=True` to get the platform-confirmed final message ID
+- Improved startup onboarding
+:::
+
 ::: timeline 2026-08-04
 - [1.1.4] Models: added support for the OpenAI Responses API (text, images, structured output, function tools, native tools, streaming events and usage stats); added native web search for DeepSeek v4 flash with related parameters
 - Maisaka: Responses native web search summaries (query, action, status and source count for the round) shown in the monitor and regular logs

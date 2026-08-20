@@ -102,6 +102,17 @@ After each conversation, it will:
 - Remember what responses worked well
 - Do better next time it encounters a similar situation
 
+## Different Reply Modes for Different Scenarios
+
+MaiBot doesn't respond to every topic the same way (reply diversity has been further improved since 1.2.0). It picks a different reply mode based on the **current scenario**:
+
+- **Casual chat** — short, lively responses, no rambling
+- **Serious questions** — structured, information-complete answers
+- **Needs comfort** — a gentler tone, empathy before advice
+- **Playing along with jokes** — matching the group's vibe and typical way of speaking
+
+The scenario is judged from the chat context, topic type, and the group's speaking style. That's why the same sentence may get a completely different reply in different groups — MaiBot isn't "reciting an answer", it's **choosing the most appropriate way to speak right now**.
+
 ## When Does It "Overthink"?
 
 Sometimes MaiBot falls into an "overthinking" mode:

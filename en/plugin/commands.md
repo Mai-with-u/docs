@@ -176,6 +176,53 @@ sequenceDiagram
     Runner-->>Host: Return result
 ```
 
+## Command Authorization (since 1.2.0) {#command-authorization}
+
+Since 1.2.0, a command can be declared as **operator level** (`permission="operator"`) and the main program authorizes it uniformly at trigger time:
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+@Command(
+    "management",
+    pattern=r"^/pm",
+    permission="operator",  # mark as an operator-level command
+)
+async def handle_management(self, **kwargs):
+    ...
+```
+
+:::
+
+Commands without `permission="operator"` are open to all users.
+
+### Evaluation Logic
+
+Operator-level commands are evaluated uniformly by `has_command_permission()`, allowing execution in the following order:
+
+1. **Operator list** — the user matches a `platform:id` in `[plugin].permission` (e.g. `qq:123456789`)
+2. **Command-level allow rules** — the command's `command_permissions` rule matches (`allow_users` matches the user, or `allow_chats` matches a real chat flow)
+3. **No rule matches** — execution is refused and the user is told "no permission"
+
+### Configuring Command-Level Allow Rules
+
+Configure them in the `[plugin]` section of `bot_config.toml`:
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
+[plugin]
+permission = ["qq:123456789"]  # operator list
+
+[plugin.command_permissions.my-plugin.my-command]
+allow_users = ["qq:987654321"]  # extra allowed users
+allow_chats = ["chat-xxxx"]     # extra allowed real chat flow IDs
+```
+
+:::
+
+These rules can also be maintained visually in the WebUI **Bot Config → Commands** editing mode, see [WebUI Command Management](../manual/webui/command-management.md).
+
 ## Command-Related Hooks
 
 There are built-in Hook points before and after command execution available for `@HookHandler` subscription:

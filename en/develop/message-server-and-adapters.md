@@ -225,6 +225,42 @@ Echo payload format sent by the adapter:
 
 The MaiBot main program registers the `message_id_echo` custom message handler at startup, and the Additional API Server's `bridge_message_handler` bridges to the same handler function.
 
+## Adapter Identity Persistence and Auto ID Discovery
+
+Since 1.2.0, MaiBot introduces a **bot account service** (`src/services/bot_account_service.py`) that persists the platform account identity actually reported by the adapter into the database (`BotPlatformAccount` table, introduced by the v39→v40 migration) as the stable identity source of an adapter instance.
+
+**Identity sources**: the adapter reports its account identity at two moments —
+- **Ready report (`ready`)** — when the adapter establishes a connection and finishes initialization, it proactively reports its platform account
+- **Inbound messages (`inbound`)** — when the adapter forwards inbound messages, the account is extracted from the sender information carried in the message
+
+**Relationship with routing**: the persisted identity is associated with the `account_id` of `RouteKey`. When multiple accounts on one instance each report their identity, outbound routing can be dispatched back to the correct account precisely, without relying on the manually configured account value. The manually configured platform account is still kept and used only as a fallback when the adapter has not yet reported an identity.
+
+**Auto ID discovery**: an adapter can report its own ID directly (`AdapterAccountIdentity` carries `adapter_id`, `plugin_id`, `gateway_name`). The WebUI shows the discovered account list with online status and supports soft disable / restore (a soft-disabled account no longer receives inbound messages). Related WebUI APIs are in `src/webui/routers/bot_accounts.py`.
+
+## Unified Adapter Access Policy
+
+Since 1.2.0, MaiBot provides a unified chat-list policy (`src/platform_io/adapter_policy.py`) that independently controls **group** and **private** admission per adapter. The policy file is `config/adapter_policy.toml` (generated at runtime; when the file is absent, everything is allowed by default).
+
+```toml [TOML ~vscode-icons:file-type-toml~]
+[defaults.group]        # global default action for group chats
+default_action = "allow"  # or "block"
+[defaults.private]      # global default action for private chats
+default_action = "allow"
+
+[[adapters]]            # precise per-adapter configuration
+# identity match fields: adapter_id / plugin_id / gateway_name / platform / account_id
+[adapters.group]
+default_action = "allow"  # allow / block / inherit
+allow_ids = []            # whitelist; matched IDs are allowed
+deny_ids = []             # blacklist; matched IDs are blocked
+[adapters.private]
+default_action = "allow"
+```
+
+**Evaluation order**: starts from the most precise adapter identity rule and falls back level by level to the global default action. `default_action` takes `allow` / `block` / `inherit` (`inherit` inherits the global default); `allow_ids` and `deny_ids` must not contain the same ID together. The global default action is controlled by `defaults.group` / `defaults.private`, both defaulting to `allow`; they can be changed to `block` for a "deny by default" policy.
+
+The WebUI adapter management page and chat management page provide visual editing of the policy; backend APIs are in `src/webui/routers/chat/routes.py` (`get_adapter_policy_defaults` / `update_adapter_policy_defaults` etc.).
+
 ## Minimal Python External Adapter Example
 
 Below is a minimal working Python adapter that connects to the Legacy Server and sends/receives messages:

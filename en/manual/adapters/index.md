@@ -83,3 +83,31 @@ If no messages are received, check in this order:
 3. Whether the adapter has successfully connected to the messaging platform.
 4. Whether the standalone version adapter has successfully connected to MaiBot.
 5. Whether MaiBot has completed initialization and is running normally.
+
+## Adapter Accounts and Identity
+
+Since 1.2.0, MaiBot **persists the platform account identity actually reported by the adapter**, instead of relying only on the account you manually fill in the configuration:
+
+- **Identity source** — The platform account reported by the adapter on connection (account ID, nickname, etc.) is persisted as the stable identity of that adapter instance
+- **Multi-account recognition** — When one MaiBot instance serves multiple accounts on the same platform, each account is reliably recognized as "itself", without confusion
+- **Auto ID discovery** — Adapters can auto-discover and report their own ID, no need to fill it in the configuration manually
+- **Fallback value** — The platform account originally configured is still kept and used only as a fallback when the adapter has not reported an identity
+
+The distinction between the adapter-reported identity and the fallback configuration can be viewed in the WebUI settings page: the discovered account list shows online status and supports soft disable / restore. See [WebUI Adapter Management](./../webui/adapter-management.md).
+
+## Group / Private Chat Access Policy {#adapter-access-policy}
+
+Since 1.2.0, MaiBot provides a **unified adapter chat-list policy** that controls group and private chat admission independently:
+
+- **Default action** — Group and private chats each have their own default action, both defaulting to "allow", and can be changed to "block"
+- **List rules** — `allow_ids` / `deny_ids` whitelist and blacklist can be configured per adapter to precisely control which groups / private chats an adapter can serve
+- **Configuration file** — The policy lives in a separate `config/adapter_policy.toml`; when the file is absent, everything is allowed by default. It can be maintained via the WebUI adapter management page or the chat management page
+
+::: tip Compatibility note
+To stay compatible with existing adapters, the default action for both group and private chats remains "allow". Access control only tightens when you explicitly change the default action or add list rules.
+:::
+
+## Related Docs
+
+- [WebUI Adapter Management](./../webui/adapter-management.md) — Discovered accounts, online status, soft disable / restore
+- [Message Server and Adapter Integration](../../develop/message-server-and-adapters.md) — Implementation details of identity persistence, auto ID discovery and the access policy

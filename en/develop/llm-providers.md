@@ -54,12 +54,27 @@ erDiagram
 
 ## Built-in client overview
 
-MaiBot ships with two `client_type` values, auto-registered by `ClientRegistry` at startup:
+MaiBot ships with three `client_type` values, auto-registered by `ClientRegistry` at startup:
 
 - **`openai`** (`OpenaiClient`): Adapts all OpenAI-compatible APIs. Uses the `AsyncOpenAI` SDK for calls, supporting streaming/non-streaming, tool calls, and reasoning content parsing. The vast majority of third-party API gateways, proxies, and relays go through this path.
+- **`openai_responses`** (`ResponsesClient`): Adapts OpenAI **Responses protocol** endpoints. Officially supported since 1.2.0, using a flat Item-first structure for model context and output (see below). Use for providers that need Responses capabilities such as web search or native tools (e.g. DeepSeek v4 flash).
 - **`gemini`** (`GeminiClient`): Adapts the native Google Gemini SDK. Uses the `google-genai` library for calls, supporting thinking budget clamping, voice transcription, and embeddings.
 
-Both clients follow the `BaseClient` → `AdapterClient` inheritance hierarchy. The framework obtains client instances uniformly through `ClientRegistry.get_client_class_instance(api_provider)`, so callers are unaware of the underlying SDK.
+All three clients follow the `BaseClient` → `AdapterClient` inheritance hierarchy. The framework obtains client instances uniformly through `ClientRegistry.get_client_class_instance(api_provider)`, so callers are unaware of the underlying SDK.
+
+## Response flat Item-first structure
+
+The `openai_responses` client uses the Item model of the OpenAI Responses protocol to carry model context and output. Unlike Chat Completions, where a single message plays all roles, Item-first expands each part of an interaction into a flat Item sequence, keeping every kind of content separate:
+
+- **Body** — the model's message text output (e.g. `output_text`)
+- **Reasoning** — thinking steps (`reasoning` items), kept strictly separate from the body and never mixed into the prompt context
+- **Function calls** — tool call items (`function_call`), each carrying a `call_id`
+- **Tool results** — tool execution results (`function_call_output`), paired with their function call via `call_id`
+- **Provider-native activities** — provider-level events such as web search and native tools
+
+**Order is defined by list position; relationships are defined by `call_id` and logical rounds**: the position of an item in the list reflects the temporal order of the interaction; tool calls and their results are linked through `call_id`, while a full plan → tool → observation round is chained by logical rounds. MaiBot maps this structure onto a unified activity model internally, so body, reasoning and tool context are never conflated.
+
+See [Model Extra Parameters · Responses API](../manual/configuration/model-extra-params.md#responses-api) for Responses protocol configuration and web search parameters.
 
 ## Registering an API Provider
 
@@ -101,7 +116,7 @@ visual = true
 - **`name`** — Provider name, referenced by ModelInfo's `api_provider` field. Must not be empty.
 - **`base_url`** — API endpoint address. Required when `client_type = "openai"`; optional for `gemini`.
 - **`api_key`** — API key. Can be empty when `auth_type = "none"`.
-- **`client_type`** — Client type, either `"openai"` or `"gemini"`. Custom types registered by plugins are also referenced here.
+- **`client_type`** — Client type, either `"openai"`, `"openai_responses"` or `"gemini"`. Custom types registered by plugins are also referenced here.
 - **`auth_type`** — Authentication method for OpenAI-compatible endpoints. Options: `bearer` (default, `Authorization: Bearer <key>`), `header` (custom header name + prefix), `query` (URL query parameter), `none` (no auth).
 - **`auth_header_name`** — Request header name when `auth_type = "header"`. Defaults to `Authorization`.
 - **`auth_header_prefix`** — Prefix when `auth_type = "header"`. Defaults to `Bearer`. Leave empty to send the raw key directly.
@@ -227,7 +242,7 @@ extra_params = {thinking_budget = 8192}
 
 - **`auto`** (default) — Auto-detect. Tries `native` first, falls back to `think_tag`.
 - **`native`** — Native mode. Reads directly from the `reasoning_content` field of the SDK response object.
-- **`think_tag`** — Tag mode. Uses regex to extract content from ` 响应`  ` 标签对 within the response text. Content inside ` 响应` is assigned to `reasoning_content`, the rest to `content`. If tags are unclosed, everything is treated as reasoning content.
+- **`think_tag`** — Tag mode. Uses regex to extract content from the `<｜end▁of▁thinking｜>` / `</｜end▁of▁thinking｜>` tag pairs in the response text. Content inside the tags is assigned to `reasoning_content`, the rest to `content`. If tags are unclosed, everything is treated as reasoning content.
 - **`none`** — No parsing. The entire response is treated as `content`.
 
 **`tool_argument_parse_mode`** controls the parsing strategy for tool call argument JSON. Some models (especially those using XML fallback extraction for tool calls) may output non-standard JSON. Options:
@@ -283,7 +298,7 @@ Anthropic API authentication differs from standard OpenAI: it sends the API key 
 
 ## Plugin-injected custom Providers
 
-Plugins can register their own `client_type` (see [LLMProvider Component](/en/plugin/llmprovider)), standing alongside the built-in `openai` / `gemini`. After registration, just point `api_providers[].client_type` in `model_config.toml` to the plugin-declared value.
+Plugins can register their own `client_type` (see [LLMProvider Component](/en/plugin/llmprovider)), standing alongside the built-in `openai` / `openai_responses` / `gemini`. After registration, just point `api_providers[].client_type` in `model_config.toml` to the plugin-declared value.
 
 Registration lifecycle: Plugin Manifest declares `llm_providers` list → Runner collects factory functions via `@LLMProvider` decorator at startup → Runner reports `ClientProviderRegistration` via IPC → Host calls `ClientRegistry.register_provider()` to write into the global registry → `ClientRegistry.validate_plugin_provider_replacement()` checks for conflicts (the same `client_type` must not be declared by multiple plugins).
 

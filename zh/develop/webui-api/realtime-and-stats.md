@@ -156,9 +156,9 @@ MaiBot 将每次推理过程（prompt 构建、LLM 调用、工具执行）记�
 **`search`** — 模糊搜索（匹配阶段、会话、输出摘要、模型名等）
 **`action`** — 按动作名过滤（仅对 planner 和黑话学习阶段有效）
 
-返回体包含 `items`（日志条目列表）、`total`、`stages`、`stage_infos`、`sessions`、`session_infos` 等字段。每个条目包含 `stage`、`session_id`、`stem`（文件名主干）、`output_preview`（replyer 阶段）、`action_preview`（planner 阶段）、`model_name`、`duration_ms` 等信息。
+返回体包含 `items`（日志条目列表）、`total`、`stages`、`stage_infos`、`sessions`、`session_infos` 等字段。每个条目包含 `stage`、`session_id`、`stem`（文件名主干）、`output_preview`（replyer 阶段）、`action_preview`（planner 阶段）、`model_name`、`duration_ms` 以及（1.2.0 起）`prompt_tokens`、`completion_tokens`、`total_tokens` 等 Token 用量统计。
 
-**`GET /api/webui/reasoning-process/file?path=<相对路径>`** — 读取单条推理日志的完整文本内容（txt 或 json）。返回 `content`、`size`、`modified_at`、`model_name`、`duration_ms` 以及消息发送者的头像映射 `message_avatars`
+**`GET /api/webui/reasoning-process/file?path=<相对路径>`** — 读取单条推理日志的完整文本内容（txt 或 json）。返回 `content`、`size`、`modified_at`、`model_name`、`duration_ms`、`prompt_tokens`、`completion_tokens`、`total_tokens`（1.2.0 起）以及消息发送者的头像映射 `message_avatars`
 
 **`GET /api/webui/reasoning-process/html?path=<相对路径>`** — 以 HTML 形式预览推理日志。返回 `text/html` 文件流，适合在浏览器中直接渲染 prompt 的结构化预览
 

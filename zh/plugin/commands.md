@@ -176,6 +176,53 @@ sequenceDiagram
     Runner-->>Host: 返回结果
 ```
 
+## 命令鉴权（1.2.0 起） {#command-authorization}
+
+从 1.2.0 起，命令可以声明为**操作员级别**（`permission="operator"`），触发时由主程序统一鉴权：
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+@Command(
+    "management",
+    pattern=r"^/pm",
+    permission="operator",  # 标记为操作员级别命令
+)
+async def handle_management(self, **kwargs):
+    ...
+```
+
+:::
+
+未标记 `permission="operator"` 的命令对所有用户开放。
+
+### 判定逻辑
+
+操作员级别命令由 `has_command_permission()` 统一判定，按以下顺序放行：
+
+1. **操作员列表** — 用户命中 `[plugin].permission` 中配置的 `platform:id`（如 `qq:123456789`）即放行
+2. **命令级放行规则** — 命中该命令的 `command_permissions` 规则（`allow_users` 命中用户，或 `allow_chats` 命中真实聊天流）即放行
+3. **未命中任何规则** — 拒绝执行，向用户提示"没有权限"
+
+### 配置命令级放行规则
+
+在 `bot_config.toml` 的 `[plugin]` 段配置：
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
+[plugin]
+permission = ["qq:123456789"]  # 操作员列表
+
+[plugin.command_permissions.my-plugin.my-command]
+allow_users = ["qq:987654321"]  # 额外放行的用户
+allow_chats = ["chat-xxxx"]     # 额外放行的真实聊天流 ID
+```
+
+:::
+
+这些规则也可以在 WebUI 的 **Bot 配置 → 命令** 编辑模式中可视化维护，详见 [WebUI 命令管理](../manual/webui/command-management.md)。
+
 ## 命令相关 Hook
 
 命令执行前后有内置 Hook 点可供 `@HookHandler` 订阅：

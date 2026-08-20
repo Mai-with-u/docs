@@ -170,6 +170,16 @@ MaiBot: Charge! I'm super 6 at camping for points, guaranteed chicken! 😎
 - Not an outsider robot
 - Accepted by everyone
 
+## The Learned "Notes" Are Auto-Organized
+
+The expressions MaiBot learns are organized into a "notebook" it uses to quickly find the right way to speak. Since 1.2.0, maintaining this notebook has become much easier:
+
+- **Always appended** — when it learns a new expression, it's filed next to related notes instead of rewriting the whole notebook
+- **Self-repairing** — even if the notebook gets corrupted, MaiBot rebuilds it automatically instead of repeatedly failing at startup
+- **Background organizing** — classification happens quietly in the background without affecting normal chat
+
+Think of it this way: MaiBot organizes its own notes and fixes its own notes — you never have to worry about it.
+
 ## The Boundaries of Learning
 
 ### 🚫 Won't Learn Everything

@@ -54,12 +54,27 @@ erDiagram
 
 ## 内置客户端总览
 
-MaiBot 自带两种 `client_type`，由 `ClientRegistry` 在启动时自动注册：
+MaiBot 自带三种 `client_type`，由 `ClientRegistry` 在启动时自动注册：
 
 - **`openai`**（`OpenaiClient`）：适配所有 OpenAI 兼容 API。用 `AsyncOpenAI` SDK 发起调用，支持流式/非流式、工具调用、推理内容解析。绝大多数第三方 API 网关、代理、中转均走这条路径。
+- **`openai_responses`**（`ResponsesClient`）：适配 OpenAI **Responses 协议**端点。自 1.2.0 起正式支持，模型上下文与输出使用扁平 Item-first 结构（见下文）。需要联网搜索、原生工具等 Responses 能力的服务商（如 DeepSeek v4 flash）用此客户端。
 - **`gemini`**（`GeminiClient`）：适配 Google Gemini 原生 SDK。通过 `google-genai` 库发起调用，支持 thinking budget 裁剪、语音转录、嵌入。
 
-两种客户端都遵循 `BaseClient` → `AdapterClient` 继承体系。框架通过 `ClientRegistry.get_client_class_instance(api_provider)` 统一获取客户端实例，调用方不感知底层是哪种 SDK。
+三种客户端都遵循 `BaseClient` → `AdapterClient` 继承体系。框架通过 `ClientRegistry.get_client_class_instance(api_provider)` 统一获取客户端实例，调用方不感知底层是哪种 SDK。
+
+## Response 扁平 Item-first 结构
+
+`openai_responses` 客户端使用 OpenAI Responses 协议的 Item 模型承载模型上下文与输出。与 Chat Completions 的"单条 message 承担所有角色"不同，Item-first 把一次交互的各个组成部分展开为扁平的 Item 序列，独立保留每一类内容：
+
+- **正文** — 模型输出的消息文本（`output_text` 等）
+- **推理** — 思考过程（`reasoning` item），与正文严格分离，不会混入提示词上下文
+- **函数调用** — 工具调用条目（`function_call`），携带 `call_id`
+- **工具结果** — 工具执行结果（`function_call_output`），通过 `call_id` 与对应的函数调用配对
+- **Provider 原生活动** — 联网搜索、原生工具等 Provider 级事件
+
+**顺序由列表位置决定，关系由 `call_id` 与逻辑轮次决定**：Item 在列表中的先后顺序表示交互的时间顺序；工具调用与其结果之间通过 `call_id` 关联，而一轮规划 → 工具 → 观察的完整循环由逻辑轮次串联。MaiBot 在内部把这一结构映射到统一的活动模型，确保正文、推理与工具上下文不会被混为一谈。
+
+Responses 协议的具体配置与联网搜索参数见 [模型额外参数 · Responses API](../manual/configuration/model-extra-params.md#responses-api)。
 
 ## 注册 API Provider
 
@@ -101,7 +116,7 @@ visual = true
 - **`name`** — Provider 名称，由 ModelInfo 的 `api_provider` 字段引用，不能为空
 - **`base_url`** — API 端点地址。`client_type = "openai"` 时必填；`gemini` 时可选
 - **`api_key`** — API 密钥。当 `auth_type = "none"` 时可为空
-- **`client_type`** — 客户端类型，取 `"openai"` 或 `"gemini"`。插件注册的自定义类型也在此引用
+- **`client_type`** — 客户端类型，取 `"openai"`、`"openai_responses"` 或 `"gemini"`。插件注册的自定义类型也在此引用
 - **`auth_type`** — OpenAI 兼容接口的鉴权方式。可选 `bearer`（默认，`Authorization: Bearer <key>`）、`header`（自定义头名+前缀）、`query`（URL 查询参数）、`none`（免鉴权）
 - **`auth_header_name`** — `auth_type = "header"` 时的请求头名称，默认 `Authorization`
 - **`auth_header_prefix`** — `auth_type = "header"` 时的前缀，默认 `Bearer`。留空直接发送原始密钥
@@ -227,13 +242,7 @@ extra_params = {thinking_budget = 8192}
 
 - **`auto`**（默认） — 自动检测。优先尝试 `native`，失败回退到 `think_tag`
 - **`native`** — 原生模式。从 SDK 响应对象的 `reasoning_content` 字段直接读取
-- **`think_tag`** — 标签模式。用正则从响应文本解析 `<｜end▁of▁thinking｜>现在用的是 `head -229` 截断的文件，269行。需要补齐剩余部分。<｜end▁of▁thinking｜>
-
-<｜｜DSML｜｜tool_calls>
-<｜｜DSML｜｜invoke name="read">
-<｜｜DSML｜｜parameter name="offset" string="false">265
-- **`think_tag`** — 标签模式。用正则从响应文本中的 ` <｜end▁of▁thinking｜>
-   ` 标签对提取内容，`  response标签内的部分归入 `reasoning_content`，其余归入 `content`。标签未闭合时，全部视为推理内容
+- **`think_tag`** — 标签模式。用正则从响应文本中的 `<｜end▁of▁thinking｜>`、`</｜end▁of▁thinking｜>` 标签对提取内容，标签内的部分归入 `reasoning_content`，其余归入 `content`。标签未闭合时，全部视为推理内容
 - **`none`** — 不解析，整个响应按 `content` 处理
 
 **`tool_argument_parse_mode`** 控制工具调用参数 JSON 的解析策略。部分模型（尤其是通过 XML 兜底提取的工具调用）可能输出非标准 JSON。可选值：
@@ -289,7 +298,7 @@ Anthropic API 的鉴权方式与标准 OpenAI 不同：它用 `x-api-key` 请求
 
 ## 插件注入自定义 Provider
 
-插件可以注册自己的 `client_type`（详见 [LLMProvider 组件](/plugin/llmprovider)），与内置 `openai` / `gemini` 并列。注册完成后，只需在 `model_config.toml` 中把 `api_providers[].client_type` 指向插件声明的值即可。
+插件可以注册自己的 `client_type`（详见 [LLMProvider 组件](/plugin/llmprovider)），与内置 `openai` / `openai_responses` / `gemini` 并列。注册完成后，只需在 `model_config.toml` 中把 `api_providers[].client_type` 指向插件声明的值即可。
 
 注册生命周期：插件 Manifest 声明 `llm_providers` 列表 → Runner 启动时 `@LLMProvider` 装饰器收集工厂函数 → Runner 通过 IPC 上报 `ClientProviderRegistration` → Host 调用 `ClientRegistry.register_provider()` 写入全局注册表 → `ClientRegistry.validate_plugin_provider_replacement()` 校验冲突（同一 `client_type` 不得被多个插件声明）。
 

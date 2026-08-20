@@ -44,7 +44,7 @@ retry_interval = 5                         # [Optional] Retry interval in second
 - **Required**: `name` (provider name), `base_url` (endpoint URL), `api_key` (key, except when `auth_type = "none"`)
 - **Authentication**: Default `bearer` works for most providers. Other options are `header` / `query` / `none`
 - **Client**: Default is `openai`. For Google Gemini use `"google"`, see [Model Extra Params](./model-extra-params.md#gemini-原生-api)
-- **Responses API**: For providers supporting the OpenAI Responses protocol (e.g. DeepSeek v4 flash web search) use `"openai_responses"`, see [Model Extra Params](./model-extra-params.md#responses-api)
+- **Responses API**: For providers supporting the OpenAI Responses protocol (e.g. DeepSeek v4 flash web search) use `"openai_responses"` (officially supported since 1.2.0), see [Model Extra Params](./model-extra-params.md#responses-api)
 - **Timeout & Retry**: `timeout` defaults to 60s, `max_retry` defaults to 3 times, `retry_interval` defaults to 5s
 - See comments above for other fields, all have reasonable default values
 

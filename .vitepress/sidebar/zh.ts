@@ -155,6 +155,8 @@ export const sidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'WebUI 概览', link: '/manual/webui/' },
         { text: '配置管理', link: '/manual/webui/config-management' },
+        { text: '适配器管理', link: '/manual/webui/adapter-management' },
+        { text: '命令管理', link: '/manual/webui/command-management' },
         { text: '记忆管理', link: '/manual/webui/memory-management' },
         { text: '插件管理', link: '/manual/webui/plugin-management' },
         { text: '聊天与统计', link: '/manual/webui/chat-stats' },

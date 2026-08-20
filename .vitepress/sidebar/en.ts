@@ -144,6 +144,8 @@ export const sidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'WebUI Overview', link: '/en/manual/webui/' },
         { text: 'Config Management', link: '/en/manual/webui/config-management' },
+        { text: 'Adapter Management', link: '/en/manual/webui/adapter-management' },
+        { text: 'Command Management', link: '/en/manual/webui/command-management' },
         { text: 'Memory Management', link: '/en/manual/webui/memory-management' },
         { text: 'Plugin Management', link: '/en/manual/webui/plugin-management' },
         { text: 'Chat & Stats', link: '/en/manual/webui/chat-stats' },

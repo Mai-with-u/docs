@@ -227,6 +227,8 @@ Below is the full capability catalog classified by namespace:
 - **`send.command`** — Send command message
 - **`send.custom`** — Send custom message
 
+Since 1.2.0, all 7 `send.*` capabilities support `return_details=True`, in which case the result carries `sent` and the platform-confirmed `message_id` (`platform_message_id`). See [API Reference · send](../plugin/api-reference.md#send).
+
 ### llm — Large Model Invocation (5)
 
 - **`llm.generate`** — Invoke LLM to generate reply

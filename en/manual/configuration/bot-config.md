@@ -244,15 +244,22 @@ value = 1.0
 
 :::
 
-**`platform`** — Platform. **Type**: `str`. **Default**: `""`. Empty together with `item_id` means global.
+**`platform`** — Platform. **Type**: `str`. **Default**: `""`. Empty together with `item_id` means global fallback; since 1.2.0 you can also use `"*"` for a global wildcard (equivalent to global fallback).
 
-**`item_id`** — User / group ID. **Type**: `str`. **Default**: `""`.
+**`item_id`** — User / group ID. **Type**: `str`. **Default**: `""`. Since 1.2.0 you can use `"*"` as a wildcard matching any ID.
 
 **`rule_type`** — Chat stream type. **Type**: `str` (enum). **Default**: `"group"`. **Options**: `"group"` / `"private"`.
 
 **`time`** — Time range. **Type**: `str`. Format: `"HH:MM-HH:MM"`, supports crossing midnight.
 
 **`value`** — Talk value. **Type**: `float`. Range: `0-1`.
+
+Since 1.2.0, `talk_value_rules` supports two special matching modes:
+
+- **Global wildcard** — `platform = "*"`, `item_id = "*"`, applies to any platform / any group or private chat
+- **Default fallback** — `platform = ""`, `item_id = ""`, used as the default frequency when no specific rule matches
+
+When editing frequency rules in the WebUI Bot config, you can directly choose the "global wildcard" or "default fallback" mode instead of filling in a specific platform and ID.
 
 ## chat_prompts
 
@@ -394,6 +401,8 @@ expression_groups = []
 **`expression_vector_index_path`** — Expression vector index path. Relative paths resolve against the project root.
 
 **`expression_vector_candidate_pool_size`** — Number of vector candidates handed to the expression selection model; hard cap is `50`.
+
+Since 1.2.0, **online maintenance** of the expression vector index has been improved: additions, historical backfill, content changes and failure recovery are all assigned incrementally by the nearest cluster center, combined with optimized k-means++, background computation and lock-free atomic writes, avoiding full-library recomputation on small-batch learning; even if the index JSON is corrupted, it is rebuilt automatically instead of repeatedly restarting with errors. This process requires no configuration and runs automatically.
 
 **`max_expression_learner`** — Max expression learning batch count. **Type**: `int`. **Default**: `3`. A chat stream only ever allows one batch at a time.
 

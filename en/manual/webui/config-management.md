@@ -89,6 +89,11 @@ A plugin's own configuration is managed by the plugin lifecycle and normally hot
 - Remember to click save after making changes
 - You can reset to default settings if there are problems
 
+## Model Config & Adapter Accounts (1.7.0)
+
+- **Improved model config layout** — the model configuration page has been reworked with a clearer layout for editing providers, models and task assignment; the issue where local models could not be tested has also been fixed. See [Model Config](../configuration/model-config.md).
+- **Adapter accounts** — the settings page shows the discovered adapter account list with online status and supports soft disable / restore. These capabilities are documented in [Adapter Management](./adapter-management.md).
+
 ## FAQ
 
 **Q: What if I mess up the settings?**

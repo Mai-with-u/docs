@@ -41,4 +41,6 @@ enable_console_input = true
 
 管理终端创建的消息固定使用本地操作员身份，可以直接执行 `/pm` 插件生命周期指令。其他平台上的用户仍需在 `[plugin].permission` 中使用 `platform:id` 格式授权，例如 `qq:123456789`。
 
+从 1.2.0 起，标记为操作员级别的插件命令（如 `/pm`）统一由 `has_command_permission()` 鉴权：除了 `[plugin].permission` 操作员列表，还可以为单个命令配置 `command_permissions` 放行规则（`allow_users` / `allow_chats`）。规则可在 WebUI 的 [命令管理](../webui/command-management.md) 中可视化维护，详见 [插件 Command 鉴权](../../plugin/commands.md#command-authorization)。
+
 `/offline` 只影响适配器插件，不会关闭 MaiBot 核心；`/online` 只恢复本次运行中由 `/offline` 关闭的适配器。

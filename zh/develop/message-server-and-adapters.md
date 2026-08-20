@@ -225,6 +225,42 @@ sequenceDiagram
 
 MaiBot 主程序在启动时注册了 `message_id_echo` 的自定义消息处理器，并由 Additional API Server 的 `bridge_message_handler` 桥接到同一个处理函数。
 
+## 适配器身份持久化与自动获取 ID
+
+自 1.2.0 起，MaiBot 引入 **Bot 账号服务**（`src/services/bot_account_service.py`），把适配器实际报告的平台账号身份持久化到数据库（`BotPlatformAccount` 表，随 v39→v40 迁移引入），作为适配器实例的稳定身份来源。
+
+**身份来源**：适配器在两类时机上报账号身份——
+- **就绪上报（`ready`）** — 适配器建立连接并完成初始化时，主动上报自己的平台账号
+- **入站消息（`inbound`）** — 适配器转发入站消息时，从消息中携带的发送者信息提取账号
+
+**与路由的关系**：持久化的身份会与 `RouteKey` 的 `account_id` 关联。同一实例上多个账号各自上报身份后，出站路由能准确回派到对应账号，而不依赖配置里手填的账号值。手填的平台账号配置仍被保留，仅在适配器尚未上报身份时作为备用值回退。
+
+**自动获取 ID**：适配器可以直接上报自身 ID（`AdapterAccountIdentity` 携带 `adapter_id`、`plugin_id`、`gateway_name`），WebUI 会展示已发现的账号列表及其在线状态，并支持软禁用 / 恢复（软禁用后该账号不再接收入站消息）。相关 WebUI API 见 `src/webui/routers/bot_accounts.py`。
+
+## 统一适配器访问策略
+
+自 1.2.0 起，MaiBot 提供统一的聊天名单策略（`src/platform_io/adapter_policy.py`），独立控制每个适配器的**群聊**与**私聊**放行。策略文件为 `config/adapter_policy.toml`（运行时生成，文件不存在时默认放行）。
+
+```toml [TOML ~vscode-icons:file-type-toml~]
+[defaults.group]        # 群聊全局默认动作
+default_action = "allow"  # 或 "block"
+[defaults.private]      # 私聊全局默认动作
+default_action = "allow"
+
+[[adapters]]            # 按适配器身份精确配置
+# 身份匹配字段：adapter_id / plugin_id / gateway_name / platform / account_id
+[adapters.group]
+default_action = "allow"  # allow / block / inherit
+allow_ids = []            # 白名单，匹配即放行
+deny_ids = []             # 黑名单，匹配即拒绝
+[adapters.private]
+default_action = "allow"
+```
+
+**求值顺序**：从最精确的适配器身份规则，逐级回退到全局默认动作。`default_action` 取值 `allow` / `block` / `inherit`（`inherit` 表示继承全局默认）；`allow_ids` 与 `deny_ids` 不可同时包含同一 ID。全局默认动作由 `defaults.group` / `defaults.private` 控制，两者默认 `allow`，可改为 `block` 实现"默认拒绝"。
+
+WebUI 的适配器管理页与聊天管理页提供策略的可视化编辑入口，后端 API 见 `src/webui/routers/chat/routes.py`（`get_adapter_policy_defaults` / `update_adapter_policy_defaults` 等）。
+
 ## 最小 Python 外部适配器示例
 
 下面是一个最小可用的 Python 适配器，连 Legacy Server 并收发消息：

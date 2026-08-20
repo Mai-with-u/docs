@@ -41,4 +41,6 @@ The console also supports Tab completion and Up/Down history navigation for the 
 
 Messages created by the management console use the trusted local-operator identity and may execute `/pm` lifecycle commands directly. Users on other platforms must still be authorized in `[plugin].permission` with the `platform:id` format, for example `qq:123456789`.
 
+Since 1.2.0, plugin commands marked as operator level (such as `/pm`) are authorized uniformly by `has_command_permission()`: besides the `[plugin].permission` operator list, you can also configure `command_permissions` allow rules per command (`allow_users` / `allow_chats`). The rules can be maintained visually in the WebUI [Command Management](../webui/command-management.md); see [Plugin Command Authorization](../../plugin/commands.md#command-authorization).
+
 `/offline` affects adapter plugins only; it does not stop the MaiBot core. `/online` restores only the adapters stopped by `/offline` during the current run.

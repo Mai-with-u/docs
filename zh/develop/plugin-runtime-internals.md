@@ -228,6 +228,8 @@ Runner 也向 Host 发起请求，在 Supervisor 的 `_register_internal_methods
 - **`send.command`** — 发送指令消息
 - **`send.custom`** — 发送自定义消息
 
+1.2.0 起 7 个 `send.*` 能力均支持 `return_details=True`，此时返回结果携带 `sent` 与平台确认的 `message_id`（`platform_message_id`），详见 [API 参考 · send](../plugin/api-reference.md#send)。
+
 ### llm — 大模型调用（5 个）
 
 - **`llm.generate`** — 调用 LLM 生成回复
