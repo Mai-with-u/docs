@@ -147,4 +147,5 @@ package-lock.json
 
 # OpenCode
 .sisyphus
-.omo
+.omozh/manual/adapters/LuckyLilliaDoc/
+zh/manual/adapters/LuckyLilliaDoc/

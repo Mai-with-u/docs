@@ -157,6 +157,7 @@ export const sidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'Adapters Overview', link: '/en/manual/adapters/' },
         { text: 'NapCat QQ Connection', link: '/en/manual/adapters/napcat' },
+        { text: 'LLOneBot (LLBot) Adapter', link: '/en/manual/adapters/LLOneBot' },
         { text: 'GoCQ Adapter', link: '/en/manual/adapters/gocq' },
         { text: 'SnowLuma Adapter', link: '/en/manual/adapters/snowluma' },
         { text: 'Telegram Adapter', link: '/en/manual/adapters/telegram' },
