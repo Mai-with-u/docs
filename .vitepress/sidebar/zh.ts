@@ -118,6 +118,7 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: 'NapCat QQ 连接', link: '/manual/adapters/napcat' },
         { text: 'GoCQ 适配器', link: '/manual/adapters/gocq' },
         { text: 'SnowLuma 适配器', link: '/manual/adapters/snowluma' },
+        { text: 'QQ 官方适配器', link: '/manual/adapters/qq-official-adapter' },
         { text: 'Telegram 适配器', link: '/manual/adapters/telegram' },
         { text: 'Discord 适配器', link: '/manual/adapters/discord' },
       ]

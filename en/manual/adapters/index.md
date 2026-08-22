@@ -12,6 +12,7 @@ Adapters are responsible for connecting messaging platforms such as QQ, Telegram
 - [NapCat](./napcat.md) (Recommended) — The QQ adapter officially maintained by MaiBot, supporting both the plugin version and the standalone version. The plugin version is the currently recommended solution.
 - [GoCQ](./gocq.md) (Available, outdated) — QQ adaptation solution based on go-cqhttp / AstralGocq, suitable for existing GoCQ environments or specific needs.
 - [SnowLuma](./snowluma.md) (Available, in testing) — Next-generation QQ adaptation solution.
+- [QQ Official Adapter](./qq-official-adapter.md) (Available) — Adapter based on the QQ official open platform API v2, outbound-only connection, no public IP needed.
 
 **Other platforms** — Community adaptations
 - [Telegram](./telegram.md) — Telegram platform adaptation solution
