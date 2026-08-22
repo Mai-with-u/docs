@@ -2,6 +2,15 @@
 
 For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
 
+::: timeline 2026-08-19
+- [1.2.1] Fixed MCP long-running calls being wrongly timed out, Maisaka final-message compatibility and own-message identification; WebUI now applies saved model config immediately and displays offline adapters correctly
+- MCP: fixed Streamable HTTP long-running tool calls wrongly using the HTTP request timeout; reading responses now follows the session read timeout
+- Maisaka: fixed compatibility of the final assistant message, now ending with a user message; own messages are now always marked to reduce the model mistaking message sources (removed the `self_message_special_mark` config option)
+- WebUI [1.7.1]: model config is now synced to the runtime immediately after saving, avoiding configs not applying in Docker; fixed chat page monitoring state (errors and thinking order); offline adapters are now displayed correctly
+- Adapters: deleting a group chat now also cleans up the explicit allow/deny rules in the adapter policy
+- Config: fixed WebUI saving configuration potentially producing invalid TOML
+:::
+
 ::: timeline 2026-08-18
 - [1.2.0] Maisaka: Replyer now uses different reply modes per scenario for more diverse replies; improved Replyer organization
 - Reply effect evaluation upgraded (currently v6): responsiveness no longer considers reply speed, removed the raw total score without clear semantics, records without related info are marked "completed / no info", records that didn't finish the observation window are marked "incomplete" and excluded from scoring; score distribution is now a per-sample scatter plot; supports deleting / clearing score records
