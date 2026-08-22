@@ -12,6 +12,7 @@ title: 适配器概览
 - [NapCat](./napcat.md)（推荐使用）— 麦麦官方维护的 QQ 适配器，支持插件版和独立版，插件版是当前推荐方案
 - [GoCQ](./gocq.md)（可用，偏旧）— 基于 go-cqhttp / AstralGocq 的 QQ 适配方案，适合已有 GoCQ 环境或特定需求
 - [SnowLuma](./snowluma.md)（可用，测试中）— 新一代 QQ 适配方案
+- [QQ 官方适配器](./qq-official-adapter.md)（可用）— 基于 QQ 官方开放平台 API v2 的适配器，纯出站连接，无需公网 IP
 
 **其他平台** — 社区适配
 - [Telegram](./telegram.md) — Telegram 平台适配方案
