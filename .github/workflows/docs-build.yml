@@ -1,0 +1,91 @@
+# Docs Build Check
+#
+# Runs `pnpm docs:build` (== `vitepress build`) on every pull request so that
+# build-breaking changes (bad frontmatter, broken markdown, dead external links,
+# sidebar/type errors, invalid Mermaid) are caught BEFORE they are merged into
+# the deploy branch.
+#
+# This is the *authoritative* gate: it is exactly the command the production
+# deploy runs, so it can never pass here and fail in production (as long as the
+# Node/pnpm versions match — pinned below).
+
+name: Docs Build Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+    # NOTE: do NOT add `paths:` filters here. VitePress always builds the whole
+    # site, so a change in one file can break the build of another. Path
+    # filtering would let broken docs slip through.
+  # Optional safety net: also verify right after a merge to the deploy branch.
+  # push:
+  #   branches:
+  #     - main
+
+# Cancel in-progress runs on the same PR (new push supersedes old run).
+concurrency:
+  group: docs-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build VitePress docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # Cache the pnpm store keyed by lockfile for fast, reproducible installs.
+      - name: Get pnpm store path
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-
+
+      # Cache VitePress's transform cache to speed up repeated builds.
+      # Keyed loosely so it is reused across commits on the same PR/branch.
+      - name: Cache VitePress transform cache
+        uses: actions/cache@v4
+        with:
+          path: .vitepress/cache
+          key: vitepress-${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            vitepress-${{ github.ref }}-
+            vitepress-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build docs
+        run: pnpm docs:build
+
+      # On failure, keep the (partial) output so the author can inspect what broke.
+      - name: Upload build output on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-dist-failed
+          path: .vitepress/dist
+          retention-days: 3

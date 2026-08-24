@@ -136,7 +136,6 @@ Controls reply frequency, context length, group/private chat prompts, the no_act
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 [chat]
-self_message_special_mark = true
 max_context_size = 40
 max_private_context_size = 60
 enable_context_optimization = true
@@ -179,8 +178,6 @@ chat_prompts = []
 **`mentioned_bot_reply`** — Reply when mentioned. **Type**: `bool`. **Default**: `false`.
 
 **`inevitable_at_reply`** — Reply on @-mention. **Type**: `bool`. **Default**: `true`.
-
-**`self_message_special_mark`** — Special mark for own messages. **Type**: `bool`. **Default**: `true`. Further emphasizes which messages were sent by the bot itself, reducing misidentification.
 
 **`max_context_size`** — Group chat context length. **Type**: `int`. **Default**: `40`. In messages.
 

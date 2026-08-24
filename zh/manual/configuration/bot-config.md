@@ -136,7 +136,6 @@ no_file_result_retention_days = 30
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 [chat]
-self_message_special_mark = true
 max_context_size = 40
 max_private_context_size = 60
 enable_context_optimization = true
@@ -179,8 +178,6 @@ chat_prompts = []
 **`mentioned_bot_reply`** — 提及必回复。**类型**：`bool`。**默认值**：`false`。
 
 **`inevitable_at_reply`** — @ 必回复。**类型**：`bool`。**默认值**：`true`。
-
-**`self_message_special_mark`** — 自身消息特殊标注。**类型**：`bool`。**默认值**：`true`。进一步强调哪些消息是自己发送的，减少 bot 认错的情况。
 
 **`max_context_size`** — 群聊上下文长度。**类型**：`int`。**默认值**：`40`。条消息。
 

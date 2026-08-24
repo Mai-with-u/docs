@@ -2,6 +2,27 @@
 
 For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
 
+::: timeline 2026-08-23
+- [1.2.2] Expression selection performance and accuracy improved; WebUI resource management and model config experience comprehensively upgraded
+- Expressions: MMR diversity reranking rewritten with vectorized implementation, significantly faster on large candidate pools; adjusted vector similarity weight mix, removed lexical overlap scoring to avoid false interference on short texts and CJK content; removed `vector` selection mode, existing configs auto-upgrade to `vector_intent`
+- WebUI [1.7.2]: model provider form adds custom request headers and a collapsible advanced config panel; task config adds hard timeouts for text and vision tasks, auto-falling back to the next model on timeout; adding a model now defaults to the currently filtered provider; model test image replaced with a standard PNG for broader vision model compatibility
+- WebUI resource management: curated expression management refactored — "review/approve" unified as "curate", top tabs replaced by dropdown menu, detail and edit dialogs merged, pagination now supports per-page count selection; jargon list pagination and layout restructured, status filter changed from tabs to dropdown, added prompt template entry; emoji filter and sort unified into the filter card, status switch changed from tabs to dropdown, sort split into field selector + asc/desc toggle, default sorted by registration time (newest first)
+- WebUI misc: login page now supports `redirect` query parameter — embedded pages return to their original location after login; prompt version management adds delete endpoint, auto-restoring the default prompt when the active version is deleted; expression and jargon lists use unified transparent background styling in the retro theme
+- Models: temporarily compatible with V4V-class vision model image formats — animated GIF/WebP frames are converted to PNG (first frame only) before submission
+- Plugins: "allow/deny" wording in plugin config unified as "read/do not read", more semantically accurate to the actual functionality
+- Maisaka: adjusted person reference wording in planning prompts
+- Engineering: PyPI index config now supports multi-source fallback (Tsinghua → Aliyun → official), improving install reliability in mainland China
+:::
+
+::: timeline 2026-08-19
+- [1.2.1] Fixed MCP long-running calls being wrongly timed out, Maisaka final-message compatibility and own-message identification; WebUI now applies saved model config immediately and displays offline adapters correctly
+- MCP: fixed Streamable HTTP long-running tool calls wrongly using the HTTP request timeout; reading responses now follows the session read timeout
+- Maisaka: fixed compatibility of the final assistant message, now ending with a user message; own messages are now always marked to reduce the model mistaking message sources (removed the `self_message_special_mark` config option)
+- WebUI [1.7.1]: model config is now synced to the runtime immediately after saving, avoiding configs not applying in Docker; fixed chat page monitoring state (errors and thinking order); offline adapters are now displayed correctly
+- Adapters: deleting a group chat now also cleans up the explicit allow/deny rules in the adapter policy
+- Config: fixed WebUI saving configuration potentially producing invalid TOML
+:::
+
 ::: timeline 2026-08-18
 - [1.2.0] Maisaka: Replyer now uses different reply modes per scenario for more diverse replies; improved Replyer organization
 - Reply effect evaluation upgraded (currently v6): responsiveness no longer considers reply speed, removed the raw total score without clear semantics, records without related info are marked "completed / no info", records that didn't finish the observation window are marked "incomplete" and excluded from scoring; score distribution is now a per-sample scatter plot; supports deleting / clearing score records
