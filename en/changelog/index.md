@@ -7,6 +7,20 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
 
+::: timeline 2026-09-15
+### Maisaka [1.2.5]
+* Long-term memory time search now supports both `YYYY/MM/DD` and `YYYY-MM-DD` date formats.
+* Enhanced reply formatting now appends a space after `@` mention components to cleanly separate mentions from surrounding text.
+* Fixed occasional tool invocation failures.
+
+### Webui [1.7.4]
+* Fixed an issue preventing saving or editing providers when the model list was empty; providers can now be saved before models are added.
+* Added a settings entry for live chat streams in Mai Chat to directly open stream management details.
+* Operator permission matching no longer converts `user_id` to lowercase.
+
+### Plugin SDK/API
+* Fixed an issue where the plugin LLM interface mistook model names for task names; task and model name can now be specified separately.
+
 ::: timeline 2026-09-01
 - [1.2.4] Plugin tools can request ending the Planner after execution; models can stop sending the temperature parameter; WebUI [1.7.3] merges MaiMai Observation into the chat workspace and streamlines memory management
 - Maisaka: when a plugin tool returns `stop_after_execution: true` successfully, the Planner ends after the current tool batch finishes and waits for new messages

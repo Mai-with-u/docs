@@ -321,3 +321,27 @@ Anthropic API 的鉴权方式与标准 OpenAI 不同：它用 `x-api-key` 请求
 快照数量受 `DEFAULT_LLM_REQUEST_SNAPSHOT_LIMIT` 限制（默认 128），超出后自动清理最旧文件。
 
 **模型级切换**：当前模型所有重试耗尽后，`_select_and_execute()` 将该模型标记为失败，按 `selection_strategy` 选择下一个可用模型继续尝试。当 `model_list` 中所有模型都失败时，任务最终报错。
+
+
+### 插件调用模型：任务分类与指定模型解耦（v1.2.5+）
+
+在插件 SDK 中调用核心模型生成能力时，明确区分业务逻辑任务（`task`）与物理模型名称（`model_name`）：
+
+
+```python
+
+from maibot_plugin_sdk import core_llm
+
+response = await core_llm.generate(
+
+    prompt="请分析该消息的情感倾向",
+    task="text_analysis",          # 逻辑任务标识：用于策略路由与配额分类
+    model_name="deepseek-chat"     # 具体模型名称：显式指定执行模型
+)
+
+```
+
+
+tip 修复说明
+
+修复了此前将 `model_name` 误当做 `task` 路由键进行解析导致的调用失败问题。现在两项参数已完全解耦，支持分别独立传递。
