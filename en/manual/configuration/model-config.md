@@ -231,6 +231,16 @@ memory · emoji · vlm · voice · embedding → No automatic fallback when empt
 
 emoji special logic: emoji has model -> use emoji, planner is full visual -> use planner, otherwise -> use vlm
 ```
+### Standalone Model Provider Saving (v1.2.5+)
+
+In earlier versions, attempting to save a provider with an empty model list was blocked by frontend form validation. Starting with MaiBot v1.2.5 (WebUI v1.7.4), providers and models are decoupled during configuration:
+
+* **Support Saving Without Models**: Navigate to **Model Management → Add/Edit Provider**. After filling in the basic provider details (Name, API Base URL, API Key), you can click **Save Provider** immediately even if no specific models have been added yet.
+* **Deferred Model Addition**: Once the provider is saved, you can add models at any time under its provider card—either by clicking **Add Model** manually or by using the auto-detection feature to fetch available models from the endpoint.
+
+::: tip Preventing Configuration Deadlock
+This change resolves the deadlock where setting up custom or local LLM providers without pre-existing model lists prevented saving provider credentials.
+:::
 
 ## Next Steps
 
