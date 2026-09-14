@@ -321,3 +321,22 @@ Non-retriable errors (e.g., 4xx client errors, configuration errors) immediately
 Snapshot count is capped by `DEFAULT_LLM_REQUEST_SNAPSHOT_LIMIT` (default 128); exceeding this triggers automatic cleanup of the oldest files.
 
 **Model-level failover**: After all retries for the current model are exhausted, `_select_and_execute()` marks that model as failed and selects the next available model per `selection_strategy`. When all models in `model_list` have failed, the task ultimately errors out.
+
+### Plugin Model Invocations: Decoupling Task Types and Model Names (v1.2.5+)
+
+When calling core model generation capabilities via the plugin SDK, explicitly distinguish between the business logic task (`task`) and the physical model name (`model_name`):
+
+```python
+from maibot_plugin_sdk import core_llm
+
+response = await core_llm.generate(
+    prompt="Please analyze the sentiment of this message.",
+    task="text_analysis",          # Logical task identifier (used for routing policies and quotas)
+    model_name="deepseek-chat"     # Specific model name (explicitly designated model)
+)
+```
+
+::: tip Fix Details
+This resolves an earlier bug where passing `model_name` caused the router to mistake it for a `task` key, failing the lookup. Both parameters are now completely decoupled and can be passed independently.
+:::
+
