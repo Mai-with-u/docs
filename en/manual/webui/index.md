@@ -102,6 +102,13 @@ Click the gear icon in the top-right corner to open **WebUI Settings** (`/settin
 
 ![About page](/images/webui/settings-about.webp)
 
+### Live Chat Stream Quick Management (v1.2.5+)
+
+In the left session sidebar of the WebUI "Mai Chat" workspace:
+
+* **Direct Settings Entry**: For connected live chat streams (e.g., group chats or private message streams from NapCat or SnowLuma), a dedicated **⚙️ Settings** gear icon is provided next to each session item.
+* **Quick Management Features**: Clicking the gear icon opens a management drawer for that specific stream, allowing administrators to view real-time stream status, quickly adjust reply frequency and interjection thresholds, and inspect its associated audit and reasoning timelines.
+
 ## Forgot Your Password?
 
 If you can still sign in, change or regenerate the Token under **WebUI Settings → Security**:
