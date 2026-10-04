@@ -16,9 +16,9 @@ title: Vibe Coding 插件开发指南
 
 ## 开发边界
 
-- 插件目录固定为 `plugins/<plugin-name>/`；如果插件需要自己的忽略规则，在插件目录内新增 `.gitignore`，不要修改仓库根目录 `.gitignore`。
+- 插件目录固定为 `plugins/<plugin-name>/`；插件专属忽略项写在目录内的 `.gitignore`，其中包含 `/config.toml`。
 - 插件入口固定为 `plugin.py`，工厂函数固定为 `create_plugin()`。
-- 插件元信息固定为 `_manifest.json`，运行配置放在 `config.toml`。
+- 插件元信息由 `_manifest.json` 声明，配置结构和默认值由 `plugin.py` 中的 `config_model` 声明，Runner 负责生成运行时 `config.toml`。
 - 新插件不要修改 `src/`、`dashboard/`、`config/` 等主程序目录；确实需要主程序能力时，先说明原因、影响面和替代方案，再请求许可。
 - 不要把本地实验数据、日志、临时脚本、个人密钥、token、cookie、数据库文件提交进插件。
 - 依赖以 `_manifest.json` 的 `dependencies` 为准；只有在维护 MaiBot 主程序依赖时才同步 `pyproject.toml` 和 `requirements.txt`。
@@ -29,10 +29,11 @@ title: Vibe Coding 插件开发指南
 plugins/my-plugin/
 ├── _manifest.json
 ├── plugin.py
-├── config.toml
 ├── README.md
-└── .gitignore
+└── .gitignore          # 包含 /config.toml
 ```
+
+首次加载后，Runner 根据 `config_model` 在已安装插件目录中生成 `config.toml`，并在配置模型演进时补齐新增字段。
 
 推荐额外添加：
 
@@ -57,7 +58,9 @@ plugins/my-plugin/
 - `capabilities` 只声明确实需要的能力。
 - `i18n.default_locale` 推荐使用 `zh-CN`。
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "manifest_version": 2,
   "id": "com.example.my-plugin",
@@ -88,9 +91,13 @@ plugins/my-plugin/
 }
 ```
 
+:::
+
 ## 代码骨架
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import Command, Field, MaiBotPlugin, PluginConfigBase, Tool
@@ -161,6 +168,8 @@ def create_plugin() -> MyPlugin:
     return MyPlugin()
 ```
 
+:::
+
 ## 组件选择
 
 - **让 LLM 主动调用能力** → `@Tool` — 默认工具进入 deferred 池，需要被搜索发现；高频低风险工具才考虑 `core_tool=True`
@@ -194,6 +203,7 @@ def create_plugin() -> MyPlugin:
 - WebUI 展示信息可以通过 `__ui_label__`、`__ui_icon__`、`__ui_order__` 补充。
 - 配置读取优先使用 `self.config.<section>.<field>`；确实需要原始字典时再用 `self.get_plugin_config_data()`。
 - 配置热重载逻辑放入 `on_config_update()`。
+- `config_model` 是源码中的配置定义，Runner 生成的 `config.toml` 保存当前安装实例的配置值。
 
 ## AI 生成代码检查清单
 
@@ -223,7 +233,7 @@ def create_plugin() -> MyPlugin:
 2. 使用 maibot-plugin-sdk 和 plugin.py / _manifest.json 结构。
 3. 实现 on_load、on_unload、on_config_update、create_plugin。
 4. 配置用 PluginConfigBase + Field，用户可见文本使用简体中文。
-5. 给出 README、config.toml、必要的 .gitignore。
+5. 给出 README、完整配置模型和包含 /config.toml 的 .gitignore。
 6. 完成后说明如何在 MaiBot 中启用和测试。
 ```
 
@@ -231,7 +241,7 @@ def create_plugin() -> MyPlugin:
 
 ```text
 请只修改 plugins/<plugin-name>/ 内的文件，为现有插件增加 <功能描述>。
-先阅读 _manifest.json、plugin.py、config.toml 和 README，沿用现有风格。
+先阅读 _manifest.json、plugin.py 中的配置模型和 README，沿用现有风格。
 不要重构无关代码，不要整理全仓库格式。
 如果需要主程序改动，先停止并说明原因。
 ```
@@ -255,7 +265,8 @@ def create_plugin() -> MyPlugin:
 
 ## 发布前检查
 
-- 插件仓库根目录包含 `_manifest.json`、`plugin.py`、`README.md`、`config.toml` 示例。
+- 插件仓库根目录包含 `_manifest.json`、`plugin.py`、`README.md` 和 `.gitignore`，配置模型完整定义在插件代码中。
+- `.gitignore` 包含 `/config.toml`，运行时配置由 Runner 根据 `config_model` 生成。
 - README 包含功能说明、安装方式、配置项、命令、权限/能力说明、故障排查。
 - 许可证与 `_manifest.json` 中的 `license` 一致。
 - 依赖声明完整，避免要求用户手动安装未声明依赖。

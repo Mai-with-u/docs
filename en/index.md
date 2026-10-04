@@ -3,345 +3,253 @@ layout: home
 
 hero:
   name: MaiBot
-  text: 基于 LLM 的交互式智能体
-  tagline: 不仅仅是一个机器人，而是一个活跃在对话中的"生命体"
+  text: An LLM-powered interactive agent
+  tagline: 'Not just a bot, but a "digital life" living inside your conversations'
   image:
     src: /title_img/mai.png
     alt: MaiBot
   actions:
-  - theme: brand
-    text: 说明书
-    link: /manual/deployment/
-  - theme: alt
-    text: 功能介绍
-    link: /features/
-  - theme: alt
-    text: 开发文档
-    link: /develop/
+    - theme: brand
+      text: Get Started
+      link: /en/manual/
+    - theme: alt
+      text: Developer Docs
+      link: /en/develop/
 
 features:
-- title: 自然对话风格
-  details: 不再是 GPT 式的长篇大论，而是贴合人类对话习惯的或长或短的闲谈
-- title: 智能发言时机
-  details: 懂得在合适的时间说话，把握聊天中的气氛，该开口时开口，该闭嘴时闭嘴
-- title: 持续学习进化
-  details: 模仿他人的说话风格，自主理解新词和黑话，不断进化
-- title: 深度了解用户
-  details: 基于心理学人格理论，不断积累对你的了解，记在心里
-- title: 插件系统
-  details: 提供强大的 API 和事件系统，拥有无限扩展可能
-- title: 长期记忆
-  details: A-Memorix 记忆引擎，让 AI 记住你们的每一次交流
+  - icon: 💬
+    title: Natural Conversation Style
+    details: No walls of text — short, human-paced turns that fit the room.
+  - icon: ⏱️
+    title: Smart Timing
+    details: Reads the mood, knows when to speak up and when to stay quiet.
+  - icon: 🌱
+    title: Continuous Learning
+    details: Picks up others' styles and figures out new slang on its own.
+  - icon: 🧠
+    title: Deep User Understanding
+    details: Built on personality psychology — the more you chat, the better it knows you.
+  - icon: 🔌
+    title: Plugin System
+    details: A powerful API and event system unlock endless extension.
+  - icon: ❤️
+    title: Long-term Memory
+    details: The A-Memorix engine remembers every exchange you share.
 ---
-## Get More Support
 
-- Visit the [GitHub Repository](https://github.com/Mai-with-u/MaiBot) to submit issues or contribute code
-- Join the user community for help
-  - QQ: 766798517
-  - QQ: 571780722
-  - QQ: 729957033
-  - QQ: 1022489779 (Casual Chat Group)
+<AuroraBackground />
+
+<div class="spotlight-sections">
+
+<section class="spotlight spotlight--media-left">
+  <div class="spotlight-media spotlight-media--1" aria-hidden="true">
+    <span class="spotlight-emoji">💬</span>
+  </div>
+  <div class="spotlight-body">
+    <h2>Conversational, like a real person</h2>
+    <p>MaiBot doesn't dump GPT-style paragraphs. It reads the room, feels the mood, and picks its moment — speaking up when it should and staying quiet when it shouldn't, so every line in the group chat lands just right.</p>
+  </div>
+</section>
+
+<section class="spotlight spotlight--media-right">
+  <div class="spotlight-media spotlight-media--2" aria-hidden="true">
+    <span class="spotlight-emoji">🧠</span>
+  </div>
+  <div class="spotlight-body">
+    <h2>Long-term Memory × Personality Profile</h2>
+    <p>The A-Memorix engine writes every exchange back into its memory, then layers in a psychological personality model — so the more time you spend together, the better it knows you. Your words, your tastes, your way of speaking: it remembers them all.</p>
+  </div>
+</section>
+
+<section class="spotlight spotlight--media-left">
+  <div class="spotlight-media spotlight-media--3" aria-hidden="true">
+    <span class="spotlight-emoji">🌱</span>
+  </div>
+  <div class="spotlight-body">
+    <h2>Continuous Learning × Evolution</h2>
+    <p>MaiBot mimics how others in the group talk, and quietly figures out new slang and in-jokes on its own. It's always evolving — and might just drop the phrase you tossed out last night into tomorrow's reply.</p>
+  </div>
+</section>
+
+</div>
+
+## Join the Community
+
+Need a hand, want new-release news the moment it drops, or just feel like hanging out with fellow Mai-pals? The community has the answers.
+
+<a class="home-cta" href="/en/about/community">
+  <span class="home-cta-title">Join the community →</span>
+  <span class="home-cta-desc">5 QQ groups · GitHub · Discord · Telegram · X</span>
+</a>
+
+## Acknowledgements
+
+MaiBot is built by volunteers — developers, docs maintainers, group owners, artists, and community contributors.
+
+<a class="home-cta" href="/en/about/acknowledgements">
+  <span class="home-cta-title">See the full list →</span>
+  <span class="home-cta-desc">Everyone who makes MaiBot better</span>
+</a>
 
 <style scoped>
-#star-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
+/* ------------------------------------------------------------------
+ * Spotlight sections — alternating left/right media+text rhythm,
+ * collapses to a single stacked column on mobile.
+ * ------------------------------------------------------------------ */
+
+.spotlight-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 72px;
+  margin: 72px 0 56px;
 }
 
-.VPHome {
+.spotlight {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 48px;
+}
+
+.spotlight--media-left .spotlight-media {
+  order: 1;
+}
+.spotlight--media-left .spotlight-body {
+  order: 2;
+}
+.spotlight--media-right .spotlight-media {
+  order: 2;
+}
+.spotlight--media-right .spotlight-body {
+  order: 1;
+}
+
+.spotlight-media {
   position: relative;
-  z-index: 1;
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--vp-c-divider);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+}
+
+/* Each media block: brand-dominant gradient + one non-brand accent,
+   echoing the aurora's "colourful yet unified" feel. */
+.spotlight-media--1 {
+  background:
+    radial-gradient(circle at 25% 30%, rgba(244, 114, 182, 0.22), transparent 55%),
+    linear-gradient(135deg, rgba(255, 140, 0, 0.28), rgba(255, 169, 64, 0.16));
+}
+.spotlight-media--2 {
+  background:
+    radial-gradient(circle at 75% 25%, rgba(56, 189, 248, 0.20), transparent 55%),
+    linear-gradient(135deg, rgba(199, 81, 41, 0.26), rgba(255, 140, 0, 0.18));
+}
+.spotlight-media--3 {
+  background:
+    radial-gradient(circle at 30% 75%, rgba(244, 114, 182, 0.20), transparent 55%),
+    linear-gradient(135deg, rgba(255, 169, 64, 0.26), rgba(199, 81, 41, 0.16));
+}
+
+.spotlight-emoji {
+  font-size: 96px;
+  line-height: 1;
+  opacity: 0.55;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.12));
+  user-select: none;
+}
+
+.spotlight-body h2 {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--vp-c-text-1);
+}
+
+.spotlight-body p {
+  margin: 16px 0 24px;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--vp-c-text-2);
+}
+
+.spotlight-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  transition: color 0.2s, transform 0.2s;
+}
+.spotlight-link:hover {
+  color: var(--vp-c-brand-2);
+  transform: translateX(2px);
+}
+
+/* ------------------------------------------------------------------
+ * CTA cards for community / acknowledgements
+ * ------------------------------------------------------------------ */
+
+.home-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 20px 0 8px;
+  padding: 18px 20px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  background: var(--vp-c-bg-soft);
+  text-decoration: none;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+}
+.home-cta:hover {
+  border-color: var(--vp-c-brand-2);
+  box-shadow: 0 6px 20px var(--vp-c-brand-soft);
+  transform: translateY(-2px);
+}
+.home-cta-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+.home-cta-desc {
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+}
+
+/* ------------------------------------------------------------------
+ * Mobile: stack spotlight media above body, single column
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 768px) {
+  .spotlight-sections {
+    gap: 48px;
+    margin: 48px 0 40px;
+  }
+  .spotlight {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .spotlight--media-left .spotlight-media,
+  .spotlight--media-right .spotlight-media {
+    order: 1;
+  }
+  .spotlight--media-left .spotlight-body,
+  .spotlight--media-right .spotlight-body {
+    order: 2;
+  }
+  .spotlight-emoji {
+    font-size: 72px;
+  }
+  .spotlight-body h2 {
+    font-size: 24px;
+  }
 }
 </style>
-
-<canvas id="star-canvas"></canvas>
-
-<script setup>
-import { onMounted, onUnmounted, nextTick } from 'vue'
-
-// Normal cover image list
-const normalImages = [
-  '/title_img/mai.png',
-  '/title_img/mai2.png',
-  '/title_img/emoji1.png',
-  '/title_img/emoji2.png',
-  '/title_img/emoji3.png',
-]
-
-// Hidden image (appearance probability is 1/5 of other images)
-const hiddenImage = '/title_img/dis.png'
-
-let animationFrameId = null
-let particles = []
-
-onMounted(async () => {
-  await nextTick()
-  
-  // Weighted random selection: dis.png probability is 1/5 of other images
-  // Create a weighted array: normal images appear 5 times each, hidden image appears once
-  const weightedImages = [
-    ...normalImages.map(img => Array(5).fill(img)).flat(), // Each normal image appears 5 times
-    hiddenImage // Hidden image appears once
-  ]
-  
-  // Randomly select an image
-  const randomImage = weightedImages[Math.floor(Math.random() * weightedImages.length)]
-  
-  // Try multiple selectors to find the hero image
-  const selectors = [
-    '.VPHomeHero .VPImage img',
-    '.VPHomeHero img',
-    'main .VPImage img',
-    '[alt="MaiBot"]'
-  ]
-  
-  let heroImage = null
-  for (const selector of selectors) {
-    heroImage = document.querySelector(selector)
-    if (heroImage) break
-  }
-  
-  // Function to set the image
-  const setImage = (imgElement, imageSrc) => {
-    imgElement.src = imageSrc
-    imgElement.alt = 'MaiBot'
-    // If it's emoji4.png, scale to 1.5x
-    if (imageSrc.includes('emoji4.png')) {
-      imgElement.style.transform = 'scale(1.5)'
-      imgElement.style.transformOrigin = 'center'
-    } else {
-      // Reset scale for other images
-      imgElement.style.transform = ''
-      imgElement.style.transformOrigin = ''
-    }
-  }
-  
-  // If image element is found, replace it
-  if (heroImage) {
-    setImage(heroImage, randomImage)
-  } else {
-    // If not found, try again after a delay (wait for VitePress rendering to complete)
-    setTimeout(() => {
-      for (const selector of selectors) {
-        heroImage = document.querySelector(selector)
-        if (heroImage) {
-          setImage(heroImage, randomImage)
-          break
-        }
-      }
-    }, 100)
-  }
-  
-  // Initialize star effect
-  initStarEffect()
-})
-
-onUnmounted(() => {
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId)
-  }
-})
-
-function initStarEffect() {
-  const canvas = document.getElementById('star-canvas')
-  if (!canvas) return
-  
-  const ctx = canvas.getContext('2d')
-  let width = canvas.width = window.innerWidth
-  let height = canvas.height = window.innerHeight
-  
-  const config = {
-    spawnRate: 12,
-    startSpeed: 0.6,
-    attraction: 0.015,
-    mouseForce: 0.05,
-    maxMouseForce: 1.5,
-    maxStarSpeed: 3.0,
-    friction: 0.98,
-    minDriftSpeed: 0.3,
-    starBaseSize: 4,
-    circleRadius: 600
-  }
-  
-  const mouse = {
-    x: undefined,
-    y: undefined,
-    vx: 0,
-    vy: 0,
-    lastX: 0,
-    lastY: 0,
-    isMoving: false,
-    timer: null
-  }
-  
-  const resize = () => {
-    width = canvas.width = window.innerWidth
-    height = canvas.height = window.innerHeight
-  }
-  
-  window.addEventListener('resize', resize)
-  
-  window.addEventListener('mousemove', (e) => {
-    mouse.x = e.x
-    mouse.y = e.y
-    mouse.vx = e.x - mouse.lastX
-    mouse.vy = e.y - mouse.lastY
-    mouse.lastX = e.x
-    mouse.lastY = e.y
-    mouse.isMoving = true
-    
-    clearTimeout(mouse.timer)
-    mouse.timer = setTimeout(() => {
-      mouse.vx = 0
-      mouse.vy = 0
-      mouse.isMoving = false
-      mouse.x = undefined
-      mouse.y = undefined
-    }, 100)
-  })
-  
-  class Star {
-    constructor(centerX, centerY) {
-      const angle = Math.random() * Math.PI * 2
-      const radius = Math.random() * config.circleRadius * 0.3 + config.circleRadius * 0.1
-      this.x = centerX + Math.cos(angle) * radius
-      this.y = centerY + Math.sin(angle) * radius
-      
-      const driftAngle = angle + (Math.random() - 0.5) * 0.5
-      const speed = config.startSpeed + Math.random() * 0.3
-      
-      this.vx = Math.cos(driftAngle) * speed
-      this.vy = Math.sin(driftAngle) * speed
-      
-      this.size = Math.random() * 5 + config.starBaseSize
-      this.life = 1
-      this.decay = Math.random() * 0.001 + 0.0015
-      this.hue = Math.random() * 60 + 180
-    }
-    
-    draw(ctx) {
-      ctx.save()
-      ctx.translate(this.x, this.y)
-      ctx.rotate(this.life * 0.5)
-      
-      ctx.beginPath()
-      const r = this.size
-      ctx.moveTo(0, -r)
-      ctx.quadraticCurveTo(0, 0, r, 0)
-      ctx.quadraticCurveTo(0, 0, 0, r)
-      ctx.quadraticCurveTo(0, 0, -r, 0)
-      ctx.quadraticCurveTo(0, 0, 0, -r)
-      ctx.closePath()
-      
-      const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, r)
-      gradient.addColorStop(0, `hsla(${this.hue}, 80%, 80%, ${this.life})`)
-      gradient.addColorStop(1, `hsla(${this.hue}, 80%, 50%, ${this.life})`)
-      
-      ctx.fillStyle = gradient
-      ctx.fill()
-      ctx.restore()
-    }
-    
-    update() {
-      if (mouse.x !== undefined) {
-        const dx = mouse.x - this.x
-        const dy = mouse.y - this.y
-        const distance = Math.sqrt(dx*dx + dy*dy)
-        
-        if (distance < 300) {
-          const forceX = dx / distance
-          const forceY = dy / distance
-          
-          this.vx += forceX * config.attraction
-          this.vy += forceY * config.attraction
-          
-          if (mouse.isMoving) {
-            let pushX = mouse.vx * config.mouseForce
-            let pushY = mouse.vy * config.mouseForce
-            
-            const pushStrength = Math.sqrt(pushX * pushX + pushY * pushY)
-            if (pushStrength > config.maxMouseForce) {
-              const scale = config.maxMouseForce / pushStrength
-              pushX *= scale
-              pushY *= scale
-            }
-            
-            this.vx += pushX
-            this.vy += pushY
-          }
-        }
-      }
-      
-      this.vx *= config.friction
-      this.vy *= config.friction
-      
-      const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy)
-      if (currentSpeed > config.maxStarSpeed) {
-        const scale = config.maxStarSpeed / currentSpeed
-        this.vx *= scale
-        this.vy *= scale
-      }
-      
-      if (currentSpeed < config.minDriftSpeed) {
-        const heroImage = document.querySelector('.VPHomeHero .VPImage img') || 
-                         document.querySelector('.VPHomeHero img')
-        if (heroImage) {
-          const rect = heroImage.getBoundingClientRect()
-          const centerX = rect.left + rect.width / 2
-          const centerY = rect.top + rect.height / 2
-          const angleToCenter = Math.atan2(this.y - centerY, this.x - centerX)
-          this.vx += Math.cos(angleToCenter) * 0.005
-          this.vy += Math.sin(angleToCenter) * 0.005
-        }
-      }
-      
-      this.x += this.vx
-      this.y += this.vy
-      this.hue += 0.2
-      this.life -= this.decay
-    }
-  }
-  
-  let frame = 0
-  
-  const animate = () => {
-    animationFrameId = requestAnimationFrame(animate)
-    
-    ctx.clearRect(0, 0, width, height)
-    
-    ctx.globalCompositeOperation = 'lighter'
-    
-    frame++
-    
-    // Get icon position
-    const heroImage = document.querySelector('.VPHomeHero .VPImage img') || 
-                     document.querySelector('.VPHomeHero img')
-    
-    if (heroImage && frame % config.spawnRate === 0) {
-      const rect = heroImage.getBoundingClientRect()
-      const centerX = rect.left + rect.width / 2
-      const centerY = rect.top + rect.height / 2
-      particles.push(new Star(centerX, centerY))
-    }
-    
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i]
-      p.update()
-      p.draw(ctx)
-      
-      if (p.life <= 0) {
-        particles.splice(i, 1)
-      }
-    }
-    
-    ctx.globalCompositeOperation = 'source-over'
-  }
-  
-  animate()
-}
-</script>

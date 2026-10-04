@@ -9,7 +9,9 @@ MaiBot plugins have three lifecycle methods: `on_load()`, `on_unload()`, and `on
 
 Each plugin's `plugin.py` must export a top-level `create_plugin()` function that returns the plugin instance:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin
 
 
@@ -28,6 +30,8 @@ def create_plugin():
     return MyPlugin()
 ```
 
+:::
+
 When the Runner loads a plugin:
 
 1. Import the `plugin.py` module
@@ -39,7 +43,9 @@ When the Runner loads a plugin:
 
 Callback after the plugin has finished loading. The Runner calls this method **after** injecting the `PluginContext` and completing capability bootstrap, so all capability proxies of `self.ctx` can be used directly within `on_load()`.
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 async def on_load(self) -> None:
     """Called after plugin loaded. Initialize resources here.
 
@@ -47,6 +53,8 @@ async def on_load(self) -> None:
     so self.ctx is available.
     """
 ```
+
+:::
 
 **Typical use cases:**
 
@@ -57,7 +65,9 @@ async def on_load(self) -> None:
 
 **Example:**
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
 
 
@@ -86,14 +96,20 @@ class MyPlugin(MaiBotPlugin):
         return {"status": "ok"}
 ```
 
+:::
+
 ## on_unload()
 
 Callback before plugin unload. Release all resources held by the plugin in this method.
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 async def on_unload(self) -> None:
     """Called before plugin unloaded. Cleanup resources."""
 ```
+
+:::
 
 **Typical use cases:**
 
@@ -104,7 +120,9 @@ async def on_unload(self) -> None:
 
 **Example:**
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class MyPlugin(MaiBotPlugin):
     async def on_unload(self) -> None:
         self.ctx.logger.info("Plugin is unloading")
@@ -120,6 +138,8 @@ class MyPlugin(MaiBotPlugin):
         await self.sync_dynamic_apis(offline_reason="Plugin has been unloaded")
 ```
 
+:::
+
 ::: warning Note
 `self.ctx` can still be used within `on_unload()`, but cleanup should be completed as quickly as possible. Do not perform time-consuming operations.
 :::
@@ -128,7 +148,9 @@ class MyPlugin(MaiBotPlugin):
 
 Configuration hot-reload callback. The Runner calls this method when the plugin configuration or any subscribed global configuration changes.
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 async def on_config_update(
     self,
     scope: str,
@@ -144,20 +166,24 @@ async def on_config_update(
     """
 ```
 
+:::
+
 ### scope values
 
 - **`"self"`** → `CONFIG_RELOAD_SCOPE_SELF` — Plugin's own configuration. Always triggered when `config.toml` in the plugin directory changes; no subscription required.
 - **`"bot"`** → `ON_BOT_CONFIG_RELOAD` — Global Bot configuration. Requires subscription via `config_reload_subscriptions`.
 - **`"model"`** → `ON_MODEL_CONFIG_RELOAD` — LLM model configuration. Requires subscription via `config_reload_subscriptions`.
 
-::: important
+::: info
 - The callback for `scope == "self"` is **always triggered** and does not require additional subscription.
 - `scope == "bot"` and `scope == "model"` are triggered only if declared in `config_reload_subscriptions`.
 :::
 
 ### Example
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, CONFIG_RELOAD_SCOPE_SELF, ON_BOT_CONFIG_RELOAD, ON_MODEL_CONFIG_RELOAD
 from typing import ClassVar, Iterable
 
@@ -186,11 +212,15 @@ class MyPlugin(MaiBotPlugin):
             self.ctx.logger.info("Model configuration updated: model=%s, version=%s", model_name, version)
 ```
 
+:::
+
 ## config_reload_subscriptions
 
 Class variable declaring the global configuration hot-reload scopes that the plugin needs to subscribe to. Only supports the values `"bot"` and `"model"`:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import ClassVar, Iterable
 
 
@@ -208,6 +238,8 @@ class MyPlugin(MaiBotPlugin):
     # config_reload_subscriptions: ClassVar[Iterable[str]] = ()
 ```
 
+:::
+
 **Rules:**
 
 - The default value is an empty tuple `()`, meaning no global configurations are subscribed to.
@@ -220,7 +252,9 @@ class MyPlugin(MaiBotPlugin):
 
 Below is a complete plugin example that includes all lifecycle methods:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any, ClassVar, Iterable
 
 from maibot_sdk import (
@@ -286,6 +320,8 @@ class GreeterPlugin(MaiBotPlugin):
 def create_plugin():
     return GreeterPlugin()
 ```
+
+:::
 
 ## Lifecycle Sequence
 

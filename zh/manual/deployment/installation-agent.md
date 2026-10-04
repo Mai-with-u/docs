@@ -16,4 +16,4 @@ title: Agent 安装指南
 
 :::
 
-> **运行本程序即表示你同意 [MaiBot 最终用户许可协议（EULA）](../../legal/EULA)。**
+> **运行本程序即表示你同意 [MaiBot 最终用户许可协议（EULA）](../../about/EULA)。**

@@ -1,12 +1,16 @@
 ---
 title: Event Handlers
----# Event Handler
+---
+
+# Event Handler
 
 `@EventHandler` is a component decorator used to subscribe to message and workflow events. Unlike the named Hook point mechanism of `@HookHandler`, `@EventHandler` subscribes to events based on fixed `EventType` enum values, making it suitable for intercepting or observing specific stages of the message processing flow.
 
 ## Decorator Signature
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import EventHandler
 from maibot_sdk.types import EventType
 
@@ -19,6 +23,8 @@ from maibot_sdk.types import EventType
     **metadata,                                     # 额外元数据
 )
 ```
+
+:::
 
 ## EventType Event Types
 
@@ -55,7 +61,9 @@ When multiple EventHandlers subscribe to the same `EventType`, `weight` determin
 
 ### ON_START: Plugin Initialization
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -80,9 +88,13 @@ class StartupPlugin(MaiBotPlugin):
         # 在这里执行启动时需要的初始化逻辑
 ```
 
+:::
+
 ### ON_MESSAGE_PRE_PROCESS: Message Filtering
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -122,9 +134,13 @@ class MessageFilterPlugin(MaiBotPlugin):
         return any(kw in text for kw in spam_keywords)
 ```
 
+:::
+
 ### ON_MESSAGE: Message Observation
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -149,9 +165,13 @@ class MessageObserverPlugin(MaiBotPlugin):
         self.ctx.logger.debug("收到第 %d 条消息", self._message_count)
 ```
 
+:::
+
 ### AFTER_LLM: LLM Response Post-processing
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -177,9 +197,13 @@ class LLMPostProcessor(MaiBotPlugin):
         self.ctx.logger.info("LLM 响应: %s", response[:200])
 ```
 
+:::
+
 ### POST_SEND: Post-send Callback
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -206,6 +230,8 @@ class SendAuditPlugin(MaiBotPlugin):
             message.get("stream_id", "unknown"),
         )
 ```
+
+:::
 
 ## Differences from HookHandler
 

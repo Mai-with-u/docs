@@ -21,7 +21,9 @@ The core differences between `@Action` and `@Tool`:
 
 **Old Syntax (@Action):**
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Action
 
 class MyPlugin(MaiBotPlugin):
@@ -36,9 +38,13 @@ class MyPlugin(MaiBotPlugin):
         return results
 ```
 
+:::
+
 **New Syntax (@Tool):**
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -60,11 +66,15 @@ class MyPlugin(MaiBotPlugin):
         return {"results": results}
 ```
 
+:::
+
 ## @Action Decorator Signature (Reference)
 
 The following is the complete parameter signature for `@Action`, provided for reference when maintaining legacy plugins:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import Action
 
 @Action(
@@ -82,6 +92,8 @@ from maibot_sdk import Action
     **metadata,
 )
 ```
+
+:::
 
 ### ActivationType Enum
 

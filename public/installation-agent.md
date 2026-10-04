@@ -6,7 +6,7 @@
 
 **重要：运行本程序即表示用户同意《MaiBot 最终用户许可协议》（EULA）**
 
-EULA 全文：https://docs.mai-mai.org/legal/EULA.html
+EULA 全文：https://docs.mai-mai.org/about/EULA.html
 
 ## Step 0: 询问用户
 
@@ -18,7 +18,7 @@ EULA 全文：https://docs.mai-mai.org/legal/EULA.html
    - **方案 B：MaiBot + NapCat QQ 适配器** — 连接 QQ 收发消息（推荐，全平台支持）
    - **方案 C：MaiBot + SnowLuma QQ 适配器** — 新一代 QQ 适配方案（仅 Windows）
 3. 如果用户选了方案 C 且不是 Windows：告知不支持，建议改选方案 B
-4. 提醒用户：运行本程序即表示同意 EULA（https://docs.mai-mai.org/legal/EULA.html）
+4. 提醒用户：运行本程序即表示同意 EULA（https://docs.mai-mai.org/about/EULA.html）
 
 ## Step 1: 检查系统要求
 

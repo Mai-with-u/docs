@@ -8,7 +8,9 @@ title: 事件处理器
 
 ## 装饰器签名
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import EventHandler
 from maibot_sdk.types import EventType
 
@@ -21,6 +23,8 @@ from maibot_sdk.types import EventType
     **metadata,                                     # 额外元数据
 )
 ```
+
+:::
 
 ## EventType 事件类型
 
@@ -57,7 +61,9 @@ from maibot_sdk.types import EventType
 
 ### ON_START：插件初始化
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -82,9 +88,13 @@ class StartupPlugin(MaiBotPlugin):
         # 在这里执行启动时需要的初始化逻辑
 ```
 
+:::
+
 ### ON_MESSAGE_PRE_PROCESS：消息过滤
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -124,9 +134,13 @@ class MessageFilterPlugin(MaiBotPlugin):
         return any(kw in text for kw in spam_keywords)
 ```
 
+:::
+
 ### ON_MESSAGE：消息观察
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -151,9 +165,13 @@ class MessageObserverPlugin(MaiBotPlugin):
         self.ctx.logger.debug("收到第 %d 条消息", self._message_count)
 ```
 
+:::
+
 ### AFTER_LLM：LLM 响应后处理
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -179,9 +197,13 @@ class LLMPostProcessor(MaiBotPlugin):
         self.ctx.logger.info("LLM 响应: %s", response[:200])
 ```
 
+:::
+
 ### POST_SEND：发送后回调
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, EventHandler
 from maibot_sdk.types import EventType
 
@@ -208,6 +230,8 @@ class SendAuditPlugin(MaiBotPlugin):
             message.get("stream_id", "unknown"),
         )
 ```
+
+:::
 
 ## 与 HookHandler 的区别
 

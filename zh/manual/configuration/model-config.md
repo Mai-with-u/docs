@@ -13,12 +13,14 @@ titleTemplate: :title · 模型配置
 
 每个 `[[api_providers]]` 块定义一个 API 服务商。一个配置文件可以有多个提供商。
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[api_providers]]
 name = "deepseek"                          # [必填] API 服务商名称，在 models 的 api_provider 中需使用这个命名
 base_url = "https://api.deepseek.com/v1"   # [必填] API 服务商的 BaseURL
 api_key = "your-api-key"                   # [必填] API 密钥。若 auth_type 为 none 则不需要
-client_type = "openai"                     # [可选] 客户端类型：openai(默认) / google
+client_type = "openai"                     # [可选] 客户端类型：openai(默认) / openai_responses / google
 auth_type = "bearer"                       # [可选] 鉴权方式：bearer(默认) / header / query / none
 auth_header_name = "Authorization"         # [可选] 当 auth_type 为 header 时使用的请求头名称
 auth_header_prefix = "Bearer"              # [可选] 当 auth_type 为 header 时的请求头前缀，留空表示直接发送原始密钥
@@ -31,16 +33,19 @@ model_list_endpoint = "/models"            # [可选] 模型列表端点路径
 reasoning_parse_mode = "auto"              # [可选] 推理内容解析模式：auto(默认) / native / think_tag / none
 tool_argument_parse_mode = "auto"          # [可选] 工具参数解析模式：auto(默认) / strict / repair / double_decode
 max_retry = 3                              # [可选] 最大重试次数
-timeout = 60                               # [可选] API 调用超时，单位秒
-retry_interval = 5                         # [可选] 重试间隔，单位秒
+timeout = 120                              # [可选] API 调用超时，单位秒（默认 120）
+retry_interval = 4                         # [可选] 重试间隔，单位秒（默认 4）
 ```
+
+:::
 
 **要点：**
 
 - **必填**：`name`（服务商名称）、`base_url`（端点地址）、`api_key`（密钥，`auth_type = "none"` 时除外）
 - **鉴权**：默认 `bearer` 适用于绝大部分服务商。其他可选 `header` / `query` / `none`
 - **客户端**：默认 `openai`。Google Gemini 用 `"google"`，见 [模型额外参数](./model-extra-params.md#gemini-原生-api)
-- **超时与重试**：`timeout` 默认 60s，`max_retry` 默认 3 次，`retry_interval` 默认 5s
+- **Responses API**：支持 OpenAI Responses 协议的服务商（如 DeepSeek v4 flash 的联网搜索）用 `"openai_responses"`（1.2.0 起正式支持），见 [模型额外参数](./model-extra-params.md#responses-api)
+- **超时与重试**：`timeout` 默认 120s，`max_retry` 默认 3 次，`retry_interval` 默认 4s
 - 其余字段参见上方注释，均有合理默认值
 
 
@@ -48,29 +53,76 @@ retry_interval = 5                         # [可选] 重试间隔，单位秒
 
 每个 `[[models]]` 块定义一个具体的 LLM 模型，关联到某个 API 提供商。
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[models]]
 model_identifier = "deepseek-v4-flash"       # [必填] API 服务商提供的模型标识符
 name = "deepseek-v4-flash"                   # [必填] 模型名称，在 model_task_config 中需使用这个命名
 api_provider = "deepseek"                    # [必填] 对应 api_providers 中配置的服务商名称
-price_in = 1.0                               # [可选] 输入价格，单位：元/M token
-cache = false                                # [可选] 是否启用缓存计费
-cache_price_in = 0.0                         # [可选] 缓存命中输入价格，仅 cache=true 时使用
+price_in = 1.0                               # [可选] 输入价格（缓存未命中部分），单位：元/M token
 price_out = 2.0                              # [可选] 输出价格，单位：元/M token
+cache_price_in = 0.0                         # [可选] 缓存命中输入价格：0 表示命中免费；WebUI 留空按输入价格解析
+price_periods = []                           # [可选] 分时价格列表，见下方「分时价格」
+# cache = false                              # [已废弃] 遗留兼容字段，不再参与任何计费逻辑
 # temperature = 0.7                          # [可选] 模型级别温度，会覆盖任务配置中的 temperature
 # max_tokens = 4096                          # [可选] 模型级别最大 token 数，会覆盖任务配置中的 max_tokens
+# send_temperature = true                    # [可选] 是否发送 MaiBot 管理的 temperature，默认 true；设为 false 后模型/任务温度均不发送
 force_stream_mode = false                    # [可选] 强制流式输出模式，模型不支持非流式输出时设为 true
 visual = false                               # [可选] 是否为多模态模型（支持视觉输入）
 extra_params = {}                            # [可选] 额外参数，详见 模型额外参数
 ```
 
+:::
+
 **要点：**
 
 - **必填**：`model_identifier`（API 标识符）、`name`（自定义名称）、`api_provider`（归属服务商）
-- **价格**：`price_in` / `price_out` 用于统计，单位 元/百万 token。开启 `cache` 后可单独设置 `cache_price_in`
+- **价格**：`price_in` / `price_out` 用于统计，单位 元/百万 token。缓存命中价由 `cache_price_in` 决定：填 `0` 表示命中免费，未命中部分按 `price_in` 计费；旧字段 `cache` 已废弃，服务商是否返回缓存用量由响应自动探测
+- **分时价格**：服务商按时段计价时用 `price_periods` 覆盖默认单价，见下方「分时价格」
 - **模型级覆盖**：`temperature` / `max_tokens` 可覆盖任务配置，不设则使用任务默认值
+- **温度发送开关**：`send_temperature` 默认 `true`；设为 `false`（对应 WebUI 模型高级设置中关闭"发送 temperature 参数"）后，MaiBot 不再向该模型发送任何由它管理的 temperature（模型级、任务级与附加参数中的温度），兼容不接受该参数的模型
 - **视觉**：`visual = true` 表示支持图像输入，用于 `vlm` 任务
 - **`extra_params`**：服务商特有参数（思考模式、推理强度等），详见 [模型额外参数](./model-extra-params.md)
+
+
+## 分时价格
+
+服务商在不同时段给出折扣价时，用 `price_periods` 给单个模型配置按**服务器本地时间**每天重复的价格时段。计价以一次成功请求的开始时间落在哪个时段为准。
+
+::: code-group
+
+```toml [model_config.toml ~vscode-icons:file-type-toml~]
+[[models]]
+name = "deepseek-v4-flash"
+# ... 其余字段省略
+
+# 每天 00:30–08:30 使用折扣价（时段包含开始、不含结束）
+[[models.price_periods]]
+start_time = "00:30"
+end_time = "08:30"
+price_in = 0.5
+price_out = 1.0
+cache_price_in = 0.0
+
+# 跨午夜时段：22:00 到次日 06:00
+[[models.price_periods]]
+start_time = "22:00"
+end_time = "06:00"
+price_in = 0.8
+price_out = 1.6
+cache_price_in = 0.0
+```
+
+:::
+
+**要点：**
+
+- 时间必须是 `HH:MM` 24 小时制（服务器本地时间）
+- 时段**包含开始时间、不包含结束时间**；`start_time` 晚于 `end_time` 表示跨午夜
+- 没有命中任何时段时，回落到模型默认的 `price_in` / `price_out` / `cache_price_in`；`price_periods = []` 表示全天使用默认价
+- 同一模型的时段之间不能重叠，且单个时段的 `start_time` 与 `end_time` 不能相同，否则配置校验失败
+- 时段内的 `cache_price_in` 同样遵循"0 表示缓存命中免费"
 
 
 ## 任务配置
@@ -81,111 +133,114 @@ extra_params = {}                            # [可选] 额外参数，详见 �
 
 ::: code-group
 
-```toml [replyer（智能模型）]
+```toml [replyer（智能模型） ~vscode-icons:file-type-toml~]
 # [必填] 回复器：将 Planner 收集的信息转为最终回复文本。追求语言质量和表达风格，推荐 pro 模型 + 思考模式。
 [model_task_config.replyer]
 model_list = ["deepseek-v4-pro-think"]        # [必填] 模型名称列表
-max_tokens = 4096                             # [可选] 最大输出 token 数
+max_tokens = 8192                             # [可选] 最大输出 token 数
 temperature = 1.0                             # [可选] 模型温度，0.3 保守 / 0.7 有创意 / 1.0 随机
-slow_threshold = 120.0                        # [可选] 慢请求阈值（秒）
 selection_strategy = "random"                 # [可选] 模型选择策略：balance / random / sequential
 hard_timeout = 240.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [planner（快模型）]
+```toml [planner（快模型） ~vscode-icons:file-type-toml~]
 # [必填] 规划器：战略核心——决定何时说话、回复谁、调用哪些工具（MCP/插件）。需较强推理和 tool 调用能力。
 [model_task_config.planner]
 model_list = ["deepseek-v4-flash"]            # [必填] 模型名称列表
-max_tokens = 8000                             # [可选] 最大输出 token 数
+max_tokens = 16384                            # [可选] 最大输出 token 数
 temperature = 0.7                             # [可选] 模型温度
-slow_threshold = 12.0                         # [可选] 慢请求阈值（秒）
 selection_strategy = "random"                 # [可选] 模型选择策略
 hard_timeout = 180.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [utils（快模型）]
+```toml [utils（快模型） ~vscode-icons:file-type-toml~]
 # [必填] 组件模型：表情包分析、学习分析、取名、关系模块、情绪变化等。麦麦必须的模型。
 [model_task_config.utils]
 model_list = ["deepseek-v4-flash"]            # [必填] 模型名称列表
-max_tokens = 4096                             # [可选] 最大输出 token 数
+max_tokens = 8192                             # [可选] 最大输出 token 数
 temperature = 0.5                             # [可选] 模型温度
-slow_threshold = 15.0                         # [可选] 慢请求阈值（秒）
 selection_strategy = "random"                 # [可选] 模型选择策略
 hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [memory（长期记忆）]
+```toml [memory（长期记忆） ~vscode-icons:file-type-toml~]
 # [可选] 长期记忆：记忆总结、抽取、写回等高质量任务（A_Memorix 子系统）。
 # 默认 model_list 为空（不自动回退），未配置时调用方按需处理。
 [model_task_config.memory]
 model_list = []                               # [可选] 模型名称列表
 max_tokens = 8192                             # [可选] 最大输出 token 数
-temperature = 0.5                             # [可选] 模型温度
-slow_threshold = 30.0                         # [可选] 慢请求阈值（秒）
+temperature = 0.3                             # [可选] 模型温度
 selection_strategy = "random"                 # [可选] 模型选择策略
 hard_timeout = 240.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [mid_memory（中期摘要）]
+```toml [mid_memory（中期摘要） ~vscode-icons:file-type-toml~]
 # [可选] 中期摘要：上下文裁切时将历史聊天压缩为摘要。留空时自动回退到 planner。
 [model_task_config.mid_memory]
 model_list = []                               # [可选] 模型名称列表（→回退 planner）
-max_tokens = 8000                             # [可选] 最大输出 token 数
+max_tokens = 8192                             # [可选] 最大输出 token 数
 temperature = 0.7                             # [可选] 模型温度
-slow_threshold = 12.0                         # [可选] 慢请求阈值（秒）
 selection_strategy = "random"                 # [可选] 模型选择策略
 hard_timeout = 180.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [timing_gate（节奏控制）]
-# [可选] 节奏控制：独立判断是否该在此时说话。留空时自动回退到 planner。
-[model_task_config.timing_gate]
-model_list = []                               # [可选] 模型名称列表（→回退 planner）
-max_tokens = 4096                             # [可选] 最大输出 token 数
-temperature = 0.3                             # [可选] 模型温度
-slow_threshold = 12.0                         # [可选] 慢请求阈值（秒）
-selection_strategy = "random"                 # [可选] 模型选择策略
-hard_timeout = 120.0                          # [可选] 硬超时（秒）
-```
-
-```toml [learner（学习）]
+```toml [learner（学习） ~vscode-icons:file-type-toml~]
 # [可选] 学习模型：表达方式学习和黑话学习。留空时自动回退到 utils。
 [model_task_config.learner]
 model_list = []                               # [可选] 模型名称列表（→回退 utils）
-max_tokens = 4096                             # [可选] 最大输出 token 数
+max_tokens = 8192                             # [可选] 最大输出 token 数
 hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [emoji（表情包选择）]
+```toml [expression_use（表达选择） ~vscode-icons:file-type-toml~]
+# [可选] 表达方式选择模型。留空时自动回退到 utils。
+[model_task_config.expression_use]
+model_list = []                               # [可选] 模型名称列表（→回退 utils）
+max_tokens = 8192                             # [可选] 最大输出 token 数
+temperature = 0.3                             # [可选] 模型温度
+selection_strategy = "balance"                # [可选] 模型选择策略
+hard_timeout = 120.0                          # [可选] 硬超时（秒）
+```
+
+```toml [emoji（表情包选择） ~vscode-icons:file-type-toml~]
 # [可选] 表情包选择：从候选表情包中选出合适的一张发送。
 # 选择优先级：emoji 有模型→用 emoji，planner 全视觉→用 planner，否则→用 vlm
 [model_task_config.emoji]
 model_list = []                               # [可选] 模型名称列表
-max_tokens = 4096                             # [可选] 最大输出 token 数
+max_tokens = 8192                             # [可选] 最大输出 token 数
 hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [vlm（看图）]
+```toml [vlm（看图） ~vscode-icons:file-type-toml~]
 # [强烈建议] 看图说话：理解图片内容。需 visual=true 的多模态模型。
 [model_task_config.vlm]
 model_list = ["qwen-vl"]                      # [必填] 模型名称列表，需 visual=true 的多模态模型
-max_tokens = 4096                             # [可选] 最大输出 token 数
+max_tokens = 8192                             # [可选] 最大输出 token 数
 hard_timeout = 240.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [voice（语音识别）]
+```toml [voice（语音识别） ~vscode-icons:file-type-toml~]
 # [可选] 语音识别：语音转文字。
 [model_task_config.voice]
 model_list = []                               # [可选] 模型名称列表
-max_tokens = 4096                             # [可选] 最大输出 token 数
+max_tokens = 8192                             # [可选] 最大输出 token 数
 hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [embedding（嵌入模型）]
+```toml [embedding（文本嵌入） ~vscode-icons:file-type-toml~]
 # [强烈建议] 嵌入模型：生成文本向量，用于长期记忆的语义搜索。
 # 推荐专门的嵌入模型（如 text-embedding-3-small）。未配置时记忆搜索不可用。
 [model_task_config.embedding]
 model_list = ["text-embedding-3-small"]       # [必填] 模型名称列表，推荐专门的嵌入模型
+max_tokens = 4096                             # [可选] 最大输出 token 数
+hard_timeout = 60.0                           # [可选] 硬超时（秒）
+```
+
+```toml [image_embedding（图片嵌入） ~vscode-icons:file-type-toml~]
+# [可选] 图片嵌入模型：把图片编码成向量，用于图片记忆的以图搜图和相似召回。
+# 需要实现"图片输入到向量"协议的嵌入模型；留空时不启用图片嵌入，图片记忆降级为不可检索。
+[model_task_config.image_embedding]
+model_list = []                               # [可选] 模型名称列表，需支持图片输入的嵌入模型
 max_tokens = 4096                             # [可选] 最大输出 token 数
 hard_timeout = 60.0                           # [可选] 硬超时（秒）
 ```
@@ -199,7 +254,24 @@ hard_timeout = 60.0                           # [可选] 硬超时（秒）
 - **Replyer 追求语言质量**：将 Planner 收集的信息转为最终回复，推荐 pro 模型 + 思考模式
 - **视觉**：`vlm` 需 `visual = true` 的多模态模型，推荐 `qwen-vl`
 - **嵌入**：`embedding` 推荐专门嵌入模型（如 `text-embedding-3-small`），未配置则记忆搜索不可用
+- **图片嵌入**：`image_embedding` 需支持图片输入的嵌入模型，供图片记忆使用；未配置时图片资产仍会保存，但检索状态显示模型不可用
+- **不再有慢请求阈值**：旧版任务配置里的 `slow_threshold` 已移除，慢请求改由日志与统计观测；升级时会自动忽略该字段
 - 模型配置中的 `temperature` / `max_tokens` 会覆盖此处设置
+
+### 模型提供商独立保存（v1.2.5+）
+
+
+在旧版本中，若添加服务商时模型列表为空，表单保存可能会被前端拦截。自 MaiBot v1.2.5（WebUI v1.7.4）起，支持服务商与具体模型解耦保存：
+
+
+* **支持空模型列表暂存**：进入 **模型管理 → 添加/编辑提供商**，填写提供商基础信息（名称、API Base URL、API Key）后，即使尚未添加任何具体模型，也可直接点击「保存提供商」。
+
+* **后置添加模型**：保存提供商后，可随时进入该提供商卡片点击「添加模型」手动录入，或使用自动探测功能拉取可用模型列表。
+
+
+::: tip 为什么这样改
+此改动解决了首次配置自定义或本地大模型服务商时，因无可用模型而无法先保存 Provider 鉴权信息的死锁问题。
+:::
 
 ### 回退规则
 
@@ -208,18 +280,20 @@ hard_timeout = 60.0                           # [可选] 硬超时（秒）
 ```
          ┌──────────┐
          │  planner │◄──── mid_memory（留空时回退）
-         │          │◄──── timing_gate（留空时回退）
          └──────────┘
               ▲
               │
          ┌──────────┐
          │  utils   │◄──── learner（留空时回退）
+         │          │◄──── expression_use（留空时回退）
          └──────────┘
 
-memory · emoji · vlm · voice · embedding → 留空不自动回退，调用方会跳过或报错
+memory · emoji · vlm · voice · embedding · image_embedding → 留空不自动回退，调用方会跳过或报错
 
 emoji 特殊逻辑：emoji 有模型→用 emoji，planner 全视觉→用 planner，否则→用 vlm
 ```
+
+**嵌入模型的两个特殊规则**：`embedding` 与 `image_embedding` 会**忽略 `selection_strategy`**，始终按 `model_list` 顺序取第一个可用模型——这是为了保证向量空间一致，不会在多个模型之间轮换；WebUI 里这两个任务也呈现为**单选模型**。`image_embedding` 留空时图片记忆直接显示"模型不可用"，不会回退到文本嵌入模型。
 
 ## 下一步
 

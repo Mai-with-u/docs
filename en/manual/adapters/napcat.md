@@ -1,203 +1,206 @@
 ---
-title: "# Connecting to MaiMai using NapCat and Adapter\n\nUse NapCat and an adapter
-  to connect to MaiMai."
----# Connecting MaiBot using NapCat and Adapter
+title: NapCat Adapter
+---
 
-You can use **NapCat** to obtain QQ messages and information,
+# NapCat Adapter
 
-and then use an **Adapter** to translate these messages and send them to MaiBot.
+**Log in your own QQ account to connect (officially recommended).** The NapCat adapter lets MaiBot connect to QQ through [NapCat](https://github.com/NapNeko/NapCatQQ), sending and receiving messages, handling group chats and private chats, and pushing notice events. It is an **officially maintained** MaiBot plugin that connects to NapCat's **forward WebSocket server** as a client. It needs no reverse WebSocket and does not use the `[maim_message]` config section.
 
-## Adapter Repository
-
-Source code for the NapCat adapter: [Mai-with-u/MaiBot-Napcat-Adapter](https://github.com/Mai-with-u/MaiBot-Napcat-Adapter)
-
-## Installing the Adapter
-
-You can find the NapCat Adapter directly in the WebUI plugin store and install it from there.
-
-⚠️ After installation, you need to manually **enable** it. You can see which plugins are enabled in the WebUI plugin management section.
-
-
-<details>
-<summary>（如果出现问题，也可以尝试手动安装）</summary>
-
-```bash
-# 克隆插件
-git clone -b main https://github.com/Mai-with-u/MaiBot-Napcat-Adapter.git
-
-```
-
-**Place the adapter directory into MaiBot's `plugins/` folder**
-
-</details>
-
-
-## Configuring NapCat
-
-1. Open the NapCat web interface.
-2. Find the "Forward WebSocket" or "WebSocket Server" settings.
-3. Enable the Forward WebSocket server. The listening port must match the `端口` in the NapCat Adapter plugin (`napcat_server.port` in `plugins/MaiBot-Napcat-Adapter/config.toml`).
-4. If your WebSocket connection has an access token, copy this token and enter it into the **Access Token** configuration item in the **Adapter plugin settings**. (Note: This is NOT the napcat webui token nor the maibot webui token!!!)
-
-For detailed configuration methods, please refer to the [NapCat Official Documentation](https://napneko.github.io/guide/boot/Shell).
-
-The default port for the Forward WebSocket server is usually `3001`. The adapter will connect to NapCat as a client, for example `ws://127.0.0.1:3001`; the specific address and port depend on the adapter configuration.
-
-## Startup
-
-Simply start MaiBot, and the adapter will load and connect automatically.
-
-
-#### Group Chat Whitelist
-
-The NapCat adapter enables chat list filtering by default, and group chats are in whitelist mode by default. Group messages not listed in `群聊名单` will be discarded. If you find that NapCat has connected successfully but the bot does not respond when @mentioned in a group, check the plugin's `聊天过滤` configuration first.
-
-<details>
-<summary>具体的配置文件项目</summary>
-
-`plugins/MaiBot-Napcat-Adapter/config.toml`
-
-```toml
-[chat]
-enable_chat_list_filter = true
-show_dropped_chat_list_messages = true
-group_list_type = "whitelist"
-group_list = ["你的QQ群号"]
-```
-
-During the testing phase, you can temporarily disable list filtering:
-
-```toml
-[chat]
-enable_chat_list_filter = false
-```
-</details>
-
-## Standalone Mode Usage Guide 🔧
-
-::: warning 旧版方法
-The standalone adapter is an early integration method and is generally only recommended for existing standalone deployments, compatibility with old environments, or special network requirements. For new deployments, it is recommended to prioritize the plugin version of the adapter mentioned above, as it requires less configuration and is easier to maintain.
+::: tip Officially maintained
+The NapCat adapter is continuously maintained by the MaiBot team, most recently updated to v1.4.0 (2026-08-19), compatible with MaiBot ≥ 1.2.0. It supports group chats, private chats, voice, images, merged forwards, proactive private chats, and multi-instance connections. If you run into issues, report them in [GitHub Issues](https://github.com/Mai-with-u/MaiBot-Napcat-Adapter/issues).
 :::
 
-<details>
-<summary>展开查看独立版适配器配置方法</summary>
+Adapter repository (🏛️ officially maintained):
 
-If you need to run the adapter independently, follow these steps.
+<Linkcard url="https://github.com/Mai-with-u/MaiBot-Napcat-Adapter" title="MaiBot-Napcat-Adapter" description="MaiBot's officially maintained NapCat QQ adapter plugin" logo="/title_img/mai.png" />
 
-Use the `main` branch:
+Message flow: **QQ → NapCat → adapter plugin (inside MaiBot) → MaiBot**
 
-```bash
-# 克隆 main 分支（默认）
-git clone https://github.com/Mai-with-u/MaiBot-Napcat-Adapter.git
+## Environment requirements
 
-# 或者如果已克隆，确保在 main 分支
-cd MaiBot-Napcat-Adapter
-git checkout main
-```
+- **MaiBot** — ≥ 1.2.0
+- **aiohttp** — the adapter depends on it to establish the WebSocket connection; normally bundled with MaiBot. If missing, the plugin reports "depends on aiohttp, but it is not installed".
+- **NapCat** — a running NapCat instance that can log in and connect to QQ (see Step 1 below)
 
-### Configuring MaiBot
+## Install NapCat and log in your bot QQ account
 
-Add the following to `config/bot_config.toml`:
+The adapter only handles the "MaiBot ↔ NapCat" connection. Install, log in, and start NapCat itself per its official docs.
 
-```toml
+<Linkcard url="https://doc.napneko.icu/" title="NapCat official docs" description="Install NapCat, log in to QQ, configure the WebSocket service" />
+
+1. Install NapCat following the official docs, and log in your bot QQ account;
+2. Confirm NapCat runs normally and that QQ account is online.
+
+::: warning This QQ account is the bot itself
+The QQ account NapCat logs in with must exactly match the `qq_account` in `bot_config.toml` below, so MaiBot can recognize the bot's own messages. If they differ, the bot mistakes its own messages for someone else's.
+:::
+
+## Enable the forward WebSocket server
+
+Enable the **forward WebSocket server** in NapCat's config, and note down the **port** and **access token** it listens on:
+
+- **Port** — defaults to `3001`. Enter it in the adapter's `napcat_server.port`.
+- **Access token** — optional. When enabled, clients must carry the same token to handshake; enter it in `napcat_server.token`.
+
+::: tip Distinguish the three tokens
+- **NapCat WebUI token** — used to log in to NapCat's own web admin UI; unrelated to this adapter.
+- **NapCat forward WebSocket token** — the one set on the "forward WebSocket" service; this is the token to put in `napcat_server.token`.
+- **MaiBot WebUI token** — used to log in to MaiBot's own web admin UI; unrelated to this adapter.
+:::
+
+## Configure MaiBot's bot account
+
+Edit the `[bot]` section of `config/bot_config.toml` so MaiBot recognizes the bot itself:
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [bot]
-platform = "qq"           # 用 QQ 平台
-qq_account = 123456789    # 你的机器人 QQ 号
-nickname = "麦麦"          # 机器人昵称
+platform = "qq"       # Local-client adapters such as NapCat / SnowLuma all use qq
+qq_account = "YOUR_QQ"  # Must match the QQ account NapCat is logged in with
+nickname = "麦麦"
+alias_names = []
 ```
 
-Still in `config/bot_config.toml`, set the connection parameters:
+:::
 
-```toml
-[maim_message]
-ws_server_host = "127.0.0.1"   # 服务器地址（本地就用这个）
-ws_server_port = 8000           # 端口号（默认 8000）
-auth_token = []                 # 认证令牌，空着就行
+- **`platform`** — set to `"qq"`, the platform identifier for local-client adapters.
+- **`qq_account`** — the QQ number NapCat is logged in with (as a string); the two must match exactly.
+- **`platforms`** — NapCat uses the `qq` platform; you do not add a `qq_bot:` entry as with official bots. Leave it as is.
+
+You can also set this in the WebUI: `Bot Settings → Basic → platform account`, pick platform `qq`, and enter the bot QQ number.
+
+## Configure the adapter connection
+
+The NapCat adapter connects out to NapCat as a client. Here is a **complete, copy-ready** config template — edit the values per the comments:
+
+::: code-group
+
+```toml [config.toml ~vscode-icons:file-type-toml~]
+[plugin]
+enabled = true                    # Enable the adapter; must be true to connect
+enable_private_chat_tool = false  # Proactive private-chat tool, see section 6
+config_version = "0.1.0"          # Config structure version; usually leave it alone
+
+[napcat_server]
+host = "127.0.0.1"   # NapCat address; local loopback, or the service name in Docker
+port = 3001          # Forward WebSocket port, must match NapCat's setting
+token = ""           # Access token; fill in the same token if NapCat enables auth
+heartbeat_interval = 30.0   # Heartbeat timeout interval (sec); must be greater than 0
+reconnect_delay_sec = 5.0   # Wait before reconnecting after a disconnect (sec)
+action_timeout_sec = 15.0   # Timeout when calling NapCat action APIs (sec)
+connection_id = ""          # Connection ID; distinguish links in multi-instance setups, see section 6
+
+[chat]
+enable_chat_list_filter = true    # List filtering, enabled by default
+show_dropped_chat_list_messages = false  # Log dropped messages (turn on when troubleshooting)
+group_list_type = "whitelist"     # Group list mode: whitelist / blacklist
+group_list = []                   # Group IDs; add your lists first, see section 5
+private_list_type = "whitelist"   # Private list mode: whitelist / blacklist
+private_list = []                 # User QQ IDs
+ban_user_id = []                  # Globally blocked user QQ IDs; messages dropped before the Host
+ban_qq_bot = false                # Block QQ official bot messages
+
+[notice]
+enabled = true            # Route notice events to the Host; off means no notices reach it
+enable_poke = true        # Poke
+enable_friend_recall = true   # Friend message recall
+enable_group_recall = true    # Group message recall
+enable_group_ban = true       # Group ban / unban
+enable_group_msg_emoji_like = true  # Emoji reactions on group messages
+enable_group_upload = true    # Group file upload
+enable_group_increase = true  # Member joins
+enable_group_decrease = true  # Member leaves
+enable_group_admin = true     # Admin changes
+enable_essence = true         # Essence message changes
+enable_group_name = true      # Group name changes
+
+[filters]
+ignore_self_message = true        # Ignore the bot's own messages; keep it on
+regex_filter_enabled = false      # Enable regex message filtering
+regex_filter_mode = "blacklist"   # blacklist (drop matches) / whitelist (only allow matches)
+regex_filter_patterns = []        # Regex patterns, Python re syntax
+regex_filter_show_dropped = false # Log messages dropped by the regex filter
 ```
 
-- **`ws_server_host`** — Server address; use `127.0.0.1` for local, or the actual IP for servers.
-- **`ws_server_port`** — Port number; default is `8000`. If changed, remember this number.
-- **`auth_token`** — Password verification; leave it blank, ignore it.
+:::
 
-> 💡 **Note**: `maim_message` configures the legacy WebSocket service (port 8000). The adapter connects to MaiBot via the MMC protocol, connecting by default to the `ws_server_port` (default 8000) set in `[maim_message]` within MaiBot's `config/bot_config.toml`. Ensure that `maibot_server.port` in the adapter's [[INLINE_211]] matches MaiBot's `ws_server_port` setting.
+::: tip Default behavior of notice events
+Notice events are enabled by default and can be controlled per type. Types not listed here (such as the input status `notify.input_status`) are dropped by default to avoid log spam.
+:::
 
-### Installing NapCat
+## Add the lists first, then test
 
-Please refer to the [NapCat Official Documentation](https://napneko.github.io/guide/boot/Shell) to install NapCat.
+The chat list filter is **enabled by default with an empty list** — without adding anything, all group and private messages are dropped. This is the most common reason for "no response" after connecting to QQ. The right approach is to **add the groups / users you want to connect first, then test**:
 
-**Docker Users**: If you are using the project's provided `docker-compose.yml`, NapCat is already included as a `napcat` service. Simply start it together with MaiBot:
+::: code-group
 
-```bash
-docker compose up -d
+```toml [TOML ~vscode-icons:file-type-toml~]
+[chat]
+enable_chat_list_filter = true
+group_list = ["123456789"]        # your group ID
+private_list = ["987654321"]      # user QQ ID for private chat
 ```
 
-### Setting up NapCat Connection
+:::
 
-1. Open the NapCat web interface.
-2. Find the "Reverse WebSocket" settings.
-3. Enter the MaiBot address: `ws://127.0.0.1:8000/ws`
+Group and user IDs are normalized to strings and deduplicated automatically. To temporarily allow all messages while testing connectivity, you can turn the filter off:
 
-For detailed configuration methods, please refer to the [NapCat Official Documentation](https://napneko.github.io/guide/boot/Shell).
+::: code-group
 
-💡 **Tip**: If both NapCat and MaiBot are running in Docker Compose, please confirm that MaiBot's `maim_message.ws_server_host` listening address allows container network access.
-
-### Logging into QQ
-
-After starting NapCat, you need to log into QQ. For specific login methods, please refer to the [NapCat Official Documentation](https://napneko.github.io/guide/boot/Shell).
-
-
-### Connection Steps
-
-Recommended startup sequence:
-
-1. **Start NapCat** → Wait for QQ login to succeed.
-2. **Start MaiBot** → Wait for the WebSocket service to start.
-3. **Start Adapter** → The adapter connects to NapCat and MaiBot.
-4. **Automatic Connection** → NapCat will automatically connect to the adapter.
-
-```bash
-# Docker 一键启动（推荐）
-docker compose up -d
-
-# 手动启动
-# 终端 1：启动 NapCat
-# 终端 2：启动适配器 (进入适配器目录运行)
-# 终端 3：uv run python bot.py
+```toml [TOML ~vscode-icons:file-type-toml~]
+[chat]
+enable_chat_list_filter = false   # testing only; add your lists back and re-enable when done
 ```
 
-</details>
+:::
 
-## Troubleshooting ✅
+::: tip There is also a main-program list layer
+Besides the adapter's own `[chat]` lists, MaiBot keeps a unified group / private-chat access policy in `config/adapter_policy.toml` (default actions plus per-adapter `allow_ids` / `deny_ids`). **A message enters the conversation only when both layers allow it**, so check both when troubleshooting "no response"; see [Adapter Management](../webui/adapter-management.md).
+:::
 
-How do I know if it's connected? Check these areas:
+::: tip Full NapCat action API
+The adapter transparently exposes most of NapCat's OneBot action APIs (System / Account / Group / Message / File namespaces) for developers. See the full list in the [NapCat API reference](https://napcat.apifox.cn/).
+:::
 
-**Plugin Mode**:
+## Optional advanced capabilities: proactive private chat, multi-instance
 
-1. **WebUI Plugin List**: You can see that the NapCat adapter plugin is loaded.
-2. **MaiBot Logs**: You see a prompt that the adapter plugin has been loaded.
-3. **Message Test**: @ the bot in a QQ group and see if it replies.
+### Proactive private chat
 
-**Standalone Mode**:
+`enable_private_chat_tool = false` by default. Turn it on and the model gains two tools to **send the first private message to a user** and **resolve the sender's QQ ID from a message ID**:
 
-1. **MaiBot Logs**: You see "WebSocket service started successfully".
-2. **NapCat Logs**: You see "Reverse WebSocket connection successful".
-3. **Adapter Logs**: You see a successful connection.
-4. **Message Test**: @ the bot in a QQ group and see if it replies.
+- **`open_private_chat`** — sends the first private message to a given QQ user; after success, that user's inbound private messages bypass the private chat list filter for **15 minutes**
+- **`get_qq_by_msg_id`** — given a message ID in the current chat, returns that message's sender QQ ID, handy for confirming the target before a proactive private chat
 
-### What if it won't connect?
+To enable:
 
-**Check these points**:
+::: code-group
 
-- Is the plugin enabled? Plugins are disabled by default.
-- Are the address and port correct? Is the WS connection token entered correctly?
-- Are NapCat and MaiBot on the same machine?
-- Are there any error messages in the logs?
+```toml [TOML ~vscode-icons:file-type-toml~]
+[plugin]
+enable_private_chat_tool = true
+```
 
-### Not receiving messages?
+:::
 
-**Possible reasons**:
+::: tip Why `get_qq_by_msg_id` is useful
+Group members may never have private-chatted the bot, so the model does not know their QQ IDs. Use this tool to fetch the sender's QQ ID from a message, then call `open_private_chat` to proactively start a private chat.
+:::
 
-- Is the group chat whitelist correctly set in the adapter? Which group chats are allowed?
-- Is the QQ number wrong? It must match the one used to log into NapCat.
-- Did NapCat itself receive the message? Check the NapCat logs.
-- Is the network connection normal?
+### Multi-instance
+
+When one MaiBot connects to multiple NapCat links, give each link a **different `connection_id`** (e.g. `primary`, `secondary`) to use as a routing scope identifier and keep the links from interfering with each other.
+
+## Verification & Troubleshooting
+
+**Verify the connection** — the plugin logs `NapCat 适配器已连接: ws://127.0.0.1:3001` (NapCat adapter connected), and @-ing the bot in an added group gets a reply. That means success.
+
+**Cannot connect, logs keep showing "connection failed"** — check that `napcat_server.host` / `port` match NapCat's forward WebSocket listening address; confirm NapCat has the forward WS service enabled and the port is not blocked by a firewall; if auth is on, confirm `napcat_server.token` matches NapCat's setting.
+
+**Connected but @-ing the bot in a group gets no response** — first check the chat list: confirm the group is in `group_list`; temporarily set `enable_chat_list_filter = false` or turn on `show_dropped_chat_list_messages = true` to inspect dropped logs. Then confirm `plugin.enabled = true`.
+
+**Can receive but not send** — does the bot have permission to speak; is `action_timeout_sec` too short; confirm `qq_account` in `bot_config.toml` matches the QQ account NapCat is logged in with.
+
+**The bot mistakes its own messages for someone else's** — `qq_account` in `bot_config.toml` differs from NapCat's logged-in QQ. Make them match and restart the host.
+
+**Notices do not arrive (poke / recall, etc.)** — confirm `[notice].enabled = true` and the relevant type switch is on; notice types not listed are dropped by default, which is expected.

@@ -4,11 +4,13 @@ title: 消息网关
 
 # 消息网关
 
-`@MessageGateway` 装饰器用于声明消息网关组件，实现 MaiBot 与外部消息平台（如 QQ、Discord 等）的双向消息路由。消息网关是平台适配器的核心组件，负责出站消息发送和入站消息注入。
+`@MessageGateway` 装饰器用于声明消息网关组件，实现 MaiBot 与外部消息平台（如 QQ、邮件等）的双向消息路由。消息网关是平台适配器的核心组件，负责出站消息发送和入站消息注入。
 
 ## 装饰器签名
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MessageGateway
 
 @MessageGateway(
@@ -16,13 +18,15 @@ from maibot_sdk import MessageGateway
     *,
     name: str = "",              # 组件名，留空时使用方法名
     description: str = "",       # 组件描述
-    platform: str = "",          # 平台名称（如 qq、discord）
+    platform: str = "",          # 平台名称（如 qq、email）
     protocol: str = "",          # 协议或接入方言名称
     account_id: str = "",        # 账号 ID / self_id
     scope: str = "",             # 路由作用域
     **metadata,                  # 额外元数据
 )
 ```
+
+:::
 
 ## 路由类型
 
@@ -50,7 +54,9 @@ from maibot_sdk import MessageGateway
 
 以下是一个完整的 QQ 平台适配器示例，基于 NapCat 协议实现双向消息路由：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import MaiBotPlugin, MessageGateway
@@ -158,11 +164,15 @@ def create_plugin():
     return NapCatGatewayPlugin()
 ```
 
+:::
+
 ## 仅入站网关示例
 
 如果只需要向 MaiBot 注入消息（如 Webhook 监听），可以使用 `route_type="receive"`：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import MaiBotPlugin, MessageGateway
@@ -222,6 +232,8 @@ def create_plugin():
     return WebhookReceiverPlugin()
 ```
 
+:::
+
 ## 网关处理器参数
 
 `@MessageGateway` 装饰的处理器方法接收以下参数：
@@ -279,7 +291,7 @@ stateDiagram-v2
     Offline --> [*]: 插件销毁
 ```
 
-::: important
+::: info
 - 插件在 `on_load()` 中应调用 `ctx.gateway.update_state(ready=True)` 上报就绪状态
 - 插件在 `on_unload()` 中应调用 `ctx.gateway.update_state(ready=False)` 上报离线状态
 - 只有 `ready=True` 的网关才会参与消息路由
@@ -287,8 +299,8 @@ stateDiagram-v2
 
 ## 平台字段说明
 
-- **`platform`** `str` — 目标平台名称（如 `"qq"`、`"discord"`、`"webhook"`）
-- **`protocol`** `str` — 协议或实现名称（如 `"napcat"`、`"go-cqhttp"`、`"discord.py"`）
+- **`platform`** `str` — 目标平台名称（如 `"qq"`、`"email"`、`"webhook"`）
+- **`protocol`** `str` — 协议或实现名称（如 `"napcat"`、`"snowluma"`、`"email"`）
 - **`account_id`** `str` — 机器人账号 ID（如 `"10001"`、`"bot#1234"`）
 - **`scope`** `str` — 路由作用域（如 `"primary"`、`"default"`）
 

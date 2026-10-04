@@ -1,10 +1,12 @@
 ---
 title: LLMProvider Component
----# LLMProvider Component
+---
+
+# LLMProvider Component
 
 `@LLMProvider` is used to declare that a plugin provides a new LLM Provider `client_type`. The main program will register this `client_type` into the LLM client registry, so existing `LLMService` and model task configurations do not need to change their invocation method—as long as the `api_providers[].client_type` in the model configuration points to the value declared in the plugin, the request will be initiated via the plugin Provider.
 
-::: warning 双重声明必须一致
+::: warning Both Declarations Must Match
 An LLM Provider must satisfy both of the following declarations; neither can be omitted:
 
 1. Statically declared in the `client_type` within the top-level `llm_providers` `_manifest.json`
@@ -15,7 +17,9 @@ The Runner will verify that the manifest and the results collected by the decora
 
 ## Decorator Signature
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import LLMProvider
 
 @LLMProvider(
@@ -27,6 +31,8 @@ from maibot_sdk import LLMProvider
     **metadata,                # 额外元数据
 )
 ```
+
+:::
 
 ### Parameter Description
 
@@ -40,7 +46,9 @@ from maibot_sdk import LLMProvider
 
 The `_manifest.json` top-level must contain the `llm_providers` array, which corresponds one-to-one with the `@LLMProvider` in the code:
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "llm_providers": [
     {
@@ -52,6 +60,8 @@ The `_manifest.json` top-level must contain the `llm_providers` array, which cor
   ]
 }
 ```
+
+:::
 
 ### llm_providers Field Description
 
@@ -102,7 +112,9 @@ The return value must be a serializable dictionary. The Host will recognize the 
 
 Within the handling method, use `if/elif` to judge the `operation` type and handle them separately:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import LLMProvider, MaiBotPlugin
@@ -133,11 +145,15 @@ def create_plugin():
     return MyLLMPlugin()
 ```
 
+:::
+
 ### Method 2: LLMProviderBase Base Class (Recommended for Complex Logic)
 
 Inherit from `LLMProviderBase` and delegate the dispatch logic to the `dispatch()` method of the base class. Subclasses only need to implement the operation methods they care about; unimplemented methods will throw `NotImplementedError`:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import LLMProvider, LLMProviderBase, MaiBotPlugin
@@ -174,6 +190,8 @@ def create_plugin():
     return MyLLMPlugin()
 ```
 
+:::
+
 `LLMProviderBase` provides the following methods for subclasses to override:
 
 - **`get_response()`** · operation `response` — Generate text or multimodal responses (abstract method, must be implemented).
@@ -190,7 +208,9 @@ Below is a complete minimum viable plugin, including the manifest declaration an
 
 **_manifest.json**:
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "id": "com.example.llm-provider",
   "name": "Example LLM Provider",
@@ -208,9 +228,13 @@ Below is a complete minimum viable plugin, including the manifest declaration an
 }
 ```
 
+:::
+
 **main.py**:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import LLMProvider, LLMProviderBase, MaiBotPlugin
@@ -256,6 +280,8 @@ class ExampleLLMPlugin(MaiBotPlugin):
 def create_plugin():
     return ExampleLLMPlugin()
 ```
+
+:::
 
 ## Uninstallation and Fallback
 

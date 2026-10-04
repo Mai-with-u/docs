@@ -8,7 +8,9 @@ Plugins can add extension cards to the WebUI home page with the SDK `@HomeCard` 
 
 ## Basic Example
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import HomeCard, MaiBotPlugin
 
 
@@ -42,19 +44,19 @@ class StatusCardPlugin(MaiBotPlugin):
         return None
 ```
 
+:::
+
 ## Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `name` | `str` | required | Card component name, unique within the plugin |
-| `title` | `str` | required | Title shown on the home page |
-| `content` | `str \| dict \| list[dict]` | `""` | Card content. Strings render as Markdown; lists render as content blocks |
-| `description` | `str` | `""` | Card description |
-| `link_url` | `str` | `""` | Optional link. Supports WebUI internal paths, `http(s)`, and `mailto` |
-| `link_label` | `str` | `""` | Link button label |
-| `icon` | `str` | `""` | Optional icon name for WebUI extensions |
-| `width` | `str` | `"medium"` | Card width: `small` = 2/10, `medium` = 3/10, `large` = 5/10, `wide` = 7/10, `full` = 10/10 |
-| `order` | `int` | `1000` | Default order. Lower values appear earlier |
+**`name`** `str` (required) — Card component name, unique within the plugin
+**`title`** `str` (required) — Title shown on the home page
+**`content`** `str \| dict \| list[dict]` (default `""`) — Card content. Strings render as Markdown; lists render as content blocks
+**`description`** `str` (default `""`) — Card description
+**`link_url`** `str` (default `""`) — Optional link. Supports WebUI internal paths, `http(s)`, and `mailto`
+**`link_label`** `str` (default `""`) — Link button label
+**`icon`** `str` (default `""`) — Optional icon name for WebUI extensions
+**`width`** `str` (default `"medium"`) — Card width: `small` = 2/10, `medium` = 3/10, `large` = 5/10, `wide` = 7/10, `full` = 10/10
+**`order`** `int` (default `1000`) — Default order. Lower values appear earlier
 
 ## Content Blocks
 

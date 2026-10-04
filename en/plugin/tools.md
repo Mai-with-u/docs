@@ -1,6 +1,8 @@
 ---
 title: Tool Component
----# Tool Component
+---
+
+# Tool Component
 
 `@Tool` is the most core component type in the MaiBot plugin system. It allows plugins to expose callabled tool functions to the LLM, enabling the LLM to proactively call external capabilities during the reasoning process—such as searching knowledge bases, querying databases, calling external APIs, etc.
 
@@ -10,7 +12,9 @@ title: Tool Component
 
 ## Decorator Signature
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -23,6 +27,8 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
     **metadata,                                             # 额外元数据
 )
 ```
+
+:::
 
 ### Argument Descriptions
 
@@ -43,7 +49,9 @@ Description field conventions:
 
 Use an `ToolParameterInfo` list to declare parameters; the SDK automatically generates a JSON Schema:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import Tool, MaiBotPlugin
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -73,11 +81,15 @@ class MyPlugin(MaiBotPlugin):
         return {"results": results}
 ```
 
+:::
+
 ### Method 2: dict parameters (Compatible with legacy declarations)
 
 Pass a dictionary in JSON Schema style directly:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class MyPlugin(MaiBotPlugin):
     @Tool(
         "search",
@@ -91,6 +103,8 @@ class MyPlugin(MaiBotPlugin):
         results = await self._do_search(query, limit)
         return {"results": results}
 ```
+
+:::
 
 ## ToolParameterInfo Fields
 
@@ -119,7 +133,9 @@ class MyPlugin(MaiBotPlugin):
 
 Tool handlers are asynchronous methods on the plugin class that receive keyword arguments corresponding to parameter names and `**kwargs`:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 @Tool("greet", description="向用户打招呼",
       parameters=[
           ToolParameterInfo(name="stream_id", param_type=ToolParamType.STRING,
@@ -130,6 +146,8 @@ async def handle_greet(self, stream_id: str, **kwargs):
     return {"success": True, "message": "已回复"}
 ```
 
+:::
+
 ### Return Value
 The return value of a Tool handler is returned to the LLM as the tool execution result. The return value can be:
 
@@ -139,10 +157,28 @@ The return value of a Tool handler is returned to the LLM as the tool execution 
 
 The LLM decides the next step based on the return value (e.g., replying to the user, calling other tools, etc.).
 
+When returning a `dict`, you may also include the boolean field **`stop_after_execution`** — set it to `true` to request ending the current Planner run after the whole tool batch finishes, and wait for new messages before continuing:
+
+- Takes effect only when the tool **succeeds**; if any successful result in the same batch carries `true`, it applies
+- The field must be a boolean; any other type makes this tool call be treated as a failure
+- When omitted, it defaults to `false` and behavior is unchanged
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+async def handle_shutdown(self, stream_id: str, **kwargs):
+    await self.ctx.send.text("本轮操作已完成。", stream_id)
+    return {"success": True, "stop_after_execution": True}
+```
+
+:::
+
 ### Returning Images and Other Media
 If a Tool needs to pass an image to Maisaka for further observation or reasoning, do not embed base64 images directly into `content`. It is recommended to return `dict`, placing the text for the LLM to read in `content` and the image itself in `content_items`:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from base64 import b64encode
 
 
@@ -164,9 +200,13 @@ async def handle_draw(self, prompt: str, **kwargs):
     }
 ```
 
+:::
+
 You can also use data URLs:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 return {
     "success": True,
     "content": "图片已生成。",
@@ -180,6 +220,8 @@ return {
     ],
 }
 ```
+
+:::
 
 Common fields in `content_items` are as follows:
 

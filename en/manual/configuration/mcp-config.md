@@ -1,21 +1,21 @@
 ---
 title: MCP Configuration
 ---
-# MCP Configuration 🛠️
+# MCP Configuration
 
-MCP (Model Context Protocol) enables MaiBot to connect with external tools, transforming it from "just chatting" to "both speaking and acting" — checking weather, searching news, reading files, calling APIs, and more, all within reach.
-
-This document details how to configure MCP in `bot_config.toml`.
+MCP (Model Context Protocol) enables MaiBot to connect with external tools, transforming it from "just chatting" to "both speaking and acting" — checking weather, searching news, reading files, calling APIs, and more, all within reach. All of the configuration lives under the `[mcp]` section of `bot_config.toml`, covered below in the order "master switch → client capabilities → server list".
 
 ::: tip 💡 Understand the Concepts First
-If you are not yet familiar with what MCP is, we recommend reading [MCP Feature Overview](../features/mcp.md) first to understand its capabilities.
+If you are not yet familiar with what MCP is, see the [MCP integration developer guide](/en/develop/mcp-integration) for its overall design.
 :::
 
 ## Configuration Structure Overview
 
 MCP configuration is located under the `[mcp]` section in `bot_config.toml`, divided into three levels:
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [mcp]
 enable = true                         # Master switch
 
@@ -52,36 +52,44 @@ mode = "none"
 bearer_token = ""
 ```
 
+:::
+
 ---
 
-## Master Switch [mcp]
+## Master Switch
 
 - **`enable`** — Whether to enable MCP. When set to `false`, no MCP servers will be connected. Enabled by default.
 
 ---
 
-## Client Capabilities [mcp.client]
+## Client Capabilities
 
 This section configures MaiBot's capabilities when acting as an MCP **client**, declaring them to the server.
 
 ### Basic Information
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [mcp.client]
 client_name = "MaiBot"
 client_version = "1.0.0"
 ```
+
+:::
 
 Generally, no changes are needed unless you want the MCP server to see a different client identifier.
 
 - **`client_name`** — The client implementation name. Default: `"MaiBot"`
 - **`client_version`** — The client implementation version. Default: `"1.0.0"`
 
-### Roots Capabilities [mcp.client.roots]
+### Roots Capabilities
 
 Roots allow you to expose local file system paths to the MCP server, enabling the server to read and write files within those paths.
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [mcp.client.roots]
 enable = true
 
@@ -90,6 +98,8 @@ enabled = true
 uri = "file:///home/mai/data"
 name = "MaiMai's Data Directory"
 ```
+
+:::
 
 - **`enable`** — Whether to expose Roots capabilities to the MCP server. Default: disabled
 - **`items`** — The list of Roots. Default: empty
@@ -104,17 +114,21 @@ Each Root item:
 If connected to a file system MCP server (e.g., `@modelcontextprotocol/server-filesystem`), enabling Roots allows the server to know where your data directory is, thereby reading and writing files within that directory.
 :::
 
-### Sampling Capabilities [mcp.client.sampling]
+### Sampling Capabilities
 
 Sampling allows the MCP server to **request MaiBot to call a large language model** in reverse to complete certain tasks. This is an advanced bidirectional capability.
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [mcp.client.sampling]
 enable = true
 task_name = "planner"
 include_context_support = false
 tool_support = true
 ```
+
+:::
 
 - **`enable`** — Whether to enable the Sampling capability declaration. Default: disabled
 - **`task_name`** — The main program model task name used when executing Sampling requests. Default: `"planner"`
@@ -125,16 +139,20 @@ tool_support = true
 Enabling Sampling means the MCP server can trigger MaiBot's model calls, incurring additional API costs. Ensure `task_name` points to a configured model task.
 :::
 
-### Elicitation Capabilities [mcp.client.elicitation]
+### Elicitation Capabilities
 
 Elicitation allows the MCP server to request users to fill out forms or open URLs in a browser.
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [mcp.client.elicitation]
 enable = true
 allow_form = true
 allow_url = false
 ```
+
+:::
 
 - **`enable`** — Whether to enable the Elicitation capability declaration. Default: disabled
 - **`allow_form`** — Whether to allow form-mode Elicitation. Default: enabled
@@ -144,13 +162,15 @@ At least one mode (`allow_form` or `allow_url`) must be allowed when enabled.
 
 ---
 
-## Server Configuration [[mcp.servers]]
+## Server Configuration
 
 This is the most commonly used section — configure the MCP servers you want to connect to. **Multiple servers can be configured**, with each `[[mcp.servers]]` block corresponding to one server.
 
 ### Common Fields
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "playwright"
 enabled = true
@@ -158,6 +178,8 @@ transport = "stdio"           # or "streamable_http", "sse"
 http_timeout_seconds = 30.0
 read_timeout_seconds = 300.0
 ```
+
+:::
 
 - **`name`** — **Required**. Server name, must be unique within the same configuration. Defaults to empty.
 - **`enabled`** — Whether to enable the current server. Defaults to enabled.
@@ -177,7 +199,9 @@ Runs the MCP server by launching a local subprocess, suitable for locally instal
 
 uvx is a runner tool included with [uv](https://docs.astral.sh/uv/) that automatically manages dependencies:
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "playwright"
 transport = "stdio"
@@ -185,7 +209,11 @@ command = "uvx"
 args = ["@playwright/mcp"]
 ```
 
-```toml
+:::
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "mcp-sse"
 transport = "stdio"
@@ -193,11 +221,15 @@ command = "uvx"
 args = ["mcp-sse-server", "--port", "8080"]
 ```
 
+:::
+
 #### Running via npx
 
 Node.js must be installed first:
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "github"
 transport = "stdio"
@@ -206,7 +238,11 @@ args = ["-y", "@modelcontextprotocol/server-github"]
 env = { GITHUB_TOKEN = "ghp_your_token_here" }
 ```
 
-```toml
+:::
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "filesystem"
 transport = "stdio"
@@ -214,9 +250,13 @@ command = "npx"
 args = ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/dir"]
 ```
 
+:::
+
 #### Running via Python
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "my-python-mcp"
 transport = "stdio"
@@ -224,6 +264,8 @@ command = "python"
 args = ["-m", "my_mcp_server"]
 env = { PYTHONUNBUFFERED = "1" }
 ```
+
+:::
 
 ### streamable_http Mode
 
@@ -235,7 +277,9 @@ Connects to remote MCP services (HTTP endpoints), suitable for cloud services or
 
 #### Remote Service Without Authentication
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "public-weather-mcp"
 transport = "streamable_http"
@@ -245,9 +289,13 @@ url = "https://mcp.example.com/weather"
 mode = "none"
 ```
 
+:::
+
 #### Remote Service With Bearer Token
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "private-api-mcp"
 transport = "streamable_http"
@@ -259,9 +307,13 @@ mode = "bearer"
 bearer_token = "sk-your-bearer-token"
 ```
 
+:::
+
 #### Remote Service With Custom Request Headers
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [[mcp.servers]]
 name = "enterprise-mcp"
 transport = "streamable_http"
@@ -272,13 +324,17 @@ headers = {
 }
 ```
 
+:::
+
 ---
 
 ## Complete Example
 
 ### Basic Configuration: Connect to a Single Service
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [mcp]
 enable = true
 
@@ -289,11 +345,15 @@ command = "uvx"
 args = ["@playwright/mcp"]
 ```
 
+:::
+
 This is the simplest configuration — just one line `enable = true` plus a single service, with everything else using default values.
 
 ### Daily Use Configuration: Two Services + Basic Capabilities
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [mcp]
 enable = true
 
@@ -316,9 +376,13 @@ command = "npx"
 args = ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
 ```
 
+:::
+
 ### Advanced Configuration: Enable Sampling + Roots
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [mcp]
 enable = true
 
@@ -352,6 +416,8 @@ name = "weather-api"
 transport = "streamable_http"
 url = "https://mcp.example.com/weather"
 ```
+
+:::
 
 ---
 
@@ -395,5 +461,5 @@ It depends on the service you are connecting to. For GitHub MCP, go to GitHub Se
 
 ## Next Steps
 
-- To learn about MCP concepts and capabilities → [MCP Features Overview](../features/mcp.md)
-- To view all configuration options → [Bot Configuration Overview](./bot-config.md)
+- To learn about MCP's overall design → [MCP integration developer guide](/en/develop/mcp-integration)
+- To view all configuration options → [Bot Configuration](./bot-config.md)

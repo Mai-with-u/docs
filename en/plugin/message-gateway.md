@@ -1,12 +1,16 @@
 ---
 title: Message Gateway
----# Message Gateway
+---
 
-The `@MessageGateway` decorator is used to declare a message gateway component, implementing bidirectional message routing between MaiBot and external message platforms (such as QQ, Discord, etc.). The message gateway is the core component of a platform adapter, responsible for outbound message sending and inbound message injection.
+# Message Gateway
+
+The `@MessageGateway` decorator is used to declare a message gateway component, implementing bidirectional message routing between MaiBot and external message platforms (such as QQ, Email, etc.). The message gateway is the core component of a platform adapter, responsible for outbound message sending and inbound message injection.
 
 ## Decorator Signature
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MessageGateway
 
 @MessageGateway(
@@ -14,7 +18,7 @@ from maibot_sdk import MessageGateway
     *,
     name: str = "",              # 组件名，留空时使用方法名
     description: str = "",       # 组件描述
-    platform: str = "",          # 平台名称（如 qq、discord）
+    platform: str = "",          # 平台名称（如 qq、email）
     protocol: str = "",          # 协议或接入方言名称
     account_id: str = "",        # 账号 ID / self_id
     scope: str = "",             # 路由作用域
@@ -22,13 +26,15 @@ from maibot_sdk import MessageGateway
 )
 ```
 
+:::
+
 ## Routing Types
 
 - **`"send"`** → `MessageGatewayRouteType.SEND` — Outbound: Host → Plugin → External Platform
 - **`"receive"`** → `MessageGatewayRouteType.RECEIVE` — Inbound: External Platform → Plugin → Host
 - **`"duplex"`** → `MessageGatewayRouteType.DUPLEX` — Bidirectional: Supports both outbound and inbound
 
-::: tip 别名支持
+::: tip Alias Support
 `route_type` also accepts `"recv"` and `"recive"` as aliases for `"receive"`.
 :::
 
@@ -48,7 +54,9 @@ from maibot_sdk import MessageGateway
 
 Below is a complete example of a QQ platform adapter, implementing bidirectional message routing based on the NapCat protocol:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import MaiBotPlugin, MessageGateway
@@ -156,11 +164,15 @@ def create_plugin():
     return NapCatGatewayPlugin()
 ```
 
+:::
+
 ## Inbound-Only Gateway Example
 
 If you only need to inject messages into MaiBot (e.g., Webhook listening), you can use `route_type="receive"`:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import MaiBotPlugin, MessageGateway
@@ -220,6 +232,8 @@ def create_plugin():
     return WebhookReceiverPlugin()
 ```
 
+:::
+
 ## Gateway Handler Parameters
 
 Handler methods decorated with `@MessageGateway` receive the following parameters:
@@ -277,7 +291,7 @@ stateDiagram-v2
     Offline --> [*]: 插件销毁
 ```
 
-::: important
+::: info
 - Plugins should call `ctx.gateway.update_state(ready=True)` in `on_load()` to report ready status
 - Plugins should call `ctx.gateway.update_state(ready=False)` in `on_unload()` to report offline status
 - Only gateways with `ready=True` will participate in message routing
@@ -285,8 +299,8 @@ stateDiagram-v2
 
 ## Platform Field Descriptions
 
-- **`platform`** `str` — Target platform name (e.g., `"qq"`, `"discord"`, `"webhook"`)
-- **`protocol`** `str` — Protocol or implementation name (e.g., `"napcat"`, `"go-cqhttp"`, `"discord.py"`)
+- **`platform`** `str` — Target platform name (e.g., `"qq"`, `"email"`, `"webhook"`)
+- **`protocol`** `str` — Protocol or implementation name (e.g., `"napcat"`, `"snowluma"`, `"email"`)
 - **`account_id`** `str` — Bot account ID (e.g., `"10001"`, `"bot#1234"`)
 - **`scope`** `str` — Routing scope (e.g., `"primary"`, `"default"`)
 

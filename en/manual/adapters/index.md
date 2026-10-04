@@ -1,82 +1,62 @@
 ---
-title: Adapter Overview
----# Adapter Overview
+title: Connect Platforms
+---
 
-Adapters are responsible for connecting messaging platforms such as QQ, Telegram, WeChat, and Discord to MaiBot. Different adapters support different platforms, have different runtime methods, and have different maintenance statuses. For your first deployment, it is recommended to prioritize adapters that are actively maintained and have complete documentation.
+# Connect Platforms
 
-## Choose an Adapter
+**Adapters connect messaging platforms such as QQ, email, and voice calls to MaiBot.** In MaiBot, **adapters are themselves plugins**—install, enable, and manage them in [Plugin Management](/en/manual/plugins/), then fill in the connection details in the plugin settings.
 
-| Adapter | Supported Platforms | Status | Description |
-| --- | --- | --- | --- |
-| [NapCat](./napcat.md) | QQ | Recommended | The QQ adapter officially maintained by MaiBot, supporting both the plugin version and the standalone version. The plugin version is the currently recommended solution. |
-| [GoCQ](./gocq.md) | QQ | Available, outdated | QQ adaptation solution based on go-cqhttp / AstralGocq, suitable for existing GoCQ environments or specific needs. |
-| [SnowLuma](./snowluma.md) | QQ | Available (In testing) | Next-generation QQ adaptation solution |
-| [Telegram](./telegram.md) | Telegram | Community adaptation | Telegram platform adaptation solution |
-| [Discord](./discord.md) | Discord | Community adaptation | Discord platform adaptation solution |
-| [Desktop Pet Adapter](https://github.com/MaiM-with-u/MaiM-desktop-pet) | Desktop Pet | Community adaptation | Integrates MaiBot into desktop pet interaction scenarios. |
-| [WeChat - wxauto Adapter](https://github.com/Angela459/WeMai) | WeChat | Community adaptation | WeChat platform adaptation solution based on wxauto. |
-| More adapters | - | Community adaptation | Follow the [MaiBot GitHub Organization](https://github.com/Mai-with-u) or community groups for information on more third-party adapters. |
+## Before Connecting QQ: Pick a Route
 
-When deploying for the QQ platform for the first time, it is recommended to use the **NapCat plugin version**. It runs directly as a MaiBot plugin, requires less configuration, and eliminates the need to maintain the network connection between the adapter and MaiBot separately.
+QQ offers two routes—pick the one that fits your setup:
 
-## Legacy / Community Adapter List (May not be maintained promptly)
+- **Local client login** — use your own QQ account (NapCat or SnowLuma) for the fullest feature set; **NapCat is recommended**;
+- **Open platform bot** — apply for a bot on the QQ Open Platform (AppID), no QQ client login needed.
 
-The following adapters are mostly legacy or community projects, and some may not be compatible with the current version of MaiBot. Before using them, it is recommended to check the update time, README, and Issues of the corresponding repository.
+The two routes are not mutually exclusive—you can enable both at the same time.
 
-- [Nonebot Adapter](https://github.com/MaiM-with-u/nonebot-plugin-maibot-adapters)
-- [Milky Protocol Adapter](https://github.com/ShinKanji/MaiBot-Milky-Adapter)
+::: tip Adapter changes in 1.3.0
+MaiBot 1.3.0 requires the latest SnowLuma adapter — the new adapter has merged the NapCat adapter, so upgrade the adapter alongside the main program and **re-configure the allow/deny lists**.
 
-::: warning 注意兼容性
-Some community adapters may be legacy projects and are not necessarily compatible with the current MaiBot. Before installing, it is recommended to check the repository's update time, README, and Issues.
+Also, since 1.3.0 adapter plugins can use MaiBot's built-in group / private-chat allow/deny lists directly (`config/adapter_policy.toml`).
 :::
 
-### Plugin Version Adapters
+## Available Adapters
 
-If an adapter provides a plugin version, it is typically installed following this process:
+**Maintenance label** — 🏛️ Official: maintained by the `Mai-with-u` organization; 🌐 Community: maintained by third-party authors.
 
-1. Download or clone the adapter project.
-2. Make sure to switch to the plugin branch required by the adapter.
-3. Place the adapter directory into MaiBot's `plugins/` directory.
-4. Start MaiBot and let the plugin system automatically load the adapter.
+### QQ (Local Client Login)
 
-Plugin version adapters run inside MaiBot, so typically you only need to configure the "messaging platform to adapter" connection.
+- [NapCat](./napcat) — 🏛️ officially recommended. Log in your own QQ account, connect via NapCat forward WebSocket, minimal configuration
+- [SnowLuma](./snowluma) — 🏛️ officially maintained. Log in your own QQ account, connect via SnowLuma, supports voice and proactive private messaging
 
-### Standalone Version Adapters
+### QQ (Open Platform Bot)
 
-If an adapter is a standalone version, it is typically installed following this process:
+- [QQ Official](./qq-official) — 🌐 community-maintained. Connect to the QQ official bot with AppID + AppSecret, supports private chats, group chats, guild text channels, and guild direct messages
+- [QQBot](./qqbot) — 🌐 community-maintained. Connect to the QQ official Bot API with AppID + AppSecret, supports private (C2C) and group chats
 
-1. Download or clone the adapter project.
-2. Install dependencies according to the adapter's documentation.
-3. Fill in the adapter's own configuration file.
-4. Start the adapter process separately.
+### Email, iMessage & Voice Calls
 
-Standalone version adapters need to connect to both the messaging platform and MaiBot, so when troubleshooting, you need to check both connections separately.
+- [Email](./email) — 🌐 community-maintained. IMAP inbound + SMTP replies, connect a dedicated bot mailbox to MaiBot
+- [QQ Voice Call](./qq-voice-call) — 🌐 community-maintained. Adds a real-time voice call entry to QQ; Mai on the phone reuses the same persona and memory
+- [iMessage](./imessage) — 🌐 community-maintained. Connect to Apple iMessage via the Photon cloud service, no Mac required
 
-## Configure Connections
+::: tip Community adapters
+Community adapters are continuously maintained by their respective authors—before installing, take a look at the repository's update time and README to confirm compatibility with your MaiBot version.
+:::
 
-Adapters typically require configuring two types of connections:
+## How Connections Are Usually Configured
 
-| Connection Direction | Description |
-| --- | --- |
-| Messaging Platform → Adapter | For example, NapCat connects to QQ and pushes QQ messages to the adapter. |
-| Adapter → MaiBot | Standalone version adapters need to connect to MaiBot; plugin version adapters usually do not require additional configuration for this layer. |
+Adapters usually need two kinds of connections:
 
-When using a plugin version adapter, primarily confirm that the adapter can correctly connect to the messaging platform.
+- **Platform → Adapter** — e.g. NapCat logs into QQ and pushes messages to the adapter; open-platform bots require applying for an official bot account first.
+- **Adapter → MaiBot** — plugin-version adapters usually don't need extra config for this layer; only standalone versions do.
 
-When using a standalone version adapter, you also need to confirm that the adapter can connect to MaiBot's messaging service address.
+How to apply for platform accounts and which addresses/tokens to fill in are covered in each adapter's doc.
 
-If you are unsure what address to fill in, first run it using the default local machine configuration from the corresponding adapter's documentation, and then consider cross-machine or Docker network deployment.
+## Verify and Troubleshoot
 
-## Confirm Successful Connection
+Send a test message on the corresponding platform:
 
-Once configuration is complete, send a test message to the corresponding platform.
-
-If you can see the corresponding message logs in the MaiBot backend, and MaiBot can reply normally, it means the adapter has connected successfully.
-
-If no messages are received, check in this order:
-
-1. Whether the messaging platform client has successfully logged in.
-2. Whether the adapter has started normally.
-3. Whether the adapter has successfully connected to the messaging platform.
-4. Whether the standalone version adapter has successfully connected to MaiBot.
-5. Whether MaiBot has completed initialization and is running normally.
+- If the MaiBot backend shows the message log and can reply normally → success;
+- If nothing happens, check in order: is the platform client logged in → is the adapter started → did it connect to the platform → (standalone) did it connect to MaiBot → is MaiBot ready.

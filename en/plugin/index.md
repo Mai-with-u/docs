@@ -50,15 +50,24 @@ graph TD
 
 ### 1. Install SDK
 
-```bash
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
 pip install maibot-plugin-sdk
 ```
 
+:::
+
 ::: tip Note
 The package name is `maibot-plugin-sdk`, but in code, import using `maibot_sdk`:
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Command, Tool
 ```
+
+:::
+
 :::
 
 ### 2. Create Plugin Directory
@@ -67,15 +76,18 @@ from maibot_sdk import MaiBotPlugin, Command, Tool
 plugins/
 └── my-plugin/
     ├── _manifest.json
-    ├── plugin.py
-    └── config.toml          # Optional
+    └── plugin.py
 ```
+
+Declare plugin configuration in `plugin.py` with `PluginConfigBase` and `Field`. When the Runner first loads the plugin, it generates the runtime `config.toml` from `config_model` and fills in newly added fields after the configuration model changes.
 
 ### 3. Write Manifest
 
 Declare plugin metadata in `_manifest.json` (for full field descriptions, see [Manifest System](./manifest.md)):
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "manifest_version": 2,
   "id": "com.example.my-plugin",
@@ -105,11 +117,15 @@ Declare plugin metadata in `_manifest.json` (for full field descriptions, see [M
 }
 ```
 
+:::
+
 ### 4. Write Plugin Code
 
 Inherit `MaiBotPlugin` in `plugin.py`, declare components using decorators, and implement three lifecycle methods:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Command, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -152,6 +168,8 @@ def create_plugin():
     return MyPlugin()
 ```
 
+:::
+
 ::: warning Three lifecycle methods must be implemented
 The SDK requires all plugins to implement `on_load()`, `on_unload()`, and `on_config_update()`. Otherwise, the Runner will refuse to load the plugin. See [Lifecycle](./lifecycle.md) for details.
 :::
@@ -166,7 +184,9 @@ Place the plugin directory into the `plugins/` folder. After starting MaiBot, th
 
 All plugins must inherit from `MaiBotPlugin` and declare plugin capabilities through class attributes and decorators:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Tool, Command, CONFIG_RELOAD_SCOPE_SELF
 from typing import ClassVar, Iterable
 
@@ -188,26 +208,37 @@ def create_plugin():
     return MyPlugin()
 ```
 
+:::
+
 ### Component Decorators
 
 The SDK provides 8 component decorators, all imported from the top level of `maibot_sdk`:
 
-| Decorator | Purpose | Description |
-|--------|------|------|
-| `@Tool` | LLM tool/function calling | Tools callable by the LLM, the most commonly used component type |
-| `@Command` | Slash commands | Commands triggered by users via regex matching |
-| `@HookHandler` | Named Hook handlers | Subscribes to specific Hook points, supports blocking/observe modes |
-| `@EventHandler` | Message/Workflow events | Listens to lifecycle events such as messages and LLM generation |
-| `@API` | Inter-plugin API | Exposes APIs callable by other plugins |
-| `@MessageGateway` | Platform adapter | Integrates external platforms (QQ, Discord, etc.) into MaiBot |
-| `@LLMProvider` | LLM Provider | Declares new LLM model access points (client_type) to extend model services |
-| `@Action` | Legacy plugin compatibility | Internally auto-converted to `@Tool`; new plugins should directly use `@Tool` |
+**`@Tool`** — LLM tool/function calling. Tools callable by the LLM, the most commonly used component type
+
+**`@Command`** — Slash commands. Commands triggered by users via regex matching
+
+**`@HookHandler`** — Named Hook handlers. Subscribes to specific Hook points, supports blocking/observe modes
+
+**`@EventHandler`** — Message/Workflow events. Listens to lifecycle events such as messages and LLM generation
+
+**`@API`** — Inter-plugin API. Exposes APIs callable by other plugins
+
+**`@MessageGateway`** — Platform adapter. Integrates external platforms (QQ, Email, etc.) into MaiBot
+
+**`@HomeCard`** — WebUI home page card. Shows plugin status, entry points, or custom content on the home page
+
+**`@LLMProvider`** — LLM Provider. Declares new LLM model access points (client_type) to extend model services
+
+**`@Action`** — Legacy plugin compatibility. Internally auto-converted to `@Tool`; new plugins should directly use `@Tool`
 
 ### Capability Proxies
 
 Access 17 capability proxies via `self.ctx`. All calls are automatically forwarded to the Host via RPC:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Context access
 self.ctx              # PluginContext instance
 self.ctx.paths        # Plugin persistence and runtime directories
@@ -233,11 +264,15 @@ self.ctx.tool         # LLM tool definition query
 self.ctx.maisaka      # Maisaka context appending and proactive tasks
 ```
 
+:::
+
 ### Configuration Models
 
 Plugins can declare strongly-typed configurations via `PluginConfigBase`. The Runner will automatically generate default configurations and WebUI Schemas:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
 
 
@@ -256,10 +291,12 @@ class MyPlugin(MaiBotPlugin):
         raw = self.get_plugin_config_data()
 ```
 
+:::
+
 - After declaring `config_model`, `self.config` returns a strongly-typed configuration instance
 - Calling `self.config` without declaration will raise a `RuntimeError`
 - `self.get_plugin_config_data()` is always available and returns the raw configuration dictionary
-- The configuration source is `config.toml` in the plugin directory
+- `config_model` defines the configuration structure and defaults, while the Runner stores current runtime values in `config.toml` under the plugin directory
 
 ## Directory Structure Conventions
 
@@ -267,23 +304,28 @@ class MyPlugin(MaiBotPlugin):
 my-plugin/
 ├── _manifest.json       # Required: Plugin manifest
 ├── plugin.py            # Required: Plugin entry point, containing create_plugin()
-├── config.toml          # Optional: Plugin configuration
 ├── i18n/                # Optional: Internationalization resources
 │   ├── zh-CN.json
 │   └── en-US.json
 └── assets/              # Optional: Static assets
 ```
 
-Plugin runtime data should not be written to the plugin source code directory. Starting from SDK 2.6.0, you can obtain the plugin-specific directory injected by the Host via `self.ctx.paths`:
+The configuration model is part of the plugin source, and the Runner generates the runtime configuration instance. The plugin repository's `.gitignore` should include `/config.toml`; after installation, WebUI or runtime configuration APIs maintain the user's configuration.
 
-```python
+Store plugin runtime data in the plugin-specific directories injected by the Host. Starting from SDK 2.6.0, these directories are available through `self.ctx.paths`:
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 self.ctx.paths.data_dir     # Persistent data, default: data/plugins/<plugin_id>/
 self.ctx.paths.runtime_dir  # Temporary data, default: temp/plugins/<plugin_id>/
 ```
 
+:::
+
 - `data_dir` is suitable for storing plugin databases, JSON states, user-generated content, and other data that needs to persist across restarts.
 - `runtime_dir` is suitable for storing download caches, rendering intermediate artifacts, and temporary files that can be rebuilt.
-- Do not use the legacy `plugins/<plugin>/data` path for new data; do not directly concatenate user input into file paths to avoid path traversal attacks caused by `..` or absolute paths.
+- Store new data in these dedicated directories. Map user input to controlled filenames and verify resolved paths remain inside the target directory.
 
 ## Built-in and Third-party Plugins
 
@@ -296,11 +338,13 @@ Both use the same communication protocol and component registration mechanism. T
 
 ## Next Steps
 
+- [Publish a Plugin](./submission.md): Submit your finished plugin to the official plugin center
 - [Manifest System](./manifest.md): Learn the complete field definitions and validation rules for `_manifest.json`
 - [Lifecycle](./lifecycle.md): Learn the lifecycle methods for plugin loading, unloading, and configuration hot-reloading
 - [Hook System](./hooks.md): Learn how to use `@HookHandler` to intercept and modify messages
 - [Tool Component](./tools.md): Learn how to develop tool components callable by LLMs
 - [Command Component](./commands.md): Learn how to develop slash command components
+- [Home Cards](./home-cards.md): Learn how to add plugin cards to the WebUI home page
 - [LLMProvider Component](./llmprovider.md): Learn how to develop custom LLM Providers to integrate new models
 - [Action Component](./actions.md): Learn about the `@Action` decorator compatible with legacy systems
 - [Configuration Management](./config.md): Learn how to declare and use plugin configurations

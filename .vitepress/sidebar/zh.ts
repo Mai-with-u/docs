@@ -2,11 +2,14 @@ import type { DefaultTheme } from 'vitepress'
 
 export const nav: DefaultTheme.NavItem[] = [
   { text: '首页', link: '/' },
-  { text: '用户手册', link: '/manual/deployment/' },
-  { text: '开发文档', link: '/develop/' },
-  { text: '插件开发', link: '/plugin/' },
+  { text: '用户手册', link: '/manual/' },
+  { text: '开发文档', items: [
+    { text: '麦麦开发', link: '/develop/' },
+    { text: '插件开发', link: '/plugin/' },
+  ]},
+  { text: '常见问题', link: '/faq/' },
   { text: '更新日志', link: '/changelog/' },
-  { text: '用户协议', link: '/legal/' },
+  { text: '关于', link: '/about/' },
 ]
 
 export const sidebar: DefaultTheme.Sidebar = {
@@ -20,6 +23,7 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: 'Manifest', link: '/plugin/manifest' },
         { text: '生命周期', link: '/plugin/lifecycle' },
         { text: '配置管理', link: '/plugin/config' },
+        { text: '发布插件', link: '/plugin/submission' },
       ]
     },
     {
@@ -28,58 +32,85 @@ export const sidebar: DefaultTheme.Sidebar = {
       items: [
         { text: 'Tool', link: '/plugin/tools' },
         { text: 'Command', link: '/plugin/commands' },
+        { text: '首页卡片', link: '/plugin/home-cards' },
         { text: 'Hook 处理器', link: '/plugin/hooks' },
         { text: '事件处理器', link: '/plugin/event-handlers' },
         { text: 'API 组件', link: '/plugin/api-components' },
         { text: '消息网关', link: '/plugin/message-gateway' },
         { text: 'LLMProvider 组件', link: '/plugin/llmprovider' },
         { text: 'Action (Legacy)', link: '/plugin/actions' },
-      ]
-    },
-    {
-      text: '参考',
-      collapsed: false,
-      items: [
         { text: 'API 参考', link: '/plugin/api-reference' },
       ]
     },
   ],
-  '/legal/': [
+  '/about/': [
     {
-      text: '法律文档',
+      text: '关于',
       collapsed: false,
       items: [
-        { text: '总览', link: '/legal/' },
-        { text: 'EULA', link: '/legal/EULA' },
+        { text: '关于麦麦', link: '/about/' },
+        { text: '关于文档', link: '/about/about-docs' },
+        { text: '交流群', link: '/about/community' },
+        { text: '致谢与友链', link: '/about/acknowledgements' },
+        { text: 'EULA', link: '/about/EULA' },
+        { text: '隐私条款', link: '/about/PRIVACY' },
+      ]
+    },
+  ],
+  '/faq/': [
+    {
+      text: '常见问题',
+      collapsed: false,
+      items: [
+        { text: '问题分类', link: '/faq/' },
+        { text: '基础使用', link: '/faq/basic-usage' },
+        { text: '部署与启动', link: '/faq/deployment' },
+        { text: '一键包', link: '/faq/one-key' },
+        { text: '适配器', link: '/faq/adapters' },
+        { text: '聊天与回复', link: '/faq/chat-and-reply' },
+        { text: '模型与 API', link: '/faq/models-and-api' },
+        { text: '记忆与学习', link: '/faq/memory-and-learning' },
+        { text: '插件', link: '/faq/plugins' },
+        { text: '备份与迁移', link: '/faq/backup-and-migration' },
+        { text: '错误排查', link: '/faq/error-troubleshooting' },
       ]
     },
   ],
   '/manual/': [
     {
-      text: '部署与安装',
+      text: '入门',
       collapsed: false,
       items: [
-        { text: '部署概览', link: '/manual/deployment/' },
-        { text: '源码安装', link: '/manual/deployment/installation' },
-        //{ text: 'Agent 安装指南', link: '/manual/deployment/installation-agent' },
-        { text: '一键包安装', link: '/manual/deployment/one_key' },
-        { text: 'Docker安装', link: '/manual/deployment/docker' },
+        { text: '快速上手', link: '/manual/' },
+        { text: 'Windows 部署', link: '/manual/deployment/windows' },
+        { text: 'Linux 部署', link: '/manual/deployment/linux' },
+        { text: 'Docker 部署', link: '/manual/deployment/docker' },
       ]
     },
     {
       text: '适配器',
       collapsed: false,
       items: [
-        { text: '适配器概览', link: '/manual/adapters/' },
-        { text: 'NapCat QQ 连接', link: '/manual/adapters/napcat' },
-        { text: 'GoCQ 适配器', link: '/manual/adapters/gocq' },
-        { text: 'SnowLuma 适配器', link: '/manual/adapters/snowluma' },
-        { text: 'Telegram 适配器', link: '/manual/adapters/telegram' },
-        { text: 'Discord 适配器', link: '/manual/adapters/discord' },
+        { text: '接入平台', link: '/manual/adapters/' },
+        { text: 'NapCat', link: '/manual/adapters/napcat' },
+        { text: 'SnowLuma', link: '/manual/adapters/snowluma' },
+        { text: 'QQ 官方', link: '/manual/adapters/qq-official' },
+        { text: 'QQBot', link: '/manual/adapters/qqbot' },
+        { text: '邮件', link: '/manual/adapters/email' },
+        { text: 'QQ 语音通话', link: '/manual/adapters/qq-voice-call' },
+        { text: 'iMessage', link: '/manual/adapters/imessage' },
       ]
     },
     {
-      text: '配置说明',
+      text: '插件',
+      collapsed: false,
+      items: [
+        { text: '安装插件', link: '/manual/plugins/' },
+        { text: '管理', link: '/manual/plugins/management' },
+      ]
+    },
+    {
+      text: '配置',
       collapsed: false,
       items: [
         { text: '配置概览', link: '/manual/configuration/' },
@@ -91,34 +122,15 @@ export const sidebar: DefaultTheme.Sidebar = {
       ]
     },
     {
-      text: '功能介绍',
+      text: '网页管理',
       collapsed: false,
       items: [
-        { text: '功能概览', link: '/manual/features/' },
-        { text: '消息是怎么处理的', link: '/manual/features/message-pipeline' },
-        { text: 'MaiBot 是怎么思考的', link: '/manual/features/maisaka-reasoning' },
-        { text: 'MaiBot 的记忆', link: '/manual/features/memory-system' },
-        { text: '学说话', link: '/manual/features/learning' },
-        { text: '表情包系统', link: '/manual/features/emoji-system' },
-        { text: 'MCP 工具', link: '/manual/features/mcp' },
-      ]
-    },
-    {
-      text: 'WebUI 管理',
-      collapsed: false,
-      items: [
-        { text: 'WebUI 概览', link: '/manual/webui/' },
+        { text: '登录与设置', link: '/manual/webui/' },
         { text: '配置管理', link: '/manual/webui/config-management' },
+        { text: '适配器管理', link: '/manual/webui/adapter-management' },
+        { text: '命令管理', link: '/manual/webui/command-management' },
         { text: '记忆管理', link: '/manual/webui/memory-management' },
-        { text: '插件管理', link: '/manual/webui/plugin-management' },
         { text: '聊天与统计', link: '/manual/webui/chat-stats' },
-      ]
-    },
-    {
-      text: '常见问题',
-      collapsed: false,
-      items: [
-        { text: 'FAQ', link: '/manual/faq/' },
       ]
     },
   ],
@@ -127,45 +139,40 @@ export const sidebar: DefaultTheme.Sidebar = {
       text: '更新日志',
       collapsed: false,
       items: [
-        { text: '版本总览', link: '/changelog/' },
-        { text: '1.0.0 更新专题', link: '/changelog/v1-0-0' },
+        { text: '总览', link: '/changelog/' },
+        { text: '1.0.0 专题', link: '/changelog/v1-0-0' },
       ]
     },
   ],
   '/develop/': [
     {
-      text: '总览',
+      text: '开发总览',
       collapsed: false,
       items: [
         { text: '开发指南', link: '/develop/' },
-        { text: '架构设计', link: '/develop/architecture' },
-        { text: '贡献指南', link: '/develop/contributing' },
+        { text: '风格指南', link: '/develop/style-guide' },
+        { text: 'Markdown 特性', link: '/develop/markdown-features' },
       ]
     },
     {
-      text: '架构详解',
+      text: '进阶专题',
       collapsed: false,
       items: [
-        { text: '消息管线', link: '/develop/architecture/message-pipeline' },
-        { text: 'Maisaka 推理引擎', link: '/develop/architecture/maisaka-reasoning' },
-        { text: '记忆系统', link: '/develop/architecture/memory-system' },
-        { text: 'WebUI 内部机制', link: '/develop/architecture/webui-internals' },
-        { text: '事件总线 (EventBus)', link: '/develop/architecture/event-bus' },
-        { text: '工具系统 (Tool System)', link: '/develop/architecture/tool-system' },
-        { text: '服务层', link: '/develop/architecture/service-layer' },
-        { text: '表达学习', link: '/develop/architecture/expression-learning' },
-        { text: '表情系统内部', link: '/develop/architecture/emoji-internals' },
-        { text: 'MCP 集成', link: '/develop/architecture/mcp-integration' },
-        { text: 'Prompt 模板', link: '/develop/architecture/prompt-templates' },
-        { text: '全局管理器', link: '/develop/architecture/global-managers' },
-      ]
-    },
-    {
-      text: '适配器开发',
-      collapsed: false,
-      items: [
-        { text: '开发指南', link: '/develop/adapter-dev/' },
-        { text: 'PlatformIO 驱动', link: '/develop/adapter-dev/platform-io' },
+        { text: '数据库', link: '/develop/database' },
+        { text: '配置系统', link: '/develop/configuration' },
+        { text: '消息服务器', link: '/develop/message-server-and-adapters' },
+        { text: 'LLM 集成', link: '/develop/llm-providers' },
+        { text: 'MCP 集成', link: '/develop/mcp-integration' },
+        { text: 'WebUI HTTP API', link: '/develop/webui-api/' },
+        { text: '认证与配置', link: '/develop/webui-api/auth-and-setup' },
+        { text: '系统控制', link: '/develop/webui-api/system-control' },
+        { text: '数据与记忆', link: '/develop/webui-api/data-and-memory-api' },
+        { text: '插件生命周期', link: '/develop/webui-api/plugin-lifecycle-api' },
+        { text: '实时统计', link: '/develop/webui-api/realtime-and-stats' },
+        { text: '日志与观测', link: '/develop/observability' },
+        { text: '数据导入导出', link: '/develop/statistics-io' },
+        { text: '事件与钩子', link: '/develop/event-pipeline-hooks' },
+        { text: '运行时架构', link: '/develop/plugin-runtime-internals' },
       ]
     },
   ],

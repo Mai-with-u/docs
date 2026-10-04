@@ -1,210 +1,260 @@
 ---
 title: Docker Deployment
----# 🐳 Docker Deployment Guide
+---
 
-Docker is like a big box that packages MaiBot and everything it needs together, allowing it to run with just one click!
+# Docker Deployment
 
-## 📋 Prerequisites
+## Prerequisites
 
-You need to install:
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+MaiBot Docker deployment requires Docker and Docker Compose, plus at least 2GB of available memory. It supports Linux, macOS, and Windows (via Docker Desktop).
 
-## 🚀 5-Minute Quick Deployment
+First, verify your environment:
 
-### 1. Download MaiBot
+::: code-group
 
-```bash
-git clone https://github.com/Mai-with-u/MaiBot.git
-cd MaiBot
+```bash [~vscode-icons:file-type-shell~]
+docker --version
+docker compose version
 ```
 
-### 2. One-click Start!
+:::
 
-```bash
+If not installed yet, refer to the official docs:
+
+- **Docker** — [Official Installation Docs](https://docs.docker.com/get-docker/)
+- **Docker Compose** — [Official Installation Docs](https://docs.docker.com/compose/install/)
+
+::: tip Domestic Users (China)
+For servers in China, you can use this one-liner:
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+bash <(curl -sSL https://linuxmirrors.cn/docker.sh)
+```
+
+:::
+:::
+
+## Docker Compose
+
+This is the recommended deployment method.
+
+### Using the Official docker-compose.yml
+
+The MaiBot repository provides a complete `docker-compose.yml`. Download it directly:
+
+::: code-group
+
+```bash [curl ~vscode-icons:file-type-shell~]
+curl -o docker-compose.yml https://raw.githubusercontent.com/Mai-with-u/MaiBot/main/docker-compose.yml
+```
+
+```bash [wget ~vscode-icons:file-type-shell~]
+wget -O docker-compose.yml https://raw.githubusercontent.com/Mai-with-u/MaiBot/main/docker-compose.yml
+```
+
+:::
+
+The official configuration includes MaiBot core, NapCat, and database tools, suitable for most users.
+
+### Using the Minimal Configuration
+
+If you only need the MaiBot core without NapCat and database tools, use this minimal configuration:
+
+::: code-group
+
+```yaml [docker-compose.yml ~vscode-icons:file-type-yaml-official~]
+services:
+  core:
+    container_name: maim-bot-core
+    image: sengokucola/maibot:latest   # Official image; run docker compose pull before upgrading
+    environment:
+      - TZ=Asia/Shanghai               # Timezone, affects log and statistics timestamps
+      - EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656    # EULA agreement marker, do not change
+      - PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 # Privacy agreement marker, do not change
+      - WEBUI_HOST=0.0.0.0             # Must listen on 0.0.0.0 inside the container, or the host cannot reach it
+    ports:
+      - "18001:8001"                   # Host 18001 -> container 8001; change the left side if the host port is taken
+    volumes:
+      - ./docker-config/mmc:/MaiMBot/config     # Configuration files
+      - ./data/MaiMBot:/MaiMBot/data            # Runtime data
+      - ./data/MaiMBot/plugins:/MaiMBot/plugins # Plugins
+      - ./data/MaiMBot/logs:/MaiMBot/logs       # Logs
+    restart: always                    # Auto-restart after a crash or server reboot
+```
+
+:::
+
+### Start
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
 docker compose up -d
 ```
 
-The first startup will automatically generate configuration files, and then it will stop and wait for you to configure.
-
-## 📦 What's inside Docker?
-
-Docker will start several services at the same time, just like a team:
-
-- **`core`** — MaiBot core, the brain of the robot 🧠
-- **`napcat`** — QQ connector, enables the robot to go on QQ 📱
-- **`sqlite-web`** — Database tool, view what the robot remembers 📊
-
-## ⚙️ Environment Variables (Advanced Usage)
-
-### Core Service Settings
-
-- **`TZ`** — Timezone, e.g., `Asia/Shanghai`
-- **`EULA_AGREE`** — Skip protocol confirmation (advanced usage, usually no need to worry about it)
-
-### QQ Service Settings
-
-- **`NAPCAT_UID`** — User ID (usually use the default)
-- **`NAPCAT_GID`** — User group ID (usually use the default)
-
-## 💾 Where is the data saved?
-
-Docker saves important data in these locations on your computer:
-
-### Robot Data
-- **Configuration files**: `./docker-config/mmc/` (robot settings)
-- **Runtime data**: `./data/MaiMBot/` (chat logs, memories, etc.)
-- **Plugins**: `./data/MaiMBot/plugins/` (extra features)
-- **Logs**: `./data/MaiMBot/logs/` (runtime records)
-
-### QQ Data
-- **QQ configuration**: `./docker-config/napcat/`
-- **Login information**: `./data/qq/` (no need to log in again next time you start)
-
-## 🔌 Port Description
-
-- **Web Interface** — Port 18001, open http://localhost:18001 in your browser
-- **NapCat Management Panel** — Port 6099, NapCat web configuration panel
-- **Database Tool** — Port 8120, used to view robot data
-
-## 🔗 Connecting to NapCat
-
-`docker compose up -d` will only start the MaiBot and NapCat containers. You still need to complete the NapCat login, WebSocket, and adapter configuration before MaiBot can actually receive QQ messages.
-
-1. Open the NapCat management panel: `http://localhost:6099`
-2. Log in to the NapCat management panel. If a token is required, check the `token` field in `./docker-config/napcat/webui.json`.
-3. Log in to your QQ alternate account in the NapCat management panel.
-4. Enable **Forward WebSocket** or **WebSocket Server** in NapCat's network configuration. The listening port is usually `3001`.
-5. Enable the **NapCat Adapter** in the MaiBot WebUI's plugin management, or edit `./data/MaiMBot/plugins/MaiBot-Napcat-Adapter/config.toml` on the host machine:
-
-```toml
-[plugin]
-enabled = true
-
-[napcat_server]
-host = "napcat"
-port = 3001
-token = ""
-```
-
-::: warning Docker 网络地址
-In Docker Compose, the MaiBot container should use the service name `napcat` when accessing the NapCat container. Therefore, `napcat_server.host` in the adapter configuration is usually filled with `napcat`, not `127.0.0.1`.
-`127.0.0.1` inside the container only refers to the container itself.
 :::
 
-### Cannot receive group messages
+The first launch will automatically generate configuration files.
 
-The NapCat adapter enables chat list filtering by default, and group chats are in whitelist mode by default. If the group number is not added to the whitelist, group messages will be directly discarded by the adapter, making it look like NapCat is connected but MaiBot is not responding.
+**Data Storage Locations**
 
-Edit the `[chat]` configuration in `./data/MaiMBot/plugins/MaiBot-Napcat-Adapter/config.toml`:
+- **Configuration files** — `./docker-config/mmc/`
+- **Runtime data** — `./data/MaiMBot/`
+- **Plugins** — `./data/MaiMBot/plugins/`
+- **Logs** — `./data/MaiMBot/logs/`
 
-```toml
-[chat]
-enable_chat_list_filter = true
-show_dropped_chat_list_messages = true
-group_list_type = "whitelist"
-group_list = ["Your QQ group number"]
-```
+**Port Reference**
 
-If you are just testing locally, you can also temporarily disable list filtering:
+- **WebUI** — 18001 (mapped to 8001 inside the container)
 
-```toml
-[chat]
-enable_chat_list_filter = false
-```
-
-After making changes, restart the core container:
-
-```bash
-docker compose restart core
-```
-
-::: tip WebUI 配置位置
-The WebUI's enabled status, listening address, and in-container port are now all set in the `[webui]` configuration section of `./docker-config/mmc/bot_config.toml`, instead of being configured via a separate WebUI configuration file or environment variables.
+::: warning
+The default WebUI `host` is `127.0.0.1`, which inside a Docker container means only the container itself can access it. When deploying with Docker, make sure to change `host` to `0.0.0.0`.
 :::
 
-By default, `docker-compose.yml` will map the host's `18001` port to the container's `8001` port:
-
-```yaml
-ports:
-  - "18001:8001"
-```
-
-When deploying with Docker, it is recommended to confirm that the WebUI configuration in `./docker-config/mmc/bot_config.toml` is as follows:
-
-```toml
-[webui]
-enabled = true
-host = "0.0.0.0"
-port = 8001
-```
-
-::: warning ⚠️ host 必须改为 0.0.0.0
-The default value of WebUI's `host` is `127.0.0.1` (only listens on the local loopback address), **which inside a Docker container means only the container itself can access the WebUI, and the host machine cannot access it via port mapping**. When deploying with Docker, you must change `host` to `0.0.0.0`, otherwise the WebUI will not open in your browser.
+::: tip
+If your server has the standalone Docker Compose installed, the command should be `docker-compose` (with a hyphen) instead of `docker compose`.
 :::
 
-- `host` is the address the WebUI binds to inside the container. For Docker deployments, it is recommended to use `0.0.0.0`, so that the host port mapping can access the WebUI.
-- `port` is the port the WebUI listens on inside the container, which needs to match the right side of the `docker-compose.yml` port mapping. For example, `8001` in `18001:8001`.
-- If you want to change the browser access port, you usually only need to change the left side of the port mapping. For example, after changing `18001:8001` to `28001:8001`, access it via `http://localhost:28001`.
+## Direct Docker Image Deployment
 
-## 📋 Complete Steps (Step by Step)
+If you just want to quickly pull and run the image without modifying any configuration, use this method:
 
-```bash
-# 1. Download
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+docker pull sengokucola/maibot:latest
+```
+
+:::
+
+Then run the container directly:
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+docker run -d \
+  --name maim-bot-core \
+  -p 18001:8001 \
+  -e TZ=Asia/Shanghai \
+  -e EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656 \
+  -e PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 \
+  -e WEBUI_HOST=0.0.0.0 \
+  -v ./docker-config/mmc:/MaiMBot/config \
+  -v ./data/MaiMBot:/MaiMBot/data \
+  -v ./data/MaiMBot/plugins:/MaiMBot/plugins \
+  -v ./data/MaiMBot/logs:/MaiMBot/logs \
+  --restart always \
+  sengokucola/maibot:latest
+```
+
+:::
+
+This method only starts the MaiBot core. If you also need NapCat and database tools, use Docker Compose deployment instead.
+
+## Building from Source with Docker
+
+If you need to modify the source code, or cannot pull images directly from Docker Hub, you can build locally:
+
+::: code-group
+
+```bash [~vscode-icons:file-type-git~]
 git clone https://github.com/Mai-with-u/MaiBot.git
-cd MaiBot
-
-# 2. First startup (will generate configuration files)
-docker compose up -d
-
-# 3. Modify configuration (Important!)
-# Open ./docker-config/mmc/bot_config.toml and fill in the QQ number
-# WebUI configuration is also in the [webui] section of ./docker-config/mmc/bot_config.toml
-# Open ./docker-config/mmc/model_config.toml and fill in the API key
-# Open http://localhost:6099 to log in to NapCat, and enable Forward WebSocket
-# Enable the NapCat adapter, and set the adapter's napcat_server.host to napcat
-# For group chats, add the group number to the NapCat adapter's group_list, or disable chat list filtering
-
-# 4. Restart to apply configuration
-docker compose restart core
-
-# 5. View logs
-docker compose logs -f core
 ```
 
-## 🔧 Frequently Asked Questions
+:::
 
-### Container exits immediately after starting?
+Enter the folder and build the image:
 
-Check the logs to find the reason:
-```bash
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+docker build -t maibot .
+```
+
+:::
+
+To run the container, the command is the same as direct image deployment, just replace the image name with the locally built `maibot`:
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+docker run -d \
+  --name maim-bot-core \
+  -p 18001:8001 \
+  -e TZ=Asia/Shanghai \
+  -e EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656 \
+  -e PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 \
+  -e WEBUI_HOST=0.0.0.0 \
+  -v ./docker-config/mmc:/MaiMBot/config \
+  -v ./data/MaiMBot:/MaiMBot/data \
+  -v ./data/MaiMBot/plugins:/MaiMBot/plugins \
+  -v ./data/MaiMBot/logs:/MaiMBot/logs \
+  --restart always \
+  maibot
+```
+
+:::
+
+## Accessing WebUI
+
+After starting, MaiBot automatically launches the WebUI service. Open your browser and visit the following address (replace `本机IP` with your server address; use `localhost` if running locally):
+
+```
+http://本机IP:18001
+```
+
+On first launch, the container log will print the WebUI login Token, like this:
+
+```
+07-30 18:53:45 [WebUI] WebUI 配置文件不存在，正在创建: /MaiMBot/data/webui.json
+07-30 18:53:45 [WebUI] WebUI 配置已保存到: /MaiMBot/data/webui.json
+07-30 18:53:45 [WebUI] 新的 WebUI Token 已生成: QSwgc2Vu...
+07-30 18:53:45 [WebUI应用] 🔑 WebUI 登录 Token: 5YWz5rOo5Y+v5LmQ5Za1fiDlhbPms6jlj6/kuZDosKLosKLllrXvvIE=
+07-30 18:53:45 [WebUI应用] 💡 请使用此 Token 登录 WebUI
+07-30 18:53:45 [WebUI服务] 🌐 WebUI 服务器启动中...
+```
+
+Use this command to view container logs:
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
 docker compose logs core
 ```
 
-90% of the time it's because:
-- Configuration file is not filled in correctly (especially the API key)
-- QQ number is filled in incorrectly
+:::
 
-### Not enough memory?
+Copy the Token from the log and paste it into the browser login page to access WebUI. You can later view or modify the Token in `data/webui.json`.
 
-Docker consumes quite a bit of memory. It is recommended to have at least 2GB of free memory.
+Once in WebUI, follow the configuration wizard to set up models and connect platforms.
 
-### Want to stop the robot?
+For detailed steps on configuring models and connecting QQ, refer to [Model Configuration](/en/manual/configuration/model-config) and [Adapters](/en/manual/adapters/).
 
-```bash
-docker compose down
-```
+## Verification & Troubleshooting
 
-### Want to restart?
+**Verify**: `docker compose ps` shows `core` as `Up`, and `curl -I http://127.0.0.1:18001` returns `200` or `307` — the container and WebUI are both ready.
 
-```bash
-docker compose restart
-```
+**Container exits right after starting?**
 
-### Getting an error `unknown shorthand flag: 'd' in -d` when entering commands?
+- Check the logs first: `docker compose logs core`
+- Common causes are insufficient permissions on mounted directories or missing paths in `docker-compose.yml`; fix per the log and retry with `docker compose up -d`
 
-This means your server has the **Standalone** version of Docker Compose installed. Please replace the space in the middle of the command with a **hyphen** to execute:
-```bash
-docker-compose up -d
-```
-Similarly, all subsequent operations in this document in the format of `docker compose <command>` need to be written as `docker-compose <command>` on your server (e.g., `docker-compose restart core`)
+**Port already in use?**
+
+- If the log says `port is already allocated`, change the host-side mappings for `18001`/`18002` in `docker-compose.yml`
+- Or find the process with `ss -ltnp | grep 18001` and stop it
+
+**WebUI unreachable from outside?**
+
+- Confirm the container environment variable `WEBUI_HOST=0.0.0.0`
+- On a cloud server, also allow port `18001` in the security group / firewall
+
+**Can't find the login Token?**
+
+- Filter the logs with `docker compose logs core | grep Token`
+- The Token is also stored in `data/webui.json` for direct viewing
+
+**Image pulls are slow?**
+
+- Configure a Docker registry mirror and run `docker compose pull` again

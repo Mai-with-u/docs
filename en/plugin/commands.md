@@ -1,12 +1,16 @@
 ---
 title: Command Component
----# Command Component
+---
+
+# Command Component
 
 `@Command` is a command component based on regex matching. When a message sent by a user matches a Command's regex pattern, MaiBot will dispatch and execute the corresponding Command handler function.
 
 ## Decorator Signature
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import Command
 
 @Command(
@@ -18,6 +22,8 @@ from maibot_sdk import Command
 )
 ```
 
+:::
+
 ### Parameter Description
 
 - **`name`** `str` — Command name, must be unique within the plugin
@@ -27,7 +33,9 @@ from maibot_sdk import Command
 
 ## Basic Usage
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Command
 
 
@@ -38,20 +46,28 @@ class MyPlugin(MaiBotPlugin):
         return True, "Hello!", 2
 ```
 
+:::
+
 ### Command with Aliases
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 @Command("greet", pattern=r"^/greet", aliases=["/hi", "/hey"])
 async def handle_greet(self, **kwargs):
     await self.ctx.send.text("Hello!", kwargs["stream_id"])
     return True, "Hello!", 2
 ```
 
+:::
+
 Using `/greet`, `/hi`, or `/hey` will all trigger this command.
 
 ### Command with Regex Capture Groups
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 import re
 
 @Command("echo", pattern=r"^/echo\s+(?P<text>.+)$")
@@ -62,6 +78,8 @@ async def handle_echo(self, **kwargs):
     await self.ctx.send.text(f"Echo: {text}", stream_id)
     return True, f"Echo: {text}", 1
 ```
+
+:::
 
 ## Handler Function Parameters
 
@@ -76,15 +94,21 @@ Command handler functions receive `**kwargs`, which contains the following param
 
 Command handler functions must return a triplet:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 return success, response, weight
 ```
+
+:::
 
 - **`success`** `bool` — Whether the command executed successfully
 - **`response`** `str` — Text description of the command execution result
 - **`weight`** `int` — Command priority weight; the higher the value, the higher the priority
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Command executed successfully
 return True, "Operation successful", 2
 
@@ -92,11 +116,15 @@ return True, "Operation successful", 2
 return False, "Parameter error", 1
 ```
 
+:::
+
 ## Regex Pattern Writing Guide
 
 ### Recommended Patterns
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Exact match /hello
 pattern=r"^/hello$"
 
@@ -110,11 +138,15 @@ pattern=r"^/echo\s+(?P<text>.+)$"
 pattern=r"^/set\s+(?P<key>\w+)\s+(?P<value>.+)$"
 ```
 
+:::
+
 ### Using Named Capture Groups
 
 It is recommended to use `(?P<name>...)` named capture groups, which allow you to access matching results by name via `kwargs["matched_groups"]`:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 @Command("ban", pattern=r"^/ban\s+(?P<user>\w+)(?:\s+(?P<reason>.+))?$")
 async def handle_ban(self, **kwargs):
     matched = kwargs.get("matched_groups", {})
@@ -123,6 +155,8 @@ async def handle_ban(self, **kwargs):
     await self.ctx.send.text(f"Banned {user}, reason: {reason}", kwargs["stream_id"])
     return True, f"Banned {user}", 2
 ```
+
+:::
 
 ## Command Execution Flow
 
@@ -142,6 +176,53 @@ sequenceDiagram
     Runner-->>Host: Return result
 ```
 
+## Command Authorization (since 1.2.0) {#command-authorization}
+
+Since 1.2.0, a command can be declared as **operator level** (`permission="operator"`) and the main program authorizes it uniformly at trigger time:
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+@Command(
+    "management",
+    pattern=r"^/pm",
+    permission="operator",  # mark as an operator-level command
+)
+async def handle_management(self, **kwargs):
+    ...
+```
+
+:::
+
+Commands without `permission="operator"` are open to all users.
+
+### Evaluation Logic
+
+Operator-level commands are evaluated uniformly by `has_command_permission()`, allowing execution in the following order:
+
+1. **Operator list** — the user matches a `platform:id` in `[plugin].permission` (e.g. `qq:123456789`)
+2. **Command-level allow rules** — the command's `command_permissions` rule matches (`allow_users` matches the user, or `allow_chats` matches a real chat flow)
+3. **No rule matches** — execution is refused and the user is told "no permission"
+
+### Configuring Command-Level Allow Rules
+
+Configure them in the `[plugin]` section of `bot_config.toml`:
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
+[plugin]
+permission = ["qq:123456789"]  # operator list
+
+[plugin.command_permissions.my-plugin.my-command]
+allow_users = ["qq:987654321"]  # extra allowed users
+allow_chats = ["chat-xxxx"]     # extra allowed real chat flow IDs
+```
+
+:::
+
+These rules can also be maintained visually in the WebUI **Bot Config → Commands** editing mode, see [WebUI Command Management](../manual/webui/command-management.md).
+
 ## Command-Related Hooks
 
 There are built-in Hook points before and after command execution available for `@HookHandler` subscription:
@@ -151,7 +232,9 @@ There are built-in Hook points before and after command execution available for 
 
 ## Complete Example
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Command, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -194,3 +277,5 @@ class AdminPlugin(MaiBotPlugin):
 def create_plugin():
     return AdminPlugin()
 ```
+
+:::

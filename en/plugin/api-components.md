@@ -1,12 +1,16 @@
 ---
 title: API Components
----# API Component
+---
+
+# API Component
 
 `@API` decorator is used to declare API interfaces for inter-plugin communication. Other plugins can call these APIs through `ctx.api.call()` to achieve functional interoperability between plugins.
 
 ## Decorator Signature
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import API
 
 @API(
@@ -17,6 +21,8 @@ from maibot_sdk import API
     **metadata,                 # Additional metadata
 )
 ```
+
+:::
 
 ## Parameter Description
 
@@ -37,7 +43,9 @@ API version number, defaults to `"1"`. Used for API version management; the vers
 
 Directly declare APIs on the plugin class using the `@API` decorator:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, API
 
 
@@ -75,6 +83,8 @@ class RenderPlugin(MaiBotPlugin):
         }
 ```
 
+:::
+
 ## Dynamic API Registration
 
 In addition to statically declaring APIs using the `@API` decorator, you can also dynamically register and unregister APIs at runtime. Dynamic APIs are suitable for scenarios where you need to decide whether to expose an API based on configuration or runtime conditions.
@@ -88,7 +98,9 @@ In addition to statically declaring APIs using the `@API` decorator, you can als
 
 ### Dynamic Registration Example
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
 from typing import Any
 
@@ -140,9 +152,13 @@ class DynamicApiPlugin(MaiBotPlugin):
         return {"language": "zh", "confidence": 0.95}
 ```
 
+:::
+
 ### Dynamic Unregistration Example
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class ManagedApiPlugin(MaiBotPlugin):
     async def on_load(self) -> None:
         # Batch register
@@ -169,6 +185,8 @@ class ManagedApiPlugin(MaiBotPlugin):
         return {"result": "b"}
 ```
 
+:::
+
 ## Calling Other Plugins' APIs
 
 You can query and call public APIs of other plugins through the `self.ctx.api` proxy.
@@ -182,7 +200,9 @@ You can query and call public APIs of other plugins through the `self.ctx.api` p
 
 ### Call Example
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -222,13 +242,19 @@ class CallerPlugin(MaiBotPlugin):
         return result
 ```
 
+:::
+
 ### Querying API Information
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Get detailed information of a specific API
 api_info = await self.ctx.api.get("com.example.translate.translate")
 self.ctx.logger.info("API info: %s", api_info)
 ```
+
+:::
 
 ## API Design Recommendations
 

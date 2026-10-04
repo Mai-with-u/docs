@@ -50,32 +50,49 @@ graph TD
 
 ### 1. 安装 SDK
 
-```bash
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
 pip install maibot-plugin-sdk
 ```
 
+:::
+
 如果你同时在本地修改 `maibot-plugin-sdk`，可以设置环境变量让 MaiBot 的插件 Runner 自动优先使用本地 SDK 源码：
 
-```powershell
+::: code-group
+
+```powershell [PowerShell ~vscode-icons:file-type-powershell~]
 $env:MAIBOT_PLUGIN_SDK_PATH = "C:\GitHub\MaiBot-dev\maibot-plugin-sdk"
 uv run python bot.py
 ```
+
+:::
 
 该路径必须指向包含 `pyproject.toml` 和 `maibot_sdk/` 的 SDK 仓库。设置后，Runner 会把该路径放到 `PYTHONPATH` 最前面，并使用本地 SDK 的 `project.version` 进行插件 manifest 兼容性检查。不要把这个环境变量指向不可信目录；它会让该目录中的 Python 代码进入插件运行时导入路径。
 
 构建本地 SDK 分发包时，在 SDK 仓库中执行：
 
-```powershell
+::: code-group
+
+```powershell [PowerShell ~vscode-icons:file-type-powershell~]
 uv sync --extra dev
 uv run pytest
 uv build
 ```
 
+:::
+
 ::: tip 注意
 安装包名为 `maibot-plugin-sdk`，但代码中导入时使用 `maibot_sdk`：
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Command, Tool
 ```
+
+:::
+
 :::
 
 ### 2. 创建插件目录
@@ -84,15 +101,18 @@ from maibot_sdk import MaiBotPlugin, Command, Tool
 plugins/
 └── my-plugin/
     ├── _manifest.json
-    ├── plugin.py
-    └── config.toml          # 可选
+    └── plugin.py
 ```
+
+插件配置在 `plugin.py` 中通过 `PluginConfigBase` 和 `Field` 声明。Runner 首次加载插件时根据 `config_model` 生成运行时 `config.toml`，并在配置模型更新后补齐新增字段。
 
 ### 3. 编写 Manifest
 
 在 `_manifest.json` 中声明插件元信息（完整字段说明见 [Manifest 系统](./manifest.md)）：
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "manifest_version": 2,
   "id": "com.example.my-plugin",
@@ -122,11 +142,15 @@ plugins/
 }
 ```
 
+:::
+
 ### 4. 编写插件代码
 
 在 `plugin.py` 中继承 `MaiBotPlugin`，用装饰器声明组件，并实现三个生命周期方法：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Command, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -169,6 +193,8 @@ def create_plugin():
     return MyPlugin()
 ```
 
+:::
+
 ::: warning 必须实现三个生命周期方法
 SDK 要求所有插件实现 `on_load()`、`on_unload()` 和 `on_config_update()` 三个方法，否则 Runner 会拒绝加载。详见 [生命周期](./lifecycle.md)。
 :::
@@ -183,7 +209,9 @@ SDK 要求所有插件实现 `on_load()`、`on_unload()` 和 `on_config_update()
 
 所有插件必须继承 `MaiBotPlugin`，通过类属性和装饰器声明插件能力：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Tool, Command, CONFIG_RELOAD_SCOPE_SELF
 from typing import ClassVar, Iterable
 
@@ -205,27 +233,37 @@ def create_plugin():
     return MyPlugin()
 ```
 
+:::
+
 ### 组件装饰器
 
 SDK 提供 8 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
 
-| 装饰器 | 用途 | 说明 |
-|--------|------|------|
-| `@Tool` | LLM 工具/函数调用 | LLM 可调用的工具，最常用的组件类型 |
-| `@Command` | 斜杠命令 | 用户通过正则匹配触发的命令 |
-| `@HookHandler` | 命名 Hook 处理器 | 订阅特定 Hook 点，支持 blocking/observe 模式 |
-| `@EventHandler` | 消息/工作流事件 | 监听消息、LLM 生成等生命周期事件 |
-| `@API` | 插件间 API | 暴露可被其他插件调用的 API |
-| `@MessageGateway` | 平台适配器 | 将外部平台（QQ、Discord 等）接入 MaiBot |
-| `@HomeCard` | WebUI 首页卡片 | 在首页展示插件状态、入口或自定义内容 |
-| `@LLMProvider` | LLM Provider | 声明新LLM模型接入点（client_type），扩展模型服务 |
-| `@Action` | 兼容旧插件 | 内部自动转换为 `@Tool`，新插件应直接使用 `@Tool` |
+**`@Tool`** — LLM 工具/函数调用，LLM 可调用的工具，最常用的组件类型
+
+**`@Command`** — 斜杠命令，用户通过正则匹配触发的命令
+
+**`@HookHandler`** — 命名 Hook 处理器，订阅特定 Hook 点，支持 blocking/observe 模式
+
+**`@EventHandler`** — 消息/工作流事件，监听消息、LLM 生成等生命周期事件
+
+**`@API`** — 插件间 API，暴露可被其他插件调用的 API
+
+**`@MessageGateway`** — 平台适配器，将外部平台（QQ、邮件等）接入 MaiBot
+
+**`@HomeCard`** — WebUI 首页卡片，在首页展示插件状态、入口或自定义内容
+
+**`@LLMProvider`** — LLM Provider，声明新 LLM 模型接入点（client_type），扩展模型服务
+
+**`@Action`** — 兼容旧插件，内部自动转换为 `@Tool`，新插件应直接使用 `@Tool`
 
 ### 能力代理
 
 通过 `self.ctx` 访问 17 种能力代理，所有调用自动通过 RPC 转发到 Host：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 上下文访问
 self.ctx              # PluginContext 实例
 self.ctx.paths        # 插件持久化与运行时目录
@@ -251,11 +289,15 @@ self.ctx.tool         # LLM 工具定义查询
 self.ctx.maisaka      # Maisaka 上下文追加与主动任务
 ```
 
+:::
+
 ### 配置模型
 
 插件可通过 `PluginConfigBase` 声明强类型配置，Runner 会自动生成默认配置和 WebUI Schema：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
 
 
@@ -274,10 +316,12 @@ class MyPlugin(MaiBotPlugin):
         raw = self.get_plugin_config_data()
 ```
 
+:::
+
 - 声明 `config_model` 后，`self.config` 返回强类型配置实例
 - 未声明时调用 `self.config` 会抛出 `RuntimeError`
 - `self.get_plugin_config_data()` 始终可用，返回原始配置字典
-- 配置来源为插件目录下的 `config.toml`
+- 配置结构与默认值由 `config_model` 定义，当前运行值由 Runner 保存在插件目录下的 `config.toml`
 
 ## 目录结构约定
 
@@ -285,23 +329,28 @@ class MyPlugin(MaiBotPlugin):
 my-plugin/
 ├── _manifest.json       # 必需：插件清单
 ├── plugin.py            # 必需：插件入口，包含 create_plugin()
-├── config.toml          # 可选：插件配置
 ├── i18n/                # 可选：国际化资源
 │   ├── zh-CN.json
 │   └── en-US.json
 └── assets/              # 可选：静态资源
 ```
 
-插件运行时数据不应写入插件源码目录。SDK 2.6.0 起可以通过 `self.ctx.paths` 获取 Host 注入的插件专属目录：
+配置模型属于插件源码，运行时配置实例由 Runner 生成。插件仓库的 `.gitignore` 应包含 `/config.toml`，安装后的用户配置由 WebUI 或运行时配置接口维护。
 
-```python
+插件运行时数据统一写入 Host 注入的插件专属目录。SDK 2.6.0 起可以通过 `self.ctx.paths` 获取这些目录：
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 self.ctx.paths.data_dir     # 持久化数据，默认 data/plugins/<plugin_id>/
 self.ctx.paths.runtime_dir  # 临时数据，默认 temp/plugins/<plugin_id>/
 ```
 
+:::
+
 - `data_dir` 适合保存插件数据库、JSON 状态、用户生成内容等需要跨重启保留的数据。
 - `runtime_dir` 适合保存下载缓存、渲染中间产物、可重建的临时文件。
-- 不要使用旧式 `plugins/<plugin>/data` 保存新数据；不要把用户输入直接拼成文件路径，避免 `..` 或绝对路径造成路径逃逸。
+- 新数据使用上述专属目录；处理用户输入时应采用受控文件名映射，并在路径解析后校验结果仍位于目标目录内。
 
 ## 内置插件与第三方插件
 
@@ -314,6 +363,7 @@ MaiBot 维护两个独立的 Runner 子进程：
 
 ## 下一步
 
+- [发布插件](./submission.md)：插件开发完成后，提交到官方插件中心
 - [Manifest 系统](./manifest.md)：了解 `_manifest.json` 的完整字段定义与校验规则
 - [生命周期](./lifecycle.md)：学习插件加载、卸载与配置热重载的生命周期方法
 - [Hook 系统](./hooks.md)：学习如何使用 @HookHandler 拦截和改写消息

@@ -22,7 +22,9 @@ title: Action 组件（Legacy）
 
 **旧写法（@Action）：**
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Action
 
 class MyPlugin(MaiBotPlugin):
@@ -37,9 +39,13 @@ class MyPlugin(MaiBotPlugin):
         return results
 ```
 
+:::
+
 **新写法（@Tool）：**
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
@@ -61,11 +67,15 @@ class MyPlugin(MaiBotPlugin):
         return {"results": results}
 ```
 
+:::
+
 ## @Action 装饰器签名（参考）
 
 以下为 `@Action` 的完整参数签名，仅供旧插件维护参考：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import Action
 
 @Action(
@@ -83,6 +93,8 @@ from maibot_sdk import Action
     **metadata,
 )
 ```
+
+:::
 
 ### ActivationType 枚举
 

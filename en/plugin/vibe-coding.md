@@ -1,6 +1,8 @@
 ---
 title: Vibe Coding Plugin Development Guide
----# Vibe Coding Plugin Development Guide
+---
+
+# Vibe Coding Plugin Development Guide
 
 This guide is for developers using AI to help write MaiBot plugins. The goal is to break down plugin requirements into units that are easy for AI to understand and verify without accidentally modifying the core program.
 
@@ -14,9 +16,9 @@ Use the following as the initial context for the AI, then add your specific requ
 
 ## Development Boundaries
 
-- The plugin directory is fixed to `plugins/<plugin-name>/`; for custom ignores, add `.gitignore` within the plugin directory, do not modify the repository root `.gitignore`.
+- The plugin directory is fixed to `plugins/<plugin-name>/`. Store plugin-specific ignore rules in its `.gitignore`, including `/config.toml`.
 - The plugin entry point is fixed at `plugin.py`, and the factory function is fixed at `create_plugin()`.
-- Plugin metadata is fixed in `_manifest.json`, and runtime configuration is placed in `config.toml`.
+- `_manifest.json` declares plugin metadata, `config_model` in `plugin.py` declares the configuration structure and defaults, and the Runner generates the runtime `config.toml`.
 - New plugins should not modify core program directories such as `src/`, `dashboard/`, `config/`; if core program capabilities are truly needed, explain the reason, impact, and alternatives first before requesting permission.
 - Do not commit local experimental data, logs, temporary scripts, personal keys, tokens, cookies, or database files to the plugin.
 - Dependencies follow the `dependencies` in `_manifest.json`; only sync `pyproject.toml` and `requirements.txt` when maintaining MaiBot core program dependencies.
@@ -27,10 +29,11 @@ Use the following as the initial context for the AI, then add your specific requ
 plugins/my-plugin/
 ├── _manifest.json
 ├── plugin.py
-├── config.toml
 ├── README.md
-└── .gitignore
+└── .gitignore          # Includes /config.toml
 ```
+
+On first load, the Runner generates `config.toml` from `config_model` in the installed plugin directory and fills in newly added fields as the configuration model evolves.
 
 Recommended additional additions:
 
@@ -55,7 +58,9 @@ plugins/my-plugin/
 - `capabilities` only declares strictly necessary capabilities.
 - `i18n.default_locale` recommends using `zh-CN`.
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "manifest_version": 2,
   "id": "com.example.my-plugin",
@@ -86,9 +91,13 @@ plugins/my-plugin/
 }
 ```
 
+:::
+
 ## Code Skeleton
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import Command, Field, MaiBotPlugin, PluginConfigBase, Tool
@@ -159,6 +168,8 @@ def create_plugin() -> MyPlugin:
     return MyPlugin()
 ```
 
+:::
+
 ## Component Selection
 
 - **Let the LLM proactively call capabilities** → `@Tool` — default tools enter the deferred pool and need to be searched/discovered; only high-frequency, low-risk tools should consider `core_tool=True`.
@@ -192,6 +203,7 @@ def create_plugin() -> MyPlugin:
 - WebUI display information can be supplemented via `__ui_label__`, `__ui_icon__`, and `__ui_order__`.
 - Prioritize reading config via `self.config.<section>.<field>`; use `self.get_plugin_config_data()` only when a raw dictionary is strictly needed.
 - Put config hot reload logic in `on_config_update()`.
+- `config_model` is the source configuration definition, while the Runner-generated `config.toml` stores values for the current installation.
 
 ## AI Generated Code Checklist
 
@@ -221,7 +233,7 @@ Self-check each item after the AI completes:
 2. 使用 maibot-plugin-sdk 和 plugin.py / _manifest.json 结构。
 3. 实现 on_load、on_unload、on_config_update、create_plugin。
 4. 配置用 PluginConfigBase + Field，用户可见文本使用简体中文。
-5. 给出 README、config.toml、必要的 .gitignore。
+5. 给出 README、完整配置模型和包含 /config.toml 的 .gitignore。
 6. 完成后说明如何在 MaiBot 中启用和测试。
 ```
 
@@ -229,7 +241,7 @@ Self-check each item after the AI completes:
 
 ```text
 请只修改 plugins/<plugin-name>/ 内的文件，为现有插件增加 <功能描述>。
-先阅读 _manifest.json、plugin.py、config.toml 和 README，沿用现有风格。
+先阅读 _manifest.json、plugin.py 中的配置模型和 README，沿用现有风格。
 不要重构无关代码，不要整理全仓库格式。
 如果需要主程序改动，先停止并说明原因。
 ```
@@ -253,8 +265,10 @@ Self-check each item after the AI completes:
 
 ## Pre-release Checklist
 
-- Plugin root contains `_manifest.json`, `plugin.py`, `README.md`, and `config.toml` examples.
+- Plugin root contains `_manifest.json`, `plugin.py`, `README.md`, and `.gitignore`, with the complete configuration model defined in plugin code.
+- `.gitignore` includes `/config.toml`, and the Runner generates runtime configuration from `config_model`.
 - README includes function description, installation, configuration, commands, permissions/capabilities, and troubleshooting.
-- License is consistent with `_manifest.json` in `license`.n- Dependency declarations are complete, avoiding requiring users to manually install undeclared dependencies.
+- License is consistent with `_manifest.json` in `license`.
+- Dependency declarations are complete, avoiding requiring users to manually install undeclared dependencies.
 - No committed `.venv/`, `__pycache__/`, logs, databases, keys, or local configs.
 - If submitting to a plugin repository, read the repository's contribution guide and organize metadata accordingly.

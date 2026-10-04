@@ -6,7 +6,9 @@ title: API 参考
 
 MaiBot 插件通过 `self.ctx`（`PluginContext`）访问 17 种能力代理。所有能力调用自动通过 RPC 转发到 Host 处理，SDK 会自动解包结果；`ctx.paths` 与 `ctx.logger` 是 Runner 注入的上下文辅助对象。
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 能力代理
 self.ctx.send       # 发送消息
 self.ctx.db         # 数据库操作
@@ -31,23 +33,31 @@ self.ctx.paths      # 插件持久化与运行时目录
 self.ctx.logger     # 日志记录器
 ```
 
+:::
+
 `ctx.paths` 详见下方的 paths 章节；`ctx.logger` 提供标准 `logging.Logger` 实例，详见 logger 章节。
 
-## send — 消息发送
+## send — 消息发送 {#send}
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 send = self.ctx.send
 ```
 
-- `await send.text(text, stream_id)` — 发送文本消息
-- `await send.image(image_data, stream_id)` — 发送图片
-- `await send.emoji(emoji_data, stream_id)` — 发送表情
-- `await send.command(command, stream_id)` — 发送指令消息
-- `await send.forward(messages, stream_id)` — 发送转发消息
-- `await send.hybrid(segments, stream_id)` — 发送图文混合消息
-- `await send.custom(custom_type, data, stream_id)` — 发送自定义类型消息
+:::
 
-```python
+- `await send.text(text, stream_id, **kwargs)` — 发送文本消息
+- `await send.image(image_data, stream_id, **kwargs)` — 发送图片
+- `await send.emoji(emoji_data, stream_id, **kwargs)` — 发送表情
+- `await send.command(command, stream_id, **kwargs)` — 发送指令消息
+- `await send.forward(messages, stream_id, **kwargs)` — 发送转发消息
+- `await send.hybrid(segments, stream_id, **kwargs)` — 发送图文混合消息
+- `await send.custom(custom_type, data, stream_id, **kwargs)` — 发送自定义类型消息
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 发送文本
 await self.ctx.send.text("你好", stream_id)
 
@@ -64,15 +74,37 @@ await self.ctx.send.hybrid([
 ], stream_id)
 ```
 
+:::
+
 说明：`send.custom()` 会同时携带 `custom_type/data` 和 `message_type/content` 两套字段名，用于兼容不同版本的 Host 实现。插件侧只需要继续传 `custom_type` 与 `data`。
 
-所有 `send.*` 方法返回 `bool`，表示是否发送成功。
+**返回值（1.2.0 起）**：默认情况下所有 `send.*` 方法返回 `bool`，表示是否发送成功。传入 `return_details=True` 时，返回包含平台确认的最终消息 ID 的详细结果，便于后续引用（如撤回）：
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+# 默认返回 bool
+ok = await self.ctx.send.text("你好", stream_id)
+
+# return_details=True 返回 {"success": bool, "sent": bool, "message_id": str | None}
+result = await self.ctx.send.text("你好", stream_id, return_details=True)
+if result["sent"] and result["message_id"]:
+    platform_msg_id = result["message_id"]
+```
+
+:::
+
+`return_details` 对 `send.text`、`send.emoji`、`send.image`、`send.forward`、`send.hybrid`、`send.command`、`send.custom` 七个方法均生效。`message_id` 为适配器回传的平台侧最终消息 ID（`platform_message_id`），未成功发送或平台未回传时为 `None`。
 
 ## db — 数据库操作
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 db = self.ctx.db
 ```
+
+:::
 
 - `await db.query(model_name, query_type="get", data=None, filters=None, order_by=None, limit=None, single_result=False)` — 通用数据库操作
 - `await db.save(model_name, data, key_field="id", key_value=None)` — 插入或按字段更新
@@ -84,7 +116,9 @@ db = self.ctx.db
 
 注意：这里的 `model_name` 必须是 Host 侧 `src.common.database.database_model` 中存在的模型类名，例如 `"ChatHistory"`、`"ActionRecord"`。旧版 `table` 参数名和 `db.get(key_field, key_value)` 形式已经废弃。
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 查询
 results = await self.ctx.db.query(
     model_name="ChatHistory",
@@ -125,11 +159,17 @@ await self.ctx.db.delete(
 count = await self.ctx.db.count("ChatHistory", {"session_id": "session-123"})
 ```
 
+:::
+
 ## llm — LLM 调用
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 llm = self.ctx.llm
 ```
+
+:::
 
 - `await llm.generate(prompt, model="", temperature=None, max_tokens=None)` — 文本生成，`prompt` 支持字符串或消息列表
 - `await llm.generate_with_tools(prompt, tools, model="", temperature=None, max_tokens=None)` — 带工具调用的生成
@@ -141,7 +181,9 @@ llm = self.ctx.llm
 
 **generate 返回值**：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 {
     "success": True,
     "response": "生成的文本",
@@ -151,9 +193,13 @@ llm = self.ctx.llm
 }
 ```
 
+:::
+
 SDK 会始终补齐 `model` 字段；若 Host 仍返回旧字段名 `model_name`，SDK 会自动兼容。
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 简单文本生成
 result = await self.ctx.llm.generate(
     prompt="请用一句话介绍 Python",
@@ -207,21 +253,29 @@ if asr_result["success"]:
 models = await self.ctx.llm.get_available_models()
 ```
 
+:::
+
 ## config — 配置读取
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 config = self.ctx.config
 ```
+
+:::
 
 - `await config.get(key, default=None)` — 获取配置值，`key` 支持点分割
 - `await config.get_plugin(plugin_name=None)` — 获取指定插件的配置
 - `await config.get_all()` — 获取插件全部配置
 
-配置来源为插件目录下的 `config.toml`。
+配置结构和默认值由插件的 `config_model` 定义。Runner 将当前安装实例的值保存在插件目录下自动生成的 `config.toml` 中，配置能力代理读取的是 Runner 已加载的运行时配置。
 
 `config.get()`、`config.get_plugin()` 和 `config.get_all()` 都会直接返回配置值或配置字典，不需要手动从 RPC 结果中读取 `value` 字段。
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 读取单个值
 api_key = await self.ctx.config.get("api_key", "")
 timeout = await self.ctx.config.get("network.timeout", 30)
@@ -233,11 +287,17 @@ config = await self.ctx.config.get_plugin("com.example.my-plugin")
 all_config = await self.ctx.config.get_all()
 ```
 
+:::
+
 ## message — 历史消息
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 message = self.ctx.message
 ```
+
+:::
 
 - `await message.get_recent(chat_id, limit)` — 获取最近消息
 - `await message.get_by_id(message_id, chat_id="", stream_id="")` — 按消息 ID 查询单条消息
@@ -248,7 +308,9 @@ message = self.ctx.message
 
 `build_readable` 支持两种调用方式：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 方式 1：传入已查询的消息列表
 msgs = await self.ctx.message.get_recent(chat_id, limit=20)
 readable = await self.ctx.message.build_readable(msgs)
@@ -265,15 +327,21 @@ readable = await self.ctx.message.build_readable(
 )
 ```
 
+:::
+
 可选关键字参数：`replace_bot_name`（默认 `True`）、`timestamp_mode`（默认 `"relative"`）、`truncate`（默认 `False`）。
 
 `message.get_by_time()`、`message.get_by_time_in_chat()` 和 `message.get_recent()` 会直接返回消息列表；`message.count_new()` 直接返回数量；`message.build_readable()` 直接返回字符串。
 
 ## chat — 聊天流
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 chat = self.ctx.chat
 ```
+
+:::
 
 - `await chat.get_all_streams(platform="qq")` — 获取所有聊天流
 - `await chat.get_group_streams(platform="qq")` — 获取所有群聊流
@@ -282,7 +350,9 @@ chat = self.ctx.chat
 - `await chat.get_stream_by_user_id(user_id, platform="qq")` — 按用户 ID 查找私聊流
 - `await chat.open_session(platform, chat_type, **kwargs)` — 打开或创建聊天流
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 获取所有群聊流
 streams = await self.ctx.chat.get_group_streams()
 
@@ -310,11 +380,15 @@ stream = await self.ctx.chat.open_session(
 )
 ```
 
+:::
+
 `chat.open_session()` 会返回 `stream_id`、`session_id`、`chat_type`、`created` 以及完整 `stream` 对象。在多账号或多路由部署中，建议同时传入 `account_id` 和 `scope`，避免打开到错误的聊天流。
 
 ## maisaka — Maisaka 主动任务
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 请求 Maisaka 基于指定聊天流主动处理一轮对话
 result = await self.ctx.maisaka.proactive.trigger(
     stream_id=stream["stream_id"],
@@ -332,19 +406,27 @@ await self.ctx.maisaka.context.append(
 )
 ```
 
+:::
+
 `maisaka.proactive.trigger()` 不会直接发送固定文本，也不会伪装成用户消息。它会把 `intent` 写入 Maisaka 内部上下文并唤醒 Planner，让 Maisaka 基于人格、记忆、当前上下文和可用工具自行决定是否回复以及如何表达。目标聊天流必须已经存在。
 
 ## person — 用户信息
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 person = self.ctx.person
 ```
+
+:::
 
 - `await person.get_id(platform, user_id)` — 获取 person_id
 - `await person.get_value(person_id, field_name)` — 获取用户字段值
 - `await person.get_id_by_name(person_name)` — 根据用户名获取 person_id
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 获取 person_id
 pid = await self.ctx.person.get_id("qq", "12345")
 
@@ -352,11 +434,17 @@ pid = await self.ctx.person.get_id("qq", "12345")
 name = await self.ctx.person.get_value(pid, "nickname") or "未知"
 ```
 
+:::
+
 ## emoji — 表情包管理
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 emoji = self.ctx.emoji
 ```
+
+:::
 
 - `await emoji.get_random(count)` — 随机获取表情包
 - `await emoji.get_by_description(description, limit)` — 按描述搜索
@@ -369,9 +457,13 @@ emoji = self.ctx.emoji
 
 ## frequency — 发言频率
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 frequency = self.ctx.frequency
 ```
+
+:::
 
 - `await frequency.get_current_talk_value(chat_id)` — 获取当前 talk value
 - `await frequency.set_adjust(chat_id, value)` — 设置频率调整值
@@ -381,9 +473,13 @@ frequency = self.ctx.frequency
 
 ## component — 插件与组件管理
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 component = self.ctx.component
 ```
+
+:::
 
 - `await component.get_all_plugins()` — 获取所有插件信息（含各插件注册的组件列表）
 - `await component.get_plugin_info(plugin_name)` — 获取指定插件信息
@@ -403,16 +499,22 @@ component = self.ctx.component
 
 ## api — 跨插件 API
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 api = self.ctx.api
 ```
+
+:::
 
 - `await api.call(api_name, version="", **kwargs)` — 调用其他插件公开的 API
 - `await api.get(api_name, version="")` — 获取单个可见 API 的元信息
 - `await api.list(plugin_id="")` — 列出当前插件可见的 API
 - `await api.replace_dynamic_apis(apis, offline_reason="动态 API 已下线")` — 用新的动态 API 集合替换当前插件已暴露的动态 API
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 调用其他插件公开的 API
 result = await self.ctx.api.call("plugin_a.sum_numbers", a=1, b=2)
 
@@ -420,6 +522,8 @@ result = await self.ctx.api.call("plugin_a.sum_numbers", a=1, b=2)
 apis = await self.ctx.api.list()
 info = await self.ctx.api.get("plugin_a.sum_numbers", version="1")
 ```
+
+:::
 
 说明：
 
@@ -429,16 +533,22 @@ info = await self.ctx.api.get("plugin_a.sum_numbers", version="1")
 
 ## gateway — 消息网关
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 gateway = self.ctx.gateway
 ```
+
+:::
 
 - `await gateway.route_message(gateway_name, message, route_metadata=None, external_message_id="", dedupe_key="")` — 通过指定消息网关把外部平台消息注入 Host
 - `await gateway.update_state(gateway_name, ready, platform="", account_id="", scope="", metadata=None)` — 向 Host 上报消息网关运行时状态
 - `await gateway.receive_external_message(message, gateway_name=..., ...)` — `route_message()` 的兼容别名
 - `await gateway.update_runtime_state(gateway_name=..., connected=..., ...)` — `update_state()` 的兼容别名
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 await self.ctx.gateway.update_state(
     gateway_name="napcat_gateway",
     ready=True,
@@ -462,13 +572,19 @@ accepted = await self.ctx.gateway.route_message(
 )
 ```
 
+:::
+
 详见 [消息网关](./message-gateway.md)。
 
 ## tool — 工具定义
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 tool = self.ctx.tool
 ```
+
+:::
 
 - `await tool.get_definitions()` — 获取 LLM 可用的工具定义列表
 
@@ -476,9 +592,13 @@ tool = self.ctx.tool
 
 ## render — HTML 渲染
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 render = self.ctx.render
 ```
+
+:::
 
 - `await render.html2png(html, **kwargs)` — 将 HTML 内容渲染为 PNG 图片
 
@@ -492,7 +612,9 @@ render = self.ctx.render
 - `wait_until` / `wait_for_selector` / `wait_for_timeout_ms`：控制页面稳定时机
 - `allow_network`：是否允许页面访问外部网络资源
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 card = await self.ctx.render.html2png(
     "<body><div id='card'>Hello MaiBot</div></body>",
     selector="#card",
@@ -503,27 +625,41 @@ card = await self.ctx.render.html2png(
 await self.ctx.send.image(card["image_base64"], stream_id)
 ```
 
+:::
+
 `render.html2png()` 会直接返回 Host 解包后的结果字典，通常包含 `image_base64`、`mime_type`、`width` 和 `height` 等字段。
 
 ## knowledge — 知识库搜索
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 knowledge = self.ctx.knowledge
 ```
 
+:::
+
 - `await knowledge.search(query, limit=5)` — 搜索 LPMM 知识库
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 content = await self.ctx.knowledge.search("Python 是什么", limit=3)
 if content:
     print(content)
 ```
 
+:::
+
 ## statistics — 本机统计
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 statistics = self.ctx.statistics
 ```
+
+:::
 
 `statistics.local.*` 只读取当前 MaiBot 本机统计数据，不包含遥测或上传后的客户端统计数据。插件需要在 `_manifest.json` 的 `capabilities` 中声明对应能力后才能调用。
 
@@ -544,7 +680,9 @@ statistics = self.ctx.statistics
 
 趋势类方法会直接返回 `series` 结构，包含 `timestamps`、`values_by_key`、`labels_by_key`、`total` 和 `source_count`。`token_distribution()` 会直接返回 `distribution` 结构，包含可用于饼图的 `pies`。
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 models = await self.ctx.statistics.local.models(days=7, limit=5)
 token_series = await self.ctx.statistics.local.token_trend(days=7, group_by="model")
 message_series = await self.ctx.statistics.local.message_trend(days=7, top_chats=5)
@@ -552,9 +690,13 @@ message_series = await self.ctx.statistics.local.message_trend(days=7, top_chats
 top_model = models[0]["model_name"] if models else "unknown"
 ```
 
+:::
+
 Manifest 示例：
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "capabilities": [
     "statistics.local.models",
@@ -568,12 +710,18 @@ Manifest 示例：
 }
 ```
 
+:::
+
 ## paths — 运行时路径
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 data_path = self.ctx.paths.data_dir / "records.json"
 runtime_path = self.ctx.paths.runtime_dir / "latest-card.png"
 ```
+
+:::
 
 `ctx.paths` 提供插件专属的标准目录，避免插件把运行数据写进源码目录或自行拼接 Host 根目录。
 
@@ -590,7 +738,9 @@ runtime_path = self.ctx.paths.runtime_dir / "latest-card.png"
 
 ## logger — 日志
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 方式一：通过 ctx.logger（名称自动为 plugin.<plugin_id>）
 logger = self.ctx.logger
 logger.info("插件已启动")
@@ -601,6 +751,8 @@ import logging
 logger = logging.getLogger(__name__)
 logger.warning("配置缺失，使用默认值")
 ```
+
+:::
 
 `self.ctx.logger` 是标准 `logging.Logger`，名称为 `plugin.<plugin_id>`。支持所有标准方法：`debug()`、`info()`、`warning()`、`error()`、`critical()`。
 

@@ -17,7 +17,9 @@ Runner 会校验 manifest 与装饰器收集结果完全一致。任意一边漏
 
 ## 装饰器签名
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import LLMProvider
 
 @LLMProvider(
@@ -29,6 +31,8 @@ from maibot_sdk import LLMProvider
     **metadata,                # 额外元数据
 )
 ```
+
+:::
 
 ### 参数说明
 
@@ -42,7 +46,9 @@ from maibot_sdk import LLMProvider
 
 `_manifest.json` 顶层必须包含 `llm_providers` 数组，与代码中的 `@LLMProvider` 一一对应：
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "llm_providers": [
     {
@@ -54,6 +60,8 @@ from maibot_sdk import LLMProvider
   ]
 }
 ```
+
+:::
 
 ### llm\_providers 字段说明
 
@@ -104,7 +112,9 @@ from maibot_sdk import LLMProvider
 
 在处理方法内通过 `if/elif` 判断 `operation` 类型分别处理：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import LLMProvider, MaiBotPlugin
@@ -135,11 +145,15 @@ def create_plugin():
     return MyLLMPlugin()
 ```
 
+:::
+
 ### 方式二：LLMProviderBase 基类（推荐，逻辑较多时）
 
 继承 `LLMProviderBase`，将分发逻辑交给基类的 `dispatch()` 方法。子类只需实现关心的 operation 方法，未实现的方法会抛出 `NotImplementedError`：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import LLMProvider, LLMProviderBase, MaiBotPlugin
@@ -176,6 +190,8 @@ def create_plugin():
     return MyLLMPlugin()
 ```
 
+:::
+
 `LLMProviderBase` 提供以下方法供子类覆写：
 
 - **`get_response()`** · operation `response` — 生成文本或多模态响应（抽象方法，必须实现）
@@ -192,7 +208,9 @@ def create_plugin():
 
 **\_manifest.json**：
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "id": "com.example.llm-provider",
   "name": "Example LLM Provider",
@@ -210,9 +228,13 @@ def create_plugin():
 }
 ```
 
+:::
+
 **main.py**：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from typing import Any
 
 from maibot_sdk import LLMProvider, LLMProviderBase, MaiBotPlugin
@@ -258,6 +280,8 @@ class ExampleLLMPlugin(MaiBotPlugin):
 def create_plugin():
     return ExampleLLMPlugin()
 ```
+
+:::
 
 ## 卸载与回退
 

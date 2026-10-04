@@ -12,7 +12,9 @@ title: Hook Handler
 
 ## Decorator Signature
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import HookHandler
 from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 
@@ -29,6 +31,8 @@ from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 )
 ```
 
+:::
+
 ## Handler Modes
 
 ### BLOCKING Mode
@@ -44,11 +48,15 @@ from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 - Does not participate in main flow control — returned `modified_kwargs` and `abort` requests are ignored
 - Suitable for scenarios like logging, data analysis that don't affect the main flow
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class HookMode(str, Enum):
     BLOCKING = "blocking"  # Sync wait, can modify data
     OBSERVE = "observe"    # Async observation, cannot modify
 ```
+
+:::
 
 ## Order Slots
 
@@ -80,7 +88,9 @@ Hook handlers are globally sorted according to the following rules:
 
 ### Blocking Mode Example: Intercept and Modify Messages
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, HookHandler
 from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 
@@ -116,9 +126,13 @@ class MyPlugin(MaiBotPlugin):
         return {"action": "continue", "modified_kwargs": kwargs}
 ```
 
+:::
+
 ### Observe Mode Example: Log Recording
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, HookHandler
 from maibot_sdk.types import HookMode, HookOrder
 
@@ -150,9 +164,13 @@ class LogPlugin(MaiBotPlugin):
         # Observe mode return values are ignored
 ```
 
+:::
+
 ### Blocking Mode Example: Modify Send Parameters
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, HookHandler
 from maibot_sdk.types import HookMode, HookOrder
 
@@ -181,6 +199,8 @@ class SendInterceptorPlugin(MaiBotPlugin):
         kwargs["show_log"] = True
         return {"action": "continue", "modified_kwargs": kwargs}
 ```
+
+:::
 
 ## Common Hook Names
 
@@ -261,7 +281,9 @@ If you need to rewrite the exact message list sent by the replyer, use `maisaka.
 
 A common pattern is to first use `maisaka.planner.before_request` to add a parameter schema to the built-in `reply` tool so the planner can fill that parameter, then read `reply_tool_args` in `maisaka.replyer.before_request` to route the model:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, HookHandler
 from maibot_sdk.types import HookMode
 
@@ -293,6 +315,8 @@ class ThinkingLevelPlugin(MaiBotPlugin):
         return {"action": "continue", "modified_kwargs": kwargs}
 ```
 
+:::
+
 Adding or changing a hook name usually does not require plugin SDK runtime changes: `@HookHandler` accepts a string hook name, and availability is validated by the Host-registered HookSpec. SDK-side updates are only needed for constants, type hints, docs, or examples.
 
 ### Expression Selection Chain
@@ -302,7 +326,9 @@ Adding or changing a hook name usually does not require plugin SDK runtime chang
 
 `before_select` receives `chat_id`, `session_id`, `chat_info`, `chat_history`, `reply_message`, `reply_tool_args`, `target_message`, `reply_reason`, `max_num`, `think_level`, and `candidates`. `reply_tool_args` contains extra reply tool arguments other than `msg_id`, `set_quote`, and `reference_info`. `after_selection` also receives `selected_expression_ids` and `selected_expressions`.
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 @HookHandler("expression.select.after_selection", mode=HookMode.BLOCKING)
 async def replace_expression_selection(self, **kwargs):
     strategy = kwargs.get("reply_tool_args", {}).get("expression_strategy")
@@ -311,6 +337,8 @@ async def replace_expression_selection(self, **kwargs):
     kwargs["selected_expression_ids"] = selected_ids
     return {"action": "continue", "modified_kwargs": kwargs}
 ```
+
+:::
 
 ## Handler Return Values
 
@@ -352,7 +380,9 @@ sequenceDiagram
 Calling `WorkflowStep(...)` directly now immediately raises `RuntimeError` — there is no compatibility mapping. You must manually replace all `@WorkflowStep` with `@HookHandler`.
 :::
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Old code (SDK 1.x) — no longer works
 @WorkflowStep(stage="pre_process", blocking=True)
 async def on_pre_process(self, **kwargs):
@@ -363,3 +393,5 @@ async def on_pre_process(self, **kwargs):
 async def on_pre_process(self, **kwargs):
     ...
 ```
+
+:::

@@ -1,32 +1,30 @@
 ---
 title: Configuration Management
----# Configuration Management
+---
+
+# Configuration Management
 
 MaiBot plugins support a declarative configuration management mechanism. By defining strongly-typed configuration models through `PluginConfigBase` and `Field`, the Runner automatically generates default configurations, fills in missing fields, and exposes renderable configuration schemas to the WebUI.
 
-## Configuration File Location
+## Configuration Generation and Storage
 
-Each plugin's configuration file is located under the plugin directory at `config.toml`:
+In `plugin.py`, a plugin uses `config_model` to declare its configuration structure, defaults, and WebUI metadata. When the Runner first loads the plugin, it generates the WebUI Schema and creates the runtime `config.toml` in the installed plugin directory. When fields are added to the configuration model, the Runner fills them into the existing configuration with their model defaults.
 
-```
-my_plugin/
-├── plugin.py          # Plugin entry point
-├── config.toml        # Plugin configuration (optional)
-└── _manifest.json     # Plugin metadata
-```
+The plugin source repository uses `config_model` as its configuration definition, and `.gitignore` should include `/config.toml`. Values changed through WebUI or runtime configuration APIs are stored in `config.toml` under the installed plugin directory.
 
-::: tip config.toml vs _manifest.json
-- `config.toml`: The plugin's **runtime configuration** (feature toggles, parameters, etc.), read by the plugin itself
-- `_manifest.json`: The plugin's **metadata** (ID, version, dependencies, etc.), validated and managed by the Host
-
-The two serve completely different purposes and should not be confused.
+::: tip Responsibilities of configuration-related files
+- `config_model` in `plugin.py`: Defines the configuration structure, types, defaults, and WebUI presentation metadata
+- `config.toml`: Stores the current installation's runtime configuration and is generated and maintained by the Runner
+- `_manifest.json`: Declares the plugin ID, version, dependencies, and capabilities and is validated and managed by the Host
 :::
 
 ## PluginConfigBase Configuration Model
 
 ### Basic Usage
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
 
 
@@ -48,11 +46,15 @@ class MyPlugin(MaiBotPlugin):
         self.ctx.logger.info("Max retries: %d", self.config.max_retries)
 ```
 
+:::
+
 ### Nested Configuration
 
 Implement grouped configuration by nesting `PluginConfigBase` classes:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, PluginConfigBase, Field
 
 
@@ -87,11 +89,15 @@ class MyPlugin(MaiBotPlugin):
         self.ctx.logger.info("Timeout: %s", self.config.advanced.timeout)
 ```
 
+:::
+
 ## Field
 
 `Field` is used to declare metadata for configuration fields:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import Field
 
 Field(
@@ -100,6 +106,8 @@ Field(
     description="...",     # Field description (displayed in WebUI)
 )
 ```
+
+:::
 
 - **`default`** `Any` — Field default value
 - **`default_factory`** `Callable` — Default value factory function, used for mutable types like `list`, `dict`, nested `PluginConfigBase`, etc.
@@ -110,34 +118,46 @@ Field(
 
 `PluginConfigBase` subclasses can set the group title displayed in the WebUI via the `__ui_label__` class attribute:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class PluginSection(PluginConfigBase):
     __ui_label__ = "Basic Settings"  # Title displayed in WebUI
     enabled: bool = Field(default=True, description="Whether to enable the plugin")
 ```
 
+:::
+
 ### __ui_icon__
 
 `PluginConfigBase` subclasses can set the group icon displayed in the WebUI via the `__ui_icon__` class attribute, accepting [Material Icons](https://fonts.google.com/icons) icon names:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class PluginSection(PluginConfigBase):
     __ui_label__ = "Basic Settings"
     __ui_icon__ = "settings"  # Material Icons icon name displayed in WebUI
     enabled: bool = Field(default=True, description="Whether to enable the plugin")
 ```
 
+:::
+
 ### __ui_order__
 
 `PluginConfigBase` subclasses can set the display order of groups in the WebUI via the `__ui_order__` class attribute. Lower values appear first:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class PluginSection(PluginConfigBase):
     __ui_label__ = "Basic Settings"
     __ui_icon__ = "settings"
     __ui_order__ = 0  # Sorting weight for the group in WebUI; lower numbers appear first
     enabled: bool = Field(default=True, description="Whether to enable the plugin")
 ```
+
+:::
 
 ### json_schema_extra
 
@@ -146,7 +166,9 @@ class PluginSection(PluginConfigBase):
 - `placeholder`: Placeholder hint text for the input box
 - `group`: Configuration grouping hint in the WebUI
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class MyPluginConfig(PluginConfigBase):
     """Plugin complete configuration"""
     greeting: str = Field(
@@ -161,11 +183,15 @@ class MyPluginConfig(PluginConfigBase):
     )
 ```
 
+:::
+
 ## Accessing Configuration
 
 ### Strongly-Typed Access (self.config)
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class MyPlugin(MaiBotPlugin):
     config_model = MyPluginConfig
 
@@ -175,14 +201,18 @@ class MyPlugin(MaiBotPlugin):
         timeout = self.config.advanced.timeout
 ```
 
-::: warning 注意
+:::
+
+::: warning Note
 - Calling `self.config` without declaring `config_model` will raise `RuntimeError`
 - Calling `self.config` before the configuration is injected will also raise `RuntimeError`
 :::
 
 ### Raw Dictionary Access
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class MyPlugin(MaiBotPlugin):
     config_model = MyPluginConfig
 
@@ -192,13 +222,17 @@ class MyPlugin(MaiBotPlugin):
         greeting = raw.get("plugin", {}).get("greeting", "Default value")
 ```
 
+:::
+
 `get_plugin_config_data()` is always available, returns `dict[str, Any]`, and does not require declaring `config_model`.
 
 ## Configuration Hot Reload
 
 When the `config.toml` file changes, the Runner automatically triggers the `on_config_update()` callback:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, CONFIG_RELOAD_SCOPE_SELF
 
 class MyPlugin(MaiBotPlugin):
@@ -210,7 +244,9 @@ class MyPlugin(MaiBotPlugin):
             self.ctx.logger.info("Configuration updated, new greeting: %s", self.config.plugin.greeting)
 ```
 
-::: important
+:::
+
+::: info
 `self.config` is automatically updated when `on_config_update(scope="self")` is called, so there is no need to manually re-read it.
 :::
 
@@ -220,7 +256,9 @@ For more on configuration hot reloading, see [Lifecycle](./lifecycle.md#on-confi
 
 The configuration file uses the TOML format, corresponding to the nested structure of `PluginConfigBase`:
 
-```toml
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
 [plugin]
 config_version = "1.0.0"
 enabled = true
@@ -230,6 +268,8 @@ greeting = "Hello!"
 max_retries = 3
 timeout = 30.0
 ```
+
+:::
 
 ### config_version
 
@@ -241,7 +281,9 @@ timeout = 30.0
 
 When certain fields are missing in `config.toml`, the Runner automatically fills them based on the default values of `config_model`:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # If config.toml only has:
 # [plugin]
 # enabled = false
@@ -249,11 +291,15 @@ When certain fields are missing in `config.toml`, the Runner automatically fills
 # The Runner will automatically fill in the default values for the greeting and advanced sections
 ```
 
+:::
+
 ### WebUI Schema
 
 After declaring `config_model`, the Runner automatically generates a WebUI-renderable configuration Schema:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Method on the plugin class (usually does not need to be called manually)
 schema = MyPlugin.build_config_schema(
     plugin_id="com.example.my-plugin",
@@ -262,13 +308,17 @@ schema = MyPlugin.build_config_schema(
 )
 ```
 
+:::
+
 The WebUI renders a configuration form based on the Schema, allowing users to edit the configuration directly in the browser.
 
 ## Reading Configuration via API
 
 In addition to using `self.config` and `self.get_plugin_config_data()`, you can also read configuration through the capability proxy:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Read the plugin's own configuration
 value = await self.ctx.config.get("plugin.greeting")
 
@@ -279,11 +329,15 @@ value = await self.ctx.config.get_plugin("com.other.plugin")
 all_config = await self.ctx.config.get_all()
 ```
 
+:::
+
 ## Not Using config_model
 
 If the plugin configuration is very simple, you can omit declaring `config_model` and directly use `ctx.config` and `get_plugin_config_data()`:
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class SimplePlugin(MaiBotPlugin):
     # Do not declare config_model
 
@@ -295,5 +349,7 @@ class SimplePlugin(MaiBotPlugin):
         # self.config will raise a RuntimeError
         # Do not call self.config
 ```
+
+:::
 
 However, it is recommended to always use `config_model` for better type safety and WebUI integration.

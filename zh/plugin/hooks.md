@@ -12,7 +12,9 @@ SDK 2.0 中 `WorkflowStep` 已被 `@HookHandler` 取代。旧代码仍在使用 
 
 ## 装饰器签名
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import HookHandler
 from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 
@@ -29,6 +31,8 @@ from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 )
 ```
 
+:::
+
 ## 处理模式
 
 ### BLOCKING（阻塞模式）
@@ -44,11 +48,15 @@ from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 - 不参与主流程控制，返回的 `modified_kwargs` 和 `abort` 请求会被忽略
 - 适合日志记录、数据分析等不影响主流程的场景
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 class HookMode(str, Enum):
     BLOCKING = "blocking"  # 同步等待，可修改数据
     OBSERVE = "observe"    # 异步观察，不可修改
 ```
+
+:::
 
 ## 顺序槽位
 
@@ -80,7 +88,9 @@ Hook 处理器按以下规则全局排序：
 
 ### 阻塞模式示例：拦截并修改消息
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, HookHandler
 from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 
@@ -116,9 +126,13 @@ class MyPlugin(MaiBotPlugin):
         return {"action": "continue", "modified_kwargs": kwargs}
 ```
 
+:::
+
 ### 观察模式示例：日志记录
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, HookHandler
 from maibot_sdk.types import HookMode, HookOrder
 
@@ -150,9 +164,13 @@ class LogPlugin(MaiBotPlugin):
         # observe 模式返回值会被忽略
 ```
 
+:::
+
 ### 阻塞模式示例：修改发送参数
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, HookHandler
 from maibot_sdk.types import HookMode, HookOrder
 
@@ -181,6 +199,8 @@ class SendInterceptorPlugin(MaiBotPlugin):
         kwargs["show_log"] = True
         return {"action": "continue", "modified_kwargs": kwargs}
 ```
+
+:::
 
 ## 内置 Hook 清单
 
@@ -279,7 +299,9 @@ async def preserve_selected_reply(self, **kwargs):
 
 常见用法是先通过 `maisaka.planner.before_request` 给内置 `reply` 工具追加参数 schema，让 planner 可以在调用 reply 工具时填入参数；随后在 `maisaka.replyer.before_request` 中读取 `reply_tool_args` 并路由模型：
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import MaiBotPlugin, HookHandler
 from maibot_sdk.types import HookMode
 
@@ -311,6 +333,8 @@ class ThinkingLevelPlugin(MaiBotPlugin):
         return {"action": "continue", "modified_kwargs": kwargs}
 ```
 
+:::
+
 只新增或修改 hook 名本身通常不需要改插件 SDK 运行时代码：`@HookHandler` 接收的是字符串 hook 名，是否可用由 Host 注册的 HookSpec 校验。只有需要 SDK 常量、类型提示、文档或示例同步时，才需要更新 SDK 侧内容。
 
 ## Host 校验规则
@@ -330,7 +354,9 @@ Host 在插件注册阶段会对 `@HookHandler` 声明进行校验，不合法�
 
 `before_select` 会收到 `chat_id`、`session_id`、`chat_info`、`chat_history`、`reply_message`、`reply_tool_args`、`target_message`、`reply_reason`、`max_num`、`think_level`、`candidates`。`reply_tool_args` 包含 reply 工具里除 `msg_id`、`set_quote`、`reference_info` 外的额外参数。`after_selection` 在此基础上额外包含 `selected_expression_ids` 与 `selected_expressions`。
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 @HookHandler("expression.select.after_selection", mode=HookMode.BLOCKING)
 async def replace_expression_selection(self, **kwargs):
     strategy = kwargs.get("reply_tool_args", {}).get("expression_strategy")
@@ -339,6 +365,8 @@ async def replace_expression_selection(self, **kwargs):
     kwargs["selected_expression_ids"] = selected_ids
     return {"action": "continue", "modified_kwargs": kwargs}
 ```
+
+:::
 
 ## 处理器返回值
 
@@ -380,7 +408,9 @@ sequenceDiagram
 直接调用 `WorkflowStep(...)` 现在会立即抛出 `RuntimeError`，不存在兼容映射。必须手动将所有 `@WorkflowStep` 替换为 `@HookHandler`。
 :::
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # 旧代码（SDK 1.x）— 不再可用
 @WorkflowStep(stage="pre_process", blocking=True)
 async def on_pre_process(self, **kwargs):
@@ -391,3 +421,5 @@ async def on_pre_process(self, **kwargs):
 async def on_pre_process(self, **kwargs):
     ...
 ```
+
+:::

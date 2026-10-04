@@ -1,208 +1,130 @@
 ---
 title: SnowLuma 适配器
 ---
+
 # SnowLuma 适配器
 
-SnowLuma 适配器让 MaiBot 通过 [SnowLuma](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter) 连接到 QQ 平台，收发消息、处理群聊和私聊。
+**登录你自己的 QQ 号接入（官方维护）。** SnowLuma 适配器让 MaiBot 通过 [SnowLuma](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter) 接入 QQ，收发消息、处理群聊和私聊，支持语音、表情解析与主动私聊。它是 MaiBot **官方维护的插件**，只有插件模式，直接在 MaiBot 进程内运行。
 
-::: warning 可用（测试中）
-SnowLuma 适配器目前处于测试阶段，功能基本可用，但可能存在未覆盖的边界情况。如遇问题欢迎在 [GitHub Issues](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter/issues) 反馈。
+::: tip 官方持续维护
+SnowLuma 适配器由 MaiBot 官方团队持续维护，遇到问题欢迎在 [GitHub Issues](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter/issues) 反馈。
 :::
 
-## 简介
+::: warning 升级到 MaiBot 1.3.0 时
+MaiBot 1.3.0 需要配合最新版本的 SnowLuma 适配器使用：新版适配器已合并 NapCat 适配器，升级后请**重新设置黑白名单**（原名单不会自动沿用）。
+:::
 
-SnowLuma 适配器是一个 MaiBot 插件，通过 WebSocket 与 SnowLuma 进行双向通信。它的工作方式很简单：
+适配器仓库（🏛️ 官方维护）：
 
-- **入站**：SnowLuma 推送 QQ 消息到适配器，适配器转换后注入 MaiBot
-- **出站**：MaiBot 生成的回复经适配器转换后，通过 SnowLuma 发送出去
-
-与 NapCat 适配器不同，SnowLuma 适配器只有**插件模式**，不提供独立运行方式。适配器直接在 MaiBot 进程内运行，配置更少，部署更简单。
+<Linkcard url="https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter" title="MaiBot-SnowLuma-Adapter" description="MaiBot 官方维护的 SnowLuma QQ 适配器插件" logo="/title_img/mai.png" />
 
 消息流转：**QQ → SnowLuma → 适配器插件（MaiBot 内部）→ MaiBot**
 
-### 适配器仓库
+## 1. 准备 SnowLuma 并登录机器人 QQ 号
 
-SnowLuma 适配器的源码：[Mai-with-u/MaiBot-SnowLuma-Adapter](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter)
+适配器只负责「MaiBot ↔ SnowLuma」这段连接，SnowLuma 本身的部署与登录请按其文档完成，并确保它已启用**正向 WebSocket 服务器**。默认连接 `ws://127.0.0.1:3001`（同机）。
 
-## 安装
+<Linkcard url="https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter" title="SnowLuma 官方文档" description="部署 SnowLuma、登录 QQ、启用正向 WebSocket 服务" />
 
-### 第一步：获取适配器
-
-克隆适配器仓库到 MaiBot 的 `plugins/` 文件夹中：
-
-```bash
-# 进入 MaiBot 的 plugins 目录
-cd MaiBot/plugins
-
-# 克隆仓库
-git clone https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter.git
-```
-
-或者，你也可以通过 MaiBot 的 WebUI 界面安装插件。
-
-### 第二步：配置 SnowLuma 连接
-
-适配器已经在 MaiBot 内部运行了，只需要配置适配器和 SnowLuma 之间的连接信息。编辑适配器的配置文件 `plugins/MaiBot-SnowLuma-Adapter/config.toml`，填写 SnowLuma 的地址和端口。
-
-### 第三步：配置 SnowLuma
-
-确保 SnowLuma 已启用正向 WebSocket 服务器，监听地址和端口需要与适配器配置中的 `luma_client.server` 和 `luma_client.port` 一致。
-
-默认连接地址为 `ws://127.0.0.1:3001`，如果你的 SnowLuma 在同一台机器上运行，保持默认即可。
-
-### 第四步：启动
-
-直接启动 MaiBot 就行，适配器会自动加载并连接。
-
-### 插件默认未启用
-
-SnowLuma 适配器插件安装后**默认是禁用的**，需要手动启用才能连接。
-
-#### 方式一：编辑配置文件（推荐）
-
-编辑 `plugins/MaiBot-SnowLuma-Adapter/config.toml`，将 `enabled` 改为 `true`：
-
-```toml
-[plugin]
-enabled = true   # 改为 true
-config_version = "1.0.0"
-```
-
-然后重启 MaiBot 即可。
-
-#### 方式二：通过 WebUI 启用
-
-1. 浏览器访问 `http://127.0.0.1:8001`，输入 Access Token 登录
-2. 点击左侧菜单 **"插件管理"**
-3. 找到 **"SnowLuma 适配器"**，点击启用开关
-4. 保存配置后重启 MaiBot（或等待插件热重载）
-
-> **验证是否启用**：启动 MaiBot 后，查看日志中是否出现适配器加载和连接成功的提示；如果看到 `已在配置中禁用，跳过激活` 则说明未启用。
-
-## 配置参考
-
-适配器的配置文件位于 `plugins/MaiBot-SnowLuma-Adapter/config.toml`，包含以下四个分组。
-
-### 插件设置 (`[plugin]`)
-
-- **`enabled`** — 是否启用 SnowLuma 适配器。关闭时插件只注册消息网关，不会主动连接 SnowLuma。默认关闭
-- **`config_version`** — 当前配置结构版本（自动管理，一般不需要手动修改）。默认 "1.0.0"
-
-### SnowLuma 连接 (`[luma_client]`)
-
-- **`server`** — SnowLuma WebSocket 服务地址。默认 "127.0.0.1"
-- **`port`** — SnowLuma WebSocket 服务端口。默认 3001
-- **`token`** — SnowLuma 访问令牌（可留空）。默认为空
-- **`connection_id`** — 可选连接标识，用于区分多条适配器链路。默认为空
-- **`reconnect_delay_sec`** — 连接断开后的重连等待时间（秒）。默认 5.0
-- **`action_timeout_sec`** — 调用 SnowLuma 动作接口的超时时间（秒）。默认 10.0
-
-### 聊天过滤 (`[chat]`)
-
-- **`enable_chat_list_filter`** — 是否启用群聊与私聊名单过滤。关闭后仅保留 `ban_user_id` 规则。默认开启
-- **`show_dropped_chat_list_messages`** — 是否记录未通过聊天名单过滤而被丢弃的消息。默认关闭
-- **`group_list_type`** — 群聊名单模式。白名单只接收列表内群聊，黑名单则忽略列表内群聊。默认 "whitelist"
-- **`group_list`** — 群聊名单中的群号列表（自动去重）。默认为空
-- **`private_list_type`** — 私聊名单模式。白名单只接收列表内私聊，黑名单则忽略列表内私聊。默认 "whitelist"
-- **`private_list`** — 私聊名单中的用户 ID 列表（自动去重）。默认为空
-- **`ban_user_id`** — 全局屏蔽的用户 ID 列表，这些用户的消息会在进入 MaiBot 之前被直接丢弃。默认为空
-- **`ban_qq_bot`** — 是否屏蔽 QQ 官方机器人消息。默认关闭
-
-::: tip 群聊白名单默认开启
-适配器默认启用聊天名单过滤，且群聊默认是白名单模式。意味着没有写进 `group_list` 的群消息会被直接丢弃。如果连接成功但群里 @ 机器人没有反应，优先检查这里。
+::: warning 这个 QQ 号就是机器人本体
+SnowLuma 登录的 QQ 号必须与后面 `bot_config.toml` 里的 `qq_account` 完全一致，MaiBot 才能识别「机器人自己」发出的消息。
 :::
 
-测试阶段可以临时关闭名单过滤：
+## 2. 配置 MaiBot 的机器人账号
 
-```toml
-[chat]
-enable_chat_list_filter = false
+编辑 `config/bot_config.toml` 的 `[bot]` 节，让 MaiBot 认识机器人自己：
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
+[bot]
+platform = "qq"       # NapCat / SnowLuma 这类本地客户端适配器都用 qq
+qq_account = "你的QQ号"  # 必须与 SnowLuma 登录的 QQ 号一致
+nickname = "麦麦"
+alias_names = []
 ```
 
-或者把需要测试的群号加入白名单：
+:::
 
-```toml
-[chat]
-enable_chat_list_filter = true
-group_list_type = "whitelist"
-group_list = ["你的QQ群号"]
-```
+- **`platform`** — 填 `"qq"`，即本地客户端适配器的平台标识。
+- **`qq_account`** — 填 SnowLuma 登录的那个 QQ 号（字符串格式），两处必须完全一致。
 
-### 消息过滤 (`[filters]`)
+也可以在 WebUI 中设置：`麦麦设置 → 基础 → 平台账号`，平台选 `qq`，账号填机器人 QQ 号。
 
-- **`ignore_self_message`** — 是否忽略机器人自身发送的消息（建议保持开启，避免机器人处理自己刚发出的消息）。默认开启
+## 3. 配置适配器连接
 
-### 完整配置示例
+配置文件位于 `plugins/MaiBot-SnowLuma-Adapter/config.toml`。下面是一份**完整可复制**的配置模板，按注释修改即可：
 
-```toml
+::: code-group
+
+```toml [config.toml ~vscode-icons:file-type-toml~]
 [plugin]
-enabled = true
-config_version = "1.0.0"
+enabled = true          # 启用适配器，必须为 true 才会建立连接
+config_version = "1.0.6"  # 配置结构版本，一般不要改动
 
 [luma_client]
-server = "127.0.0.1"
-port = 3001
-token = ""
-connection_id = ""
-reconnect_delay_sec = 5.0
-action_timeout_sec = 10.0
+server = "127.0.0.1"   # SnowLuma 地址；同机回环地址
+port = 3001            # 正向 WebSocket 端口，与 SnowLuma 设置一致
+token = ""             # 访问令牌；SnowLuma 开启鉴权后填相同 token
+connection_id = ""     # 连接标识；多实例时区分链路，见本节末尾
+reconnect_delay_sec = 5.0   # 断线重连等待（秒）
+action_timeout_sec = 10.0   # 动作接口超时（秒）
 
 [chat]
+enable_chat_list_filter = true    # 名单过滤，默认开启
+show_dropped_chat_list_messages = true  # 记录被丢弃消息日志（排错时开）
+group_list_type = "whitelist"     # 群聊名单模式：whitelist / blacklist
+group_list = []                   # 群号列表，先加名单再测试，见第 4 节
+private_list_type = "whitelist"   # 私聊名单模式：whitelist / blacklist
+private_list = []                 # 用户 ID 列表
+ban_user_id = []                  # 全局屏蔽的用户 ID，消息直接丢弃
+ban_qq_bot = false                # 屏蔽 QQ 官方机器人消息
+```
+
+:::
+
+### 多实例 `connection_id`
+
+同一台 MaiBot 连多条 SnowLuma 链路时，为每条链路配**不同的 `connection_id`**（如 `primary`、`secondary`），用它作为路由作用域标识，避免链路互相干扰。
+
+## 4. 先加名单，再测试
+
+聊天名单过滤**默认开启且名单为空**——不加名单，任何群聊和私聊消息都会被丢弃，这是接上 QQ 后「没反应」最常见的原因。正确做法是**先把要接入的群 / 用户加进名单，再测试**：
+
+::: code-group
+
+```toml [TOML ~vscode-icons:file-type-toml~]
+[chat]
 enable_chat_list_filter = true
-show_dropped_chat_list_messages = false
-group_list_type = "whitelist"
-group_list = ["123456789"]
-private_list_type = "whitelist"
-private_list = []
-ban_user_id = []
-ban_qq_bot = false
-
-[filters]
-ignore_self_message = true
+group_list = ["123456789"]        # 你的群号
+private_list = ["987654321"]      # 要私聊的用户 ID
 ```
 
-## 验证与排查
+:::
 
-### 验证连接
+测试时想临时放行全部消息，可先关掉过滤观察连通性：
 
-怎么知道连上了？看这几个地方：
+::: code-group
 
-1. **WebUI 插件列表**：能看到 SnowLuma 适配器插件已加载
-2. **MaiBot 日志**：看到 `SnowLuma WebSocket 已连接` 的提示
-3. **发消息测试**：在 QQ 群里 @机器人，看有没有回复
-
-### 连不上怎么办？
-
-**检查这几点**：
-
-- SnowLuma 的地址和端口填对了吗？和适配器 `luma_client.server` / `luma_client.port` 一致吗？
-- 防火墙拦住了吗？
-- SnowLuma 和 MaiBot 在同一台机器吗？
-- 访问令牌 `token` 填对了吗？
-- 日志里有什么报错信息？
-
-### 收不到消息？
-
-**可能原因**：
-
-- 群聊白名单默认开启，你的群号加入 `group_list` 了吗？
-- `enabled` 设为 `true` 了吗？
-- SnowLuma 本身收到消息了吗？看 SnowLuma 的日志
-- 网络连接正常吗？
-
-### 发不出消息？
-
-**排查方法**：
-
-- 机器人有发言权限吗？（群聊需要权限）
-- 看 MaiBot 日志有什么报错
-- `action_timeout_sec` 设置是否合理？网络延迟较高时可以适当增大
-
-### 多实例部署
-
-如果需要同一个 MaiBot 对接多个 SnowLuma 实例（比如多个 QQ 号），可以为每个实例配置不同的 `connection_id` 来区分链路：
-
-```toml
-[luma_client]
-connection_id = "bot-1"
+```toml [TOML ~vscode-icons:file-type-toml~]
+[chat]
+enable_chat_list_filter = false   # 仅临时测试，调试完记得加回名单再打开
 ```
+
+:::
+
+::: tip 还有一层主程序名单
+除了适配器自己的 `[chat]` 名单，MaiBot 主程序在 `config/adapter_policy.toml` 里还有一套统一的群聊 / 私聊访问策略。**两层都放行，消息才会进入对话**；排查"没反应"时两层都要看，入口见 [适配器管理](../webui/adapter-management.md)。
+:::
+
+## 验证与排错
+
+**验证连接** — WebUI 插件列表已加载；日志出现 `SnowLuma WebSocket 已连接`；群里 @ 机器人有回复，即成功。
+
+**连不上** — 核对 `luma_client.server` / `port` 与 SnowLuma 正向 WebSocket 监听地址一致；SnowLuma 是否已开启正向 WS 服务、端口是否被防火墙拦截、是否同机；若开启鉴权，`token` 是否与 SnowLuma 设置一致。
+
+**连接成功但群里 @ 机器人没反应** — 首选查聊天名单：确认该群已加入 `group_list`；可临时设 `enable_chat_list_filter = false` 或打开 `show_dropped_chat_list_messages` 观察丢弃日志。其次确认 `plugin.enabled = true`。
+
+**能收不能发** — 机器人有无发言权限；`action_timeout_sec` 是否太短；确认 `bot_config.toml` 的 `qq_account` 与 SnowLuma 登录 QQ 一致。
+
+**麦麦把自己的消息当成别人** — `bot_config.toml` 的 `qq_account` 与 SnowLuma 登录的 QQ 号不一致，改成一致后重启主程序。

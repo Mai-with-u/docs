@@ -1,76 +1,220 @@
 ---
 title: Changelog
----# Changelog
+description: Feature updates, fixes, and configuration changes across MaiBot releases.
+---
 
-This page records the major version updates of MaiBot. For the complete changelog, please refer to [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases).
+# Changelog
 
-## v1.0.0
+For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
 
-1.0.0 is a systematic upgrade. For a more complete illustrated explanation, you can read the [MaiBot 1.0.0 Update Feature](./v1-0-0.md).
+::: timeline 2026-09-28
 
-### Major Updates
+### Webui [1.8.0]
 
-- **Maisaka Inference Engine Refactoring**: Comprehensively upgraded the collaboration mechanism between planning and reply generation, Planner and Replyer now achieve deep integration
-- **Thinking Effort Mechanism**: Dynamically controls reply time and length, making the reply rhythm more natural
-- **A-Memorix Memory Engine v1.0**: Brand new long-term memory system, supporting knowledge graphs, character profiles, and chat summaries
-- **Feedback Correction System**: Automatically corrects outdated memories based on user feedback, maintaining memory timeliness
-- **MCP Built-in Plugin**: Model Context Protocol added as a built-in plugin, disabled by default
-- **Global Memory**: Added global memory configuration, allowing memory retrieval across sessions
+* MaiMai Observation now shows thinking and tool-execution status as soon as the Planner returns, and updates results in place when a tool finishes; fixed new rounds overwriting old cards after a restart; `tool_search` now shows the search terms and activated tool list separately.
 
-### WebUI Major Updates
+* MaiMai Settings moves manual save, shared-group settings, and source-file editing into an ellipsis menu, keeping detailed settings and command management at the top; shared-group settings replace core settings, and the sidebar chat-management entry is removed.
 
-- **Model Preset Marketplace**: Model configurations can be fully shared, the share button is located in the upper right corner of the model configuration interface
-- **Comprehensive Security Hardening**: Authentication protection added to all WebUI API and WebSocket endpoints, Cookie Secure and SameSite attributes added
-- **Frontend Authentication Refactoring**: Migrated from localStorage to HttpOnly Cookie, added a WebSocket temporary token authentication mechanism
-- **Enhanced Plugin Configuration Management**: Supports loading and saving raw TOML configurations, frontend supports viewing and editing plugin configuration source files
+* In MaiMai Chat, the local user identity box moves to the right of the input area, with avatar and nickname editable in the same box; chat-stream browsing is removed from chat management and unified in the MaiMai Chat page, while chat management keeps shared-group management.
 
-### Feature Detail Updates
+* Improved the mobile experience and chat-stream reading in MaiMai Chat with related fixes, refreshed the login page styling, and removed unused feature code.
 
-- Removed frequency auto-adjustment
-- Removed emotion feature
-- Optimized memory retrieval timeout settings
-- Active selection of the cloned branch during plugin installation
-- Homepage feedback questionnaire feature, allowing submission of feedback and suggestions
-- Slang and expressions no longer extract content containing names
-- Model interface supports editing extra params fields
-- Model task assignment supports editing slow request detection thresholds
-- Model interface supports specifying temperature and max_tokens parameters for individual models
+* Fixed being unable to change the embedding model in the WebUI.
 
-## v0.12.2
+### Main program
 
-- Optimized private chat wait logic
-- Force quote reply on timeout
-- Fixed disconnection issues with some adapters
-- Fixed expression reflection configuration not taking effect
-- Optimized memory retrieval logic
+* No more fallback for vision embedding models: when an image embedding model is unavailable, MaiBot no longer silently switches to another model.
 
-## v0.12.1
+:::
 
-### 🌟 Major Updates
+::: timeline 2026-09-26
 
-- Added year-end summary feature, viewable in WebUI
-- Optional LLM judgment for quote replies
-- Expression optimization: supports automatic and manual evaluation, making it more precise
-- Reply and planning records: WebUI can view the details of each reply and plan
+### Main program
 
-### Feature Detail Changes
+* Fixed punctuation-less long text caused by reply splitting; sentence separators are restored when segments are joined.
 
-- Optimized display of messages with long intervals
-- Enabled jargon detection (enable_jargon_detection)
-- Global memory blacklist (global_memory_blacklist), specifying certain group chats to not participate in global memory
-- Removed utils_small model, removed deprecated LPMM model
+* Fixed a memory anomaly caused by the statistics task.
 
-## v0.12.0
+* Fixed incorrect Prompt cache statistics; cache price now defaults to the same value as the input price, so existing configs may need a manual cache-price update.
 
-### 🌟 Major Updates
+* The plugin market now supports installing different versions of a plugin.
 
-- Added thinking effort mechanism, dynamically controlling reply time and length
-- Planner and Replyer integration, better reply logic
-- New private chat system
-- Added MaiMai dreaming feature
-- MCP plugin added as a built-in plugin
-- Added global memory configuration
+* Improved compatibility with adapter plugins; adapter plugins can use MaiBot's built-in allow/deny lists directly.
+
+* The SnowLuma adapter must be updated to the latest version: the new adapter has merged the NapCat adapter, and the allow/deny lists must be re-configured after upgrading.
+
+### Webui [1.7.5]
+
+* Category statistics add a "By task group" view that aggregates call count, tokens, cost, cache, and latency by the actual model task config.
+
+* Greatly improved WebUI plugin-market loading speed.
+
+* Improved the long-term memory interaction experience; the long-term memory page adds image-memory management for viewing image assets, cognitions, and related memories, with confirmation, correction, and record deletion.
+
+* Improved the MaiMai Observation page, adding "Find previous"; it shows context segment ratios, session cumulative tokens, and average cache hit rate, and chat-stream settings can be opened directly from the chat view.
+
+### Memory
+
+* Added image memory, which requires configuring an image embedding model (the `image_embedding` task); a dedicated image vector pool supports image search and other query paths.
+
+* Added `.amembundle` export, validation, and LLM-free installation, supporting LPMM-equivalent knowledge packages and full packages that include person profiles, Episodes, the fact ledger, external references, and lifecycle state.
+
+### Models
+
+* Improved the model testing flow.
+
+* Image embedding models now automatically support Bailian, SiliconFlow, and Volcano models.
+
+* Model pricing supports per-time-of-day periods that combine input, output, and cache-hit unit prices.
+
+* The thinking switch on the model config page now adapts to provider templates: the general switch covers Zhipu/Kimi/MiniMax/Doubao (`thinking.type`), Bailian/SiliconFlow (`enable_thinking`), StepFun/OpenAI/xAI; Doubao and Qwen support a thinking budget; DeepSeek keeps a dedicated switch (including the Responses client and web search). Added provider templates for Zhipu Coding Plan (GLM Coding Plan), StepFun Step Plan, and Volcano Ark Coding Plan.
+
+### Debugging
+
+* Added a "Force plugin compatibility" debug switch.
+
+* Fixed Fake-IP resolution in the plugin market.
+
+### Configuration changes
+
+* `model_config.toml`: the per-task `slow_threshold` (slow-request warning threshold) has been removed; the field is ignored and cleaned up when loading old configs.
+
+* `model_config.toml`: the model `cache` field no longer affects billing logic; whether cache hits are billed is now decided by `cache_price_in`, and whether a provider returns cache usage is auto-detected from the response.
+
+* `bot_config.toml`: new options for image memory, the retro reply prompt, splitting mode, the event-loop lag watchdog, and forced plugin compatibility. See the updated configuration docs under the manual.
+
+:::
+
+::: timeline 2026-09-15
+### Maisaka [1.2.5]
+* Long-term memory time search now supports both `YYYY/MM/DD` and `YYYY-MM-DD` date formats.
+* Enhanced reply formatting now appends a space after `@` mention components to cleanly separate mentions from surrounding text.
+* Fixed occasional tool invocation failures.
+
+### Webui [1.7.4]
+* Fixed an issue preventing saving or editing providers when the model list was empty; providers can now be saved before models are added.
+* Added a settings entry for live chat streams in Mai Chat to directly open stream management details.
+* Operator permission matching no longer converts `user_id` to lowercase.
+
+### Plugin SDK/API
+* Fixed an issue where the plugin LLM interface mistook model names for task names; task and model name can now be specified separately.
+
+:::
+
+::: timeline 2026-09-01
+- [1.2.4] Plugin tools can request ending the Planner after execution; models can stop sending the temperature parameter; WebUI [1.7.3] merges MaiMai Observation into the chat workspace and streamlines memory management
+- Maisaka: when a plugin tool returns `stop_after_execution: true` successfully, the Planner ends after the current tool batch finishes and waits for new messages
+- Models: model advanced settings add a "Send temperature parameter" switch (`send_temperature`, on by default); when off, MaiBot no longer sends any MaiBot-managed temperature — model-level, task-level, or from extra parameters — for compatibility with models that reject this parameter
+- WebUI [1.7.3]: the standalone "MaiMai Observation" page merges into the chat workspace; the sidebar now shows chattable sessions and read-only chat streams (marked with an "Observing" badge) in one place, and clicking a chat stream opens its reasoning timeline inline
+- WebUI [1.7.3]: long-term memory run status moves into the "More actions" menu, simplifying the top of the memory management page; tuning parameters and import common/advanced parameters collapse into dialogs; the audit timeline layout is adjusted — the audit scope now spans the full row and change summaries merge into the event list
+- WebUI [1.7.3]: emoji keyword-recognition prompts integrate into the "Prompt Management" page, with per-language editing, custom versions, and hot reload
+- Long-term memory: multiple fixes for person profile refresh, authoritative fact and alias maintenance, and memory import/audit flows; no config changes
+:::
+
+::: timeline 2026-08-23
+- [1.2.3] Expression config compatibility fix and Maisaka orphan tool message fix
+- Expressions: fixed startup failures when an old config still used the `vector` selection mode; after upgrading, the first launch auto-migrates it to `vector_intent` (Super Fine) and writes the config back
+- Maisaka: fixed orphan tool messages
+:::
+
+::: timeline 2026-08-23
+- [1.2.2] Expression selection performance and accuracy improved; WebUI resource management and model config experience comprehensively upgraded
+- Expressions: MMR diversity reranking rewritten with vectorized implementation, significantly faster on large candidate pools; adjusted vector similarity weight mix, removed lexical overlap scoring to avoid false interference on short texts and CJK content; removed `vector` selection mode, existing configs auto-upgrade to `vector_intent`
+- WebUI [1.7.2]: model provider form adds custom request headers and a collapsible advanced config panel; task config adds hard timeouts for text and vision tasks, auto-falling back to the next model on timeout; adding a model now defaults to the currently filtered provider; model test image replaced with a standard PNG for broader vision model compatibility
+- WebUI resource management: curated expression management refactored — "review/approve" unified as "curate", top tabs replaced by dropdown menu, detail and edit dialogs merged, pagination now supports per-page count selection; jargon list pagination and layout restructured, status filter changed from tabs to dropdown, added prompt template entry; emoji filter and sort unified into the filter card, status switch changed from tabs to dropdown, sort split into field selector + asc/desc toggle, default sorted by registration time (newest first)
+- WebUI misc: login page now supports `redirect` query parameter — embedded pages return to their original location after login; prompt version management adds delete endpoint, auto-restoring the default prompt when the active version is deleted; expression and jargon lists use unified transparent background styling in the retro theme
+- Models: temporarily compatible with V4V-class vision model image formats — animated GIF/WebP frames are converted to PNG (first frame only) before submission
+- Plugins: "allow/deny" wording in plugin config unified as "read/do not read", more semantically accurate to the actual functionality
+- Maisaka: adjusted person reference wording in planning prompts
+- Engineering: PyPI index config now supports multi-source fallback (Tsinghua → Aliyun → official), improving install reliability in mainland China
+:::
+
+::: timeline 2026-08-19
+- [1.2.1] Fixed MCP long-running calls being wrongly timed out, Maisaka final-message compatibility and own-message identification; WebUI now applies saved model config immediately and displays offline adapters correctly
+- MCP: fixed Streamable HTTP long-running tool calls wrongly using the HTTP request timeout; reading responses now follows the session read timeout
+- Maisaka: fixed compatibility of the final assistant message, now ending with a user message; own messages are now always marked to reduce the model mistaking message sources (removed the `self_message_special_mark` config option)
+- WebUI [1.7.1]: model config is now synced to the runtime immediately after saving, avoiding configs not applying in Docker; fixed chat page monitoring state (errors and thinking order); offline adapters are now displayed correctly
+- Adapters: deleting a group chat now also cleans up the explicit allow/deny rules in the adapter policy
+- Config: fixed WebUI saving configuration potentially producing invalid TOML
+:::
+
+::: timeline 2026-08-18
+- [1.2.0] Maisaka: Replyer now uses different reply modes per scenario for more diverse replies; improved Replyer organization
+- Reply effect evaluation upgraded (currently v6): responsiveness no longer considers reply speed, removed the raw total score without clear semantics, records without related info are marked "completed / no info", records that didn't finish the observation window are marked "incomplete" and excluded from scoring; score distribution is now a per-sample scatter plot; supports deleting / clearing score records
+- Models: official support for the Response endpoint; model context and output upgraded to a flat Item-first structure, keeping body, reasoning, function calls, tool results and provider-native activities separate
+- Expression: fixed repeated abnormal restarts after expression vector index corruption; optimized online index maintenance (incremental assignment, k-means++, lock-free atomic writes)
+- Adapters: bot platform accounts now persist the identity reported by the adapter, so multiple accounts on one instance are reliably recognized; adapters can auto-discover their ID; access policy adds independent group and private default actions (allow by default, switchable to deny)
+- WebUI [1.7.0]: new dedicated adapter management and unified command management pages; improved model configuration layout; fixed local model testing bug; settings page shows discovered adapter accounts with online status and soft disable / restore; group frequency can be set per mode (with wildcard and default config); reasoning logs now show input, output and total tokens
+- Messages: nested forwarded messages can now be viewed
+- Plugin SDK: `send.text`, `send.emoji`, `send.image`, `send.forward`, `send.hybrid`, `send.command` and `send.custom` support `return_details=True` to get the platform-confirmed final message ID
+- Improved startup onboarding
+:::
+
+::: timeline 2026-08-04
+- [1.1.4] Models: added support for the OpenAI Responses API (text, images, structured output, function tools, native tools, streaming events and usage stats); added native web search for DeepSeek v4 flash with related parameters
+- Maisaka: Responses native web search summaries (query, action, status and source count for the round) shown in the monitor and regular logs
+- WebUI [1.6.3]: new native detailed statistics page (keeps the old HTML report, interactive filtering by model/module/request type/chat flow, trends and performance metrics)
+- Plugin management: shows conflicting directories of duplicate plugins with explicit load failure reasons; refreshes runtime state immediately after enabling a plugin; cleans up empty plugin root directories on startup
+- Fixed being unable to add a new model provider when both model and provider lists are empty; improved plugin market card layout
+:::
+
+::: timeline 2026-07-28
+- [1.1.3] WebUI: optimized sidebar hover behavior, page colors and layout, new storage management page
+- Maisaka: fixed Planner native reasoning incorrectly passed as body to Replyer; added typo correction message references
+- [1.1.2] WebUI: optimized homepage cards
+- [1.1.1] Main program: statistics charts split into customizable cards, fixed memory growth from full model call detail loading
+- WebUI: LLM request error classification in reasoning view, global AI search upgraded to draggable multi-turn Agent overlay
+- Chat: fixed session teardown on page switch, default nickname "Human", user avatar and emoji support
+- Plugin list now layered by load status; homepage version and card layout streamlined
+- Maisaka: added `reply.before_post_process` Hook for per-reply text post-processing control
+- MCP: process-level shared server connections with hot reload, improved WebUI MCP configuration
+:::
+
+::: timeline 2026-07-22
+- [1.1.0] Main program: optional interactive terminal input with `/clear`, `/pm`, `/offline`, `/online` commands for chat and adapter management
+- A_Memorix: long-term memory lifecycle (decay/freeze/restore/protect/recycle bin), improved retrieval quality and character profiles
+- Legacy memory migration fixes: orphaned associations, timeline selection, entity renaming issues
+- Maisaka: separated behavior style from persona, fixed cross-day time reminder interrupting tool chains
+- WebUI: fixed frequency display precision, QQ number config, model rename, and homepage animation issues
+- Plugins: automatic compatibility check after host update, tightened Host version range
+:::
+
+::: timeline 2026-07-09
+- [1.0.12] Improved Planner-to-Replyer information transfer and reduced duplicate replies
+- WebUI: more reliable offline observation records, custom API model lists, multiple model configurations, data import/export, and upgrade announcements
+- Initial setup now guides users to replace the temporary startup Token with a persistent Token
+- Messaging: the host can control adapter admission; fixed handling of oversized emoji images
+:::
+
+::: timeline 2026-06-12
+- [1.0.0] **Systematic upgrade!** Maisaka inference engine refactored with Planner-Replyer deep integration
+- Thinking effort mechanism: dynamically controls reply time and length
+- A-Memorix Memory Engine v1.0: knowledge graphs, character profiles, chat summaries
+- Feedback correction system: automatically corrects outdated memories
+- MCP built-in plugin; global memory configuration added
+- WebUI: Model preset marketplace, comprehensive security hardening, frontend auth refactoring
+- For a more complete illustrated explanation, see the [MaiBot 1.0.0 Update Feature](./v1-0-0.md)
+:::
+
+::: timeline 2026-01-11
+- [0.12.2] Optimized private chat wait logic, force quote reply on timeout
+- Fixed disconnection issues with some adapters, optimized memory retrieval logic
+:::
+
+::: timeline 2025-12-31
+- [0.12.1] Year-end summary feature (WebUI), optional LLM judgment for quote replies
+- Expression optimization: automatic and manual evaluation support
+- Reply and planning records viewable in WebUI
+- Global memory blacklist: exclude specific group chats from global memory
+:::
+
+::: timeline 2025-12-21
+- [0.12.0] Thinking effort mechanism: dynamic reply time and length control
+- Planner and Replyer integration, new private chat system
+- MaiMai dreaming feature, MCP plugin as built-in
+- Global memory configuration added
+:::
 
 ## Earlier Versions
 
-For the changelog of earlier versions, please refer to [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases) or the `changelogs/` directory in the project repository.
+For changelog of earlier versions, see [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases).

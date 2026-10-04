@@ -8,7 +8,9 @@ title: 首页卡片
 
 ## 基本示例
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import HomeCard, MaiBotPlugin
 
 
@@ -42,19 +44,19 @@ class StatusCardPlugin(MaiBotPlugin):
         return None
 ```
 
+:::
+
 ## 参数
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `name` | `str` | 必填 | 卡片组件名称，同一插件内唯一 |
-| `title` | `str` | 必填 | 首页显示标题 |
-| `content` | `str \| dict \| list[dict]` | `""` | 卡片内容。字符串按 Markdown 渲染；列表按内容块渲染 |
-| `description` | `str` | `""` | 卡片描述 |
-| `link_url` | `str` | `""` | 可选跳转链接，支持 WebUI 内部路径、`http(s)`、`mailto` |
-| `link_label` | `str` | `""` | 跳转按钮文案 |
-| `icon` | `str` | `""` | 可选图标名，供 WebUI 展示扩展 |
-| `width` | `str` | `"medium"` | 卡片宽度：`small` = 2/10、`medium` = 3/10、`large` = 5/10、`wide` = 7/10、`full` = 10/10 |
-| `order` | `int` | `1000` | 默认排序值，越小越靠前 |
+**`name`** `str`（必填）— 卡片组件名称，同一插件内唯一
+**`title`** `str`（必填）— 首页显示标题
+**`content`** `str \| dict \| list[dict]`（默认 `""`）— 卡片内容。字符串按 Markdown 渲染；列表按内容块渲染
+**`description`** `str`（默认 `""`）— 卡片描述
+**`link_url`** `str`（默认 `""`）— 可选跳转链接，支持 WebUI 内部路径、`http(s)`、`mailto`
+**`link_label`** `str`（默认 `""`）— 跳转按钮文案
+**`icon`** `str`（默认 `""`）— 可选图标名，供 WebUI 展示扩展
+**`width`** `str`（默认 `"medium"`）— 卡片宽度：`small` = 2/10、`medium` = 3/10、`large` = 5/10、`wide` = 7/10、`full` = 10/10
+**`order`** `int`（默认 `1000`）— 默认排序值，越小越靠前
 
 ## 内容块
 

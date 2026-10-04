@@ -6,7 +6,9 @@ title: API Reference
 
 MaiBot plugins access 17 capability proxies through `self.ctx` (`PluginContext`). Capability calls are automatically forwarded to Host via RPC, and the SDK automatically unwraps results; `ctx.paths` and `ctx.logger` are context helper objects injected by the Runner.
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Capability proxies
 self.ctx.send       # Send messages
 self.ctx.db         # Database operations
@@ -31,9 +33,13 @@ self.ctx.paths      # Plugin data and runtime directories
 self.ctx.logger     # Logging (standard logging.Logger)
 ```
 
-## send — Message Sending
+:::
 
-```python
+## send — Message Sending {#send}
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Send text message
 await self.ctx.send.text(text="Hello!", stream_id=stream_id)
 
@@ -53,11 +59,31 @@ await self.ctx.send.forward(messages=[...], stream_id=stream_id)
 await self.ctx.send.custom(custom_type="card", data={...}, stream_id=stream_id)
 ```
 
-All `send.*` methods return `bool`, indicating whether the send was successful.
+:::
+
+All `send.*` methods return `bool` by default, indicating whether the send was successful. Since 1.2.0, passing `return_details=True` returns a detailed result that includes the platform-confirmed final message ID, useful for later references (e.g. recalling):
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+# Default: returns bool
+ok = await self.ctx.send.text("Hi", stream_id)
+
+# return_details=True returns {"success": bool, "sent": bool, "message_id": str | None}
+result = await self.ctx.send.text("Hi", stream_id, return_details=True)
+if result["sent"] and result["message_id"]:
+    platform_msg_id = result["message_id"]
+```
+
+:::
+
+`return_details` works for all seven methods: `send.text`, `send.emoji`, `send.image`, `send.forward`, `send.hybrid`, `send.command`, `send.custom`. `message_id` is the platform-side final message ID reported back by the adapter (`platform_message_id`); it is `None` when the send failed or the platform did not report one back.
 
 ## db — Database Operations
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Query data
 results = await self.ctx.db.query(model_name="my_data", filters={"key": "value"})
 
@@ -74,9 +100,13 @@ await self.ctx.db.delete(model_name="my_data", filters={"key": "value"})
 count = await self.ctx.db.count(model_name="my_data", filters={"status": "active"})
 ```
 
+:::
+
 ## llm — LLM Calls
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Text generation
 result = await self.ctx.llm.generate(prompt="Summarize the following", model="gpt-4")
 
@@ -88,9 +118,13 @@ result = await self.ctx.llm.generate_with_tools(
 )
 ```
 
+:::
+
 When `temperature` or `max_tokens` is omitted or set to `None`, the Host uses the values configured for the selected model/task in model management. Pass concrete values only when the plugin needs to override that configuration.
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Generate an embedding vector for one text. Uses model_task_config.embedding by default.
 embedding = await self.ctx.llm.embed(text="Text to vectorize")
 
@@ -111,11 +145,15 @@ if asr_result["success"]:
 models = await self.ctx.llm.get_available_models()
 ```
 
+:::
+
 Before using embedding or audio transcription, declare `llm.embed` or `llm.transcribe_audio` in the plugin `_manifest.json` `capabilities` list.
 
 ## config — Configuration Reading
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Read config value
 value = await self.ctx.config.get("key.subkey")
 
@@ -126,9 +164,15 @@ config = await self.ctx.config.get_plugin("com.example.my-plugin")
 all_config = await self.ctx.config.get_all()
 ```
 
+:::
+
+The plugin's `config_model` defines its configuration structure and defaults. The Runner stores values for the current installation in the generated `config.toml` under the plugin directory, and the configuration capability proxy reads the runtime configuration already loaded by the Runner.
+
 ## message — Historical Messages
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Get recent messages
 messages = await self.ctx.message.get_recent(stream_id=stream_id, limit=20)
 
@@ -149,9 +193,13 @@ message = await self.ctx.message.get_by_id(message_id="msg-001", stream_id=strea
 text = await self.ctx.message.build_readable(messages=messages)
 ```
 
+:::
+
 ## chat — Chat Streams
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Get all chat streams
 streams = await self.ctx.chat.get_all_streams()
 
@@ -182,11 +230,15 @@ stream = await self.ctx.chat.open_session(
 )
 ```
 
+:::
+
 `chat.open_session` returns `stream_id`, `session_id`, `chat_type`, `created`, and the full `stream` object. In multi-account or multi-route deployments, pass `account_id` and `scope` as well to avoid opening the wrong chat stream.
 
 ## maisaka - Maisaka Proactive Tasks
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Ask Maisaka to proactively process one conversation turn for a chat stream.
 result = await self.ctx.maisaka.proactive.trigger(
     stream_id=stream["stream_id"],
@@ -204,11 +256,15 @@ await self.ctx.maisaka.context.append(
 )
 ```
 
+:::
+
 `maisaka.proactive.trigger` does not send fixed text directly and does not impersonate a user message. It writes the `intent` into Maisaka's internal context and wakes the Planner, letting Maisaka decide whether to reply and how to express itself using personality, memory, current context, and available tools. The chat stream must already exist; call `chat.open_session` first when you need to open a private or group stream proactively.
 
 ## person — User Information
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Get user ID
 person_id = await self.ctx.person.get_id(name="username")
 
@@ -219,9 +275,13 @@ person_id = await self.ctx.person.get_id_by_name(name="John")
 value = await self.ctx.person.get_value(person_id=person_id, key="nickname")
 ```
 
+:::
+
 ## emoji — Emoji Management
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Get random emojis
 emojis = await self.ctx.emoji.get_random(count=5)
 
@@ -244,9 +304,13 @@ emotions = await self.ctx.emoji.get_emotions()
 await self.ctx.emoji.delete_emoji(emoji_hash="sha256_hash", keep_desc=True)
 ```
 
+:::
+
 ## frequency — Talk Frequency
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Get current talk frequency value
 value = await self.ctx.frequency.get_current_talk_value()
 
@@ -257,9 +321,13 @@ await self.ctx.frequency.set_adjust(value=0.5)
 value = await self.ctx.frequency.get_adjust()
 ```
 
+:::
+
 ## component — Plugin and Component Management
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Load plugin
 await self.ctx.component.load_plugin(plugin_id="com.example.plugin")
 
@@ -282,9 +350,13 @@ plugins = await self.ctx.component.list_loaded_plugins()
 plugins = await self.ctx.component.list_registered_plugins()
 ```
 
+:::
+
 ## api — Cross-plugin API
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Call another plugin's API
 result = await self.ctx.api.call(
     plugin_id="com.other.plugin",
@@ -308,9 +380,13 @@ await self.ctx.api.replace_dynamic_apis(
 )
 ```
 
+:::
+
 ## gateway — Message Gateway
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Inject inbound message to Host
 accepted = await self.ctx.gateway.route_message(
     gateway_name="my_gateway",
@@ -330,36 +406,54 @@ await self.ctx.gateway.update_state(
 )
 ```
 
+:::
+
 See [Message Gateway](./message-gateway.md) for details.
 
 ## tool — Tool Definitions
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Get LLM tool definition list
 definitions = await self.ctx.tool.get_definitions()
 ```
 
+:::
+
 ## render — HTML Rendering
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Render HTML to PNG image
 result = await self.ctx.render.html2png(html="<h1>Hello</h1><p>World</p>")
 ```
+
+:::
 
 `html2png()` returns a rendering result, suitable for scenarios requiring image output such as cards, leaderboards, or share images.
 
 ## knowledge — Knowledge Base Search
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Search LPMM knowledge base
 content = await self.ctx.knowledge.search(query="MaiBot configuration guide")
 ```
 
+:::
+
 ## statistics — Local Statistics
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 statistics = self.ctx.statistics
 ```
+
+:::
 
 `statistics.local.*` reads only the current MaiBot instance's local statistics. It does not expose telemetry or uploaded client statistics. Declare the corresponding capability in `_manifest.json` before calling it.
 
@@ -380,7 +474,9 @@ Common parameters:
 
 Trend methods directly return a `series` object with `timestamps`, `values_by_key`, `labels_by_key`, `total`, and `source_count`. `token_distribution()` directly returns a `distribution` object with chart-ready `pies`.
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 models = await self.ctx.statistics.local.models(days=7, limit=5)
 token_series = await self.ctx.statistics.local.token_trend(days=7, group_by="model")
 message_series = await self.ctx.statistics.local.message_trend(days=7, top_chats=5)
@@ -388,9 +484,13 @@ message_series = await self.ctx.statistics.local.message_trend(days=7, top_chats
 top_model = models[0]["model_name"] if models else "unknown"
 ```
 
+:::
+
 Manifest example:
 
-```json
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
 {
   "capabilities": [
     "statistics.local.models",
@@ -404,12 +504,18 @@ Manifest example:
 }
 ```
 
+:::
+
 ## paths — Runtime Paths
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 data_path = self.ctx.paths.data_dir / "records.json"
 runtime_path = self.ctx.paths.runtime_dir / "latest-card.png"
 ```
+
+:::
 
 `ctx.paths` provides standard per-plugin directories, so plugins do not need to write runtime data into the source directory or manually construct paths under the Host root.
 
@@ -426,13 +532,17 @@ Path safety notes:
 
 ## logger — Logging
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 # Standard logging interface, Logger name is "plugin.<plugin_id>"
 self.ctx.logger.info("Plugin started")
 self.ctx.logger.warning("Config missing, using default")
 self.ctx.logger.error("Something went wrong", exc_info=True)
 self.ctx.logger.debug("Debug info: %s", data)
 ```
+
+:::
 
 ::: tip Automatic Log Forwarding
 Logs in the Runner process are automatically transmitted to the main process via IPC, no extra configuration needed. All plugin output logs can be found in the main process logs.
