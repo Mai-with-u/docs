@@ -1,0 +1,255 @@
+/**
+ * 千禧（millennium）— MaiBot WebUI webui_style = 2 同款
+ *
+ * 整个界面只用三种材质（与 dashboard styles/millennium.css 一致）：
+ *   1. 米黄塑料机壳 — 页面底色，带颗粒；
+ *   2. 下沉屏幕 — 代码块、行内代码，浅色是暗纹网格，深色是示波屏；
+ *   3. 键帽 — 按钮、链接卡片，选中态是按下去的薄荷绿键。
+ * 夜间模式是同一台机器关了灯：炭灰机壳、近黑屏幕，薄荷绿保持不变。
+ *
+ * 字体：拉丁字符用自托管 Pixelify Sans 像素字（@font-face 在 base.css），
+ * 中文回落黑体。全站直角、硬边框。
+ */
+
+/* ==========================================================================
+ * 材质令牌（浅色）：米黄机壳
+ * ======================================================================== */
+html[data-theme-style='millennium'] {
+  /* 机壳 */
+  --mil-shell: #ddd4bf;
+  --mil-panel: #ebe4d2;
+  --mil-hi: #f6f1e3;
+  --mil-lo: #bdb39c;
+  --mil-line: #5a544a;
+  --mil-ink: #4a443a;
+
+  /* 屏幕 */
+  --mil-screen: #fbf9f0;
+  --mil-screen-grid: rgb(0 0 0 / 0.04);
+
+  /* 键帽 */
+  --mil-key: #f3eee1;
+  --mil-key-side: #c2b8a1;
+  --mil-key-hi: #fffaf0;
+  --mil-key-hover: #fbf7ec;
+
+  /* 薄荷绿（选中/激活） */
+  --mil-on: #8fd6a0;
+  --mil-on-ink: #2f3a2b;
+  --mil-on-side: #5fa873;
+  --mil-accent: #2a7d50;
+
+  /* 纹理与组合阴影 */
+  --mil-speck: radial-gradient(rgb(90 84 74 / 0.09) 1px, transparent 1px);
+  --mil-screen-tex:
+    linear-gradient(var(--mil-screen-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mil-screen-grid) 1px, transparent 1px);
+  --mil-keycap:
+    inset 0 0 0 2px var(--mil-line), inset 0 -5px 0 var(--mil-key-side),
+    inset 2px 2px 0 var(--mil-key-hi);
+  --mil-pressed: inset 0 0 0 2px var(--mil-line), inset 0 -3px 0 var(--mil-on-side);
+
+  /* 映射到 VitePress 令牌 */
+  --vp-c-brand-1: var(--mil-accent);
+  --vp-c-brand-2: #3fae72;
+  --vp-c-brand-3: var(--mil-on);
+  --vp-c-brand-soft: rgb(63 174 114 / 0.16);
+
+  --vp-c-bg: var(--mil-shell);
+  --vp-c-bg-alt: #d6ccb4;
+  --vp-c-bg-elv: var(--mil-panel);
+  --vp-c-bg-soft: #e6dfc9;
+
+  --vp-c-border: var(--mil-lo);
+  --vp-c-divider: #c9c0a8;
+  --vp-c-gutter: #c9c0a8;
+
+  --vp-c-text-1: var(--mil-ink);
+  --vp-c-text-2: #5f5849;
+  --vp-c-text-3: #7a7360;
+  --vp-c-text-code: var(--mil-accent);
+
+  /* 薄荷绿按钮上的文字压深一档 */
+  --vp-button-brand-text: var(--mil-on-ink);
+  --vp-button-brand-hover-text: var(--mil-on-ink);
+  --vp-button-brand-active-text: var(--mil-on-ink);
+
+  /* 像素字 */
+  --vp-font-family-base: 'Pixelify Sans', 'Fusion Pixel 12px Proportional SC',
+    'Zpix', 'Noto Sans SC', 'Microsoft YaHei UI', system-ui, sans-serif;
+  --vp-font-family-mono: 'Pixelify Sans', 'JetBrains Mono', 'Cascadia Mono',
+    Consolas, monospace;
+
+  /* 首页 Hero 渐变换成薄荷绿 + 暖橙 */
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    #f08a5d 20%,
+    #3fae72 60%,
+    #2a7d50
+  );
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    #f08a5d 40%,
+    #3fae72 60%
+  );
+
+  color-scheme: light;
+}
+
+/* ==========================================================================
+ * 材质令牌（深色）：关灯后的炭灰机壳
+ * ======================================================================== */
+html.dark[data-theme-style='millennium'] {
+  --mil-shell: #2f2c28;
+  --mil-panel: #3a3631;
+  --mil-hi: #4a453f;
+  --mil-lo: #2a2723;
+  --mil-line: #171513;
+  --mil-ink: #ebe4d2;
+
+  --mil-screen: #1e221e;
+  --mil-screen-grid: rgb(255 255 255 / 0.03);
+
+  --mil-key: #4d4841;
+  --mil-key-side: #2e2b27;
+  --mil-key-hi: #5d574f;
+  --mil-key-hover: #58524a;
+
+  --mil-on-ink: #1f2a20;
+  --mil-on-side: #5fa873;
+  --mil-accent: #8fd6a0;
+
+  --vp-c-brand-1: var(--mil-accent);
+  --vp-c-brand-2: #6fc488;
+  --vp-c-brand-3: var(--mil-on);
+  --vp-c-brand-soft: rgb(143 214 160 / 0.12);
+
+  --vp-c-bg: var(--mil-shell);
+  --vp-c-bg-alt: #2a2723;
+  --vp-c-bg-elv: var(--mil-panel);
+  --vp-c-bg-soft: #35322c;
+
+  --vp-c-border: #4a453f;
+  --vp-c-divider: #3c3a34;
+  --vp-c-gutter: #232120;
+
+  --vp-c-text-1: var(--mil-ink);
+  --vp-c-text-2: #b5ad9a;
+  --vp-c-text-3: #8d8574;
+  --vp-c-text-code: var(--mil-accent);
+
+  color-scheme: dark;
+}
+
+/* ==========================================================================
+ * 机壳颗粒铺底
+ * ======================================================================== */
+html[data-theme-style='millennium'] body {
+  background-color: var(--mil-shell);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+}
+
+/* ==========================================================================
+ * 结构：全站直角 + 键帽按钮 + 下沉屏幕 + 面板提示块
+ * ======================================================================== */
+
+/* 直角 */
+html[data-theme-style='millennium'] .VPButton,
+html[data-theme-style='millennium'] .vp-doc .custom-block,
+html[data-theme-style='millennium'] .vp-doc div[class*='language-'],
+html[data-theme-style='millennium'] .VPMenu,
+html[data-theme-style='millennium'] .vp-code-group .tabs,
+html[data-theme-style='millennium'] .linkcard {
+  border-radius: 0;
+}
+
+/* 按钮一律做成键帽；按下是薄荷绿键 */
+html[data-theme-style='millennium'] .VPButton {
+  border: none;
+  box-shadow: var(--mil-keycap);
+  background-color: var(--mil-key);
+  color: var(--mil-ink);
+  font-weight: 600;
+}
+
+html[data-theme-style='millennium'] .VPButton:hover {
+  background-color: var(--mil-key-hover);
+  border-color: transparent;
+}
+
+html[data-theme-style='millennium'] .VPButton:active {
+  background-color: var(--mil-on);
+  box-shadow: var(--mil-pressed);
+}
+
+/* 代码块 = 下沉屏幕（浅色暗纹网格，深色示波屏） */
+html[data-theme-style='millennium'] .vp-doc div[class*='language-'] {
+  background-color: var(--mil-screen);
+  background-image: var(--mil-screen-tex);
+  background-size: 12px 12px;
+  border: 1px solid var(--mil-lo);
+  box-shadow: inset 2px 2px 0 rgb(0 0 0 / 0.12);
+}
+
+html[data-theme-style='millennium'] .vp-doc div[class*='language-'] code {
+  color: var(--vp-c-text-1);
+}
+
+html.dark[data-theme-style='millennium'] .vp-doc div[class*='language-'] code {
+  color: #e8e2cf;
+}
+
+/* 行内代码也进屏幕 */
+html[data-theme-style='millennium'] .vp-doc :not(pre) > code {
+  background-color: var(--mil-screen);
+  color: var(--vp-c-text-code);
+  border-radius: 0;
+  padding: 3px 6px;
+  box-shadow: inset 1px 1px 0 rgb(0 0 0 / 0.1);
+}
+
+/* 提示块 = 面板机壳 */
+html[data-theme-style='millennium'] .vp-doc .custom-block {
+  border: 1px solid var(--mil-lo);
+  box-shadow: inset 2px 2px 0 var(--mil-hi), inset -2px -2px 0 rgb(0 0 0 / 0.08);
+}
+
+/* 表格线 = 印刷网格 */
+html[data-theme-style='millennium'] .vp-doc table {
+  border-collapse: collapse;
+}
+
+html[data-theme-style='millennium'] .vp-doc th,
+html[data-theme-style='millennium'] .vp-doc td {
+  border: 1px solid var(--vp-c-divider);
+}
+
+html[data-theme-style='millennium'] .vp-doc th {
+  background-color: var(--vp-c-bg-soft);
+}
+
+/* 链接卡片 = 键帽 */
+html[data-theme-style='millennium'] .linkcard {
+  box-shadow: var(--mil-keycap);
+  border: none;
+  background: var(--mil-key);
+}
+
+html[data-theme-style='millennium'] .linkcard:hover {
+  background: var(--mil-key-hover);
+  transform: none;
+}
+
+/* ==========================================================================
+ * 首页极光（AuroraBackground）整体调色成机壳薄荷绿
+ * ======================================================================== */
+html[data-theme-style='millennium'] .aurora-bg {
+  background: var(--mil-shell);
+  filter: sepia(0.35) hue-rotate(60deg) saturate(1.6);
+}
+
+html.dark[data-theme-style='millennium'] .aurora-bg {
+  background: var(--mil-shell);
+  filter: sepia(0.4) hue-rotate(60deg) saturate(1.5);
+}

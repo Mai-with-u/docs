@@ -6,6 +6,7 @@ import {
   NolebaseEnhancedReadabilitiesMenu,
   NolebaseEnhancedReadabilitiesScreenMenu,
 } from '@nolebase/vitepress-plugin-enhanced-readabilities/client'
+import ThemeStyleSwitch from './ThemeStyleSwitch.vue'
 
 const { isDark } = useData()
 
@@ -47,10 +48,12 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 <template>
   <DefaultTheme.Layout>
     <template #nav-bar-content-after>
+      <ThemeStyleSwitch />
       <NolebaseEnhancedReadabilitiesMenu />
     </template>
     <template #nav-screen-content-after>
       <NolebaseEnhancedReadabilitiesScreenMenu />
+      <ThemeStyleSwitch />
     </template>
   </DefaultTheme.Layout>
 </template>

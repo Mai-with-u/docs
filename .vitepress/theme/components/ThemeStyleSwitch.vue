@@ -1,0 +1,285 @@
+<script setup lang="ts">
+/**
+ * ThemeStyleSwitch — 界面风格切换器
+ *
+ * 对应 MaiBot WebUI 的 webui_style：0 原版 / 1 未来复古 / 2 千禧。
+ * 往 <html> 写 data-theme-style 属性，外观覆盖在
+ * theme/styles/{future-retro,millennium}.css 里定义；
+ * 共享常量与工具函数在 utils/theme-style.ts。
+ */
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute, useData } from 'vitepress'
+import {
+  THEME_STYLES,
+  applyThemeStyle,
+  loadStoredThemeStyle,
+  storeThemeStyle,
+} from '../utils/theme-style'
+import type { ThemeStyleId } from '../utils/theme-style'
+
+const { lang } = useData()
+const route = useRoute()
+
+const current = ref<ThemeStyleId>('modern')
+const open = ref(false)
+const rootEl = ref<HTMLElement>()
+
+/* 菜单文案（描述与 MaiBot WebUI 外观设置一致） */
+const i18n = {
+  zh: {
+    label: '界面风格',
+    items: {
+      modern: ['原版', 'MaiBot 橙色的现代外观'],
+      'future-retro': ['未来复古', '纸面颗粒、硬朗描边与切角面板'],
+      millennium: ['千禧', '米黄机壳、键帽按钮与像素字'],
+    },
+  },
+  en: {
+    label: 'Theme Style',
+    items: {
+      modern: ['Classic', 'Modern look in MaiBot orange'],
+      'future-retro': ['Future Retro', 'Paper grain and hard ink strokes'],
+      millennium: ['Millennium', 'Beige shell, keycaps and pixel type'],
+    },
+  },
+} as const
+
+const t = computed(() => (lang.value.toLowerCase().startsWith('zh') ? i18n.zh : i18n.en))
+
+/* 菜单里的迷你色板：[背景, 主色, 点缀色] */
+const SWATCHES: Record<ThemeStyleId, readonly [string, string, string]> = {
+  modern: ['#ffffff', '#ff8c00', '#d2691e'],
+  'future-retro': ['#f3eccc', '#c24d24', '#0d4550'],
+  millennium: ['#ddd4bf', '#8fd6a0', '#2a7d50'],
+}
+
+const options = computed(() =>
+  THEME_STYLES.map((id) => {
+    const [name, description] = t.value.items[id]
+    return { id, name, description, swatches: SWATCHES[id] }
+  })
+)
+
+function select(id: ThemeStyleId) {
+  if (id === current.value) {
+    open.value = false
+    return
+  }
+
+  const commit = () => {
+    applyThemeStyle(id)
+    current.value = id
+    storeThemeStyle(id)
+  }
+
+  const animate =
+    'startViewTransition' in document &&
+    window.matchMedia('(prefers-reduced-motion: no-preference)').matches
+
+  open.value = false
+
+  /* 支持时用 View Transition 交叉淡化（见 base.css），否则直接切换 */
+  if (!animate) {
+    commit()
+    return
+  }
+
+  const transition = document.startViewTransition(() => {
+    document.documentElement.classList.add('theme-style-switching')
+    commit()
+  })
+
+  transition.finished.finally(() => {
+    document.documentElement.classList.remove('theme-style-switching')
+  })
+}
+
+function onPointerDown(e: PointerEvent) {
+  if (!rootEl.value || !rootEl.value.contains(e.target as Node)) open.value = false
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') open.value = false
+}
+
+onMounted(() => {
+  current.value = loadStoredThemeStyle()
+  applyThemeStyle(current.value)
+  document.addEventListener('pointerdown', onPointerDown)
+  document.addEventListener('keydown', onKeydown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', onPointerDown)
+  document.removeEventListener('keydown', onKeydown)
+})
+
+/* 路由变化时收起菜单，避免移动端残留展开态 */
+watch(() => route.path, () => (open.value = false))
+</script>
+
+<template>
+  <div ref="rootEl" class="theme-style-switch">
+    <button
+      class="style-trigger"
+      :class="{ open }"
+      type="button"
+      :aria-label="t.label"
+      :title="t.label"
+      @click="open = !open"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5c0-.39-.15-.74-.39-1.01c-.23-.26-.38-.61-.38-.99c0-.83.67-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4.42-4.03-8-9-8Zm-5.5 9a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3Zm3-4a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3Zm5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3Zm3.5 4a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3Z"
+        />
+      </svg>
+    </button>
+
+    <Transition name="style-menu">
+      <div v-if="open" class="style-menu" role="menu" :aria-label="t.label">
+        <p class="style-menu-title">{{ t.label }}</p>
+        <button
+          v-for="option in options"
+          :key="option.id"
+          class="style-option"
+          :class="{ active: option.id === current }"
+          type="button"
+          role="menuitemradio"
+          :aria-checked="option.id === current"
+          @click="select(option.id)"
+        >
+          <span class="style-option-body">
+            <span class="style-option-name">{{ option.name }}</span>
+            <span class="style-option-desc">{{ option.description }}</span>
+          </span>
+          <span class="style-swatches" aria-hidden="true">
+            <i
+              v-for="(color, index) in option.swatches"
+              :key="index"
+              class="swatch"
+              :style="{ backgroundColor: color }"
+            />
+          </span>
+        </button>
+      </div>
+    </Transition>
+  </div>
+</template>
+
+<style scoped>
+.theme-style-switch {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 触发按钮：与 VitePress 导航栏其他按钮同规格 */
+.style-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: color 0.25s, background-color 0.25s;
+}
+
+.style-trigger:hover,
+.style-trigger.open {
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-bg-soft);
+}
+
+/* 下拉面板 */
+.style-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 32;
+  margin-top: 10px;
+  min-width: 224px;
+  padding: 8px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background-color: var(--vp-c-bg-elv);
+  box-shadow: var(--vp-shadow-3);
+}
+
+.style-menu-title {
+  margin: 4px 8px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
+}
+
+.style-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.style-option:hover {
+  background-color: var(--vp-c-bg-soft);
+}
+
+.style-option.active {
+  border-color: var(--vp-c-brand-2);
+  background-color: var(--vp-c-brand-soft);
+}
+
+.style-option-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.style-option-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.style-option-desc {
+  font-size: 11px;
+  color: var(--vp-c-text-3);
+}
+
+.style-swatches {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--vp-c-divider);
+}
+
+/* 展开 / 收起动画 */
+.style-menu-enter-active,
+.style-menu-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.style-menu-enter-from,
+.style-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+</style>

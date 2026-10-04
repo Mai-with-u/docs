@@ -14,6 +14,17 @@ import '@nolebase/vitepress-plugin-enhanced-readabilities/client/style.css'
 import 'vitepress-markdown-timeline/dist/theme/index.css'
 import 'virtual:group-icons.css'
 import './style.css'
+import './styles/base.css'
+import './styles/future-retro.css'
+import './styles/millennium.css'
+
+// 首屏恢复用户上次选择的界面风格，避免闪烁
+if (inBrowser) {
+  const savedStyle = localStorage.getItem('maibot-docs-theme-style')
+  if (savedStyle === 'future-retro' || savedStyle === 'millennium') {
+    document.documentElement.setAttribute('data-theme-style', savedStyle)
+  }
+}
 
 export default {
   extends: DefaultTheme,

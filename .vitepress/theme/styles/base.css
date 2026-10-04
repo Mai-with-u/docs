@@ -1,0 +1,60 @@
+/**
+ * 界面风格 — 共享基础样式
+ *
+ * 这里只放与具体风格无关的公共部分：
+ *   1. 千禧风格所需的像素字体（自托管，OFL 协议见 public/fonts/）
+ *   2. 风格切换时的交叉淡化过渡
+ *
+ * 各风格的外观定义在：
+ *   future-retro.css — 未来复古
+ *   millennium.css   — 千禧
+ * （原版即默认主题，不设 data-theme-style 属性，无需定义）
+ *
+ * html 上的 data-theme-style 属性由 ThemeStyleSwitch.vue 维护。
+ */
+
+/* --------------------------------------------------------------------------
+ * 千禧像素字体（仅覆盖拉丁字符与数字，中文回落黑体）
+ * ------------------------------------------------------------------------ */
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: url('/fonts/PixelifySans-Variable.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-024F, U+2000-206F, U+20A0-20CF, U+2190-21FF;
+}
+
+/* --------------------------------------------------------------------------
+ * 风格切换的交叉淡化过渡
+ *
+ * ThemeStyleSwitch 切换期间给 <html> 加 .theme-style-switching 类，
+ * 这里声明的优先级（0,2,1）高于 MyLayout 里的 ::view-transition 兜底样式（0,1,1），
+ * 因此能覆盖其 animation: none，实现淡出/淡入；尊重 prefers-reduced-motion。
+ * ------------------------------------------------------------------------ */
+html.theme-style-switching::view-transition-old(root) {
+  animation: maibot-style-fade-out 0.25s ease both;
+}
+
+html.theme-style-switching::view-transition-new(root) {
+  animation: maibot-style-fade-in 0.25s ease both;
+}
+
+@keyframes maibot-style-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes maibot-style-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-style-switching::view-transition-old(root),
+  html.theme-style-switching::view-transition-new(root) {
+    animation: none;
+  }
+}

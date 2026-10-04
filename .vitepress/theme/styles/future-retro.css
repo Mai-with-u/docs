@@ -1,0 +1,139 @@
+/**
+ * 未来复古（future-retro）— MaiBot WebUI webui_style = 1 同款
+ *
+ * 灵感来自 MaiBot 一键包外壳：奶油纸面配墨青描边，锈橙点缀，
+ * 细分形噪点颗粒铺底，硬朗小圆角。夜间模式是炭褐纸箱。
+ *
+ * 色值取自 dashboard 的 src/lib/theme/tokens.ts
+ * （futureRetroLightTokens / futureRetroDarkTokens），映射到 VitePress 的
+ * --vp-c-* 设计令牌；明暗由 .dark 类叠加，两套并列声明。
+ */
+
+/* ==========================================================================
+ * 设计令牌（浅色）：奶油纸面 + 锈橙 + 墨青
+ * ======================================================================== */
+html[data-theme-style='future-retro'] {
+  /* 品牌：锈橙 */
+  --vp-c-brand-1: hsl(15.6 68.7% 40.1%);
+  --vp-c-brand-2: hsl(15.6 68.7% 45.1%);
+  --vp-c-brand-3: hsl(15.6 68.7% 52.1%);
+  --vp-c-brand-soft: hsl(15.6 68.7% 45.1% / 0.14);
+
+  /* 背景：奶油纸面 */
+  --vp-c-bg: hsl(35.4 61.9% 87.6%);
+  --vp-c-bg-alt: hsl(34.9 55% 83.6%);
+  --vp-c-bg-elv: hsl(36 66% 89.6%);
+  --vp-c-bg-soft: hsl(34.9 48.3% 82.5%);
+
+  /* 边框：墨青硬描边（未来复古的签名视觉） */
+  --vp-c-border: hsl(188.1 74% 19.6% / 0.85);
+  --vp-c-divider: hsl(188.1 74% 19.6% / 0.28);
+  --vp-c-gutter: hsl(188.1 74% 19.6% / 0.22);
+
+  /* 文字：深墨青正文 + 暖褐辅助 */
+  --vp-c-text-1: hsl(189 72% 18.2%);
+  --vp-c-text-2: hsl(39.1 11.6% 39%);
+  --vp-c-text-3: hsl(39.1 10% 52%);
+  --vp-c-text-code: hsl(189 60% 26%);
+
+  /* 等宽字体：未来复古同款 */
+  --vp-font-family-mono: 'Agency FB', 'Cascadia Mono', 'JetBrains Mono',
+    Consolas, 'Courier New', monospace;
+
+  /* 首页 Hero 渐变换成纸面锈橙 */
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    hsl(34.7 45.6% 55.5%) 20%,
+    hsl(15.6 68.7% 45.1%) 60%,
+    hsl(189 72% 18.2%)
+  );
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    hsl(34.7 45.6% 65.5%) 40%,
+    hsl(15.6 68.7% 45.1%) 60%
+  );
+
+  color-scheme: light;
+}
+
+/* ==========================================================================
+ * 设计令牌（深色）：炭褐纸箱 + 暖锈橙
+ * ======================================================================== */
+html.dark[data-theme-style='future-retro'] {
+  --vp-c-brand-1: hsl(20 45% 60%);
+  --vp-c-brand-2: hsl(20 43% 52%);
+  --vp-c-brand-3: hsl(19.2 44.7% 42.5%);
+  --vp-c-brand-soft: hsl(19.2 44.7% 42.5% / 0.28);
+
+  --vp-c-bg: hsl(17 25.9% 10.6%);
+  --vp-c-bg-alt: hsl(20 21.3% 12.9%);
+  --vp-c-bg-elv: hsl(24 20% 15%);
+  --vp-c-bg-soft: hsl(24 16% 18%);
+
+  --vp-c-border: hsl(31 18% 28%);
+  --vp-c-divider: hsl(31 14% 26%);
+  --vp-c-gutter: hsl(17 25.9% 8%);
+
+  --vp-c-text-1: hsl(34.3 31.8% 74.3%);
+  --vp-c-text-2: hsl(34 19% 58%);
+  --vp-c-text-3: hsl(34 16% 48%);
+  --vp-c-text-code: hsl(20 43% 62%);
+
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    hsl(40.3 33.3% 56.9%) 20%,
+    hsl(20 43% 55%) 60%,
+    hsl(34.3 31.8% 74.3%)
+  );
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    hsl(40.3 33.3% 46.9%) 40%,
+    hsl(19.2 44.7% 42.5%) 60%
+  );
+
+  color-scheme: dark;
+}
+
+/* ==========================================================================
+ * 纸面颗粒铺底（fine 分形噪点，同 buildFutureRetroTexture 的 fine 档）
+ * ======================================================================== */
+html[data-theme-style='future-retro'] body {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' seed='11'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.14'/%3E%3Cg fill='%23c24d24' opacity='0.09'%3E%3Ccircle cx='12' cy='21' r='1'/%3E%3Ccircle cx='67' cy='43' r='0.8'/%3E%3Ccircle cx='139' cy='16' r='1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+html.dark[data-theme-style='future-retro'] body {
+  /* 深色纸面颗粒：墨色换成暖沙 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' seed='11'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.11'/%3E%3Cg fill='%23c04d27' opacity='0.07'%3E%3Ccircle cx='12' cy='21' r='1'/%3E%3Ccircle cx='67' cy='43' r='0.8'/%3E%3Ccircle cx='139' cy='16' r='1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+ * 结构：整体硬朗小圆角 + 提示块的锈橙硬边
+ * ======================================================================== */
+html[data-theme-style='future-retro'] .VPButton {
+  border-radius: 3px;
+}
+
+html[data-theme-style='future-retro'] .vp-doc .custom-block,
+html[data-theme-style='future-retro'] .vp-doc div[class*='language-'],
+html[data-theme-style='future-retro'] .VPMenu,
+html[data-theme-style='future-retro'] .linkcard {
+  border-radius: 4px;
+}
+
+html[data-theme-style='future-retro'] .vp-doc .custom-block {
+  border: 1px solid var(--vp-c-divider);
+  border-left: 3px solid var(--vp-c-brand-2);
+}
+
+/* ==========================================================================
+ * 首页极光（AuroraBackground）整体调色成纸面锈橙
+ * ======================================================================== */
+html[data-theme-style='future-retro'] .aurora-bg {
+  background: hsl(35.4 61.9% 87.6%);
+  filter: sepia(0.45) hue-rotate(-12deg) saturate(1.4);
+}
+
+html.dark[data-theme-style='future-retro'] .aurora-bg {
+  background: hsl(17 25.9% 10.6%);
+  filter: sepia(0.5) hue-rotate(-8deg) saturate(1.3);
+}
