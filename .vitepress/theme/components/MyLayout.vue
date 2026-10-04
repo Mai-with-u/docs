@@ -75,11 +75,11 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
   z-index: 9999;
 }
 
-.VPSwitchAppearance .check {
-  transform: none !important;
-}
-
-.VPSwitchAppearance .check .icon {
-  top: -2px;
+/* 明暗切换收进 ThemeStyleSwitch 的外观菜单，隐藏默认开关
+   （scoped 样式带 [data-v] 属性且在 1280px 断点恢复 display:flex，
+   这里必须 !important 才能压住） */
+.VPNavBarAppearance,
+.VPNavScreenAppearance {
+  display: none !important;
 }
 </style>

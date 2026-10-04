@@ -1,13 +1,17 @@
 <script setup lang="ts">
 /**
- * ThemeStyleSwitch — 界面风格切换器
+ * ThemeStyleSwitch — 外观菜单：明暗切换 + 界面风格切换
  *
- * 对应 MaiBot WebUI 的 webui_style：0 原版 / 1 未来复古 / 2 千禧。
- * 往 <html> 写 data-theme-style 属性，外观覆盖在
- * theme/styles/{future-retro,millennium}.css 里定义；
+ * 明暗（浅色/深色）复用 VitePress 的 toggle-appearance 注入（MyLayout
+ * 提供，带从点击坐标展开的圆形揭示动效）；界面风格对应 MaiBot WebUI
+ * 的 webui_style：0 原版 / 1 未来复古 / 2 千禧。
+ *
+ * 明暗与风格是两套正交体系，可自由组合：
+ *   明暗 → html.dark 类（VitePress 原生）
+ *   风格 → html[data-theme-style] 属性（样式在 theme/styles/ 下定义）
  * 共享常量与工具函数在 utils/theme-style.ts。
  */
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useData } from 'vitepress'
 import {
   THEME_STYLES,
@@ -17,16 +21,26 @@ import {
 } from '../utils/theme-style'
 import type { ThemeStyleId } from '../utils/theme-style'
 
-const { lang } = useData()
+const { lang, isDark } = useData()
 const route = useRoute()
 
 const current = ref<ThemeStyleId>('modern')
 const open = ref(false)
 const rootEl = ref<HTMLElement>()
 
-/* 菜单文案（描述与 MaiBot WebUI 外观设置一致） */
+/* 明暗切换：与 VPSwitchAppearance 同名注入键，MyLayout 里带圆形揭示动效 */
+const toggleAppearance = inject<
+  (e: { clientX: number; clientY: number }) => void
+>('toggle-appearance', () => {
+  isDark.value = !isDark.value
+})
+
+/* 菜单文案（风格描述与 MaiBot WebUI 外观设置一致） */
 const i18n = {
   zh: {
+    appearance: '外观',
+    light: '浅色',
+    dark: '深色',
     label: '界面风格',
     items: {
       modern: ['原版', 'MaiBot 橙色的现代外观'],
@@ -35,6 +49,9 @@ const i18n = {
     },
   },
   en: {
+    appearance: 'Appearance',
+    light: 'Light',
+    dark: 'Dark',
     label: 'Theme Style',
     items: {
       modern: ['Classic', 'Modern look in MaiBot orange'],
@@ -60,6 +77,22 @@ const options = computed(() =>
   })
 )
 
+/* ------------------------------------------------------------------
+ * 明暗：把点击坐标交给注入的 toggle-appearance，
+ * 圆形揭示动效就从菜单项的位置展开（与原开关行为一致）
+ * ------------------------------------------------------------------ */
+function selectAppearance(mode: 'light' | 'dark', event: MouseEvent) {
+  if (isDark.value === (mode === 'dark')) {
+    open.value = false
+    return
+  }
+  open.value = false
+  toggleAppearance(event)
+}
+
+/* ------------------------------------------------------------------
+ * 风格：支持时用 View Transition 交叉淡化（见 base.css），否则直接切换
+ * ------------------------------------------------------------------ */
 function select(id: ThemeStyleId) {
   if (id === current.value) {
     open.value = false
@@ -78,7 +111,6 @@ function select(id: ThemeStyleId) {
 
   open.value = false
 
-  /* 支持时用 View Transition 交叉淡化（见 base.css），否则直接切换 */
   if (!animate) {
     commit()
     return
@@ -124,8 +156,8 @@ watch(() => route.path, () => (open.value = false))
       class="style-trigger"
       :class="{ open }"
       type="button"
-      :aria-label="t.label"
-      :title="t.label"
+      :aria-label="t.appearance"
+      :title="t.appearance"
       @click="open = !open"
     >
       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -137,7 +169,35 @@ watch(() => route.path, () => (open.value = false))
     </button>
 
     <Transition name="style-menu">
-      <div v-if="open" class="style-menu" role="menu" :aria-label="t.label">
+      <div v-if="open" class="style-menu" role="menu" :aria-label="t.appearance">
+        <!-- 明暗：复用注入的 toggle-appearance（带圆形揭示动效） -->
+        <p class="style-menu-title">{{ t.appearance }}</p>
+        <div class="appearance-row">
+          <button
+            class="appearance-option"
+            :class="{ active: !isDark }"
+            type="button"
+            role="menuitemradio"
+            :aria-checked="!isDark"
+            @click="selectAppearance('light', $event)"
+          >
+            <span class="vpi-sun appearance-icon" aria-hidden="true" />
+            {{ t.light }}
+          </button>
+          <button
+            class="appearance-option"
+            :class="{ active: isDark }"
+            type="button"
+            role="menuitemradio"
+            :aria-checked="isDark"
+            @click="selectAppearance('dark', $event)"
+          >
+            <span class="vpi-moon appearance-icon" aria-hidden="true" />
+            {{ t.dark }}
+          </button>
+        </div>
+
+        <!-- 界面风格 -->
         <p class="style-menu-title">{{ t.label }}</p>
         <button
           v-for="option in options"
@@ -217,6 +277,52 @@ watch(() => route.path, () => (open.value = false))
   color: var(--vp-c-text-3);
 }
 
+.style-menu-title + .style-menu-title {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+/* 明暗分段选择 */
+.appearance-row {
+  display: flex;
+  gap: 4px;
+  padding: 2px;
+  border-radius: 8px;
+  background-color: var(--vp-c-bg-soft);
+}
+
+.appearance-option {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.appearance-option:hover {
+  color: var(--vp-c-text-1);
+}
+
+.appearance-option.active {
+  border-color: var(--vp-c-brand-2);
+  background-color: var(--vp-c-bg-elv);
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+.appearance-icon {
+  font-size: 14px;
+}
+
+/* 界面风格选项 */
 .style-option {
   display: flex;
   align-items: center;
