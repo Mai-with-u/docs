@@ -4,7 +4,7 @@ title: Manage Plugins
 
 # Manage Plugins
 
-Installing is only the first step. After a plugin is written, you enable, configure, update, or uninstall it in the WebUI's "Plugin Management". This page explains these operations and the runtime timing behind them.
+Installing is only the first step. After a plugin is written, you enable, configure, update, or uninstall it in the WebUI's "Plugin Extensions". This page explains these operations and the runtime timing behind them.
 
 ## View Plugins
 
@@ -30,6 +30,20 @@ Some plugins support custom settings:
 2. Modify options (e.g. API Key, trigger words, feature toggles);
 3. After saving, the runtime invokes the plugin's `on_config_update`.
 
+## Custom Pages (since 1.3.2)
+
+Once a plugin ships a `webui.json`, it can bring its own page entries — no Node install, no changes to the main program:
+
+- **Sidebar entries** — shown in the workspace sidebar under "Plugin Extensions"; the entry label and icon come from the plugin itself
+- **Top workspace entries** — a plugin can also declare its own top-level workspace. When one plugin has several workspace pages, the first is the default and the rest collapse into "More Plugin Workspaces"
+- **Page addresses** — of the form `/extensions/{plugin_id}/{page_id}`; a plugin cannot define custom routes or override built-in entries
+
+**Reorder or hide**: open the "Plugin Extensions" page (sidebar → "Integration → Plugin Extensions", at `/plugin-config`). At the bottom of the page is the "Manage Plugin Pages" area, where you drag to reorder or hide a plugin's entries entirely. These preferences live only in your current browser and affect display only — they are not server-side authorization, so clearing the cache or switching browsers restores the defaults.
+
+**Changes not taking effect?** Editing `webui.json` requires a **plugin reload** to take effect; it is not a MaiBot global setting. After reloading, the browser reflects entries within at most 30 seconds, or refresh manually.
+
+For the full field reference, component types, limits, and troubleshooting, see [WebUI Pages](/en/plugin/webui-pages).
+
 ## Update Plugins
 
 When the page reports a new version:
@@ -44,7 +58,7 @@ The same plugin cannot run install / update / uninstall at the same time; differ
 
 ### Install a Specific Version / Downgrade
 
-To install a particular version (including one older than what you have now), open the plugin's **detail page** from the market or plugin management and install after selecting a version in the "Install version" card:
+To install a particular version (including one older than what you have now), open the plugin's **detail page** from the market or plugin extensions and install after selecting a version in the "Install version" card:
 
 - Versions disabled in the dropdown are incompatible with your current MaiBot / SDK, and the reason follows in parentheses (e.g. "Requires MaiBot ≥ 1.4.0")
 - "· Recommended" is the newest stable version under the compatibility check and is selected by default

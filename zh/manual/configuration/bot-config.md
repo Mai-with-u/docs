@@ -33,7 +33,7 @@ platforms = []            # 其他平台的备用账号，格式 platform:账号
 :::
 
 ::: warning qq_account 要和适配器登录的 QQ 一致
-用 NapCat 这类适配器接入时，`qq_account` 必须与适配器登录的 QQ 号完全一致，否则麦麦会把自己的消息当成别人的。适配器正常上报身份时这两个字段只是备用值，但保持一致永远是对的。详见 [NapCat 适配器](../adapters/napcat.md)。
+用 NapCat 这类适配器接入时，`qq_account` 必须与适配器登录的 QQ 号完全一致，否则麦麦会把自己的消息当成别人的。适配器正常上报身份时这两个字段只是备用值，但保持一致永远是对的。详见 [统一 QQ 连接器](../adapters/qq-local-client.md)。
 :::
 
 ### 捏人设
@@ -225,7 +225,7 @@ talk_value = 1                             # 群聊发言频率：0~1，越小�
 private_talk_value = 1                     # 私聊发言频率：同上
 mentioned_bot_reply = false                # 消息提到麦麦名字时更容易回复
 inevitable_at_reply = true                 # 被 @ 时尽量回复
-reply_trigger_mode = "frequency"           # 新消息何时进入 Planner："frequency" / "reply_necessity"
+reply_trigger_mode = "frequency"           # 新消息何时进入 Planner："frequency" 频率触发 / "dynamic" 动态触发
 planner_interrupt_max_consecutive_count = 0  # [进阶] 思考时来了新消息最多重新思考几次；0 = 不限制
 max_consecutive_wait_count = 3             # Planner 最多连续调用 wait 几次，达到后拒绝继续等待
 no_action_backoff_base_seconds = 15        # 连续决定不回复后，下次检查前先等多久（秒）
@@ -264,6 +264,13 @@ value = 1.0
 - **具体群** — `platform = "qq"`、`item_id = "123456"`，只对这一个群生效
 - **全局兜底** — `platform` 与 `item_id` 都留空，未命中任何具体规则时使用
 - **全局通配** — 两个字段都填 `"*"`，匹配任意平台和聊天；在 WebUI 编辑时可直接选「全局通配」或「默认兜底」模式
+
+**怎么触发思考** — `reply_trigger_mode` 决定新消息何时进入 Planner：
+
+- **`frequency`（频率触发，默认）** — 按新消息数量决定是否思考，配合 `talk_value` / `talk_value_rules` 控制频率
+- **`dynamic`（动态触发，1.3.2 起）** — 估计每批消息的回复可能性，再用 1 小时滑动窗口把实际回复次数拉回"预计回复数 × 频率"的目标，并保留空闲退避。**只在群聊生效，私聊不设门控**；没有新增配置字段，仍用 `talk_value`、`talk_value_rules`、`mentioned_bot_reply` / `inevitable_at_reply` 与 `no_action_backoff_*` 调节
+
+旧版的「必要性触发」（`reply_necessity`）已移除，升级时会自动改写为 `dynamic`。
 
 #### 如何发言
 
@@ -382,9 +389,9 @@ reaction = "对方在问早，简短回应即可"
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [expression]
-expression_checked_only = true        # 仅使用人工精选过的表达
+expression_checked_only = false       # 仅使用人工精选过的表达；关闭时未精选的表达也会被使用
 expression_self_reflect = true        # 写入前先让 AI 审核，减少学到奇怪内容
-expression_selection_mode = "legacy"  # "legacy" 随手抽取 / "vector_intent" 意图+向量精细召回（需嵌入模型）
+use_vector_expression = true          # 使用向量表达：表达意图 + 嵌入召回，效果更好（需嵌入模型）；关闭则随手抽取
 expression_vector_index_path = "data/expression_selection/expression_vector_index.json"  # [进阶]
 expression_vector_candidate_pool_size = 50  # [进阶] 向量召回后交给 LLM 选择的候选数，硬上限 50
 max_expression_learner = 3            # [进阶] 同时运行的学习任务数
@@ -396,7 +403,8 @@ expression_groups = []                # 多个聊天共享学到的表达
 
 **要点：**
 
-- **`expression_selection_mode`** — 配好了嵌入模型就换 `"vector_intent"`，选择效果显著更好；旧配置里的 `"vector"` 模式已移除，升级后首次启动会自动迁移为 `"vector_intent"` 并写回文件
+- **`use_vector_expression`** — 默认开启，改用表达意图 + 嵌入模型精细召回，效果显著更好；关闭时退回随手抽取的候选。旧配置里的 `expression_selection_mode`（`legacy` / `vector_intent`，以及更早的 `vector`）已被移除，升级后首次启动会自动改写为 `use_vector_expression` 并写回文件
+- **`expression_checked_only`** — 默认 `false`，即未经人工精选的表达也会参与；如果你只想让麦麦使用你审核过的表达，改为 `true`
 - **`learning_list`** — `platform` / `item_id` 留空表示全局规则；`type` 可选 `"group"` / `"private"`；`use` 控制是否使用已学内容，`learn` 控制是否继续学习
 
 从 1.2.0 起，表达向量索引支持在线维护：新增、历史回填与失败恢复按最近聚类中心增量分配，索引文件损坏会自动重建而不是反复异常重启。该过程自动运行，无需配置。
@@ -419,18 +427,16 @@ jargon_groups = []  # 多个聊天共享学到的黑话
 
 #### 视觉
 
-控制图片消息进入规划器和回复器的方式：
+控制图片消息进入规划器和回复器的方式。**是否直接发送图片由模型能力自动决定**：当任务（如 `planner`）配置的模型全部为 `visual = true` 时才启用多模态输入，否则退化为纯文本 + 识图结果；旧版手动的「规划/回复阶段视觉模式」开关已在 1.3.2 移除。
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [visual]
-planner_mode = "auto"                  # "auto" 按模型自动选 / "text" 只用文字和识图结果 / "multimodal" 直接发图给模型
-replyer_mode = "auto"                  # 同上，控制回复生成阶段
-max_image_num = 128                    # [进阶] 一次多模态请求最多带多少张图
-wait_image_recognize_max_time = 10     # 等识图完成的最长秒数；0 = 不等待
+max_image_num = 64                     # [进阶] 一次多模态请求最多带多少张图
+wait_image_recognize_max_time = 32     # 等识图完成的最长秒数；0 = 不等待
 handle_oversized_images = true         # 收到过大图片时自动压缩或丢弃
-max_image_size_mb = 30.0               # 超过此大小按过大图片处理；0 = 不限
+max_image_size_mb = 16.0               # 超过此大小按过大图片处理；0 = 不限
 oversized_image_handle_method = "compress"  # "compress" 压缩后继续用 / "discard" 直接丢弃
 
 [visual.image_cache_cleanup]
@@ -572,7 +578,7 @@ enabled = true            # 是否启动 WebUI 管理界面
 host = ["127.0.0.1", "::1"]  # 监听地址；允许外部访问改为 ["0.0.0.0", "::"]
 port = 8001               # 访问端口
 mode = "production"       # "production" 日常使用 / "development" 调试
-webui_style = 1           # 界面风格：0 旧风格 / 1 未来复古风格
+webui_style = 1           # 界面风格：0 旧风格 / 1 未来复古风格 / 2 千禧风格
 
 anti_crawler_mode = "basic"  # 防爬虫："basic" 只记录 / "strict" / "loose" 拦截更多请求 / "false" 关闭
 allowed_ips = "127.0.0.1"    # 允许访问的 IP，逗号分隔，支持 CIDR 和通配符
@@ -613,9 +619,15 @@ enable = true  # 是否启用 MCP 工具接入能力
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [plugin]
 permission = ["qq:123456789"]  # 允许用聊天命令管理插件的用户，格式 platform:QQ号
+silent_permission_denied = false  # 用户执行无权限命令时静默拦截，不再发送提示消息
+disabled_commands = []         # 停用的命令 ID 列表，格式 plugin_id.command_name；内置命令为 core.clear
 ```
 
 :::
+
+- **`permission`** — 允许通过聊天命令管理插件的用户
+- **`silent_permission_denied`** — 开启后无权限命令只静默拦截并记日志，不再回复提示；适合不想让普通用户看到管理提示的群
+- **`disabled_commands`** — 在命令管理页面停用的命令；例如 `["core.clear"]` 关闭内置清空上下文指令，`["my-plugin.some_command"]` 关闭某个插件命令
 
 #### 插件运行时
 
@@ -690,7 +702,6 @@ library_log_levels = { aiohttp = "WARNING", PIL = "WARNING" }  # [进阶] 单独
 [debug]
 enable_console_input = true           # 在交互式终端中启用本地消息和指令输入（默认开启）
 show_maisaka_thinking = true          # 在日志或界面中显示麦麦的思考过程
-enable_clear_context_command = false  # 允许用 /clear 清空当前聊天流的短期上下文
 enable_reply_effect_tracking = false  # 记录回复效果评分，观察回复质量
 force_plugin_compatibility = false    # 跳过插件声明的 Host/SDK 版本校验直接加载；开启后需重启生效
 keep_prompt_preview_json_base64 = false  # [进阶] Prompt 预览保留图片 base64；便于复现但占空间
@@ -704,6 +715,7 @@ enable_llm_cache_stats = false           # [进阶] 记录模型 prompt cache �
 
 - **终端输入** — `enable_console_input` 默认开启：在交互式终端里可以直接输入普通消息，或用 `/clear`、`/pm`、`/offline`、`/online`、`/help` 等指令管理聊天和适配器，输入 `exit()` 关闭。非交互终端（systemd、nohup、`docker run` 不带 `-it`）只会多打一条 warning，不影响运行；改动需重启
 - **强制插件兼容** — `force_plugin_compatibility = true` 会跳过插件 manifest 声明的 Host/SDK 版本区间校验直接加载，**仅作临时兜底**，可能加载实际不兼容的插件；它只记一条 warning，且不影响插件市场的版本兼容性判断。开启后需重启
+- **`/clear` 指令** — 1.3.2 起 `/clear` 是内置命令，默认可用，不再需要调试开关；如需禁用，用 `[plugin].disabled_commands = ["core.clear"]`
 
 #### 遥测
 
@@ -764,7 +776,7 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 
 **改了没生效** — 你改的段落可能属于「仅启动时生效」：`[webui]` 与 `[maim_message]` 的监听地址和端口、`[mcp]` 服务器连接、`[plugin_runtime]` 的 IPC、`[log]` 的 `event_loop_watchdog_*`、`[debug]` 的 `enable_console_input` 与 `force_plugin_compatibility`。重启 MaiBot。其余段落看 [配置概览](./index.md#改了会立即生效吗)。
 
-**麦麦不理人** — 依次检查：适配器的聊天名单有没有加这个群（见 [NapCat 适配器](../adapters/napcat.md) 的「先加名单，再测试」）；`talk_value` 是否被调得过低；`qq_account` 与适配器登录的 QQ 是否一致。
+**麦麦不理人** — 依次检查：宿主适配器策略有没有放行这个群（见 [统一 QQ 连接器](../adapters/qq-local-client.md) 的「先加名单，再测试」）；`talk_value` 是否被调得过低；`qq_account` 与适配器登录的 QQ 是否一致。
 
 **麦麦刷屏话痨** — 调低 `talk_value`（如 0.3）；`response_splitter.max_sentence_num` 和 `max_split_num` 限制单次回复条数；注意 `emoji_send_num` 只是发送候选数，调小它不会减少发言频率。
 
@@ -778,5 +790,5 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 - 模型高级参数（思考模式等）：[模型额外参数](./model-extra-params.md)
 - 长期记忆详解：[A_Memorix 配置](./amemorix-config.md)
 - 接入外部工具：[MCP 配置](./mcp-config.md)
-- 连接 QQ：[NapCat 适配器](../adapters/napcat.md)
+- 连接 QQ：[统一 QQ 连接器](../adapters/qq-local-client.md)
 - 在浏览器里改配置：[WebUI 配置管理](../webui/config-management.md)

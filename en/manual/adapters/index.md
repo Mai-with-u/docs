@@ -10,15 +10,15 @@ title: Connect Platforms
 
 QQ offers two routes—pick the one that fits your setup:
 
-- **Local client login** — use your own QQ account (NapCat or SnowLuma) for the fullest feature set; **NapCat is recommended**;
-- **Open platform bot** — apply for a bot on the QQ Open Platform (AppID), no QQ client login needed.
+- **Local client login** — use your own QQ account (SnowLuma or NapCat) for the fullest feature set; **the Unified QQ Connector is recommended**: one plugin supports both client types and detects the peer automatically;
+- **Open platform bot** — apply for a bot on the QQ Open Platform (AppID + AppSecret), no QQ client login needed.
 
-The two routes are not mutually exclusive—you can enable both at the same time.
+The two routes are not mutually exclusive—you can enable both at the same time; the open-platform route can also share data with the local-client route through unified ID binding.
 
 ::: tip Adapter changes in 1.3.0
-MaiBot 1.3.0 requires the latest SnowLuma adapter — the new adapter has merged the NapCat adapter, so upgrade the adapter alongside the main program and **re-configure the allow/deny lists**.
+Since MaiBot 1.3.0, the former SnowLuma adapter and NapCat adapter have merged into the **Unified QQ Connector** (`MaiBot-SnowLuma-Adapter`), and the standalone NapCat adapter has stopped evolving and is archived. After upgrading the main program, upgrade the adapter as well; legacy configs are migrated automatically on load.
 
-Also, since 1.3.0 adapter plugins can use MaiBot's built-in group / private-chat allow/deny lists directly (`config/adapter_policy.toml`).
+Also, the adapters' built-in group / private-chat allow/deny lists have been removed—inbound access is controlled uniformly by MaiBot's adapter policy (`config/adapter_policy.toml` + the WebUI adapter settings).
 :::
 
 ## Available Adapters
@@ -27,13 +27,12 @@ Also, since 1.3.0 adapter plugins can use MaiBot's built-in group / private-chat
 
 ### QQ (Local Client Login)
 
-- [NapCat](./napcat) — 🏛️ officially recommended. Log in your own QQ account, connect via NapCat forward WebSocket, minimal configuration
-- [SnowLuma](./snowluma) — 🏛️ officially maintained. Log in your own QQ account, connect via SnowLuma, supports voice and proactive private messaging
+- [QQ Local Client](./qq-local-client) — 🏛️ officially maintained. The Unified QQ Connector: log in your own QQ account; one plugin supports SnowLuma / NapCat and detects the peer automatically
+- [NapCat](./napcat) — archived. The former standalone NapCat adapter has been merged into the Unified QQ Connector; this page is kept for historical reference only
 
 ### QQ (Open Platform Bot)
 
-- [QQ Official](./qq-official) — 🌐 community-maintained. Connect to the QQ official bot with AppID + AppSecret, supports private chats, group chats, guild text channels, and guild direct messages
-- [QQBot](./qqbot) — 🌐 community-maintained. Connect to the QQ official Bot API with AppID + AppSecret, supports private (C2C) and group chats
+- [QQ Official Bot](./qq-official) — 🏛️ officially maintained. Connect directly to the QQ Open Platform with AppID + AppSecret; supports private and group chat text, @, images, and emoji
 
 ### Email, iMessage & Voice Calls
 
@@ -49,14 +48,20 @@ Community adapters are continuously maintained by their respective authors—bef
 
 Adapters usually need two kinds of connections:
 
-- **Platform → Adapter** — e.g. NapCat logs into QQ and pushes messages to the adapter; open-platform bots require applying for an official bot account first.
+- **Platform → Adapter** — e.g. SnowLuma / NapCat logs into QQ and pushes messages to the adapter; open-platform bots require applying for an official bot account first.
 - **Adapter → MaiBot** — plugin-version adapters usually don't need extra config for this layer; only standalone versions do.
 
 How to apply for platform accounts and which addresses/tokens to fill in are covered in each adapter's doc.
+
+## Set the allow scope first, then test
+
+After connecting a new adapter, the first thing to check is the **allow scope**: MaiBot keeps a unified group / private-chat access policy in `config/adapter_policy.toml` (allowing everything by default), with visual editing in the WebUI adapter settings. **Allow one test group and one test user in the policy before testing**; when troubleshooting "no response", this layer is the first place to look. See [Adapter Management](../webui/adapter-management.md).
+
+Neither the Unified QQ Connector nor the QQ Official Bot Adapter ships a built-in chat list—the allow scope is decided by this layer alone.
 
 ## Verify and Troubleshoot
 
 Send a test message on the corresponding platform:
 
 - If the MaiBot backend shows the message log and can reply normally → success;
-- If nothing happens, check in order: is the platform client logged in → is the adapter started → did it connect to the platform → (standalone) did it connect to MaiBot → is MaiBot ready.
+- If nothing happens, check in order: is the platform client logged in → is the adapter started → did it connect to the platform → (standalone) did it connect to MaiBot → does MaiBot's adapter policy allow that group / user → is MaiBot ready.

@@ -38,7 +38,7 @@ MaiBot 自带浏览器管理面板（WebUI），启动后访问 `http://localhos
 
 ## 首次配置向导
 
-向导共三步，任何一步都可以点「跳过向导」（之后可在「WebUI 设置」中重新进入）：
+向导共三步，任何一步都可以点「跳过向导」（之后可在「麦麦设置 → WebUI 设置 → 其他」里重新运行）：
 
 ### 设置登录密码
 
@@ -70,6 +70,20 @@ MaiBot 自带浏览器管理面板（WebUI），启动后访问 `http://localhos
 - 💬 **直接聊天** — 和麦麦对话、围观真实群聊的推理过程
 - 📊 **看统计** — 消息、Token、费用与在线时长
 
+## 界面导航
+
+1.3.2 起重排了左侧侧边栏，入口按用途分成四组：
+
+- **配置管理** — 麦麦设置（`bot_config.toml`）、模型管理（`model_config.toml`）、适配器设置（账号与黑白名单）
+- **资源管理** — 表情包、表达方式、黑话、行为学习、长期记忆
+- **扩展集成** — 插件扩展（原「插件管理」）、插件市场
+- **高级工具** — Prompt 管理、回复效果、数据管理、详细统计数据、日志查看器
+
+两处入口变化需要知道：
+
+- 右上角的齿轮按钮和独立的 **WebUI 设置**（`/settings`）页面已取消，设置项内嵌为「麦麦设置」页顶部第三个标签 **WebUI 设置**；打开旧地址 `/settings` 会被自动替换为 `/config/bot?mode=webui`，浏览器收藏夹里的旧地址要更新
+- 侧边栏的 **MCP 设置** 独立入口已移除，MCP 服务管理并入「扩展集成 → 插件扩展」页里的 **MCP 服务** 分组；打开旧地址 `/mcp-settings` 会跳转到插件扩展页
+
 ## 基本设置
 
 在 `bot_config.toml` 里改 WebUI 的设置：
@@ -82,7 +96,7 @@ enabled = true                # 是否启用 WebUI
 host = ["127.0.0.1", "::1"]  # 绑定地址列表
 port = 8001                   # 端口号
 mode = "production"           # 运行模式：development(开发) 或 production(生产)
-webui_style = 1               # 界面风格
+webui_style = 2               # 界面风格：0 原版 / 1 未来复古 / 2 千禧（1.3.2 起开放）
 anti_crawler_mode = "basic"   # 防爬虫模式：false / strict / loose / basic
 allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 ```
@@ -94,16 +108,32 @@ allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 
 ## WebUI 设置
 
-右上角齿轮进入 **WebUI 设置**（`/settings`），管理界面偏好：
+WebUI 自身的界面偏好、登录 Token 和维护操作都收在 **WebUI 设置** 里：侧边栏「配置管理 → 麦麦设置」，点页面顶部第三个标签 **WebUI 设置**（`/config/bot?mode=webui`）。
 
-- **外观** — 主题模式（浅色/深色/跟随系统）、主题色、字体、圆角、自定义 CSS
+- **外观** — 主题模式（浅色 / 深色 / 跟随系统）、主题色、字体、圆角、自定义 CSS，以及界面风格（原版 Dashboard / 未来复古 / 千禧）
 - **安全** — 修改或重新生成登录 Token
-- **其他** — 数据管理：清理日志与缓存、导入/导出设置、重置
+- **其他** — 清理日志与缓存、导入 / 导出设置、重新运行安装向导、重置
 - **关于** — 版本信息、技术栈与开源许可
 
 ![WebUI 设置](/images/webui/settings.webp)
 
 ![关于页](/images/webui/settings-about.webp)
+
+### 界面风格
+
+「外观」标签顶部的「界面风格」是三选一：
+
+- **原版 Dashboard** — 保留卡片、圆角、背景和自定义主题能力，对应 `webui_style = 0`
+- **未来复古** — 一键包外壳同款纸面颗粒、硬朗描边和切角面板，对应 `webui_style = 1`
+- **千禧**（1.3.2 新增）— 米黄塑料机壳、键帽按钮和下沉屏幕，夜间模式是关灯后的炭灰机壳，对应 `webui_style = 2`。侧边栏常驻不折叠，首页图表变成示波屏样式
+
+千禧是 1.3.2 才开放的取值：`webui_style = 2` 写在 1.3.1 的 `bot_config.toml` 里会校验失败。
+
+::: warning 自定义主题只在原版下可见
+主题色、界面样式微调（字体、视觉效果、布局、动画、背景）和主题导入 / 导出只在「原版 Dashboard」下显示；切到「未来复古」或「千禧」后这些区块会隐藏。
+
+样式选择会写回 `bot_config.toml` 的 `[webui].webui_style`，多个浏览器同时打开 WebUI 时会互相覆盖本地的选择，以最后一次切换为准。
+:::
 
 ### 真实聊天流快捷管理
 
@@ -133,7 +163,7 @@ allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 
 ## 忘记密码怎么办？
 
-如果仍能登录，在「WebUI 设置 → 安全」中修改或重新生成 Token：
+如果仍能登录，在「麦麦设置 → WebUI 设置 → 安全」中修改或重新生成 Token：
 
 ![安全设置](/images/webui/settings-security.webp)
 
@@ -162,9 +192,18 @@ allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 - 保存固定 Token 后旧 Token 立即失效，用新 Token 重新登录
 - 实在不行删除 `data/webui.json` 重置
 
+**收藏的 `/settings` 地址跳到 `/config/bot` 了？**
+
+- 1.3.2 起独立的 WebUI 设置页已内嵌进「麦麦设置 → WebUI 设置」标签，旧地址会被替换成 `/config/bot?mode=webui`
+- 想直接进外观设置，用 `/config/bot?mode=webui&tab=appearance`；想进 MCP 服务，走「扩展集成 → 插件扩展」
+
 ## 更多功能
 
 - [配置管理](./config-management.md) - 在浏览器里改配置
+- [适配器管理](./adapter-management.md) - 账号身份与黑白名单
+- [命令管理](./command-management.md) - 插件命令与执行权限
 - [记忆管理](./memory-management.md) - 查看和管理记忆
+- [MCP 配置](../configuration/mcp-config.md) - 外部工具服务，入口在「插件扩展 → MCP 服务」
 - [插件管理](/manual/plugins/) - 安装和管理插件
 - [聊天记录](./chat-stats.md) - 查看聊天统计
+- [数据管理](./data-management.md)（`/data-transfer`）- 侧边栏「高级工具 → 数据管理」，打包导出和导入整份数据

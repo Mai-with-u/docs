@@ -32,7 +32,7 @@ NapCat WebUI 的登录 Token 与 WebSocket 访问令牌不是同一个概念，�
 
 ## 切换到 SnowLuma 后连接失败怎么办？
 
-确认 SnowLuma 适配器已启用，SnowLuma 的地址、端口和访问令牌与插件配置一致，并检查 SnowLuma 本身是否已经正常登录和监听。详见[SnowLuma 适配器](../manual/adapters/snowluma.md)。
+确认 SnowLuma 适配器已启用，SnowLuma 的地址、端口和访问令牌与插件配置一致，并检查 SnowLuma 本身是否已经正常登录和监听。详见[统一 QQ 连接器](../manual/adapters/qq-local-client.md)。
 
 ::: info 内容来源
 本页的一键包问题分类参考了社区协作文档[《麦麦教程-常见问题速查/社区教程》](https://www.kdocs.cn/l/ctOGhVv6L8Yq)。2026 年 7 月 12 日导出版本的页面信息显示创建者为池雨、修改者为无为青年；本站仅保留能够按当前文档确认的通用步骤。

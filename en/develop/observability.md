@@ -253,13 +253,11 @@ Telemetry consists of two independent tasks: `TelemetryHeartBeatTask` (heartbeat
 
 ## Debug Configuration Items
 
-Debug configuration is in the `[debug]` section, with `__ui_parent__` set to `log`, so it appears in the same area as log configuration in the WebUI. Below is the complete list of debug items in 1.3.1, in source field order:
+Debug configuration is in the `[debug]` section, with `__ui_parent__` set to `log`, so it appears in the same area as log configuration in the WebUI. Below is the complete list of debug items in 1.3.2, in source field order:
 
 **`enable_console_input`** — Whether to enable local message and command input in an interactive terminal, default `true` (on by default since 1.3.0). When enabled, you can type plain messages directly in the terminal, as well as management commands like `/clear`, `/pm`, `/offline`, and `/online`; typing `exit()` closes only the terminal input while the bot keeps running. Non-interactive terminals (systemd services, output redirected to a file, etc.) skip terminal input and log one extra warning, without affecting operation. See [Linux Deployment](../manual/deployment/linux) and [Windows Deployment](../manual/deployment/windows) for per-deployment notes.
 
 **`show_maisaka_thinking`** — Whether to show MaiMai's thinking process in logs (Planner planning details, tool call reasoning chains), default `true`. You can disable this if you want to reduce log volume.
-
-**`enable_clear_context_command`** — Whether to allow the `/clear` command to clear the Maisaka short-term history of the current chat stream, default `false`. When enabled, regular users in group and private chats can also use `/clear`; input from local-operator sources such as the terminal is always available regardless of this switch. The command supports targeting a specific chat by name (`/clear <chat-name>`).
 
 **`enable_reply_effect_tracking`** — Whether to record reply effect scores, default `false`. When enabled, the system calculates effect metrics for each reply and writes them to the database, with `maisaka_reply_effect_limit` limiting the number of records per chat. Useful when tuning prompts or comparing model performance. The scoring semantics are currently v6 (responsiveness no longer considers user reply speed; no confidence is generated when no related info is found; records that haven't finished the observation window are excluded from scoring). See [Chat & Stats · Reply Effect Evaluation](../manual/webui/chat-stats.md#reply-effect-evaluation) for the WebUI view.
 
@@ -270,6 +268,10 @@ Debug configuration is in the `[debug]` section, with `__ui_parent__` set to `lo
 **`enable_llm_cache_stats`** — Whether to record model prompt cache hit statistics, default `false`. When enabled, cache-related metrics are appended to logs for performance tuning and model API cost analysis.
 
 **`force_plugin_compatibility`** — Whether to skip the plugin's declared Host / SDK version range check and load it directly, default `false`. When enabled, a version range mismatch only logs one warning (including the declared range and the current Host / SDK versions) instead of rejecting the load. This is a temporary fallback, not a recommended practice; changes require a restart to take effect. See [Plugin Loading Failed](../faq/error-troubleshooting#scenario-7-plugin-loading-failed) for usage.
+
+::: tip About the /clear command
+`[debug].enable_clear_context_command` was removed in 1.3.2. `/clear` is now a built-in command (command ID `core.clear`) that is available by default; to disable it, add `"core.clear"` to `[plugin].disabled_commands`. Input from local-operator sources such as the terminal is always available, and the command supports targeting a specific chat by name (`/clear <chat-name>`).
+:::
 
 ## WebSocket Log Subscription
 

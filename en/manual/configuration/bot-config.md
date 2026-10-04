@@ -33,7 +33,7 @@ platforms = []            # Fallback accounts on other platforms, format platfor
 :::
 
 ::: warning qq_account must match the adapter's logged-in QQ
-When connecting through an adapter such as NapCat, `qq_account` must exactly match the QQ number logged in on the adapter, otherwise Mai treats her own messages as other people's. When the adapter reports identity normally these two fields are only fallbacks, but keeping them consistent is always correct. See the [NapCat Adapter](/en/manual/adapters/napcat).
+When connecting through an adapter such as NapCat, `qq_account` must exactly match the QQ number logged in on the adapter, otherwise Mai treats her own messages as other people's. When the adapter reports identity normally these two fields are only fallbacks, but keeping them consistent is always correct. See the [Unified QQ Connector](/en/manual/adapters/qq-local-client).
 :::
 
 ### Shape the Personality
@@ -225,7 +225,7 @@ talk_value = 1                             # Group talk frequency: 0~1, lower is
 private_talk_value = 1                     # Private talk frequency: same scale
 mentioned_bot_reply = false                # Reply more easily when a message mentions Mai's name
 inevitable_at_reply = true                 # Try to reply when @-mentioned
-reply_trigger_mode = "frequency"           # When new messages enter the Planner: "frequency" / "reply_necessity"
+reply_trigger_mode = "frequency"           # When new messages enter the Planner: "frequency" / "dynamic"
 planner_interrupt_max_consecutive_count = 0  # [Advanced] How many times new messages may restart an in-progress thought; 0 = unlimited
 max_consecutive_wait_count = 3             # Max consecutive wait calls by the Planner; afterwards the wait tool refuses to continue
 no_action_backoff_base_seconds = 15        # After consecutive no-reply decisions, how long to wait before the next check (seconds)
@@ -264,6 +264,13 @@ value = 1.0
 - **One specific group** — `platform = "qq"`, `item_id = "123456"`, applies only to that group
 - **Global fallback** — leave both `platform` and `item_id` empty; used when no specific rule matches
 - **Global wildcard** — set both to `"*"` to match any platform and any chat; in the WebUI you can pick the "global wildcard" or "fallback" mode directly
+
+**How thinking is triggered** — `reply_trigger_mode` decides when new messages enter the Planner:
+
+- **`frequency` (default)** — decides whether to think based on the number of new messages, with `talk_value` / `talk_value_rules` controlling the rate
+- **`dynamic` (since 1.3.2)** — estimates the reply likelihood of each message batch, then uses a one-hour sliding window to pull the actual reply count back toward the target of "expected replies × frequency", keeping idle backoff. It **only applies to group chats; private chats have no gate**. No config field was added; keep tuning `talk_value`, `talk_value_rules`, `mentioned_bot_reply` / `inevitable_at_reply`, and `no_action_backoff_*`
+
+The old necessity trigger (`reply_necessity`) has been removed and is rewritten to `dynamic` on upgrade.
 
 #### How to Speak
 
@@ -382,9 +389,9 @@ Mai learns ways of speaking from chat and reuses them in later replies:
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [expression]
-expression_checked_only = true        # Only use expressions that were manually curated
+expression_checked_only = false       # Only use manually curated expressions; when off, uncurated ones are used too
 expression_self_reflect = true        # Let an AI review entries before writing, less weird content
-expression_selection_mode = "legacy"  # "legacy" quick pick / "vector_intent" intent + vector recall (needs an embedding model)
+use_vector_expression = true          # Use vector expressions: intent + embedding recall, better quality (needs an embedding model); off = quick pick
 expression_vector_index_path = "data/expression_selection/expression_vector_index.json"  # [Advanced]
 expression_vector_candidate_pool_size = 50  # [Advanced] Candidates handed to the LLM after vector recall, hard cap 50
 max_expression_learner = 3            # [Advanced] Learning tasks running at the same time
@@ -396,7 +403,8 @@ expression_groups = []                # Multiple chats share learned expressions
 
 **Key points:**
 
-- **`expression_selection_mode`** — switch to `"vector_intent"` once an embedding model is configured; selection quality improves significantly. The old `"vector"` mode has been removed; on first launch after upgrading it is migrated to `"vector_intent"` and written back automatically
+- **`use_vector_expression`** — on by default; it switches to expression intent plus embedding-model recall, which selects noticeably better. When off it falls back to quick-picked candidates. The old `expression_selection_mode` (`legacy` / `vector_intent`, and the even older `vector`) has been removed; on first launch after upgrading it is rewritten to `use_vector_expression` and saved back
+- **`expression_checked_only`** — defaults to `false`, so expressions you have not curated are used as well; set it to `true` if Mai should only use expressions you have reviewed
 - **`learning_list`** — empty `platform`/`item_id` means a global rule; `type` accepts `"group"`/`"private"`; `use` controls whether learned content is used, `learn` whether learning continues
 
 Since 1.2.0, the expression vector index is maintained online: inserts, backfill, and failure recovery allocate incrementally from the nearest cluster center, and a corrupted index file is rebuilt automatically instead of crashing in a loop. This runs by itself, no configuration needed.
@@ -419,18 +427,16 @@ jargon_groups = []  # Multiple chats share learned jargon
 
 #### Vision
 
-Controls how image messages enter the planner and replyer:
+Controls how image messages enter the planner and replyer. **Whether images are sent directly is now decided automatically by model capability**: multimodal input is enabled only when every model configured for a task (such as `planner`) has `visual = true`; otherwise it degrades to plain text plus recognition results. The old manual "planner/replyer vision mode" switches were removed in 1.3.2.
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [visual]
-planner_mode = "auto"                  # "auto" pick by model / "text" text and recognition results only / "multimodal" send images to the model
-replyer_mode = "auto"                  # Same options, for the reply stage
-max_image_num = 128                    # [Advanced] Max images per multimodal request
-wait_image_recognize_max_time = 10     # Longest wait for image recognition, seconds; 0 = no wait
+max_image_num = 64                     # [Advanced] Max images per multimodal request
+wait_image_recognize_max_time = 32     # Longest wait for image recognition, seconds; 0 = no wait
 handle_oversized_images = true         # Automatically compress or drop oversized images
-max_image_size_mb = 30.0               # Images above this size count as oversized; 0 = unlimited
+max_image_size_mb = 16.0               # Images above this size count as oversized; 0 = unlimited
 oversized_image_handle_method = "compress"  # "compress" then keep using / "discard" drop it
 
 [visual.image_cache_cleanup]
@@ -572,7 +578,7 @@ enabled = true            # Whether to start the WebUI
 host = ["127.0.0.1", "::1"]  # Listen addresses; for external access use ["0.0.0.0", "::"]
 port = 8001               # Access port
 mode = "production"       # "production" for daily use / "development" for debugging
-webui_style = 1           # Interface style: 0 old / 1 retro-future
+webui_style = 1           # Interface style: 0 old / 1 retro-future / 2 millennium
 
 anti_crawler_mode = "basic"  # Anti-crawler: "basic" log only / "strict" / "loose" block more / "false" off
 allowed_ips = "127.0.0.1"    # IPs allowed to access, comma separated, CIDR and wildcards supported
@@ -613,9 +619,15 @@ Connections under `[mcp]` are established at startup only; a file reload does no
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [plugin]
 permission = ["qq:123456789"]  # Users allowed to manage plugins via chat commands, format platform:QQ
+silent_permission_denied = false  # Silently block unauthorized commands instead of sending a notice
+disabled_commands = []         # Disabled command IDs, format plugin_id.command_name; the built-in one is core.clear
 ```
 
 :::
+
+- **`permission`** — users allowed to manage plugins through chat commands
+- **`silent_permission_denied`** — when on, unauthorized commands are silently blocked and only logged, with no reply notice; useful for groups where you do not want to expose management hints
+- **`disabled_commands`** — commands disabled on the command-management page; for example `["core.clear"]` turns off the built-in context-clear command, and `["my-plugin.some_command"]` disables a plugin command
 
 #### Plugin Runtime
 
@@ -690,7 +702,6 @@ library_log_levels = { aiohttp = "WARNING", PIL = "WARNING" }  # [Advanced] Lowe
 [debug]
 enable_console_input = true           # Enable local message and command input in an interactive terminal (on by default)
 show_maisaka_thinking = true          # Show Mai's thinking process in logs or the UI
-enable_clear_context_command = false  # Allow /clear to wipe a chat stream's short-term context
 enable_reply_effect_tracking = false  # Record reply-effect scores to observe quality
 force_plugin_compatibility = false    # Skip the plugin-declared Host/SDK version check and load directly; takes effect after a restart
 keep_prompt_preview_json_base64 = false  # [Advanced] Keep image base64 in prompt previews; reproducible but large
@@ -704,6 +715,7 @@ enable_llm_cache_stats = false           # [Advanced] Record prompt-cache statis
 
 - **Terminal input** — `enable_console_input` is on by default: in an interactive terminal you can type ordinary messages or manage chats and adapters with `/clear`, `/pm`, `/offline`, `/online`, `/help`, and type `exit()` to close it. A non-interactive terminal (systemd, nohup, `docker run` without `-it`) only logs one extra warning and is otherwise unaffected; changing this requires a restart
 - **Force plugin compatibility** — `force_plugin_compatibility = true` skips the Host/SDK version-range checks declared by a plugin manifest and loads it anyway; it is **only a temporary fallback** and may load plugins that are in fact incompatible. It logs a single warning and does not affect the plugin market's version compatibility filtering. Requires a restart
+- **The `/clear` command** — since 1.3.2 `/clear` is a built-in command that is available by default and no longer needs a debug switch; to disable it, use `[plugin].disabled_commands = ["core.clear"]`
 
 #### Telemetry
 
@@ -764,7 +776,7 @@ Then watch the log or the WebUI: once the file is saved, a successful config-rel
 
 **Change had no effect** — the section you touched may be startup-only: `[webui]` and `[maim_message]` listen addresses and ports, `[mcp]` server connections, `[plugin_runtime]` IPC, `[log]`'s `event_loop_watchdog_*`, `[debug]`'s `enable_console_input` and `force_plugin_compatibility`. Restart MaiBot. For everything else see [Configuration Overview](./index.md#does-it-take-effect-immediately).
 
-**Mai ignores people** — check in order: is the group in the adapter's chat list (see "Add lists first, then test" in the [NapCat Adapter](/en/manual/adapters/napcat)); is `talk_value` set too low; does `qq_account` match the adapter's logged-in QQ.
+**Mai ignores people** — check in order: does the host adapter policy allow this group (see "Add the allow scope first, then test" in the [Unified QQ Connector](/en/manual/adapters/qq-local-client)); is `talk_value` set too low; does `qq_account` match the adapter's logged-in QQ.
 
 **Mai floods the chat** — lower `talk_value` (e.g. 0.3); cap messages per reply with `response_splitter.max_sentence_num` and `max_split_num`; note that `emoji_send_num` is only the candidate pool size — lowering it does not reduce talk frequency.
 
@@ -778,5 +790,5 @@ Then watch the log or the WebUI: once the file is saved, a successful config-rel
 - Advanced model parameters (thinking mode, etc.): [Model Extra Parameters](/en/manual/configuration/model-extra-params)
 - Long-term memory in depth: [A_Memorix Configuration](/en/manual/configuration/amemorix-config)
 - External tools: [MCP Configuration](/en/manual/configuration/mcp-config)
-- Connect QQ: [NapCat Adapter](/en/manual/adapters/napcat)
+- Connect QQ: [Unified QQ Connector](/en/manual/adapters/qq-local-client)
 - Configure in the browser: [WebUI Config Management](/en/manual/webui/config-management)

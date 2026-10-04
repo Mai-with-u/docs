@@ -33,6 +33,7 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: 'Tool', link: '/en/plugin/tools' },
         { text: 'Command', link: '/en/plugin/commands' },
         { text: 'Home Cards', link: '/en/plugin/home-cards' },
+        { text: 'WebUI Pages', link: '/en/plugin/webui-pages' },
         { text: 'Hook Handler', link: '/en/plugin/hooks' },
         { text: 'Event Handler', link: '/en/plugin/event-handlers' },
         { text: 'API Components', link: '/en/plugin/api-components' },
@@ -102,13 +103,12 @@ export const sidebar: DefaultTheme.Sidebar = {
       collapsed: false,
       items: [
         { text: 'Connect Platforms', link: '/en/manual/adapters/' },
-        { text: 'NapCat', link: '/en/manual/adapters/napcat' },
-        { text: 'SnowLuma', link: '/en/manual/adapters/snowluma' },
-        { text: 'QQ Official', link: '/en/manual/adapters/qq-official' },
-        { text: 'QQBot', link: '/en/manual/adapters/qqbot' },
+        { text: 'QQ Local Client', link: '/en/manual/adapters/qq-local-client' },
+        { text: 'QQ Official Bot', link: '/en/manual/adapters/qq-official' },
         { text: 'Email', link: '/en/manual/adapters/email' },
         { text: 'QQ Voice Call', link: '/en/manual/adapters/qq-voice-call' },
         { text: 'iMessage', link: '/en/manual/adapters/imessage' },
+        { text: 'NapCat (archived)', link: '/en/manual/adapters/napcat' },
       ]
     },
     {
@@ -140,6 +140,7 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: 'Adapter Management', link: '/en/manual/webui/adapter-management' },
         { text: 'Command Management', link: '/en/manual/webui/command-management' },
         { text: 'Memory Management', link: '/en/manual/webui/memory-management' },
+        { text: 'Data Management', link: '/en/manual/webui/data-management' },
         { text: 'Chat & Stats', link: '/en/manual/webui/chat-stats' },
       ]
     },

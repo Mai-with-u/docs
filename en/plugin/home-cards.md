@@ -85,3 +85,7 @@ The layout is stored locally in the browser and is not written to plugin config.
 - The WebUI does not execute HTML, JavaScript, or inline events provided by plugins. HTML inside Markdown is treated as normal text.
 - Links are checked by both Host and WebUI. Only internal paths, `http(s)`, and `mailto` are allowed.
 - Host truncates oversized text and content block lists so plugins cannot push excessively large arbitrary JSON into the home page.
+
+::: tip Need a full page instead of a card?
+Home cards only live on the WebUI home page. To give your plugin a full page (a top workspace or a sidebar entry), use [WebUI Pages](./webui-pages.md).
+:::

@@ -269,8 +269,10 @@ title: Manifest
 1. **扫描**：收集所有插件的 `_manifest.json`
 2. **检测 Host 冲突**：若插件的 Python 包依赖与主程序的依赖约束无交集，则阻止加载
 3. **检测插件间冲突**：若多个插件对同一 Python 包的版本约束互斥，则全部阻止加载
-4. **自动安装**：对可加载插件缺失的 Python 依赖，优先使用 `uv pip install`，回退到 `pip install`
+4. **自动安装**：对可加载插件缺失的 Python 依赖，读取主程序 `pyproject.toml` 中 `[tool.uv]` 的索引顺序与约束依赖，**逐个源单独安装，任意一个源成功即可**；主程序的 `constraint-dependencies` 会以临时约束文件显式传给安装命令。全部源失败时，报错会列出每个源的失败摘要
 5. **拓扑排序**：根据跨 Supervisor 依赖关系决定 Runner 启动顺序，循环依赖将被拒绝
+
+索引顺序沿用 uv 自己的语义：非 `default = true` 的索引按声明顺序排在前，`default = true` 的排在最后。uv 分支在指定索引时会追加 `--no-config`——uv 会把 `pyproject.toml` 的索引与命令行索引合并，只有加上它才保证本次只查这一个源。插件的 `dependencies` 声明规则（`type` / `id` / `version_spec` / `name`）不受影响，照旧编写即可。
 
 ## 校验规则
 

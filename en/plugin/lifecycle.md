@@ -248,6 +248,10 @@ class MyPlugin(MaiBotPlugin):
 - Declaring unsupported values will raise a `ValueError` in `get_config_reload_subscriptions()`.
 - You cannot pass a string directly (e.g., `config_reload_subscriptions = "bot"`); an iterable collection must be used.
 
+::: tip Since 1.3.2: saving configuration no longer blocks on the broadcast
+Config hot-reload broadcasts now run in a background task and are **coalesced before delivery**: when you change configuration several times in quick succession, the plugin receives only one merged latest snapshot, and the WebUI save request no longer waits for the broadcast to finish, so saving is noticeably faster. Callback semantics are unchanged — `on_config_update()` still receives the complete latest configuration for that scope.
+:::
+
 ## Complete Lifecycle Example
 
 Below is a complete plugin example that includes all lifecycle methods:

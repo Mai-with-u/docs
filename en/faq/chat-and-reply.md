@@ -4,6 +4,15 @@ title: Chat and Replies
 
 # Chat and Replies
 
+## What is the difference between frequency and dynamic trigger?
+
+`[chat.reply_timing].reply_trigger_mode` decides when new messages enter the Planner:
+
+- **`frequency` (default)** — decides whether to think based on the number of new messages; simple and predictable
+- **`dynamic`** — estimates the reply likelihood of each message batch, then uses a one-hour sliding window to pull the actual reply count back to the configured target, matching real chat rhythm better than the old necessity trigger. It **only applies to group chats; private chats are not gated**. No new config option was added
+
+The old necessity trigger (`reply_necessity`, essentially rule scoring) was replaced in 1.3.2 by this "fitted probability + closed-loop rate control" and is rewritten to `dynamic` on upgrade. After switching modes, observe for a while before deciding whether to fine-tune `talk_value`.
+
 ## How do I make MaiBot speak more or less often?
 
 Adjust group or private-chat frequency, then check dynamic frequency rules. When dynamic rules are enabled, a matching rule may override the base value. Personality and group prompts can also affect the Planner's decision to speak.

@@ -85,3 +85,7 @@ class StatusCardPlugin(MaiBotPlugin):
 - WebUI 不执行插件提供的 HTML、JavaScript 或内联事件；Markdown 中的 HTML 会按普通文本处理。
 - 链接会被 Host 和 WebUI 双重校验，仅允许内部路径、`http(s)` 和 `mailto`。
 - Host 会裁剪过长文本和过大的内容块列表，避免插件向首页塞入过大的任意 JSON。
+
+::: tip 需要整页而不是一张卡片？
+首页卡片只能放在 WebUI 首页。如果要给插件一个完整页面（顶部工作区或侧边栏入口），用 [WebUI 页面](./webui-pages.md)。
+:::

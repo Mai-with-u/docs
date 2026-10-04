@@ -141,7 +141,7 @@ When a configuration file is loaded, the system compares the file's `[inner].ver
 
 ### The BOT_CONFIG_UPGRADE_HOOKS Chain
 
-`BOT_CONFIG_UPGRADE_HOOKS` currently contains 9 hooks, arranged in ascending version order (the current `CONFIG_VERSION` is `"8.14.51"`):
+`BOT_CONFIG_UPGRADE_HOOKS` currently contains 11 hooks, arranged in ascending version order (the current `CONFIG_VERSION` is `"8.14.59"`):
 
 **8.10.11 — Reset Group Chat Prompt to Default**
 
@@ -178,6 +178,14 @@ When the Planner behavior style was first split out, if `[personality]` had no `
 **8.14.40 — Migrate the Removed Expression Selection Mode**
 
 The old `expression.expression_selection_mode = "vector"` (Fine mode) has been removed. The `_migrate_removed_expression_selection_mode` hook rewrites it to `"vector_intent"` (Super Fine) so startup does not fail.
+
+**8.14.54 — Migrate the Removed Reply Trigger Mode**
+
+The old `[chat.reply_timing].reply_trigger_mode = "reply_necessity"` (necessity trigger) has been replaced by `"dynamic"`. The `_migrate_removed_reply_necessity_trigger_mode` hook rewrites it automatically so the old value does not fail validation.
+
+**8.14.58 — Reset Expression Defaults**
+
+The expression config was refactored in 1.3.2: the `_reset_expression_defaults` hook **forces** `expression.expression_checked_only` to `false` (`force=True`, ignoring the old value), adds `expression.use_vector_expression = true` when missing (`force=False`, so an existing value is kept), and removes the legacy `expression.expression_selection_mode` field entirely. Note that this also switches users upgrading from an old version to vector expressions, which requires an embedding model.
 
 ### Upgrade Hook Execution Flow
 
@@ -248,6 +256,8 @@ Key protections for hot reload:
 - **Timeout protection**: a single `reload_config` runs for at most 20 seconds.
 - **Lock protection**: `asyncio.Lock` ensures only one reload is in progress at a time.
 - **Callback exception isolation**: an error in one callback does not prevent other callbacks from running.
+
+Since 1.3.2, hot reload supports **per-section subscriptions**: when registering a callback you may pass `sections=("webui",)` (dotted sub-sections such as `"chat.reply_timing"` are supported, matched by prefix), and the callback is notified only when those sections actually change. `ConfigManager` first compares the old and new configs via `model_dump` to find the changed top-level sections and skips callbacks that do not match — this is how "improved config hot reload, greatly speeding up saving some settings" is implemented, so saving one small section no longer wakes every component that caches config. Three rules apply: a `model`-scope reload does **not** notify section subscribers; if the comparison fails and the changed sections are unknown, all subscribers are notified conservatively; and reloads now deduplicate by file sha256 fingerprint (unchanged content is skipped). In addition, `unregister_reload_callback` changed from `list.remove` to a list comprehension, so unregistering works correctly even with duplicate registrations or non-comparable callbacks.
 
 ## Legacy Migration
 
@@ -335,6 +345,8 @@ Plugins or custom modules can register hot reload callbacks via `ConfigManager.r
 
 `changed_scopes` is one of `("bot",)`, `("model",)`, or `("bot", "model")`, indicating which config files were hit by this reload.
 
+The optional second argument `sections` subscribes by config section (since 1.3.2): pass `("chat",)`, `("webui",)`, `("a_memorix",)`, or a dotted sub-section such as `("chat.reply_timing",)` and the callback is notified only when those sections change; omit it to be notified on any bot-config hot reload. Use it when you only need to refresh caches for the sections you care about. Matching is by prefix and respects scope: a `model`-scope reload notifies no section subscriber.
+
 ::: code-group
 
 ```python [Python ~vscode-icons:file-type-python~]
@@ -356,8 +368,8 @@ def on_any_config_changed() -> None:
     print("[plugin] Config hot reload complete, refreshing cache...")
 
 
-# Register callbacks
-cfg_mgr.register_reload_callback(on_bot_config_changed)
+# Register callbacks: only notify on chat-related changes; omit sections to be notified on any reload
+cfg_mgr.register_reload_callback(on_bot_config_changed, sections=("chat",))
 cfg_mgr.register_reload_callback(on_any_config_changed)
 
 # Unregister when no longer needed

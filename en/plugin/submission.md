@@ -100,6 +100,7 @@ Go through this list before submitting:
 - [ ] `urls.repository` is a public HTTPS URL without a `.git` suffix
 - [ ] `capabilities` declares only what the plugin actually needs
 - [ ] Plugin loads and runs correctly with a real MaiBot instance locally
+- [ ] If the plugin contains a `webui.json`, it has been reloaded and its pages opened for verification in a local MaiBot
 
 ## Further Reading
 

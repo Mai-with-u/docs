@@ -234,6 +234,20 @@ stream = await self.ctx.chat.open_session(
 
 `chat.open_session` returns `stream_id`, `session_id`, `chat_type`, `created`, and the full `stream` object. In multi-account or multi-route deployments, pass `account_id` and `scope` as well to avoid opening the wrong chat stream.
 
+`chat.get_avatar()` (since 1.3.2) returns three keys: `status`, `url`, and `expires_at`. `expires_at` is a Unix timestamp; when `status` is `available`, `url` is the avatar source URL supplied by the adapter that currently owns the platform route. The result carries **no image bytes and no Host file path** — download it yourself or hand it to your frontend. Declare the `chat.get_avatar` capability in the manifest's `capabilities` to use it.
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+# Query a user avatar; target_type is "user" or "group"
+avatar = await self.ctx.chat.get_avatar(platform="qq", target_id="1026294844")
+if avatar["status"] == "available":
+    url = avatar["url"]                # Avatar source URL from the adapter
+    expires_at = avatar["expires_at"]  # Unix timestamp
+```
+
+:::
+
 ## maisaka - Maisaka Proactive Tasks
 
 ::: code-group
@@ -381,6 +395,8 @@ await self.ctx.api.replace_dynamic_apis(
 ```
 
 :::
+
+**Custom WebUI pages also bind `@API`**, but only to **this plugin's own static APIs**: `version` must match the registered value exactly, `public=True` is not required, and dynamic APIs cannot be bound. See [WebUI Pages](./webui-pages.md).
 
 ## gateway — Message Gateway
 

@@ -12,9 +12,9 @@ title: 适配器连接
 
 ## NapCat 已连接，为什么群聊仍然没有回复？
 
-优先检查 NapCat 适配器的聊天过滤。白名单模式下，群号不在名单中时，消息会在进入 MaiBot 前被丢弃。
+优先检查宿主适配器策略的放行范围。群聊或私聊不在放行列表时，消息会在进入 MaiBot 前被丢弃。
 
-还应确认 NapCat 登录的 QQ 号、目标群号、机器人发言权限以及 MaiBot 日志中是否实际收到消息。具体配置见[NapCat QQ 连接](../manual/adapters/napcat.md)。
+还应确认 NapCat 登录的 QQ 号、目标群号、机器人发言权限以及 MaiBot 日志中是否实际收到消息。放行范围在 WebUI 的适配器设置或 `config/adapter_policy.toml` 中配置，具体见[统一 QQ 连接器](../manual/adapters/qq-local-client.md)。
 
 ## 应该填写哪个 NapCat Token？
 

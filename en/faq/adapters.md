@@ -12,9 +12,9 @@ Restart both sides after changes and compare their logs to confirm the connectio
 
 ## NapCat is connected. Why are group messages ignored?
 
-Check the NapCat adapter's chat filter first. In allowlist mode, group messages are discarded before reaching MaiBot unless the group is listed.
+Check the host adapter policy's allow scope first. Group or private messages are discarded before reaching MaiBot unless the target is allowed.
 
-Also verify the logged-in QQ account, group ID, speaking permission, and whether MaiBot logs show the incoming message. See [NapCat Connection](../manual/adapters/napcat.md).
+Also verify the logged-in QQ account, group ID, speaking permission, and whether MaiBot logs show the incoming message. The allow scope is configured in the WebUI adapter settings or `config/adapter_policy.toml`; see [Unified QQ Connector](../manual/adapters/qq-local-client.md).
 
 ## Which NapCat token should I use?
 

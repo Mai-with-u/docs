@@ -28,7 +28,7 @@ The "Only show current version" switch in the toolbar decides whether plugins in
 
 ### Install from the Plugin Market
 
-1. Open the WebUI and go to "Plugin Management".
+1. Open the WebUI and go to "Plugin Extensions".
 2. Switch to the "Plugin Market / Browse" tab.
 3. Search or filter for the plugin you want (e.g. `NapCat`).
 4. Click "Install".
@@ -96,7 +96,7 @@ Besides the built-in Plugin Market in the WebUI, you can also visit the **MaiBot
 
 Use this when the plugin isn't in the market, or when you want a specific branch / fork.
 
-Paste the repository URL into "Install from Git" in plugin management, or clone manually in a terminal:
+Paste the repository URL into "Install from Git" in plugin extensions, or clone manually in a terminal:
 
 ::: code-group
 
@@ -130,7 +130,7 @@ Only install plugins from trusted sources. Before installing, check the reposito
 
 ## Verification & Troubleshooting
 
-**Verify**: after installation the plugin appears in the WebUI plugin management page and `plugins/<plugin-name>/config.toml` has been generated — installation succeeded. Then go to [Manage Plugins](./management) to enable it manually.
+**Verify**: after installation the plugin appears in the WebUI plugin extensions page and `plugins/<plugin-name>/config.toml` has been generated — installation succeeded. Then go to [Manage Plugins](./management) to enable it manually.
 
 **The plugin is missing from the list?**
 

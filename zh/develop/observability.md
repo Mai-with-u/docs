@@ -253,13 +253,11 @@ enable = false
 
 ## Debug 配置项
 
-Debug 配置位于 `[debug]` 段，`__ui_parent__` 为 `log`，在 WebUI 中与日志配置在同一区域。以下为 1.3.1 的完整调试项，按源码字段顺序列出：
+Debug 配置位于 `[debug]` 段，`__ui_parent__` 为 `log`，在 WebUI 中与日志配置在同一区域。以下为 1.3.2 的完整调试项，按源码字段顺序列出：
 
 **`enable_console_input`** — 是否在交互式终端中启用本地消息和指令输入，默认 `true`（1.3.0 起默认开启）。开启后可以直接在终端输入普通消息，也可以输入 `/clear`、`/pm`、`/offline`、`/online` 等管理指令，输入 `exit()` 只关闭终端输入而 Bot 继续运行。非交互式终端（systemd 服务、输出重定向到文件等）会跳过终端输入，只多一条 warning，不影响运行。各部署方式的说明见 [Linux 部署](../manual/deployment/linux) 和 [Windows 部署](../manual/deployment/windows)。
 
 **`show_maisaka_thinking`** — 是否在日志中显示麦麦的思考过程（Planner 规划细节、工具调用的推理链条），默认 `true`。如果你想压日志长度，可以关闭此开关。
-
-**`enable_clear_context_command`** — 是否允许使用 `/clear` 指令清空当前聊天流的 Maisaka 短期历史上下文，默认 `false`。开启后群聊和私聊里的普通用户也能用 `/clear`；来自终端等本地操作员身份的输入始终可用，不受此开关限制。指令支持按聊天名指定目标（`/clear <聊天名>`）。
 
 **`enable_reply_effect_tracking`** — 是否记录回复效果评分，默认 `false`。开启后系统会为每条回复计算效果指标并写入数据库，配合 `maisaka_reply_effect_limit` 限制每聊天的记录数。适合调优 Prompt 或对比模型表现时使用。评分语义当前为 v6（回应度不再考虑用户回应速度、无关联信息不生成置信度、未走完观察窗口的记录不参与评分），WebUI 查看见 [聊天与统计 · 回复效果评估](../manual/webui/chat-stats.md#reply-effect-evaluation)。
 
@@ -270,6 +268,10 @@ Debug 配置位于 `[debug]` 段，`__ui_parent__` 为 `log`，在 WebUI 中与�
 **`enable_llm_cache_stats`** — 是否记录模型 prompt cache 命中统计，默认 `false`。开启后在日志中追加缓存相关指标，用于性能调优和模型 API 成本分析。
 
 **`force_plugin_compatibility`** — 是否跳过插件声明的 Host / SDK 版本区间校验直接加载插件，默认 `false`。开启后版本区间不匹配只记一条 warning（含插件声明范围与当前 Host / SDK 版本），不再因此拒绝加载。属于临时兜底手段而非推荐做法，修改后需重启生效，用法见[插件加载失败](../faq/error-troubleshooting#场景-7-插件加载失败)。
+
+::: tip 关于 /clear 指令
+`[debug].enable_clear_context_command` 已在 1.3.2 移除。`/clear` 现在是内置命令（命令 ID `core.clear`），默认可用；如需停用，在 `[plugin].disabled_commands` 中加入 `"core.clear"`。来自终端等本地操作员身份的输入始终可用，指令支持按聊天名指定目标（`/clear <聊天名>`）。
+:::
 
 ## WebSocket 日志订阅
 

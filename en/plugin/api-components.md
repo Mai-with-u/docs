@@ -39,6 +39,8 @@ The unique identifier name of the API. There cannot be duplicate API names withi
 
 API version number, defaults to `"1"`. Used for API version management; the version number can be incremented when incompatible updates are needed.
 
+When a custom WebUI page binds an API, this version must **exactly match** the version registered by `@API` (defaulting to `"1"` when omitted) — the Host does not do fuzzy matching. See [WebUI Pages](./webui-pages.md).
+
 ## Static API Example
 
 Directly declare APIs on the plugin class using the `@API` decorator:
@@ -283,3 +285,4 @@ self.ctx.logger.info("API info: %s", api_info)
 - **Unregistration**: `@API` Not supported → `register_dynamic_api()` Can be dynamically unregistered via unregister
 - **Synchronization**: `@API` Automatic → `register_dynamic_api()` Requires calling sync_dynamic_apis()
 - **Applicable scenarios**: `@API` Fixed APIs → `register_dynamic_api()` APIs enabled/disabled on demand
+- **WebUI page binding**: `@API` Supported → `register_dynamic_api()` **Not supported**; custom pages can only bind static APIs

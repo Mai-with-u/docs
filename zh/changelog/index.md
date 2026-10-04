@@ -5,6 +5,56 @@ description: MaiBot 各版本的功能更新、修复与配置变更记录。
 
 # 更新日志
 
+::: timeline 2026-10-04
+
+### 主程序
+
+* 新增**动态触发**聊天模式，比必要性回复更精准：估计每批消息的回复可能性并动态调整门槛，让回复次数贴近设定的回复频率。
+
+* 新增适配器与 SDK 的头像查询接口，WebUI 统一使用头像服务。
+
+* 优化丰富性回复的表情包发送逻辑。
+
+* 优化配置热重载，大幅加快部分配置保存速度。
+
+* 插件依赖安装改为按主程序的 uv 索引逐源回退安装（非默认源优先），任一来源成功即可，全部失败时汇总每个来源的原因，改善国内网络下的安装成功率。
+
+* 修复推理记录自动淘汰或在 WebUI 清空后，未被其他记录引用的预览图片仍占用磁盘的问题；启动时及每小时检查推理图片缓存，自动清理无记录引用的遗留图片。
+
+* 修复 Windows 下 WebUI 数据导出误读记忆模块运行锁导致失败的问题，并在导出错误中显示具体文件路径。
+
+### WebUI [1.8.1]
+
+* 插件支持声明自定义 tab 页面。
+
+* WebUI 记忆需要重建向量时，在页面顶部标签栏右侧显示重建按钮。
+
+* 重构部分配置项编辑位置。
+
+* 适配器黑白名单面板在群号后显示群头像和已知群名称。
+
+* 优化和丰富了命令管理相关功能。
+
+* 优化麦麦数据导出功能的可用性。
+
+* 修复 WebUI 实时连接断开后需要刷新页面才能恢复的问题。
+
+* 新增一种 WebUI 页面样式（千禧风格）。
+
+* 头像改为统一由适配器头像接口提供；适配器未实现该接口时显示默认头像，旧的 `data/avatar/qq/` 缓存不再读取。
+
+### 配置变更
+
+* `bot_config.toml`：`[chat.reply_timing].reply_trigger_mode` 的 `reply_necessity`（必要性触发）已被 `dynamic`（动态触发）取代，升级时自动迁移；`必要性` 相关说明与文档已同步更新。
+
+* `bot_config.toml`：表达配置重构——`expression_selection_mode` 被布尔 `use_vector_expression`（默认开启，使用向量表达）取代；`expression_checked_only` 默认改为 `false`，含义变为"仅使用精选表达"。
+
+* `bot_config.toml`：`[visual]` 移除 `planner_mode` / `replyer_mode`，`max_image_num` 默认 64、`wait_image_recognize_max_time` 默认 32 秒、`max_image_size_mb` 默认 16；`[debug]` 移除 `enable_clear_context_command`。
+
+* `bot_config.toml`：`[plugin]` 新增 `silent_permission_denied`（静默拦截无权限命令）与 `disabled_commands`（停用内置/插件命令）；`[webui].webui_style` 新增取值 `2`（千禧风格）。
+
+:::
+
 ::: timeline 2026-09-28
 
 ### WebUI [1.8.0]

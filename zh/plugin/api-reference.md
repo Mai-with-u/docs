@@ -349,6 +349,7 @@ chat = self.ctx.chat
 - `await chat.get_stream_by_group_id(group_id, platform="qq")` — 按群 ID 查找聊天流
 - `await chat.get_stream_by_user_id(user_id, platform="qq")` — 按用户 ID 查找私聊流
 - `await chat.open_session(platform, chat_type, **kwargs)` — 打开或创建聊天流
+- `await chat.get_avatar(platform, target_id, target_type="user", account_id="", scope="", force_refresh=False)` — 查询头像（1.3.2 起）
 
 ::: code-group
 
@@ -383,6 +384,20 @@ stream = await self.ctx.chat.open_session(
 :::
 
 `chat.open_session()` 会返回 `stream_id`、`session_id`、`chat_type`、`created` 以及完整 `stream` 对象。在多账号或多路由部署中，建议同时传入 `account_id` 和 `scope`，避免打开到错误的聊天流。
+
+`chat.get_avatar()` 返回 `status`、`url`、`expires_at` 三个键：`expires_at` 是 Unix 时间戳，`status` 为 `available` 时 `url` 是当前平台路由到的适配器给到的头像源地址。结果**不包含图片字节，也不包含 Host 文件路径**，你可以自行下载或转给前端展示。该能力需要在 manifest 的 `capabilities` 里声明 `chat.get_avatar`。
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+# 查询用户头像；target_type 取 "user" 或 "group"
+avatar = await self.ctx.chat.get_avatar(platform="qq", target_id="1026294844")
+if avatar["status"] == "available":
+    url = avatar["url"]              # 适配器提供的头像源地址
+    expires_at = avatar["expires_at"]  # Unix 时间戳
+```
+
+:::
 
 ## maisaka — Maisaka 主动任务
 
@@ -530,6 +545,7 @@ info = await self.ctx.api.get("plugin_a.sum_numbers", version="1")
 - `api_name` 支持完整名 `plugin_id.api_name`，也支持唯一短名。
 - `replace_dynamic_apis()` 适合 MCP 服务器、外部能力市场等"API 集合会动态变化"的场景。
 - 动态 API 下线后，Host 会把它们标记为 offline，并对后续调用返回 `offline_reason`。
+- **WebUI 自定义页面绑定的也是 `@API`**，但只限**本插件的静态 API**、`version` 必须与注册值精确匹配、不要求 `public=True`，动态 API 不能被页面绑定。详见 [WebUI 页面](./webui-pages.md)。
 
 ## gateway — 消息网关
 

@@ -39,6 +39,8 @@ API 的唯一标识名称。同一插件内不能有重复名称的 API。其他
 
 API 版本号，默认为 `"1"`。用于 API 版本管理，当需要不兼容更新时可以递增版本号。
 
+**自定义 WebUI 页面绑定 API 时，这里的版本必须与 `@API` 注册的版本精确匹配**（省略时默认 `"1"`），宿主不会做模糊匹配。详见 [WebUI 页面](./webui-pages.md)。
+
 ## 静态 API 示例
 
 通过 `@API` 装饰器在插件类上直接声明 API：
@@ -283,3 +285,4 @@ self.ctx.logger.info("API 信息: %s", api_info)
 - **注销**：`@API` 不支持 → `register_dynamic_api()` 可通过 unregister 动态注销
 - **同步**：`@API` 自动 → `register_dynamic_api()` 需调用 sync_dynamic_apis()
 - **适用场景**：`@API` 固定不变的 API → `register_dynamic_api()` 按需启用/禁用的 API
+- **WebUI 页面绑定**：`@API` 支持 → `register_dynamic_api()` **不支持**，自定义页面只能绑定静态 API

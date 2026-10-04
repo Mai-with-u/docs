@@ -255,7 +255,7 @@ self.ctx.emoji        # Emoji pack management
 self.ctx.message      # Historical message query
 self.ctx.frequency    # Speech frequency control
 self.ctx.component    # Plugin and component management
-self.ctx.chat         # Chat stream query, open, or create chat streams
+self.ctx.chat         # Chat stream query, open, or create chat streams, plus avatar lookup
 self.ctx.person       # User information query
 self.ctx.render       # Render HTML to PNG images
 self.ctx.knowledge    # LPMM knowledge base search
@@ -304,6 +304,7 @@ class MyPlugin(MaiBotPlugin):
 my-plugin/
 ├── _manifest.json       # Required: Plugin manifest
 ├── plugin.py            # Required: Plugin entry point, containing create_plugin()
+├── webui.json           # Optional: Declarative custom WebUI pages
 ├── i18n/                # Optional: Internationalization resources
 │   ├── zh-CN.json
 │   └── en-US.json
@@ -345,6 +346,7 @@ Both use the same communication protocol and component registration mechanism. T
 - [Tool Component](./tools.md): Learn how to develop tool components callable by LLMs
 - [Command Component](./commands.md): Learn how to develop slash command components
 - [Home Cards](./home-cards.md): Learn how to add plugin cards to the WebUI home page
+- [WebUI Pages](./webui-pages.md): Add custom pages to your plugin with webui.json
 - [LLMProvider Component](./llmprovider.md): Learn how to develop custom LLM Providers to integrate new models
 - [Action Component](./actions.md): Learn about the `@Action` decorator compatible with legacy systems
 - [Configuration Management](./config.md): Learn how to declare and use plugin configurations

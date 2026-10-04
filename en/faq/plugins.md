@@ -8,6 +8,19 @@ title: Plugin Issues
 
 Read the plugin's README and confirm required configuration, dependencies, permissions, and compatible MaiBot versions. Then inspect startup logs for load, validation, command-registration, or event-registration errors.
 
+Only after you have confirmed the problem comes from the plugin itself should you report it to the plugin author.
+
+## Avatars disappeared after upgrading to 1.3.2. How do I get them back?
+
+Since 1.3.2, avatars are fetched by a **unified avatar service** that asks the adapter on the current platform route instead of using a hard-coded QQ avatar URL. When avatars are missing, check in order:
+
+- **The old cache is no longer read** — cache files written earlier under `data/avatar/qq/` are skipped outright from 1.3.2 on and are never used as a fallback; you can delete that directory
+- **The adapter does not implement the avatar interface** — only platforms whose current adapter implements the avatar lookup protocol can show avatars. Platforms and target types without it show the **default avatar**, which is expected behavior, not a fault
+- **A setting turned it off** — when the "Fetch avatars" switch in the WebUI settings is off, the frontend never requests avatars; turn it on
+- **The platform never had avatars** — custom platforms and non-numeric IDs had no avatars before 1.3.2 at all; now they show avatars as long as the adapter implements the avatar interface
+
+Whether an adapter supports avatars is documented in its own README or release notes, and depends on whether its author implemented the avatar protocol.
+
 ## The log says "Host version incompatible" or "SDK version incompatible". What should I do?
 
 The plugin's `_manifest.json` declares a compatibility range that does not include your current version. Two cases:
@@ -28,6 +41,18 @@ Temporarily disable recently installed plugins and restore them one at a time to
 ## How do I diagnose plugin conflicts?
 
 Record the last installed or updated plugins and disable them in batches. Compare command names, hooks, event priority, and dependency versions after identifying the pair. Do not assume that an old online report applies to the current version.
+
+## A plugin's custom page does not appear. What should I do?
+
+Since 1.3.2, plugins can declare WebUI pages through a `webui.json` in their own directory. If you installed such a plugin and see no entry, check in order:
+
+- **Look for a registration failure in the log** — when the declaration is malformed, that plugin's **entire registration fails for this run**. The log prints "plugin WebUI declaration invalid" with the reason (out-of-range fields, component attributes that do not apply, a danger button missing its confirmation text, and so on)
+- **Look for "referenced unregistered static API" in the log** — a page binding whose API short name or `version` does not match what `@API` registered, or one that binds a dynamic API, never attaches
+- **Confirm the plugin was reloaded** — changes to `webui.json` require a **plugin reload** to take effect. Plugins without this file are completely unaffected
+- **Confirm you are looking in the right place** — `sidebar` pages appear in the workspace sidebar under "Plugin Extensions", while `workspace` pages live in the plugin's own top workspace; do not only scan one side
+- **Wait up to 30 seconds** — the frontend polls for declarations. Entries come down together with plugin uninstall or disable, and the browser reflects that within 30 seconds at most; refresh manually for it to apply immediately
+
+For the field reference, component types, and troubleshooting, see [WebUI Pages](/en/plugin/webui-pages).
 
 ## What should I do when a plugin download fails?
 

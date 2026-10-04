@@ -26,7 +26,7 @@ The NapCat WebUI login token is not the WebSocket access token. See [NapCat Conn
 
 ## Why does SnowLuma fail after switching adapters?
 
-Confirm that the SnowLuma adapter is enabled and that its address, port, and token match the SnowLuma WebSocket service. See [SnowLuma Adapter](../manual/adapters/snowluma.md).
+Confirm that the SnowLuma adapter is enabled and that its address, port, and token match the SnowLuma WebSocket service. See [Unified QQ Connector](../manual/adapters/qq-local-client.md).
 
 ::: info Source note
 The one-click-package question categories on this page were adapted from the community [Quick FAQ / Community Tutorial](https://www.kdocs.cn/l/ctOGhVv6L8Yq). Metadata from the July 12, 2026 export identifies 池雨 as the creator and 无为青年 as the modifier. This page keeps only general steps that can be verified against the current documentation.

@@ -21,6 +21,8 @@ Open the Long-term Memory page; the tab bar is organized by purpose:
 
 The "更多操作" (More actions) menu in the top-right corner also has **查看记忆状态** (View memory status) and **打开图谱** (Open graph); `tab=graph` in old links still opens the graph directly.
 
+When memory needs a vector rebuild, a **"重建向量" (Rebuild vectors) button appears directly on the right of the top tab bar** (since 1.3.2), so you no longer have to dig into Memory inspection; it carries a hover note and shows an in-progress state while rebuilding.
+
 ## Search Memory
 
 In **记忆查询** (Memory query), enter keywords (e.g. "game", "food") and filter by time or by user to see memories from a period or from chats with a specific person.
@@ -150,7 +152,7 @@ If MaiBot's memory is poor, run a tuning task to optimize retrieval (**记忆检
 
 ## Runtime Maintenance
 
-**记忆检修 → 状态维护** (Memory inspection → State maintenance) provides runtime self-checks, the auto-save switch, vector rebuild, paragraph vector backfill, image asset reconciliation, import tasks, and delete operation records. The "更多操作 → 查看记忆状态" (More actions → View memory status) dialog in the top-right corner centralizes the runtime status (including vector rebuild and data refresh).
+**记忆检修 → 状态维护** (Memory inspection → State maintenance) provides runtime self-checks, the auto-save switch, vector rebuild, paragraph vector backfill, image asset reconciliation, import tasks, and delete operation records. The "更多操作 → 查看记忆状态" (More actions → View memory status) dialog in the top-right corner centralizes the runtime status (including vector rebuild and data refresh); when a rebuild is needed, a shortcut "重建向量" (Rebuild vectors) button also appears on the right of the top tab bar.
 
 ![State maintenance](/images/webui/knowledge-maintenance.webp)
 

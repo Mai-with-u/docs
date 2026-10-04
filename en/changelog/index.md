@@ -7,6 +7,56 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
 
+::: timeline 2026-10-04
+
+### Main program
+
+* Added the **dynamic** chat trigger mode, more precise than necessity-based replies: it estimates the reply likelihood of each message batch and adjusts the threshold dynamically so the reply count stays close to the configured reply frequency.
+
+* Added avatar-query interfaces for adapters and the SDK; the WebUI now uses a unified avatar service.
+
+* Improved the emoji-sending logic for rich replies.
+
+* Improved config hot reload, greatly speeding up saving some settings.
+
+* Plugin dependency installation now falls back source by source using the main program's uv indexes (non-default sources first); any source succeeding is enough, and a full failure summarizes each source's reason, improving install reliability on flaky networks.
+
+* Fixed preview images still occupying disk after reasoning records were auto-evicted or cleared in the WebUI without being referenced by other records; the reasoning image cache is now checked at startup and hourly, cleaning up unreferenced leftovers.
+
+* Fixed Windows WebUI data export misreading the memory module run lock and failing, and export errors now show the specific file path.
+
+### WebUI [1.8.1]
+
+* Plugins can declare custom tab pages.
+
+* When long-term memory needs a vector rebuild, a rebuild button now appears on the right of the top tab bar.
+
+* Refactored the editing location of some config items.
+
+* The adapter allow/deny panel now shows group avatars and known group names after the group number.
+
+* Improved and enriched command management.
+
+* Improved the usability of MaiBot data export.
+
+* Fixed the WebUI realtime connection needing a page refresh to recover after a disconnect.
+
+* Added a new WebUI page style (Millennium style).
+
+* Avatars now come uniformly from the adapter avatar interface; a placeholder avatar is shown when an adapter does not implement it, and the old `data/avatar/qq/` cache is no longer read.
+
+### Configuration changes
+
+* `bot_config.toml`: `reply_necessity` (necessity trigger) in `[chat.reply_timing].reply_trigger_mode` has been replaced by `dynamic`, migrated automatically on upgrade.
+
+* `bot_config.toml`: expression config refactor — `expression_selection_mode` is replaced by the boolean `use_vector_expression` (on by default); `expression_checked_only` now defaults to `false` and means "use only curated expressions".
+
+* `bot_config.toml`: `[visual]` drops `planner_mode` / `replyer_mode`; `max_image_num` defaults to 64, `wait_image_recognize_max_time` to 32 seconds, and `max_image_size_mb` to 16; `[debug]` drops `enable_clear_context_command`.
+
+* `bot_config.toml`: `[plugin]` adds `silent_permission_denied` (silently block unauthorized commands) and `disabled_commands` (disable built-in/plugin commands); `[webui].webui_style` adds value `2` (Millennium style).
+
+:::
+
 ::: timeline 2026-09-28
 
 ### Webui [1.8.0]

@@ -57,6 +57,7 @@ plugins/my-plugin/
 - 插件间依赖写入 `dependencies`，类型为 `plugin`。
 - `capabilities` 只声明确实需要的能力。
 - `i18n.default_locale` 推荐使用 `zh-CN`。
+- `webui.json` 与 `_manifest.json` 同级、由宿主独立校验，**不是 manifest 字段**，也不影响 `manifest_version`；不放这个文件的插件完全不受影响。
 
 ::: code-group
 

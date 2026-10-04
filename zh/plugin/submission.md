@@ -100,6 +100,7 @@ flowchart TD
 - [ ] `urls.repository` 是公开 HTTPS 地址，无 `.git` 后缀
 - [ ] `capabilities` 只声明实际需要的能力
 - [ ] 本地已用真实 MaiBot 验证过插件能正常加载运行
+- [ ] 若插件包含 `webui.json`，已在本地 MaiBot 里重载插件并打开页面验证过
 
 ## 更多信息
 

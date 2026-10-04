@@ -36,8 +36,8 @@ From zero to chatting takes just four steps, about 1–2 minutes each. Just foll
 
 <div class="step-card">
   <div class="step-head"><span class="step-no">4</span> <h3>Connect a Chat Platform</h3></div>
-  <p>Taking QQ as the most common example: install NapCat and enable its forward WebSocket, then install and enable the "NapCat Adapter" from the plugin store in the WebUI — MaiBot can join your group chats.</p>
-  <a class="step-more" href="/en/manual/adapters/napcat">Connect to QQ →</a>
+  <p>Taking QQ as the most common example: install SnowLuma or NapCat and enable its forward WebSocket, then install and enable the "Unified QQ Connector" from the plugin store in the WebUI — MaiBot can join your group chats.</p>
+  <a class="step-more" href="/en/manual/adapters/qq-local-client">Connect to QQ →</a>
 </div>
 
 </div>

@@ -299,5 +299,5 @@ emoji 特殊逻辑：emoji 有模型→用 emoji，planner 全视觉→用 plann
 
 - 模型高级参数（思考模式、推理强度）：[模型额外参数](./model-extra-params.md)
 - 配置机器人：看 [Bot 配置](./bot-config.md)
-- 连接 QQ：[NapCat 适配器](../adapters/napcat.md)
+- 连接 QQ：[统一 QQ 连接器](../adapters/qq-local-client.md)
 - 管理 WebUI：[WebUI 配置管理](../webui/config-management.md)

@@ -20,7 +20,7 @@ The **home page** (`/`) you land on after login shows the running overview in ca
 - **Prompt cache** — cache hit rate and saved cost
 - **Storage usage** — disk usage of the local data directory
 
-Cards can be dragged to reorder, added, removed, and resized; the top-right corner switches between 24-hour / 7-day / 30-day time ranges.
+Cards can be dragged to reorder, added, removed, and resized; the top-right corner switches between 24-hour / 7-day / 30-day time ranges. With the Millennium interface style, the trend charts switch to an oscilloscope look: solid grid lines, bolder polylines, no axis lines, and the legend moved to the bottom.
 
 ## Detailed Statistics
 
@@ -116,7 +116,9 @@ Select any session under "麦麦的聊天流" (MaiBot's chat streams) on the Mai
 - **Stage status** — the status bar at the top shows the current stage (Planner, replier, etc.), the round, and the agent state
 - **Live reasoning** — as soon as Planner returns, the thinking content and tool execution state appear, and each tool result updates **in place inside the same card**; you no longer wait for the whole round to finish. Repeated pushes for the same round (cycle / run) also refresh only the original position
 - **Stable ordering** — entries follow the actual broadcast / write order, fixing the issue where a new round overwrote old cards after a restart
-- **Find previous** — click **上条** (Previous) to jump up to the nearest MaiBot-sent message above the viewport and highlight it; if there are none left you get a notice. The neighboring **底部** (Bottom) returns to the newest entry
+- **Find previous** — click **上条** (Previous) to jump up to the nearest MaiBot-sent message above the viewport and highlight it; if there are none left you get a notice. The neighboring **顶部** (Top) jumps to the earliest entry and **底部** (Bottom) returns to the newest
+- **当前上下文** (Current context, new in 1.3.2) — the **当前上下文** button on the status bar opens a popover with what the running chat stream actually used this round: counts and entries for **回想记忆** (Recalled memory), **表达方式** (Expression styles), **黑话** (Slang), and **激活的工具** (Activated tools). Slang entries show their explanation on hover, the data refreshes every 10 seconds, and a stopped chat stream or a failed read gives a clear notice
+- **Connection state** — the green dot next to the "聊天流" (Chat streams) heading on the left now reflects the underlying connection in real time and disappears when it drops; once the network recovers or the page becomes visible again it reconnects immediately and the timeline continues on its own, with no page refresh
 
 ### Stats Popover
 
@@ -132,6 +134,7 @@ The section shares are estimates converted from character counts, useful for qui
 ### Tool Cards
 
 - **Builtin tools get their own icons** — `reply`, `wait`, `fetch_history`, `query_memory`, `query_image_memory`, `query_person_profile`, `send_emoji`, `send_image`, `switch_chat`, `tool_search`, and `view_forward_message`; everything else uses a wrench
+- **Titles list tool names directly** (as of 1.3.2) — the card title is the list of tool names actually used this round, separated by "、" (e.g. `send_message、web_search`); with a single tool the name, latency, and reasoning entry merge into the title row and the count is no longer repeated
 - **Status badges** — a running tool shows "执行中" (Running), a queued one shows "等待执行" (Pending), and a finished one shows "执行成功" (Succeeded) or "执行失败" (Failed)
 - **`tool_search` is shown separately** (as of 1.3.1) — the query appears as "搜索工具" followed by the search term, and after a successful run the "激活工具" (Activated tools) list shows whether each tool was "本次新发现" (Newly discovered) or "此前已发现" (Previously discovered); when nothing matches it shows "未找到匹配工具" (No matching tools)
 - **`wait` is collapsed** — only "等待 x 秒" (Wait x seconds) is shown, without the arguments, JSON, or execution result
@@ -222,6 +225,15 @@ In the **推理过程** (Reasoning Process) page (`/reasoning-process`), the log
 - **Total tokens** — input + output
 
 This makes the reasoning cost of a single reply easy to evaluate, especially cost growth in high-activity group chats.
+
+### Preview Image Cache and Cleanup
+
+Besides text records, the reasoning process saves prompt preview images, cached under `data/prompt_imgs/`. As of 1.3.2 these images use a registration scheme and are swept by a background thread:
+
+- **Once at startup, then once an hour** — it rescans every record under `logs/maisaka_prompt` to build a reference index and deletes hash-named images under `data/prompt_imgs/` that no record references. The log prints "Prompt 孤立图片清理完成: 删除 N 张，释放 X MiB" (Prompt orphan image cleanup complete: deleted N images, freed X MiB)
+- **Clearing the reasoning process frees them too** — "清空推理过程" (Clear reasoning process) in the WebUI releases images no longer referenced by other records, so the disk space actually reclaimed is larger than the "N files deleted" count in the toast
+- **It only touches its own cache** — only 64-character hexadecimal hash images under `data/prompt_imgs/` are deleted, symlinks are skipped, and chat images and original stickers are left alone
+- **Not included in export packages** — exporting business data from the WebUI data management page excludes `data/prompt_imgs/` by default, so back it up separately
 
 ## Log Viewer
 

@@ -295,5 +295,5 @@ emoji special logic: emoji has model -> use emoji, planner is full visual -> use
 
 - Advanced model parameters (thinking mode, reasoning intensity): [Model Extra Params](./model-extra-params.md)
 - Configure the bot: see [Bot Configuration](./bot-config.md)
-- Connect to QQ: [NapCat Adapter](../adapters/napcat.md)
+- Connect to QQ: [Unified QQ Connector](../adapters/qq-local-client.md)
 - Manage WebUI: [WebUI Configuration Management](../webui/config-management.md)

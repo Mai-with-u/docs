@@ -24,7 +24,7 @@ This Token is only for the first login of the current startup. After signing in,
 
 ![WebUI login page](/images/webui/login.webp)
 
-> 1.3.1 restyled the login page: a compact left-aligned card with a command-line style title prefix, and the input placeholder and help dialog now call the credential a "访问密码" (access password) instead of an "Access Token" (WebUI Settings → Security still writes Access Token; both names refer to the same thing).
+> 1.3.1 restyled the login page: a compact left-aligned card with a command-line style title prefix, and the input placeholder and help dialog now call the credential a "访问密码" (access password) instead of an "Access Token" (MaiBot Settings → WebUI Settings → Security still writes Access Token; both names refer to the same thing).
 
 3. On first login, the setup wizard opens; the first step is setting a persistent Token
 
@@ -38,7 +38,7 @@ The persistent Token must satisfy all of: at least 10 characters, at least one u
 
 ## First-Time Setup Wizard
 
-The wizard has three steps, and any step can be skipped with **跳过向导** (Skip wizard); you can re-enter it later from **WebUI Settings**:
+The wizard has three steps, and any step can be skipped with **跳过向导** (Skip wizard); you can re-run it later under "MaiBot Settings → WebUI Settings → Other":
 
 ### Set Login Password
 
@@ -70,6 +70,20 @@ After completion you land on the dashboard home page:
 - 💬 **Chat Directly** - Talk to MaiBot and watch the reasoning of real group chats
 - 📊 **View Statistics** - Messages, tokens, cost, and uptime
 
+## Interface Navigation
+
+As of 1.3.2 the sidebar has been reorganized into four groups by purpose:
+
+- **配置管理** (Configuration) - MaiBot Settings (`bot_config.toml`), Model Management (`model_config.toml`), and Adapter Settings (accounts and allow/deny lists)
+- **资源管理** (Resources) - stickers, expression styles, slang, behavior learning, and long-term memory
+- **扩展集成** (Extensions) - 插件扩展 (Plugin Extensions, formerly "Plugin Management") and the plugin market
+- **高级工具** (Advanced Tools) - prompt management, reply effects, data management, detailed statistics, and the log viewer
+
+Two entry-point changes to know about:
+
+- The gear button in the top-right corner and the standalone **WebUI Settings** (`/settings`) page are gone; the settings are now embedded as the third tab, **WebUI Settings**, on the MaiBot Settings page. Opening the old address `/settings` is rewritten to `/config/bot?mode=webui`, so update any bookmarks
+- The standalone **MCP 设置** sidebar entry is gone; MCP service management now lives in the **MCP 服务** group on the "扩展集成 → 插件扩展" page. Opening the old address `/mcp-settings` redirects to the plugin extensions page
+
 ## Basic Settings
 
 Change WebUI settings in `bot_config.toml`:
@@ -82,7 +96,7 @@ enabled = true                # Whether to enable WebUI
 host = ["127.0.0.1", "::1"]  # Bind address list
 port = 8001                   # Port number
 mode = "production"           # Running mode: development or production
-webui_style = 1               # UI style
+webui_style = 2               # UI style: 0 original / 1 future retro / 2 millennium (added in 1.3.2)
 anti_crawler_mode = "basic"   # Anti-crawler mode: false / strict / loose / basic
 allowed_ips = "127.0.0.1"     # IP whitelist (comma-separated)
 ```
@@ -94,16 +108,32 @@ allowed_ips = "127.0.0.1"     # IP whitelist (comma-separated)
 
 ## WebUI Settings
 
-Click the gear icon in the top-right corner to open **WebUI Settings** (`/settings`) and manage interface preferences:
+The WebUI's own interface preferences, login Token, and maintenance actions all live under **WebUI Settings**: sidebar "配置管理 (Configuration) → 麦麦设置 (MaiBot Settings)", then click the third tab at the top of the page, **WebUI Settings** (`/config/bot?mode=webui`).
 
-- **外观** (Appearance) - theme mode (light/dark/system), accent color, fonts, border radius, custom CSS
+- **外观** (Appearance) - theme mode (light / dark / follow system), accent color, fonts, border radius, custom CSS, and the interface style (Original Dashboard / Future Retro / Millennium)
 - **安全** (Security) - change or regenerate the login Token
-- **其他** (Other) - data management: clear logs and cache, import/export settings, reset
+- **其他** (Other) - clear logs and cache, import/export settings, re-run the setup wizard, and reset
 - **关于** (About) - version info, tech stack, and open-source license
 
 ![WebUI settings](/images/webui/settings.webp)
 
 ![About page](/images/webui/settings-about.webp)
+
+### Interface Style
+
+"界面风格" (Interface style) at the top of the Appearance tab offers three options:
+
+- **原版 Dashboard** (Original Dashboard) - keeps the current cards, border radius, backgrounds, and custom theme capabilities; corresponds to `webui_style = 0`
+- **未来复古** (Future Retro) - the same paper grain, hard outlines, and clipped panels as the one-click package shell; corresponds to `webui_style = 1`
+- **千禧** (Millennium, new in 1.3.2) - cream plastic shell, keycap buttons, and a recessed screen; dark mode is a charcoal shell with the lights off. Corresponds to `webui_style = 2`. The sidebar stays open and does not collapse, and the home page charts switch to an oscilloscope look
+
+Millennium is only valid from 1.3.2 onward: writing `webui_style = 2` in a 1.3.1 `bot_config.toml` fails validation.
+
+::: warning Custom theming only shows under the original style
+Accent color, interface style tweaks (fonts, visual effects, layout, animations, backgrounds), and theme import/export only appear under **原版 Dashboard** (Original Dashboard); switching to Future Retro or Millennium hides those blocks.
+
+The style choice is written back to `[webui].webui_style` in `bot_config.toml`, so with several browsers open at once the last switch wins and overrides the local choice elsewhere.
+:::
 
 ### Live Chat Stream Quick Management
 
@@ -133,7 +163,7 @@ For the full chat and statistics walkthrough see [Chat History and Statistics](.
 
 ## Forgot Your Password?
 
-If you can still sign in, change or regenerate the Token under **WebUI Settings → Security**:
+If you can still sign in, change or regenerate the Token under "MaiBot Settings → WebUI Settings → Security":
 
 ![Security settings](/images/webui/settings-security.webp)
 
@@ -162,9 +192,18 @@ If you can no longer sign in:
 - The old Token is invalidated as soon as the persistent Token is saved; log in with the new Token
 - As a last resort, delete `data/webui.json` to reset
 
+**Did your bookmarked `/settings` jump to `/config/bot`?**
+
+- As of 1.3.2 the standalone WebUI settings page is embedded in the "MaiBot Settings → WebUI Settings" tab, and the old address is rewritten to `/config/bot?mode=webui`
+- To land directly on appearance settings use `/config/bot?mode=webui&tab=appearance`; for MCP services go through "扩展集成 (Extensions) → 插件扩展 (Plugin Extensions)"
+
 ## More Features
 
 - [Configuration Management](./config-management.md) - Change configurations in the browser
+- [Adapter Management](./adapter-management.md) - Account identities and allow/deny lists
+- [Command Management](./command-management.md) - Plugin commands and execution permissions
 - [Memory Management](./memory-management.md) - View and manage memories
+- [MCP Configuration](../configuration/mcp-config.md) - external tool services, entered via "Plugin Extensions → MCP Services"
 - [Plugin Management](/en/manual/plugins/) - Install and manage plugins
 - [Chat Logs](./chat-stats.md) - View chat statistics
+- [Data Management](./data-management.md) (`/data-transfer`) - sidebar "高级工具 (Advanced Tools) → 数据管理 (Data Management)" packages exports and imports of the whole data set

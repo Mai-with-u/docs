@@ -249,6 +249,10 @@ class MyPlugin(MaiBotPlugin):
 - 声明不支持的值会在 `get_config_reload_subscriptions()` 中抛出 `ValueError`
 - 不能直接传入字符串（如 `config_reload_subscriptions = "bot"`），必须使用可迭代集合
 
+::: tip 1.3.2 起：保存配置不再被广播阻塞
+配置热重载广播改在后台任务里执行并**合并下发**：短时间里连续改多次配置，插件只会收到合并后的最新快照，WebUI 的保存请求也不必等广播跑完才返回，保存明显更快。回调语义不变，`on_config_update()` 拿到的仍是该 scope 的完整最新配置。
+:::
+
 ## 完整生命周期示例
 
 以下是一个包含所有生命周期方法的完整插件示例：

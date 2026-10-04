@@ -57,6 +57,7 @@ plugins/my-plugin/
 - Inter-plugin dependencies are written in `dependencies`, type `plugin`.
 - `capabilities` only declares strictly necessary capabilities.
 - `i18n.default_locale` recommends using `zh-CN`.
+- `webui.json` sits next to `_manifest.json` and is validated by the Host on its own. It is **not a manifest field** and does not affect `manifest_version`. Plugins without this file are completely unaffected.
 
 ::: code-group
 

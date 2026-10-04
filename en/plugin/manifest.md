@@ -266,8 +266,10 @@ The `dependencies` array supports two types of dependencies, distinguished by th
 1. **Scanning**: Collect `_manifest.json` from all plugins
 2. **Host Conflict Detection**: If a plugin's Python package dependency has no intersection with the main program's dependency constraints, loading is blocked
 3. **Inter-Plugin Conflict Detection**: If multiple plugins have mutually exclusive version constraints for the same Python package, all are blocked from loading
-4. **Automatic Installation**: For missing Python dependencies of loadable plugins, `uv pip install` is used preferentially, falling back to `pip install`
+4. **Automatic Installation**: For missing Python dependencies of loadable plugins, the index order and constrained dependencies in the main program's `pyproject.toml` under `[tool.uv]` are read, and installation is attempted **one source at a time — any single source succeeding is enough**. The main program's `constraint-dependencies` are passed explicitly to the install command as a temporary constraint file. If every source fails, the error lists the failure summary of each source
 5. **Topological Sorting**: Determine the Runner startup order based on cross-Supervisor dependency relationships; circular dependencies will be rejected
+
+The index order follows uv's own semantics: indexes that are not `default = true` come first in declaration order, with `default = true` last. The uv branch appends `--no-config` when an index is specified — uv merges indexes from `pyproject.toml` with command-line indexes, and only this flag restricts the install to that one source. Plugin `dependencies` declaration rules (`type` / `id` / `version_spec` / `name`) are unaffected; keep writing them as before.
 
 ## Validation Rules
 

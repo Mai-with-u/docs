@@ -9,6 +9,18 @@ MCP (Model Context Protocol) enables MaiBot to connect with external tools, tran
 If you are not yet familiar with what MCP is, see the [MCP integration developer guide](/en/develop/mcp-integration) for its overall design.
 :::
 
+## Managing MCP Services in the WebUI
+
+The visual entry point for MCP services is the **插件扩展** (Plugin Extensions) page: sidebar "扩展集成 (Extensions) → 插件扩展 (Plugin Extensions)". Above the plugin list there is an extra **MCP 服务** (MCP Services) section (a sky-blue dot plus the service count); click any service or "管理服务" (Manage services) in the top-right corner to open the MCP settings.
+
+- Each service is one row showing its name, transport, connection state (connected / not connected / connection error / disabled), and tool count, with the state refreshing every 5 seconds
+- The top of the page searches by name and transport; with no services configured it prompts "尚未添加 MCP 服务，点击『管理服务』连接更多工具" (No MCP services yet, click "Manage services" to connect more tools)
+- On the MCP settings page, click "返回插件扩展" (Back to plugin extensions) in the top-left corner to return to the plugin list; unsaved changes are confirmed first
+- The standalone sidebar **MCP 设置** entry from before 1.3.1 is gone, and the old address `/mcp-settings` redirects to the plugin extensions page; the MCP service group is not shown on the "适配器设置" (Adapter Settings) path
+- The MCP service list's description reads "连接本地或远程工具服务，保存后即可供麦麦调用" (Connect local or remote tool services; they become available to MaiBot after saving)
+
+This page edits the same `[mcp]` configuration, whose fields are covered below; a MaiBot restart is required for changes to take effect.
+
 ## Configuration Structure Overview
 
 MCP configuration is located under the `[mcp]` section in `bot_config.toml`, divided into three levels:
@@ -463,3 +475,4 @@ It depends on the service you are connecting to. For GitHub MCP, go to GitHub Se
 
 - To learn about MCP's overall design → [MCP integration developer guide](/en/develop/mcp-integration)
 - To view all configuration options → [Bot Configuration](./bot-config.md)
+- To change configuration in the browser → [Configuration Management](../webui/config-management.md); for the WebUI Settings and Plugin Extensions entry points see [Login & Settings](../webui/index.md)

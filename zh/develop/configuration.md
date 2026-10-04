@@ -141,7 +141,7 @@ MaiBot 运行时依赖 `config/` 目录下两份独立的 TOML 文件，它们�
 
 ### BOT_CONFIG_UPGRADE_HOOKS 链
 
-`BOT_CONFIG_UPGRADE_HOOKS` 当前包含 9 个钩子，按版本递增排列（当前 `CONFIG_VERSION = "8.14.51"`）：
+`BOT_CONFIG_UPGRADE_HOOKS` 当前包含 11 个钩子，按版本递增排列（当前 `CONFIG_VERSION = "8.14.59"`）：
 
 **8.10.11 — 重置群聊 Prompt 为默认值**
 
@@ -178,6 +178,14 @@ MaiBot 运行时依赖 `config/` 目录下两份独立的 TOML 文件，它们�
 **8.14.40 — 迁移已移除的表达选取模式**
 
 旧配置里 `expression.expression_selection_mode = "vector"`（精细模式）已被移除。钩子 `_migrate_removed_expression_selection_mode` 会把它改写为 `"vector_intent"`（超级精细），防止因此无法启动。
+
+**8.14.54 — 迁移已移除的回复触发模式**
+
+旧配置里 `[chat.reply_timing].reply_trigger_mode = "reply_necessity"`（必要性触发）已被 `"dynamic"`（动态触发）取代。钩子 `_migrate_removed_reply_necessity_trigger_mode` 会自动改写，避免旧值导致校验失败。
+
+**8.14.58 — 重置表达默认值**
+
+表达配置在 1.3.2 重构：钩子 `_reset_expression_defaults` 把 `expression.expression_checked_only` **强制**重置为 `false`（`force=True`，无视旧值）、在缺失时补上 `expression.use_vector_expression = true`（`force=False`，已有值保留），并彻底删除旧的 `expression.expression_selection_mode` 字段。注意这意味着从旧版升级的用户也会被切到向量表达，需要配置嵌入模型。
 
 ### 升级钩子执行流程
 
@@ -248,6 +256,8 @@ flowchart TD
 - **超时保护**：单次 `reload_config` 最多执行 20 秒。
 - **锁保护**：`asyncio.Lock` 保证同一时刻只有一个重载在进行。
 - **回调异常隔离**：单个回调报错不影响其他回调继续执行。
+
+1.3.2 起热重载支持**按配置节订阅**：注册回调时可传入 `sections=("webui",)`（支持点号子节如 `"chat.reply_timing"`，按前缀匹配），只有这些节实际变化时才通知该回调。`ConfigManager` 会先对新旧配置做 `model_dump` 对比得到变化的顶层节，未命中的回调直接跳过——这就是"优化配置热重载、大幅加快部分配置保存速度"的实现方式，保存某个小节时不再唤醒所有固化配置的组件。判断规则有三点：`model` 范围的重载**不会**通知节订阅者；新旧配置对比失败、变化节未知时保守地通知所有订阅者；重载还新增了文件 sha256 指纹去重（内容没变直接跳过）。此外 `unregister_reload_callback` 从 `list.remove` 改为列表推导，重复注册或回调不可比较时也能正确注销。
 
 ## Legacy Migration（旧版迁移）
 
@@ -335,6 +345,8 @@ MaiBot 在启动时会自动检测并迁移旧版配置。迁移分为两个层�
 
 `changed_scopes` 是 `("bot",)`、`("model",)` 或 `("bot", "model")` 之一，表示本次重载命中了哪些配置文件。
 
+第三个可选参数 `sections` 用于按配置节订阅（1.3.2 起）：传入 `("chat",)`、`("webui",)`、`("a_memorix",)` 或点号子节 `("chat.reply_timing",)`，只有这些节变化时才通知回调；不传则任何 bot 配置热重载都会通知。只想在关心的节变化时刷新缓存时，用它避免无谓的重算。注意它按前缀匹配且区分「范围」：`model` 范围的重载不会通知任何节订阅者。
+
 ::: code-group
 
 ```python [Python ~vscode-icons:file-type-python~]
@@ -356,8 +368,8 @@ def on_any_config_changed() -> None:
     print("[plugin] 配置热重载完成，刷新缓存...")
 
 
-# 注册回调
-cfg_mgr.register_reload_callback(on_bot_config_changed)
+# 注册回调：只在 chat 相关节变化时通知，任何重载都通知则省略 sections
+cfg_mgr.register_reload_callback(on_bot_config_changed, sections=("chat",))
 cfg_mgr.register_reload_callback(on_any_config_changed)
 
 # 不再需要时注销

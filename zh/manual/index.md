@@ -36,8 +36,8 @@ title: 快速上手
 
 <div class="step-card">
   <div class="step-head"><span class="step-no">4</span> <h3>连接聊天平台</h3></div>
-  <p>以最常用的 QQ 为例：装好 NapCat 并开启正向 WebSocket，然后在 WebUI 的插件市场安装「NapCat 适配器」并启用，麦麦就能进群聊天了。</p>
-  <a class="step-more" href="/manual/adapters/napcat">连接 QQ →</a>
+  <p>以最常用的 QQ 为例：装好 SnowLuma 或 NapCat 并开启正向 WebSocket，然后在 WebUI 的插件市场安装「统一 QQ 连接器」并启用，麦麦就能进群聊天了。</p>
+  <a class="step-more" href="/manual/adapters/qq-local-client">连接 QQ →</a>
 </div>
 
 </div>

@@ -280,7 +280,7 @@ self.ctx.emoji        # 表情包管理
 self.ctx.message      # 历史消息查询
 self.ctx.frequency    # 发言频率控制
 self.ctx.component    # 插件与组件管理
-self.ctx.chat         # 聊天流查询、打开或创建聊天流
+self.ctx.chat         # 聊天流查询、打开或创建聊天流，以及头像查询
 self.ctx.person       # 用户信息查询
 self.ctx.render       # 将 HTML 渲染为 PNG 图片
 self.ctx.knowledge    # LPMM 知识库搜索
@@ -329,6 +329,7 @@ class MyPlugin(MaiBotPlugin):
 my-plugin/
 ├── _manifest.json       # 必需：插件清单
 ├── plugin.py            # 必需：插件入口，包含 create_plugin()
+├── webui.json           # 可选：声明式 WebUI 自定义页面
 ├── i18n/                # 可选：国际化资源
 │   ├── zh-CN.json
 │   └── en-US.json
@@ -370,6 +371,7 @@ MaiBot 维护两个独立的 Runner 子进程：
 - [Tool 组件](./tools.md)：学习如何开发 LLM 可调用的工具组件
 - [Command 组件](./commands.md)：学习如何开发斜杠命令组件
 - [首页卡片](./home-cards.md)：学习如何向 WebUI 首页添加插件卡片
+- [WebUI 页面](./webui-pages.md)：用 webui.json 给插件加自定义页面
 - [LLMProvider 组件](./llmprovider.md)：学习如何开发自定义LLM Provider接入新模型
 - [Action 组件](./actions.md)：了解兼容旧系统的 @Action 装饰器
 - [配置管理](./config.md)：学习如何声明和使用插件配置

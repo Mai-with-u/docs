@@ -33,6 +33,7 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: 'Tool', link: '/plugin/tools' },
         { text: 'Command', link: '/plugin/commands' },
         { text: '首页卡片', link: '/plugin/home-cards' },
+        { text: 'WebUI 页面', link: '/plugin/webui-pages' },
         { text: 'Hook 处理器', link: '/plugin/hooks' },
         { text: '事件处理器', link: '/plugin/event-handlers' },
         { text: 'API 组件', link: '/plugin/api-components' },
@@ -92,13 +93,12 @@ export const sidebar: DefaultTheme.Sidebar = {
       collapsed: false,
       items: [
         { text: '接入平台', link: '/manual/adapters/' },
-        { text: 'NapCat', link: '/manual/adapters/napcat' },
-        { text: 'SnowLuma', link: '/manual/adapters/snowluma' },
-        { text: 'QQ 官方', link: '/manual/adapters/qq-official' },
-        { text: 'QQBot', link: '/manual/adapters/qqbot' },
+        { text: 'QQ 本地客户端', link: '/manual/adapters/qq-local-client' },
+        { text: 'QQ 官方机器人', link: '/manual/adapters/qq-official' },
         { text: '邮件', link: '/manual/adapters/email' },
         { text: 'QQ 语音通话', link: '/manual/adapters/qq-voice-call' },
         { text: 'iMessage', link: '/manual/adapters/imessage' },
+        { text: 'NapCat（已归档）', link: '/manual/adapters/napcat' },
       ]
     },
     {
@@ -130,6 +130,7 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: '适配器管理', link: '/manual/webui/adapter-management' },
         { text: '命令管理', link: '/manual/webui/command-management' },
         { text: '记忆管理', link: '/manual/webui/memory-management' },
+        { text: '数据管理', link: '/manual/webui/data-management' },
         { text: '聊天与统计', link: '/manual/webui/chat-stats' },
       ]
     },
