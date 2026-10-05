@@ -52,6 +52,7 @@ export default {
     app.component('ArticleMetadata', ArticleMetadata)
     app.component('Linkcard', defineAsyncComponent(() => import('./components/Linkcard.vue')))
     app.component('AuroraBackground', defineAsyncComponent(() => import('./components/AuroraBackground.vue')))
+    app.component('HomeSections', defineAsyncComponent(() => import('./components/HomeSections.vue')))
 
     if (inBrowser) {
       NProgress.configure({ showSpinner: false })
