@@ -82,4 +82,15 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 .VPNavScreenAppearance {
   display: none !important;
 }
+
+/* 电脑端把功能图标（外观菜单、阅读菜单）排到联系方式（社交链接）
+   之前：功能图标组沿用默认 order:0，社交链接等右端元素 order 提到 1。
+   最终顺序：搜索 → 菜单 → 语言 → 外观 → 阅读 → 联系方式 */
+@media (min-width: 768px) {
+  .VPNavBar .content-body > .VPNavBarSocialLinks,
+  .VPNavBar .content-body > .VPNavBarExtra,
+  .VPNavBar .content-body > .VPNavBarHamburger {
+    order: 1;
+  }
+}
 </style>

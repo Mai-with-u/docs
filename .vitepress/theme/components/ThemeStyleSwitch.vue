@@ -160,10 +160,23 @@ watch(() => route.path, () => (open.value = false))
       :title="t.appearance"
       @click="open = !open"
     >
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+        <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+        <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
         <path
-          fill="currentColor"
-          d="M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5c0-.39-.15-.74-.39-1.01c-.23-.26-.38-.61-.38-.99c0-.83.67-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4.42-4.03-8-9-8Zm-5.5 9a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3Zm3-4a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3Zm5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3Zm3.5 4a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3Z"
+          d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.473 5.555-5.555C21.965 6.012 17.461 2 12 2z"
         />
       </svg>
     </button>
@@ -234,25 +247,32 @@ watch(() => route.path, () => (open.value = false))
   align-items: center;
 }
 
-/* 触发按钮：与 VitePress 导航栏其他按钮同规格 */
+/* 触发按钮：与 VPFlyout（阅读菜单等导航栏图标按钮）同规格——
+   全导航栏高度、无背景，悬停只变色，图标 20px 描边风格 */
 .style-trigger {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  height: var(--vp-nav-height);
+  padding: 0 12px;
   border: none;
-  border-radius: 20px;
   background: transparent;
-  color: var(--vp-c-text-2);
+  color: var(--vp-c-text-1);
   cursor: pointer;
-  transition: color 0.25s, background-color 0.25s;
+  transition: color 0.25s;
 }
 
 .style-trigger:hover,
 .style-trigger.open {
-  color: var(--vp-c-text-1);
-  background-color: var(--vp-c-bg-soft);
+  color: var(--vp-c-brand-1);
+}
+
+/* 移动端抽屉里不需要整条导航栏高度 */
+@media (max-width: 767px) {
+  .style-trigger {
+    height: 40px;
+    padding: 0 10px;
+  }
 }
 
 /* 下拉面板 */
@@ -261,7 +281,7 @@ watch(() => route.path, () => (open.value = false))
   top: 100%;
   right: 0;
   z-index: 32;
-  margin-top: 10px;
+  margin-top: 8px;
   min-width: 224px;
   padding: 8px;
   border: 1px solid var(--vp-c-divider);
