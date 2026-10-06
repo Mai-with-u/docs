@@ -2,13 +2,13 @@
  * 界面风格（theme style）共享定义
  *
  * 界面风格对应 MaiBot WebUI 的 webui_style 取值：
- *   modern（0）原版 / future-retro（1）未来复古 / millennium（2）千禧
+ *   modern（0）原版 / millennium（2）千禧
  *
  * 与明暗（light / dark）是两套正交体系：明暗由 VitePress 的 .dark 类
  * 控制，界面风格由 <html> 上的 data-theme-style 属性控制，可以自由组合。
  */
 
-export type ThemeStyleId = 'modern' | 'future-retro' | 'millennium'
+export type ThemeStyleId = 'modern' | 'millennium'
 
 /** localStorage 存储键，组件与 index.ts 的首屏恢复共用 */
 export const THEME_STYLE_STORAGE_KEY = 'maibot-docs-theme-style'
@@ -16,9 +16,11 @@ export const THEME_STYLE_STORAGE_KEY = 'maibot-docs-theme-style'
 /** 所有可选风格，顺序即菜单展示顺序 */
 export const THEME_STYLES: readonly ThemeStyleId[] = [
   'modern',
-  'future-retro',
   'millennium',
 ]
+
+/** 首次访问、没有保存过选择时使用的风格；config.mts 的首屏脚本需与此保持一致 */
+export const DEFAULT_THEME_STYLE: ThemeStyleId = 'millennium'
 
 export function isThemeStyleId(value: unknown): value is ThemeStyleId {
   return (
@@ -34,11 +36,11 @@ export function applyThemeStyle(id: ThemeStyleId) {
   else root.setAttribute('data-theme-style', id)
 }
 
-/** 读取持久化的选择，非法值一律回落 modern */
+/** 读取持久化的选择，没有或非法时回落默认风格 */
 export function loadStoredThemeStyle(): ThemeStyleId {
-  if (typeof localStorage === 'undefined') return 'modern'
+  if (typeof localStorage === 'undefined') return DEFAULT_THEME_STYLE
   const saved = localStorage.getItem(THEME_STYLE_STORAGE_KEY)
-  return isThemeStyleId(saved) ? saved : 'modern'
+  return isThemeStyleId(saved) ? saved : DEFAULT_THEME_STYLE
 }
 
 export function storeThemeStyle(id: ThemeStyleId) {

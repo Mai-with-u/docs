@@ -4,7 +4,7 @@
  *
  * 明暗（浅色/深色）复用 VitePress 的 toggle-appearance 注入（MyLayout
  * 提供，带从点击坐标展开的圆形揭示动效）；界面风格对应 MaiBot WebUI
- * 的 webui_style：0 原版 / 1 未来复古 / 2 千禧。
+ * 的 webui_style：0 原版 / 2 千禧。
  *
  * 明暗与风格是两套正交体系，可自由组合：
  *   明暗 → html.dark 类（VitePress 原生）
@@ -15,6 +15,7 @@ import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useData } from 'vitepress'
 import {
   THEME_STYLES,
+  DEFAULT_THEME_STYLE,
   applyThemeStyle,
   loadStoredThemeStyle,
   storeThemeStyle,
@@ -24,7 +25,7 @@ import type { ThemeStyleId } from '../utils/theme-style'
 const { lang, isDark } = useData()
 const route = useRoute()
 
-const current = ref<ThemeStyleId>('modern')
+const current = ref<ThemeStyleId>(DEFAULT_THEME_STYLE)
 const open = ref(false)
 const rootEl = ref<HTMLElement>()
 
@@ -44,7 +45,6 @@ const i18n = {
     label: '界面风格',
     items: {
       modern: ['原版', 'MaiBot 橙色的现代外观'],
-      'future-retro': ['未来复古', '纸面颗粒、硬朗描边与切角面板'],
       millennium: ['千禧', '米黄机壳、键帽按钮与像素字'],
     },
   },
@@ -55,7 +55,6 @@ const i18n = {
     label: 'Theme Style',
     items: {
       modern: ['Classic', 'Modern look in MaiBot orange'],
-      'future-retro': ['Future Retro', 'Paper grain and hard ink strokes'],
       millennium: ['Millennium', 'Beige shell, keycaps and pixel type'],
     },
   },
@@ -66,7 +65,6 @@ const t = computed(() => (lang.value.toLowerCase().startsWith('zh') ? i18n.zh : 
 /* 菜单里的迷你色板：[背景, 主色, 点缀色] */
 const SWATCHES: Record<ThemeStyleId, readonly [string, string, string]> = {
   modern: ['#ffffff', '#ff8c00', '#d2691e'],
-  'future-retro': ['#f3eccc', '#c24d24', '#0d4550'],
   millennium: ['#ddd4bf', '#8fd6a0', '#2a7d50'],
 }
 

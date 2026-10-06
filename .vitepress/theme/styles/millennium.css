@@ -1,97 +1,124 @@
 /**
  * 千禧（millennium）— MaiBot WebUI webui_style = 2 同款
  *
- * 整个界面只用三种材质（与 dashboard styles/millennium.css 一致）：
- *   1. 米黄塑料机壳 — 页面底色，带颗粒；
- *   2. 下沉屏幕 — 代码块、行内代码，浅色是暗纹网格，深色是示波屏；
- *   3. 键帽 — 按钮、链接卡片，选中态是按下去的薄荷绿键。
- * 夜间模式是同一台机器关了灯：炭灰机壳、近黑屏幕，薄荷绿保持不变。
+ * 整个界面只用三种材质（色板与 dashboard styles/millennium.css 一致）：
+ *   1. 米黄塑料机壳 — 页面、顶栏、侧栏、提示块，带左上亮边、右下暗边和底部厚度；
+ *   2. 下沉屏幕 — 正文、搜索框、表格，承载内容的区域；代码块是深色示波屏；
+ *   3. 键帽 — 按钮、导航项、标签页、翻页，选中态是按下去的薄荷绿键。
+ * 夜间模式是同一台机器关了灯：炭灰机壳、近黑屏幕，亮色保持不变。
  *
- * 字体：拉丁字符用自托管 Pixelify Sans 像素字（@font-face 在 base.css），
- * 中文回落黑体。全站直角、硬边框。
+ * 像素字（Departure Mono + Ark Pixel，@font-face 在 base.css）只用在铭牌、
+ * 大标题和丝印小标题上，正文保持普通黑体保证可读。全站直角、硬边框。
  */
 
 /* ==========================================================================
  * 材质令牌（浅色）：米黄机壳
  * ======================================================================== */
 html[data-theme-style='millennium'] {
-  /* 机壳 */
   --mil-shell: #ddd4bf;
   --mil-panel: #ebe4d2;
   --mil-hi: #f6f1e3;
   --mil-lo: #bdb39c;
+  --mil-drop: #9c927b;
   --mil-line: #5a544a;
   --mil-ink: #4a443a;
-
-  /* 屏幕 */
+  --mil-print: #5f5849;
+  --mil-vent: #a89e87;
   --mil-screen: #fbf9f0;
-  --mil-screen-grid: rgb(0 0 0 / 0.04);
-
-  /* 键帽 */
+  --mil-screen-ink: #3a3833;
+  --mil-screen-dim: #66625a;
+  --mil-screen-shade: rgb(0 0 0 / 0.16);
+  --mil-screen-grid: rgb(0 0 0 / 0.03);
+  --mil-rule: #d3cec0;
+  --mil-scope: #403c37;
+  --mil-scope-grid: #5a554d;
+  --mil-scope-ink: #ded7c4;
   --mil-key: #f3eee1;
   --mil-key-side: #c2b8a1;
   --mil-key-hi: #fffaf0;
   --mil-key-hover: #fbf7ec;
-
-  /* 薄荷绿（选中/激活） */
   --mil-on: #8fd6a0;
   --mil-on-ink: #2f3a2b;
   --mil-on-side: #5fa873;
-  --mil-accent: #2a7d50;
+  --mil-accent-text: #2a7d50;
+  --mil-hot: #f08a5d;
+  --mil-hot-ink: #3a2a22;
+  --mil-hot-side: #c2643c;
+  --mil-danger: #c2452f;
+  --mil-led: #4fd07a;
+  --mil-float-shadow: rgb(74 68 58 / 0.28);
+  --mil-plate: #5a544a;
+  --mil-plate-ink: #fffaf0;
 
-  /* 纹理与组合阴影 */
   --mil-speck: radial-gradient(rgb(90 84 74 / 0.09) 1px, transparent 1px);
   --mil-screen-tex:
     linear-gradient(var(--mil-screen-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--mil-screen-grid) 1px, transparent 1px);
+  --mil-scope-tex:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  --mil-bevel: inset 2px 2px 0 var(--mil-hi), inset -2px -2px 0 var(--mil-lo);
+  --mil-raise: var(--mil-bevel), 0 5px 0 var(--mil-drop);
+  --mil-float:
+    inset 2px 2px 0 var(--mil-hi), inset -2px -2px 0 var(--mil-lo),
+    6px 6px 0 var(--mil-float-shadow);
+  --mil-sunk:
+    inset 3px 3px 0 var(--mil-screen-shade), -2px -2px 0 2px var(--mil-lo),
+    2px 2px 0 2px var(--mil-hi);
   --mil-keycap:
     inset 0 0 0 2px var(--mil-line), inset 0 -5px 0 var(--mil-key-side),
-    inset 2px 2px 0 var(--mil-key-hi);
+    inset 4px 4px 0 var(--mil-key-hi);
+  --mil-keycap-hot:
+    inset 0 0 0 2px var(--mil-line), inset 0 -5px 0 var(--mil-hot-side),
+    inset 4px 4px 0 rgb(255 255 255 / 0.28);
   --mil-pressed: inset 0 0 0 2px var(--mil-line), inset 0 -3px 0 var(--mil-on-side);
 
+  --mil-font-pixel:
+    'Departure Mono', 'Ark Pixel 12px SC', 'Fusion Pixel 12px Proportional SC', 'Zpix',
+    'Noto Sans SC', 'Microsoft YaHei UI', sans-serif;
+
   /* 映射到 VitePress 令牌 */
-  --vp-c-brand-1: var(--mil-accent);
+  --vp-c-brand-1: var(--mil-accent-text);
   --vp-c-brand-2: #3fae72;
   --vp-c-brand-3: var(--mil-on);
   --vp-c-brand-soft: rgb(63 174 114 / 0.16);
 
   --vp-c-bg: var(--mil-shell);
-  --vp-c-bg-alt: #d6ccb4;
+  --vp-c-bg-alt: var(--mil-shell);
   --vp-c-bg-elv: var(--mil-panel);
-  --vp-c-bg-soft: #e6dfc9;
+  --vp-c-bg-soft: var(--mil-panel);
 
   --vp-c-border: var(--mil-lo);
-  --vp-c-divider: #c9c0a8;
-  --vp-c-gutter: #c9c0a8;
+  --vp-c-divider: var(--mil-lo);
+  --vp-c-gutter: var(--mil-lo);
 
   --vp-c-text-1: var(--mil-ink);
-  --vp-c-text-2: #5f5849;
+  --vp-c-text-2: var(--mil-print);
   --vp-c-text-3: #7a7360;
-  --vp-c-text-code: var(--mil-accent);
+  --vp-c-text-code: var(--mil-accent-text);
 
-  /* 薄荷绿按钮上的文字压深一档 */
-  --vp-button-brand-text: var(--mil-on-ink);
-  --vp-button-brand-hover-text: var(--mil-on-ink);
-  --vp-button-brand-active-text: var(--mil-on-ink);
+  --vp-nav-bg-color: transparent;
+  --vp-sidebar-bg-color: transparent;
+  --vp-local-nav-bg-color: var(--mil-panel);
+  --vp-nav-screen-bg-color: var(--mil-shell);
 
-  /* 像素字 */
-  --vp-font-family-base: 'Pixelify Sans', 'Fusion Pixel 12px Proportional SC',
-    'Zpix', 'Noto Sans SC', 'Microsoft YaHei UI', system-ui, sans-serif;
-  --vp-font-family-mono: 'Pixelify Sans', 'JetBrains Mono', 'Cascadia Mono',
-    Consolas, monospace;
+  /* 代码块 = 深色示波屏，高亮配色固定用深色那套 */
+  --vp-code-block-bg: var(--mil-scope);
+  --vp-code-block-color: var(--mil-scope-ink);
+  --vp-code-block-divider-color: var(--mil-scope-grid);
+  --vp-code-lang-color: #a8a290;
+  --vp-code-line-number-color: #8d8574;
+  --vp-code-line-highlight-color: rgb(143 214 160 / 0.14);
+  --vp-code-copy-code-bg: var(--mil-scope);
+  --vp-code-copy-code-hover-bg: var(--mil-scope);
+  --vp-code-copy-code-border-color: var(--mil-scope-grid);
+  --vp-code-copy-code-hover-border-color: var(--mil-on);
+  --vp-code-copy-code-active-text: var(--mil-scope-ink);
+  --vp-code-copy-copied-text-content: 'OK';
 
-  /* 首页 Hero 渐变换成薄荷绿 + 暖橙 */
-  --vp-home-hero-name-background: -webkit-linear-gradient(
-    120deg,
-    #f08a5d 20%,
-    #3fae72 60%,
-    #2a7d50
-  );
-  --vp-home-hero-image-background-image: linear-gradient(
-    -45deg,
-    #f08a5d 40%,
-    #3fae72 60%
-  );
+  --vp-home-hero-name-color: var(--mil-ink);
+  --vp-home-hero-name-background: none;
+  --vp-home-hero-image-background-image: none;
 
   color-scheme: light;
 }
@@ -104,136 +131,575 @@ html.dark[data-theme-style='millennium'] {
   --mil-panel: #3a3631;
   --mil-hi: #4a453f;
   --mil-lo: #2a2723;
+  --mil-drop: #1d1b18;
   --mil-line: #171513;
   --mil-ink: #ebe4d2;
-
+  --mil-print: #b5ad9a;
+  --mil-vent: #1d1b18;
   --mil-screen: #1e221e;
+  --mil-screen-ink: #e8e2cf;
+  --mil-screen-dim: #a8a290;
+  --mil-screen-shade: rgb(0 0 0 / 0.4);
   --mil-screen-grid: rgb(255 255 255 / 0.03);
-
+  --mil-rule: #3c423b;
+  --mil-scope: #171a17;
+  --mil-scope-grid: #3a4139;
   --mil-key: #4d4841;
   --mil-key-side: #2e2b27;
   --mil-key-hi: #5d574f;
   --mil-key-hover: #58524a;
-
   --mil-on-ink: #1f2a20;
-  --mil-on-side: #5fa873;
-  --mil-accent: #8fd6a0;
+  --mil-accent-text: #8fd6a0;
+  --mil-hot-ink: #2a1c14;
+  --mil-float-shadow: rgb(0 0 0 / 0.45);
+  --mil-plate: #171513;
+  --mil-plate-ink: #ebe4d2;
+  --mil-speck: radial-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px);
 
-  --vp-c-brand-1: var(--mil-accent);
   --vp-c-brand-2: #6fc488;
-  --vp-c-brand-3: var(--mil-on);
   --vp-c-brand-soft: rgb(143 214 160 / 0.12);
-
-  --vp-c-bg: var(--mil-shell);
-  --vp-c-bg-alt: #2a2723;
-  --vp-c-bg-elv: var(--mil-panel);
-  --vp-c-bg-soft: #35322c;
-
-  --vp-c-border: #4a453f;
-  --vp-c-divider: #3c3a34;
-  --vp-c-gutter: #232120;
-
-  --vp-c-text-1: var(--mil-ink);
-  --vp-c-text-2: #b5ad9a;
   --vp-c-text-3: #8d8574;
-  --vp-c-text-code: var(--mil-accent);
 
   color-scheme: dark;
 }
 
 /* ==========================================================================
- * 机壳颗粒铺底
+ * 机壳底纹 + 全站直角
  * ======================================================================== */
 html[data-theme-style='millennium'] body {
   background-color: var(--mil-shell);
   background-image: var(--mil-speck);
   background-size: 5px 5px;
+  color: var(--mil-ink);
+}
+
+html[data-theme-style='millennium'] :is(.VPNav, .VPSidebar, .VPContent, .VPFooter, .VPLocalNav, .VPNavScreen) *,
+html[data-theme-style='millennium'] :is(.VPLocalSearchBox, .VPLocalSearchBox *) {
+  border-radius: 0 !important;
+}
+
+/* 首页极光只属于原版风格 */
+html[data-theme-style='millennium'] .aurora-bg {
+  display: none;
+}
+
+/* 选中文字是薄荷绿 */
+html[data-theme-style='millennium'] ::selection {
+  background: var(--mil-on);
+  color: var(--mil-on-ink);
+}
+
+/* 滚动条：机壳上的滑槽和方滑块 */
+html[data-theme-style='millennium'] {
+  scrollbar-color: var(--mil-drop) var(--mil-shell);
+}
+
+html[data-theme-style='millennium'] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+html[data-theme-style='millennium'] ::-webkit-scrollbar-track {
+  background: var(--mil-shell);
+  box-shadow: inset 1px 1px 0 var(--mil-lo);
+}
+
+html[data-theme-style='millennium'] ::-webkit-scrollbar-thumb {
+  background: var(--mil-key);
+  box-shadow: inset 0 0 0 2px var(--mil-line);
+}
+
+/* 顶部加载条 */
+html[data-theme-style='millennium'] #nprogress .bar {
+  background: var(--mil-led) !important;
+  height: 3px;
 }
 
 /* ==========================================================================
- * 结构：全站直角 + 键帽按钮 + 下沉屏幕 + 面板提示块
+ * 顶栏：机壳上沿，左边是铭牌，中间一排键帽，右边散热栅格
  * ======================================================================== */
-
-/* 直角 */
-html[data-theme-style='millennium'] .VPButton,
-html[data-theme-style='millennium'] .vp-doc .custom-block,
-html[data-theme-style='millennium'] .vp-doc div[class*='language-'],
-html[data-theme-style='millennium'] .VPMenu,
-html[data-theme-style='millennium'] .vp-code-group .tabs,
-html[data-theme-style='millennium'] .linkcard {
-  border-radius: 0;
+html[data-theme-style='millennium'] .VPNav {
+  background-color: var(--mil-panel);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border-bottom: 2px solid var(--mil-line);
+  box-shadow:
+    inset 0 2px 0 var(--mil-hi),
+    inset 0 -2px 0 var(--mil-lo),
+    0 5px 0 var(--mil-drop);
 }
 
-/* 按钮一律做成键帽；按下是薄荷绿键 */
-html[data-theme-style='millennium'] .VPButton {
-  border: none;
+html[data-theme-style='millennium'] .VPNavBar,
+html[data-theme-style='millennium'] .VPNavBar :is(.title, .content-body) {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+  backdrop-filter: none !important;
+}
+
+html[data-theme-style='millennium'] .VPNavBar :is(.divider, .curtain, .content-curtain) {
+  display: none !important;
+}
+
+/* 铭牌：深色底上的浅色像素字 */
+html[data-theme-style='millennium'] .VPNavBarTitle .title {
+  font-family: var(--mil-font-pixel);
+  font-synthesis: none;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+html[data-theme-style='millennium'] .VPNavBarTitle .title > span {
+  background: var(--mil-plate);
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / 0.25), 2px 2px 0 var(--mil-hi);
+  color: var(--mil-plate-ink);
+  line-height: 1;
+  padding: 9px 12px 10px;
+}
+
+/* 顶栏菜单：一排键帽，当前栏目是按下去的绿键 */
+html[data-theme-style='millennium'] .VPNavBarMenu {
+  align-items: center;
+  gap: 6px;
+}
+
+html[data-theme-style='millennium'] .VPNavBarMenuLink,
+html[data-theme-style='millennium'] .VPNavBarMenuGroup .button {
+  background: var(--mil-key);
   box-shadow: var(--mil-keycap);
-  background-color: var(--mil-key);
+  color: var(--mil-ink) !important;
+  font-weight: 700;
+  height: 38px;
+  line-height: 31px;
+  padding: 0 12px 5px;
+  transition: background-color 120ms ease-out;
+}
+
+html[data-theme-style='millennium'] .VPNavBarMenuGroup .button .text {
   color: var(--mil-ink);
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 31px;
 }
 
-html[data-theme-style='millennium'] .VPButton:hover {
-  background-color: var(--mil-key-hover);
-  border-color: transparent;
+html[data-theme-style='millennium'] .VPNavBarMenuLink:hover,
+html[data-theme-style='millennium'] .VPNavBarMenuGroup:hover .button {
+  background: var(--mil-key-hover);
 }
 
-html[data-theme-style='millennium'] .VPButton:active {
-  background-color: var(--mil-on);
+html[data-theme-style='millennium'] .VPNavBarMenuLink.active,
+html[data-theme-style='millennium'] .VPNavBarMenuGroup.active .button {
+  background: var(--mil-on);
+  box-shadow: var(--mil-pressed);
+  color: var(--mil-on-ink) !important;
+  line-height: 35px;
+  padding-bottom: 3px;
+}
+
+html[data-theme-style='millennium'] .VPNavBarMenuGroup.active .button .text {
+  color: var(--mil-on-ink);
+  line-height: 35px;
+}
+
+/* 右侧图标键之间的竖线换成散热栅格 */
+html[data-theme-style='millennium'] .VPNavBar :is(.translations, .appearance, .social-links)::before {
+  background:
+    repeating-linear-gradient(90deg, var(--mil-vent) 0 2px, transparent 2px 5px);
+  height: 22px;
+  width: 13px;
+}
+
+html[data-theme-style='millennium'] .VPNavBar :is(.VPSocialLink, .VPFlyout > .button):hover {
+  color: var(--mil-accent-text);
+}
+
+/* 搜索框 = 下沉屏幕（窄屏上只是一个图标，不做屏幕） */
+@media (min-width: 768px) {
+  html[data-theme-style='millennium'] .DocSearch-Button {
+    background: var(--mil-screen) !important;
+    border: 0 !important;
+    box-shadow: var(--mil-sunk);
+    color: var(--mil-screen-dim);
+  }
+
+  html[data-theme-style='millennium'] .DocSearch-Button:hover {
+    box-shadow: var(--mil-sunk), 0 0 0 4px var(--mil-on);
+  }
+}
+
+html[data-theme-style='millennium'] .DocSearch-Button-Keys {
+  background: var(--mil-key);
+  border: 0 !important;
+  box-shadow: inset 0 0 0 1px var(--mil-line), inset 0 -2px 0 var(--mil-key-side);
+}
+
+/* ==========================================================================
+ * 浮层：下拉菜单、搜索弹窗
+ * ======================================================================== */
+html[data-theme-style='millennium'] .VPMenu {
+  background-color: var(--mil-panel);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border: 2px solid var(--mil-line);
+  box-shadow: var(--mil-float);
+}
+
+html[data-theme-style='millennium'] .VPMenu :is(.VPMenuLink a, .VPMenuLink .link):hover {
+  background: var(--mil-key);
+  box-shadow: inset 0 0 0 2px var(--mil-line);
+  color: var(--mil-ink);
+}
+
+html[data-theme-style='millennium'] .VPMenu .VPMenuLink :is(a, .link).active {
+  background: var(--mil-on);
+  box-shadow: inset 0 0 0 2px var(--mil-line);
+  color: var(--mil-on-ink);
+}
+
+html[data-theme-style='millennium'] .VPLocalSearchBox .backdrop {
+  background: rgb(47 44 40 / 0.55);
+  backdrop-filter: none;
+}
+
+html[data-theme-style='millennium'] .VPLocalSearchBox .shell {
+  background-color: var(--mil-panel);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border: 2px solid var(--mil-line);
+  box-shadow: var(--mil-float);
+}
+
+html[data-theme-style='millennium'] .VPLocalSearchBox .search-bar {
+  background: var(--mil-screen);
+  border: 0;
+  box-shadow: var(--mil-sunk);
+}
+
+html[data-theme-style='millennium'] .VPLocalSearchBox .result {
+  background: var(--mil-key);
+  border: 0;
+  box-shadow: var(--mil-keycap);
+  padding-bottom: 5px;
+}
+
+html[data-theme-style='millennium'] .VPLocalSearchBox .result.selected {
+  background: var(--mil-on);
+  box-shadow: var(--mil-pressed);
+  color: var(--mil-on-ink);
+}
+
+html[data-theme-style='millennium'] .VPLocalSearchBox .result.selected :is(.title, .titles, .excerpt) {
+  color: var(--mil-on-ink);
+}
+
+/* ==========================================================================
+ * 侧栏：和页面同一块机壳，分组标题是丝印小字，当前页是按下的绿键
+ * ======================================================================== */
+html[data-theme-style='millennium'] .VPSidebar {
+  background-color: var(--mil-shell);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border-right: 2px solid var(--mil-lo);
+  box-shadow: 2px 0 0 var(--mil-hi);
+}
+
+html[data-theme-style='millennium'] .VPSidebar .curtain {
+  display: none;
+}
+
+/* 分组之间一道刻线：暗线 + 下方亮线 */
+html[data-theme-style='millennium'] .VPSidebar .group + .group {
+  border-top: 2px solid var(--mil-lo);
+  box-shadow: inset 0 2px 0 var(--mil-hi);
+}
+
+html[data-theme-style='millennium'] .VPSidebarItem.level-0 > .item .text {
+  color: var(--mil-print);
+  font-family: var(--mil-font-pixel);
+  font-size: 13px;
+  font-synthesis: none;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+}
+
+html[data-theme-style='millennium'] .VPSidebarItem:not(.level-0) > .item {
+  margin: 2px 0;
+}
+
+html[data-theme-style='millennium'] .VPSidebarItem:not(.level-0) > .item > .link {
+  display: block;
+  padding: 0 10px;
+  width: 100%;
+}
+
+html[data-theme-style='millennium'] .VPSidebarItem:not(.level-0) > .item .text {
+  color: var(--mil-ink);
+  font-weight: 500;
+  padding: 5px 0;
+}
+
+html[data-theme-style='millennium'] .VPSidebarItem:not(.level-0) > .item:hover {
+  background: var(--mil-key);
+  box-shadow: inset 0 0 0 2px var(--mil-lo);
+}
+
+html[data-theme-style='millennium'] .VPSidebarItem.is-active:not(.level-0) > .item {
+  background: var(--mil-on);
   box-shadow: var(--mil-pressed);
 }
 
-/* 代码块 = 下沉屏幕（浅色暗纹网格，深色示波屏） */
-html[data-theme-style='millennium'] .vp-doc div[class*='language-'] {
+html[data-theme-style='millennium'] .VPSidebarItem.is-active:not(.level-0) > .item .text {
+  color: var(--mil-on-ink) !important;
+  font-weight: 700;
+}
+
+html[data-theme-style='millennium'] .VPSidebarItem .indicator {
+  display: none;
+}
+
+/* ==========================================================================
+ * 正文：一整块下沉屏幕
+ * ======================================================================== */
+html[data-theme-style='millennium'] .VPDoc .content-container {
   background-color: var(--mil-screen);
   background-image: var(--mil-screen-tex);
-  background-size: 12px 12px;
-  border: 1px solid var(--mil-lo);
-  box-shadow: inset 2px 2px 0 rgb(0 0 0 / 0.12);
+  background-size: 16px 16px;
+  box-shadow: var(--mil-sunk);
+  color: var(--mil-screen-ink);
+  padding: 28px 20px 32px;
+}
+
+@media (min-width: 768px) {
+  html[data-theme-style='millennium'] .VPDoc .content-container {
+    padding: 36px 40px 40px;
+  }
+}
+
+html[data-theme-style='millennium'] .vp-doc {
+  --vp-c-text-1: var(--mil-screen-ink);
+  --vp-c-text-2: var(--mil-screen-dim);
+  --vp-c-divider: var(--mil-rule);
+}
+
+/* 大标题用像素字，下面压一道薄荷绿底线 */
+html[data-theme-style='millennium'] .VPDoc .vp-doc h1 {
+  border-bottom: 4px solid var(--mil-on);
+  font-family: var(--mil-font-pixel);
+  font-synthesis: none;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  padding-bottom: 14px;
+}
+
+/* 二级标题是一条标题条：左边一颗方形指示灯 */
+html[data-theme-style='millennium'] .VPDoc .vp-doc h2 {
+  border-top: 2px solid var(--mil-rule);
+  font-family: var(--mil-font-pixel);
+  font-synthesis: none;
+  font-weight: 400;
+  padding-left: 22px;
+  position: relative;
+}
+
+html[data-theme-style='millennium'] .VPDoc .vp-doc h2::before {
+  background: var(--mil-led);
+  box-shadow: inset 0 0 0 2px var(--mil-line);
+  content: '';
+  height: 12px;
+  left: 0;
+  position: absolute;
+  top: calc(24px + 0.55em);
+  width: 12px;
+}
+
+html[data-theme-style='millennium'] .VPDoc .vp-doc h3 {
+  border-left: 4px solid var(--mil-on);
+  padding-left: 10px;
+}
+
+html[data-theme-style='millennium'] .vp-doc a {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+html[data-theme-style='millennium'] .VPDoc .vp-doc hr {
+  border-top: 2px dashed var(--mil-rule);
+}
+
+html[data-theme-style='millennium'] .vp-doc blockquote {
+  border-left: 4px solid var(--mil-lo);
+}
+
+html[data-theme-style='millennium'] .vp-doc img {
+  box-shadow: 0 0 0 2px var(--mil-line);
+}
+
+/* 文章信息：印在屏幕上的小字 */
+html[data-theme-style='millennium'] .article-metadata {
+  color: var(--mil-screen-dim);
+  font-family: var(--mil-font-pixel);
+  font-size: 12px;
+  font-synthesis: none;
+  letter-spacing: 0.04em;
+}
+
+/* 行内代码：机壳色的小标签 */
+html[data-theme-style='millennium'] .vp-doc :not(pre) > code {
+  background-color: var(--mil-panel);
+  box-shadow: inset 0 0 0 1px var(--mil-lo);
+  color: var(--mil-accent-text);
+  padding: 2px 6px;
+}
+
+/* 代码块：深色示波屏 */
+html[data-theme-style='millennium'] .vp-doc div[class*='language-'] {
+  background-color: var(--mil-scope);
+  background-image: var(--mil-scope-tex);
+  background-size: 16px 16px;
+  box-shadow: inset 0 0 0 2px var(--mil-line), inset 4px 4px 0 rgb(0 0 0 / 0.25);
 }
 
 html[data-theme-style='millennium'] .vp-doc div[class*='language-'] code {
-  color: var(--vp-c-text-1);
+  color: var(--mil-scope-ink);
 }
 
-html.dark[data-theme-style='millennium'] .vp-doc div[class*='language-'] code {
-  color: #e8e2cf;
+html:not(.dark)[data-theme-style='millennium'] .vp-doc div[class*='language-'] .shiki span {
+  color: var(--shiki-dark, inherit);
 }
 
-/* 行内代码也进屏幕 */
-html[data-theme-style='millennium'] .vp-doc :not(pre) > code {
-  background-color: var(--mil-screen);
-  color: var(--vp-c-text-code);
-  border-radius: 0;
-  padding: 3px 6px;
-  box-shadow: inset 1px 1px 0 rgb(0 0 0 / 0.1);
+html[data-theme-style='millennium'] .vp-doc div[class*='language-'] > button.copy {
+  box-shadow: inset 0 0 0 2px var(--mil-scope-grid);
 }
 
-/* 提示块 = 面板机壳 */
+/* 代码组的标签页：一排键帽，选中的是按下去的绿键 */
+html[data-theme-style='millennium'] .vp-code-group {
+  margin-top: 20px;
+}
+
+html[data-theme-style='millennium'] .vp-code-group .tabs {
+  background: transparent;
+  box-shadow: none;
+  gap: 6px;
+  display: flex;
+  margin: 0 0 6px;
+  padding: 0;
+}
+
+html[data-theme-style='millennium'] .vp-code-group .tabs label {
+  background: var(--mil-key);
+  border: 0;
+  box-shadow: var(--mil-keycap);
+  color: var(--mil-ink);
+  font-weight: 700;
+  line-height: 31px;
+  padding: 0 12px 5px;
+}
+
+html[data-theme-style='millennium'] .vp-code-group .tabs label::after {
+  display: none;
+}
+
+html[data-theme-style='millennium'] .vp-code-group .tabs label:hover {
+  background: var(--mil-key-hover);
+}
+
+html[data-theme-style='millennium'] .vp-code-group .tabs input:checked + label {
+  background: var(--mil-on);
+  box-shadow: var(--mil-pressed);
+  color: var(--mil-on-ink);
+  line-height: 35px;
+  padding-bottom: 3px;
+}
+
+html[data-theme-style='millennium'] .vp-code-group div[class*='language-'] {
+  margin-top: 0 !important;
+}
+
+/* 提示块：凸起的塑料模块，标题前一颗指示灯，颜色区分类型 */
 html[data-theme-style='millennium'] .vp-doc .custom-block {
-  border: 1px solid var(--mil-lo);
-  box-shadow: inset 2px 2px 0 var(--mil-hi), inset -2px -2px 0 rgb(0 0 0 / 0.08);
+  --mil-block-led: var(--mil-led);
+  background-color: var(--mil-panel);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border: 2px solid var(--mil-line);
+  box-shadow: var(--mil-raise);
+  color: var(--mil-ink);
+  margin-bottom: 21px;
+  padding: 14px 18px 12px;
 }
 
-/* 表格线 = 印刷网格 */
+html[data-theme-style='millennium'] .vp-doc .custom-block.info {
+  --mil-block-led: var(--mil-vent);
+}
+
+html[data-theme-style='millennium'] .vp-doc .custom-block.warning {
+  --mil-block-led: var(--mil-hot);
+}
+
+html[data-theme-style='millennium'] .vp-doc .custom-block.danger {
+  --mil-block-led: var(--mil-danger);
+}
+
+html[data-theme-style='millennium'] .vp-doc .custom-block :is(.custom-block-title, summary) {
+  color: var(--mil-print);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+html[data-theme-style='millennium'] .vp-doc .custom-block .custom-block-title::before {
+  background: var(--mil-block-led);
+  box-shadow: inset 0 0 0 2px var(--mil-line);
+  content: '';
+  display: inline-block;
+  height: 10px;
+  margin-right: 8px;
+  width: 10px;
+}
+
+html[data-theme-style='millennium'] .vp-doc .custom-block :not(pre) > code {
+  background: var(--mil-screen);
+}
+
+/* 表格：整张表是一块屏幕 */
 html[data-theme-style='millennium'] .vp-doc table {
   border-collapse: collapse;
+  box-shadow: 0 0 0 2px var(--mil-line);
+  display: table;
+  width: 100%;
 }
 
-html[data-theme-style='millennium'] .vp-doc th,
-html[data-theme-style='millennium'] .vp-doc td {
-  border: 1px solid var(--vp-c-divider);
+html[data-theme-style='millennium'] .vp-doc tr {
+  background: transparent !important;
+  border-top: 0;
+}
+
+html[data-theme-style='millennium'] .vp-doc :is(th, td) {
+  border: 1px solid var(--mil-rule);
 }
 
 html[data-theme-style='millennium'] .vp-doc th {
-  background-color: var(--vp-c-bg-soft);
+  background: var(--mil-panel);
+  border-bottom: 2px solid var(--mil-line);
+  color: var(--mil-print);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+/* 徽标 */
+html[data-theme-style='millennium'] .VPBadge {
+  background: var(--mil-on);
+  border: 0;
+  box-shadow: inset 0 0 0 1px var(--mil-line);
+  color: var(--mil-on-ink);
 }
 
 /* 链接卡片 = 键帽 */
 html[data-theme-style='millennium'] .linkcard {
-  box-shadow: var(--mil-keycap);
-  border: none;
   background: var(--mil-key);
+  border: 0;
+  border-radius: 0;
+  box-shadow: var(--mil-keycap);
+  color: var(--mil-ink);
+  padding-bottom: calc(1em + 5px);
 }
 
 html[data-theme-style='millennium'] .linkcard:hover {
@@ -241,15 +707,424 @@ html[data-theme-style='millennium'] .linkcard:hover {
   transform: none;
 }
 
-/* ==========================================================================
- * 首页极光（AuroraBackground）整体调色成机壳薄荷绿
- * ======================================================================== */
-html[data-theme-style='millennium'] .aurora-bg {
-  background: var(--mil-shell);
-  filter: sepia(0.35) hue-rotate(60deg) saturate(1.6);
+html[data-theme-style='millennium'] .linkcard:active {
+  background: var(--mil-on);
+  box-shadow: var(--mil-pressed);
 }
 
-html.dark[data-theme-style='millennium'] .aurora-bg {
-  background: var(--mil-shell);
-  filter: sepia(0.4) hue-rotate(60deg) saturate(1.5);
+/* 更新日志时间线：日期是铭牌，节点是指示灯 */
+html[data-theme-style='millennium'] .timeline-dot {
+  border-left: 2px solid var(--mil-rule);
+  color: var(--mil-screen-ink);
+}
+
+html[data-theme-style='millennium'] .timeline-dot::before {
+  background: var(--mil-led);
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 2px var(--mil-line);
+}
+
+html[data-theme-style='millennium'] .timeline-dot .timeline-dot-title {
+  background: var(--mil-plate);
+  color: var(--mil-plate-ink);
+  display: inline-block;
+  font-family: var(--mil-font-pixel);
+  font-style: normal;
+  font-synthesis: none;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  padding: 6px 10px 7px;
+}
+
+/* ==========================================================================
+ * 右侧目录：一块凸起的小模块
+ * ======================================================================== */
+html[data-theme-style='millennium'] .VPDocAsideOutline .content {
+  background-color: var(--mil-panel);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border: 2px solid var(--mil-line);
+  box-shadow: var(--mil-raise);
+  padding: 12px 14px 14px;
+}
+
+html[data-theme-style='millennium'] .VPDocAsideOutline .outline-title {
+  border-bottom: 2px solid var(--mil-lo);
+  box-shadow: 0 2px 0 var(--mil-hi);
+  color: var(--mil-print);
+  font-family: var(--mil-font-pixel);
+  font-size: 13px;
+  font-synthesis: none;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+}
+
+html[data-theme-style='millennium'] .VPDocAsideOutline .outline-marker {
+  background: var(--mil-led);
+  box-shadow: inset 0 0 0 1px var(--mil-line);
+  left: 4px;
+  width: 6px;
+}
+
+html[data-theme-style='millennium'] .VPDocAsideOutline .outline-link {
+  color: var(--mil-print);
+}
+
+html[data-theme-style='millennium'] .VPDocAsideOutline .outline-link:is(:hover, .active) {
+  color: var(--mil-ink);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+ * 键帽：按钮、翻页、回到顶部
+ * ======================================================================== */
+html[data-theme-style='millennium'] .VPButton {
+  background-color: var(--mil-key) !important;
+  border: 0;
+  box-shadow: var(--mil-keycap);
+  color: var(--mil-ink) !important;
+  font-weight: 700;
+  padding-bottom: 5px;
+  transition: background-color 120ms ease-out;
+}
+
+html[data-theme-style='millennium'] .VPButton:hover {
+  background-color: var(--mil-key-hover) !important;
+}
+
+/* 主操作是珊瑚橙键 */
+html[data-theme-style='millennium'] .VPButton.brand {
+  background-color: var(--mil-hot) !important;
+  box-shadow: var(--mil-keycap-hot);
+  color: var(--mil-hot-ink) !important;
+}
+
+html[data-theme-style='millennium'] .VPButton.brand:hover {
+  background-color: #f59b72 !important;
+}
+
+html[data-theme-style='millennium'] .VPButton:active {
+  background-color: var(--mil-on) !important;
+  box-shadow: var(--mil-pressed);
+  color: var(--mil-on-ink) !important;
+  transform: translateY(2px);
+}
+
+html[data-theme-style='millennium'] .VPDocFooter .prev-next {
+  border-top: 2px dashed var(--mil-rule);
+}
+
+html[data-theme-style='millennium'] .VPDocFooter .pager-link {
+  background: var(--mil-key);
+  border: 0;
+  box-shadow: var(--mil-keycap);
+  padding-bottom: 16px;
+}
+
+html[data-theme-style='millennium'] .VPDocFooter .pager-link:hover {
+  background: var(--mil-key-hover);
+}
+
+html[data-theme-style='millennium'] .VPDocFooter .pager-link:active {
+  background: var(--mil-on);
+  box-shadow: var(--mil-pressed);
+}
+
+html[data-theme-style='millennium'] .VPDocFooter .pager-link .desc {
+  color: var(--mil-print);
+  letter-spacing: 0.1em;
+}
+
+html[data-theme-style='millennium'] .VPDocFooter .pager-link .title {
+  color: var(--mil-ink);
+  font-weight: 700;
+}
+
+html[data-theme-style='millennium'] .VPLocalNav {
+  border-bottom: 2px solid var(--mil-line);
+  border-top: 0;
+}
+
+html[data-theme-style='millennium'] .VPFooter {
+  background: transparent;
+  border-top: 2px solid var(--mil-lo);
+  box-shadow: inset 0 2px 0 var(--mil-hi);
+}
+
+/* ==========================================================================
+ * 首页
+ * ======================================================================== */
+
+/* Hero：名字是一块铭牌，标语是印在壳上的字 */
+html[data-theme-style='millennium'] .VPHero :is(.name, .text) {
+  font-family: var(--mil-font-pixel);
+  font-synthesis: none;
+  font-weight: 400;
+}
+
+html[data-theme-style='millennium'] .VPHero .name.clip {
+  -webkit-text-fill-color: var(--mil-plate-ink);
+  background: var(--mil-plate);
+  box-shadow: inset 0 -6px 0 rgb(0 0 0 / 0.25), 4px 4px 0 var(--mil-hi);
+  color: var(--mil-plate-ink);
+  display: inline-block;
+  line-height: 1;
+  margin-bottom: 14px;
+  padding: 12px 18px 16px;
+}
+
+html[data-theme-style='millennium'] .VPHero .tagline {
+  color: var(--mil-print);
+}
+
+/* 主图装进一块示波屏 */
+html[data-theme-style='millennium'] .VPHero .image-bg {
+  display: none;
+}
+
+html[data-theme-style='millennium'] .VPHero .image-container::before {
+  background-color: var(--mil-scope);
+  background-image: var(--mil-scope-tex);
+  background-size: 16px 16px;
+  box-shadow:
+    inset 0 0 0 2px var(--mil-line),
+    inset 6px 6px 0 rgb(0 0 0 / 0.3),
+    0 0 0 10px var(--mil-panel),
+    0 0 0 12px var(--mil-line),
+    0 7px 0 12px var(--mil-drop);
+  content: '';
+  height: min(340px, 100%);
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(340px, 100%);
+}
+
+/* 首页分区（HomeSections） */
+html[data-theme-style='millennium'] .hs :is(.hs-title, .hs-eyebrow, .hs-banner-title) {
+  font-family: var(--mil-font-pixel);
+  font-synthesis: none;
+  font-weight: 400;
+}
+
+html[data-theme-style='millennium'] .hs .hs-eyebrow {
+  color: var(--mil-print);
+  letter-spacing: 0.18em;
+}
+
+html[data-theme-style='millennium'] .hs .hs-pill {
+  background: var(--mil-key);
+  border: 0;
+  border-radius: 0;
+  box-shadow: var(--mil-keycap);
+  color: var(--mil-ink);
+  padding-bottom: 12px;
+}
+
+html[data-theme-style='millennium'] .hs .hs-pill:hover {
+  background: var(--mil-key-hover);
+  color: var(--mil-ink);
+}
+
+html[data-theme-style='millennium'] .hs .hs-pill-dot {
+  animation: none;
+  background: var(--mil-led);
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px var(--mil-line);
+}
+
+html[data-theme-style='millennium'] .hs :is(.hs-card, .hs-link, .hs-browser, .hs-chat) {
+  backdrop-filter: none;
+  background-color: var(--mil-panel);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border: 2px solid var(--mil-line);
+  border-radius: 0;
+  box-shadow: var(--mil-raise);
+}
+
+html[data-theme-style='millennium'] .hs :is(.hs-card, .hs-link, .hs-browser):hover {
+  border-color: var(--mil-line);
+  box-shadow: var(--mil-bevel), 0 7px 0 var(--mil-drop);
+  transform: translateY(-2px);
+}
+
+html[data-theme-style='millennium'] .hs :is(.hs-card-icon, .hs-link-icon) {
+  background: var(--mil-on);
+  border-radius: 0;
+  box-shadow: var(--mil-pressed);
+  color: var(--mil-on-ink);
+}
+
+/* 聊天演示和截图：模块里嵌一块屏幕 */
+html[data-theme-style='millennium'] .hs :is(.hs-chat-bar, .hs-browser-bar) {
+  background: transparent;
+  border-bottom: 2px solid var(--mil-lo);
+  box-shadow: 0 2px 0 var(--mil-hi);
+}
+
+html[data-theme-style='millennium'] .hs :is(.hs-chat-dot, .hs-dot) {
+  background: var(--mil-vent);
+  border-radius: 0;
+}
+
+html[data-theme-style='millennium'] .hs .hs-dot--g {
+  background: var(--mil-led);
+}
+
+html[data-theme-style='millennium'] .hs .hs-dot--r {
+  background: var(--mil-hot);
+}
+
+html[data-theme-style='millennium'] .hs .hs-chat-body {
+  background-color: var(--mil-screen);
+  background-image: var(--mil-screen-tex);
+  background-size: 16px 16px;
+  box-shadow: inset 3px 3px 0 var(--mil-screen-shade);
+}
+
+html[data-theme-style='millennium'] .hs .hs-bubble {
+  border-radius: 0;
+}
+
+html[data-theme-style='millennium'] .hs .hs-bubble--in {
+  background: var(--mil-panel);
+  border: 2px solid var(--mil-line);
+  color: var(--mil-ink);
+}
+
+html[data-theme-style='millennium'] .hs .hs-bubble--out {
+  background: var(--mil-on);
+  box-shadow: inset 0 0 0 2px var(--mil-line);
+  color: var(--mil-on-ink);
+}
+
+html[data-theme-style='millennium'] .hs .hs-browser-url {
+  background: var(--mil-screen);
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 2px 2px 0 var(--mil-screen-shade), 0 0 0 1px var(--mil-lo);
+}
+
+/* 底部横幅：一块深色示波屏 */
+html[data-theme-style='millennium'] .hs .hs-banner {
+  background-color: var(--mil-scope);
+  background-image: var(--mil-scope-tex);
+  background-size: 16px 16px;
+  border-radius: 0;
+  box-shadow:
+    inset 0 0 0 2px var(--mil-line),
+    inset 6px 6px 0 rgb(0 0 0 / 0.3),
+    0 0 0 8px var(--mil-panel),
+    0 0 0 10px var(--mil-line),
+    0 6px 0 10px var(--mil-drop);
+  color: var(--mil-scope-ink);
+  text-shadow: none;
+}
+
+html[data-theme-style='millennium'] .hs .hs-banner::before,
+html[data-theme-style='millennium'] .hs .hs-banner::after {
+  display: none;
+}
+
+html[data-theme-style='millennium'] .hs .hs-banner-title {
+  color: var(--mil-on);
+}
+
+html[data-theme-style='millennium'] .hs .hs-btn {
+  border: 0;
+  border-radius: 0;
+  box-shadow: var(--mil-keycap);
+  background: var(--mil-key);
+  color: var(--mil-ink);
+  font-weight: 700;
+  padding-bottom: calc(0.7em + 5px);
+}
+
+html[data-theme-style='millennium'] .hs .hs-btn--solid {
+  background: var(--mil-hot);
+  box-shadow: var(--mil-keycap-hot);
+  color: var(--mil-hot-ink);
+}
+
+html[data-theme-style='millennium'] .hs .hs-btn:hover {
+  transform: none;
+  filter: brightness(1.05);
+}
+
+/* ==========================================================================
+ * 内容页里的自定义卡片（手册首页的步骤卡片 / 导航卡片、1.0.0 专题的发布卡片）
+ * 都是嵌在屏幕里的凸起塑料模块
+ * ======================================================================== */
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card, .release-lead div, .release-grid section) {
+  background-color: var(--mil-panel);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border: 2px solid var(--mil-line);
+  border-radius: 0;
+  box-shadow: var(--mil-raise);
+  color: var(--mil-ink);
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card):hover {
+  border-color: var(--mil-line);
+  box-shadow: var(--mil-bevel), 0 7px 0 var(--mil-drop);
+  transform: translateY(-2px);
+}
+
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card, .release-grid section) h3 {
+  border-left: 0;
+  color: var(--mil-ink);
+  padding-left: 0;
+}
+
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card, .release-lead div, .release-grid section) :is(p, span, strong) {
+  color: var(--mil-ink);
+}
+
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) p {
+  color: var(--mil-print);
+}
+
+/* 步骤卡片的标题条：下面一道刻线，序号是一颗按下的绿键 */
+html[data-theme-style='millennium'] .vp-doc .step-head {
+  border-bottom: 2px solid var(--mil-lo);
+  box-shadow: 0 2px 0 var(--mil-hi);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+}
+
+html[data-theme-style='millennium'] .vp-doc .step-no {
+  background: var(--mil-on);
+  border-radius: 0;
+  box-shadow: var(--mil-pressed);
+  color: var(--mil-on-ink);
+  font-family: var(--mil-font-pixel);
+  font-synthesis: none;
+  font-weight: 400;
+  height: 30px;
+  padding-bottom: 3px;
+  width: 30px;
+}
+
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card, .release-grid section) :not(pre) > code {
+  background: var(--mil-screen);
+}
+
+html[data-theme-style='millennium'] .vp-doc :is(.step-more, .nav-card a) {
+  color: var(--mil-accent-text);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+html[data-theme-style='millennium'] .vp-doc .step-more:hover {
+  color: var(--mil-ink);
+  transform: none;
 }

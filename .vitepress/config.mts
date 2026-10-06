@@ -118,6 +118,8 @@ export default defineConfig({
     ['meta', { name: 'theme-color', content: '#d2691e', media: '(prefers-color-scheme: light)' }],
     ['meta', { name: 'theme-color', content: '#ffa940', media: '(prefers-color-scheme: dark)' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    // 首屏绘制前写入界面风格，避免先闪一下原版；默认值与 theme/utils/theme-style.ts 的 DEFAULT_THEME_STYLE 一致
+    ['script', {}, `(()=>{try{var s=localStorage.getItem('maibot-docs-theme-style');if(s!=='modern'&&s!=='millennium')s='millennium';if(s!=='modern')document.documentElement.setAttribute('data-theme-style',s)}catch(e){document.documentElement.setAttribute('data-theme-style','millennium')}})()`],
   ],
   themeConfig: {
     search: {
