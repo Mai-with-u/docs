@@ -61,5 +61,7 @@ There is no guaranteed fixed count. Sample consistency, context, and the learnin
 
 ## How can several chats share expressions or jargon?
 
-Place the desired chat streams in the same expression or jargon sharing group. See [Bot Configuration](../manual/configuration/bot-config.md) for wildcard rules. Use global wildcards only when every chat should share learning results.
+Place the desired chat streams in the same expression or jargon sharing group. In sharing groups, `platform` and `item_id` accept the `"*"` wildcard; see [Bot Configuration](../manual/configuration/bot-config.md) for the full fields. Use a global wildcard only when you really want every chat to share learning results.
+
+This applies to sharing groups only. `learning_list`, which decides which chat learns and which chat uses, no longer accepts `"*"` since 1.3.4 — leave the field empty for a default rule.
 

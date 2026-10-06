@@ -96,11 +96,6 @@ curl -X GET http://127.0.0.1:8001/api/webui/config/prompts/zh-CN/main.prompt \
 
 版本 ID 需满足 `^[A-Za-z0-9_.-]+$` 格式。`legacy-current` 为保留 ID，指代升级前的旧版自定义内容。
 
-### 人设生成器
-
-- **`POST /api/webui/config/prompt-generator/generate`** — 用 LLM 将任意文段（角色卡、人设描述等）解析为结构化配置片段
-- **`POST /api/webui/config/prompt-generator/apply`** — 将生成的配置块写入 `bot_config.toml`（仅允许写入 persona/chat 相关字段）
-
 ## 实体端点群
 
 以下六个路由模块覆盖 MaiBot 的各类可编辑数据实体，全部挂载在 `/api/webui/` 下。每个模块遵循统一的 CRUD + 批量操作 + 统计/导出模式。

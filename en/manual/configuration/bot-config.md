@@ -202,6 +202,7 @@ multiple_probability = 0  # [Advanced] Chance to temporarily inject one alternat
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat]
+enable_reply_at = true           # Let Mai @-mention people at the start of a reply; the model decides when
 max_context_size = 40            # How many recent messages a group reply considers; more context costs more tokens
 max_private_context_size = 60    # Recent messages considered for private replies
 enable_context_optimization = true  # Compress part of the context to reduce model usage; recommended
@@ -321,7 +322,6 @@ The whole section is advanced; everything is off by default — opt in per featu
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [experimental]
 enable_behavior_learning = false  # Learn "how to respond when" experience from chat
-enable_rich_reply = false         # The reply action may attach pictures, stickers, or @
 replyer_retro_prompt = false      # Organize the Replyer prompt the legacy (0.12.x) way, with all instructions in a single template
 emotion_trait = "neutral"         # Experimental emotion trait: "rational_calm" / "neutral" / "sentimental"
 behavior_learning_list = [{ platform = "", item_id = "", type = "group", use = true, learn = true }]
@@ -341,6 +341,8 @@ reaction_style = "lively"         # "reserved" / "natural" / "lively"
 ```
 
 :::
+
+**Where did rich replies go** — since 1.3.4 they are no longer experimental and the `enable_rich_reply` switch is gone: pictures in replies work out of the box; @-mentions in replies follow [`[chat].enable_reply_at`](#context-and-recall); stickers in replies follow [`[emoji].use_new_send_logic`](#emoji-stickers).
 
 **Retro reply prompt** — with `replyer_retro_prompt = true`, the Replyer prompt is organized the legacy (0.12.x) way: all reply instructions live in a single complete template sent as one `user` message, and the dialogue history is rendered as plain text into template placeholders instead of being sent as image Items. Group chat, "short reply", private chat, and "private chat replying to Mai herself" each use their own template (`retro_replyer`, `retro_replyer_light`, `retro_private_replyer`, `retro_private_replyer_self`); they appear under **Prompt Management** collapsed as "advanced" and can be edited or given custom versions. Changes hot-reload.
 
@@ -405,7 +407,12 @@ expression_groups = []                # Multiple chats share learned expressions
 
 - **`use_vector_expression`** — on by default; it switches to expression intent plus embedding-model recall, which selects noticeably better. When off it falls back to quick-picked candidates. The old `expression_selection_mode` (`legacy` / `vector_intent`, and the even older `vector`) has been removed; on first launch after upgrading it is rewritten to `use_vector_expression` and saved back
 - **`expression_checked_only`** — defaults to `false`, so expressions you have not curated are used as well; set it to `true` if Mai should only use expressions you have reviewed
-- **`learning_list`** — empty `platform`/`item_id` means a global rule; `type` accepts `"group"`/`"private"`; `use` controls whether learned content is used, `learn` whether learning continues
+- **`learning_list`** — each rule covers one scope: `use` controls whether learned content is used, `learn` whether learning continues, and `type` accepts `"group"`/`"private"`. There are three ways to write the scope, and the most specific one wins:
+  - **A specific chat** — fill in `item_id` (group number or user ID); `platform` is optional
+  - **Platform default** — fill in only `platform` and leave `item_id` empty; covers chats on that platform with no rule of their own
+  - **Global default** — leave both empty; used when nothing above matched
+
+  Since 1.3.4 the `"*"` wildcard is no longer supported here. An old `"*"` is rewritten to empty on upgrade, with the same effect
 
 Since 1.2.0, the expression vector index is maintained online: inserts, backfill, and failure recovery allocate incrementally from the nearest cluster center, and a corrupted index file is rebuilt automatically instead of crashing in a loop. This runs by itself, no configuration needed.
 
@@ -454,6 +461,7 @@ no_file_result_retention_days = 30  # Days the recognition result outlives the d
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [emoji]
+use_new_send_logic = false # New sending mode: the thinking model looks at the stickers itself and picks one, sent after the text reply; the thinking model must support vision
 emoji_send_num = 25        # [Advanced] Pick one sticker out of this many candidates per send (not 25 sent at once)
 max_reg_num = 64           # Max number of usable stickers kept
 do_replace = true          # [Advanced] When full, new stickers replace old ones; off = stop collecting

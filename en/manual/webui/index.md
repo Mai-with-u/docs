@@ -81,7 +81,7 @@ As of 1.3.2 the sidebar has been reorganized into four groups by purpose:
 
 Two entry-point changes to know about:
 
-- The gear button in the top-right corner and the standalone **WebUI Settings** (`/settings`) page are gone; the settings are now embedded as the third tab, **WebUI Settings**, on the MaiBot Settings page. Opening the old address `/settings` is rewritten to `/config/bot?mode=webui`, so update any bookmarks
+- **WebUI Settings** is a standalone page (`/settings`): click the gear button on the right of the top bar, or find it in the top-bar menu on a phone. In 1.3.2–1.3.3 it was embedded as the third tab of MaiBot Settings, and 1.3.4 moved it back; a `/config/bot?mode=webui` bookmark from that period redirects to `/settings`
 - The standalone **MCP 设置** sidebar entry is gone; MCP service management now lives in the **MCP 服务** group on the "扩展集成 → 插件扩展" page. Opening the old address `/mcp-settings` redirects to the plugin extensions page
 
 ## Basic Settings
@@ -108,7 +108,7 @@ allowed_ips = "127.0.0.1"     # IP whitelist (comma-separated)
 
 ## WebUI Settings
 
-The WebUI's own interface preferences, login Token, and maintenance actions all live under **WebUI Settings**: sidebar "配置管理 (Configuration) → 麦麦设置 (MaiBot Settings)", then click the third tab at the top of the page, **WebUI Settings** (`/config/bot?mode=webui`).
+The WebUI's own interface preferences, login Token, and maintenance actions all live under **WebUI Settings**: click the gear button on the right of the top bar (`/settings`).
 
 - **外观** (Appearance) - theme mode (light / dark / follow system), accent color, fonts, border radius, custom CSS, and the interface style (Original Dashboard / Future Retro / Millennium)
 - **安全** (Security) - change or regenerate the login Token
@@ -129,11 +129,21 @@ The WebUI's own interface preferences, login Token, and maintenance actions all 
 
 Millennium is only valid from 1.3.2 onward: writing `webui_style = 2` in a 1.3.1 `bot_config.toml` fails validation.
 
+**Changing fonts in Millennium** — with Millennium selected, Appearance shows two extra groups of pixel fonts: pick one for "英文与数字" (English and digits) and one for "中文" (Chinese). The change applies immediately. The choice is stored in the current browser only, so pick again in another browser.
+
 ::: warning Custom theming only shows under the original style
 Accent color, interface style tweaks (fonts, visual effects, layout, animations, backgrounds), and theme import/export only appear under **原版 Dashboard** (Original Dashboard); switching to Future Retro or Millennium hides those blocks.
 
 The style choice is written back to `[webui].webui_style` in `bot_config.toml`, so with several browsers open at once the last switch wins and overrides the local choice elsewhere.
 :::
+
+### Pin the Settings Pages You Use Most
+
+MaiBot Settings has many sections. Since 1.3.3 there is a **dropdown list** next to the page title that holds every section, with no more expanded/collapsed split.
+
+Since 1.3.4 you can also pin the ones you visit often: open the dropdown and click the pin on the right of a section. It then stays to the right of the title, one click away. Click the pin again to remove it.
+
+Pins are stored in the current browser only; pin again after switching browsers or clearing the cache.
 
 ### Live Chat Stream Quick Management
 
@@ -194,8 +204,8 @@ If you can no longer sign in:
 
 **Did your bookmarked `/settings` jump to `/config/bot`?**
 
-- As of 1.3.2 the standalone WebUI settings page is embedded in the "MaiBot Settings → WebUI Settings" tab, and the old address is rewritten to `/config/bot?mode=webui`
-- To land directly on appearance settings use `/config/bot?mode=webui&tab=appearance`; for MCP services go through "扩展集成 (Extensions) → 插件扩展 (Plugin Extensions)"
+- Since 1.3.4 WebUI Settings is the standalone page `/settings`, opened from the gear on the right of the top bar; the old `/config/bot?mode=webui` address redirects there
+- To land directly on a sub-tab use `/settings?tab=security` (`security` / `other` / `about`; no parameter means appearance); for MCP services go through "扩展集成 (Extensions) → 插件扩展 (Plugin Extensions)"
 
 ## More Features
 

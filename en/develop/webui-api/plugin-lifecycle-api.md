@@ -91,6 +91,24 @@ curl -X POST http://127.0.0.1:8001/api/webui/plugins/install \
 - **409 The tag's current commit does not match the version index** / **409 The downloaded manifest does not match the version index** — the index and repository are out of sync
 - **502 Failed to fetch the plugin version index** — the official index could not be fetched; switch mirror source or retry later
 
+### Install from ZIP
+
+**`POST /api/webui/plugins/install-zip`** — Upload a plugin archive and install it. The request body is `multipart/form-data` with a single field, `file`, whose filename must end in `.zip`.
+
+It differs from the install endpoint above in three ways: it **returns synchronously** and does not use the WebSocket progress channel; it **does not consult the version index** and records no release version; and the plugin loads only after **MaiBot is restarted**.
+
+The server unpacks the archive into a temporary directory under `plugins/`, and renames it to the final directory only after the manifest passes validation. A failure along the way is cleaned up automatically, so no half-installed plugin is left behind.
+
+On success it returns `success`, `plugin_id`, and `message`. Common rejections:
+
+- **400 Please choose a ZIP file** — the filename does not end in `.zip`
+- **400 ZIP exceeds 300 MB unpacked or 10000 files** — the archive is too large
+- **400 ZIP contains illegal paths, links, or encrypted files** — it carries `..`, absolute paths, symbolic links, `.git`, Windows reserved names, or encrypted entries
+- **400 `_manifest.json` must be in the ZIP root or in a single plugin folder** — wrong layout, or several plugins in one archive
+- **400 Plugin validation failed** — the manifest did not pass validation; `detail` has the reason
+- **409 Plugin already installed; uninstall it before installing from ZIP** — a plugin with the same ID exists
+- **413 ZIP file must not exceed 100 MB**
+
 ### Uninstall
 
 **`POST /api/webui/plugins/uninstall`** — Uninstall a specified plugin. Before the operation, the plugin is first disabled and the runtime is notified to unload it, then the entire plugin directory is deleted. Request body only needs `plugin_id`.

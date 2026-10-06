@@ -202,6 +202,7 @@ multiple_probability = 0  # [进阶] 每次回复按此概率临时注入一条�
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat]
+enable_reply_at = true           # 允许麦麦在回复开头 @ 人；要不要 @ 由模型看聊天内容决定
 max_context_size = 40            # 群聊回复参考最近多少条消息；越大越懂上下文，也更耗 token
 max_private_context_size = 60    # 私聊参考的最近消息数量
 enable_context_optimization = true  # 压缩部分上下文减少模型消耗；一般建议开启
@@ -321,7 +322,6 @@ prompt = "这个群里说话要更简短。"
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [experimental]
 enable_behavior_learning = false  # 从聊天中学习「什么时候该怎么回应」的经验
-enable_rich_reply = false         # reply 动作可附加图片、表情包或 @
 replyer_retro_prompt = false      # 按旧版（0.12.x）方式组织 Replyer 提示词，全部指令集中在一份模板里
 emotion_trait = "neutral"         # 实验性情绪特点："rational_calm" / "neutral" / "sentimental"
 behavior_learning_list = [{ platform = "", item_id = "", type = "group", use = true, learn = true }]
@@ -341,6 +341,8 @@ reaction_style = "lively"         # 短反应风格："reserved" / "natural" / "
 ```
 
 :::
+
+**丰富回复去哪了** — 1.3.4 起它不再是实验功能，`enable_rich_reply` 这个开关已经删掉：回复带图片默认就能用；回复时 @ 人看 [`[chat].enable_reply_at`](#上下文与回想)；回复带表情包看 [`[emoji].use_new_send_logic`](#表情包)。
 
 **复古回复提示词** — `replyer_retro_prompt = true` 时按旧版（0.12.x）方式组织 Replyer 提示词：全部回复指令集中在一份完整模板里，整段作为一条 `user` 消息发送，历史对话渲染成纯文本填入模板占位符，不再发送图片 Item。群聊、"简短回复"、私聊和"私聊且回复麦麦自己"各用一套模板（`retro_replyer`、`retro_replyer_light`、`retro_private_replyer`、`retro_private_replyer_self`），它们在 **Prompt 管理**里以"高级"折叠展示，可以编辑和创建自定义版本。改动热重载生效。
 
@@ -405,7 +407,12 @@ expression_groups = []                # 多个聊天共享学到的表达
 
 - **`use_vector_expression`** — 默认开启，改用表达意图 + 嵌入模型精细召回，效果显著更好；关闭时退回随手抽取的候选。旧配置里的 `expression_selection_mode`（`legacy` / `vector_intent`，以及更早的 `vector`）已被移除，升级后首次启动会自动改写为 `use_vector_expression` 并写回文件
 - **`expression_checked_only`** — 默认 `false`，即未经人工精选的表达也会参与；如果你只想让麦麦使用你审核过的表达，改为 `true`
-- **`learning_list`** — `platform` / `item_id` 留空表示全局规则；`type` 可选 `"group"` / `"private"`；`use` 控制是否使用已学内容，`learn` 控制是否继续学习
+- **`learning_list`** — 每条规则管一个范围，`use` 控制是否使用已学内容，`learn` 控制是否继续学习，`type` 可选 `"group"` / `"private"`。范围有三种写法，越具体的越优先：
+  - **指定聊天** — 填 `item_id`（群号或 QQ 号），`platform` 可填可不填
+  - **平台默认** — 只填 `platform`，`item_id` 留空，管这个平台上没单独设置的聊天
+  - **全局默认** — 两个都留空，前面都没命中时用它
+
+  1.3.4 起不再支持 `"*"` 通配，旧配置里的 `"*"` 升级时会自动改成留空，效果不变
 
 从 1.2.0 起，表达向量索引支持在线维护：新增、历史回填与失败恢复按最近聚类中心增量分配，索引文件损坏会自动重建而不是反复异常重启。该过程自动运行，无需配置。
 
@@ -454,6 +461,7 @@ no_file_result_retention_days = 30  # 图片删掉后识别结果再保留多久
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [emoji]
+use_new_send_logic = false # 新发送方式：思考模型直接看图挑表情包，跟在文字回复后面发；要求思考模型能识图
 emoji_send_num = 25        # [进阶] 每次从多少个候选里挑一张发送（不是一次发 25 张）
 max_reg_num = 64           # 最多保存多少个可用表情
 do_replace = true          # [进阶] 满额后用新表情替换旧表情；关闭则不再收集

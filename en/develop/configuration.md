@@ -60,7 +60,7 @@ This section only covers the core fields that deployment operators need to care 
 
 **`[[models]]` (array of tables)** — each model entry defines `name` (model alias), `model_identifier` (actual model name in the API), and `api_provider` (points to a provider name in `api_providers`).
 
-**`[model_task_config]`** — binds various inference tasks to models. It currently has 12 task sections: `replyer`, `planner`, `memory`, `mid_memory`, `utils`, `learner`, `expression_use`, `emoji`, `vlm`, `voice`, `embedding`, and `image_embedding`. Each task section contains `model_list` (candidate model names), `max_tokens`, `temperature`, `selection_strategy`, `hard_timeout`, and similar parameters; `slow_threshold` was removed in 1.3.0.
+**`[model_task_config]`** — binds various inference tasks to models. It currently has 12 task sections: `replyer`, `planner`, `memory`, `mid_memory`, `utils`, `learner`, `fast_model`, `emoji`, `vlm`, `voice`, `embedding`, and `image_embedding`. Each task section contains `model_list` (candidate model names), `max_tokens`, `temperature`, `selection_strategy`, `hard_timeout`, and similar parameters; `slow_threshold` was removed in 1.3.0.
 
 **`[[api_providers]]` (array of tables)** — API provider configuration.
 
@@ -76,7 +76,7 @@ This section only covers the core fields that deployment operators need to care 
 
 **client_type** — client type, `openai` or `google` (default `openai`).
 
-**max_retry** — maximum retry count after a failed API call (default 3).
+**max_retry** — total requests per call, the first one included (default 3); 0 or 1 means no retry.
 
 **timeout** — single API call timeout in seconds (default 60).
 

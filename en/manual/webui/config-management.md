@@ -8,22 +8,25 @@ No need to edit files — change MaiBot's settings with a few clicks in the WebU
 
 ## MaiBot Settings
 
-Open the MaiBot Settings page; the top now has three tabs:
+Open the MaiBot Settings page; the top has two tabs and an ellipsis menu:
 
 ![MaiBot settings](/images/webui/config-bot.webp)
 
 - **详细设置** (Detailed Settings) — the complete sectioned form
 - **命令管理** (Command Management) — plugin commands and execution permissions
-- **WebUI 设置** (WebUI Settings) — the WebUI's own interface style, login Token, and maintenance actions (the former standalone `/settings` page, embedded here as of 1.3.2)
 - **⋮ 更多设置** (More settings) — manual save, shared group settings, and source file editing
 
-The three tabs map to the URLs `?mode=detail`, `?mode=commands`, and `?mode=webui`; shared group settings (`?mode=groups`) and source file editing (`?mode=source`) live only in the ellipsis menu, and switching to them writes the mode into the URL too, so both addresses still work when opened directly.
+To open a page directly: Command Management is `/config/bot?mode=commands`, Shared Group Settings is `/config/bot?mode=groups`, and no parameter means Detailed Settings.
 
-Before 1.3.1 the top had four tabs (核心设置 / Core Settings, 详细设置 / Detailed Settings, 命令管理 / Command Management, 源文件 / Source File). They were folded into "two tabs + an ellipsis menu", and as of 1.3.2 WebUI Settings joined the tab bar to make "three tabs + an ellipsis menu". The "Core Settings" page was deleted, with "Shared Group Settings" taking its place.
+**WebUI Settings no longer lives here.** The WebUI's own settings, such as interface style and login Token, are on the standalone page `/settings` since 1.3.4 — click the gear on the right of the top bar. See [Login & Settings](./index.md#webui-settings).
+
+Before 1.3.1 this page had four tabs (核心设置 / Core Settings, 详细设置 / Detailed Settings, 命令管理 / Command Management, 源文件 / Source File). "Core Settings" was deleted, with "Shared Group Settings" taking its place.
 
 ### Detailed Settings
 
 A complete sectioned form covering all sections of `bot_config.toml` (chat, memory, emoji, voice, MCP, etc.). Hover over an option you are unsure about to see its description.
+
+**Switching sections** — click the dropdown list next to the page title; every section is in it, with no more expanded/collapsed split. Click the pin on the right of a section you visit often and it stays to the right of the title; pins are stored in the current browser only.
 
 ![Detailed settings](/images/webui/config-bot-detail.webp)
 
@@ -32,19 +35,13 @@ A complete sectioned form covering all sections of `bot_config.toml` (chat, memo
 1.3.2 moved the **display location** of a batch of configuration items. Not a single TOML path changed — `bot.nickname`, `bot.alias_names`, `chat.reply_style.*`, `expression.learning_list`, and `jargon.learning_list` are read and written exactly as before:
 
 - **Bot nickname and aliases** — moved from the top of the "基础" (Basics) page to the top of the "基础 → 身份与人格" (Basics → Identity & Personality) subpage; aliases collapse into an "N aliases" button that opens a popover for adding and removing them
-- **Group and private chat prompts** — moved from "聊天 → 如何发言" (Chat → How to speak) to below the "表达风格" (Reply style) field on "基础 → 身份与人格". The former "聊天 → 聊天流prompt" subpage keeps only items such as `enable_reply_quote` and `chat_prompts`, and is collapsed as an advanced tab by default — click the arrow on the right of the tab bar to expand it
+- **Group and private chat prompts** — moved from "聊天 → 如何发言" (Chat → How to speak) to below the "表达风格" (Reply style) field on "基础 → 身份与人格". The former "聊天 → 聊天流prompt" subpage keeps only items such as `enable_reply_quote` and `chat_prompts`
 - **Global "use / learn" switches for expression styles and slang** — collected at the bottom of "基础 → 身份与人格" as four switches: use expressions, learn expressions, use slang, and learn slang. These change the global default rules; per-chat-stream rules on the MaiBot Chat page can still override them individually
 - **Platform accounts** — no longer in MaiBot Settings; they moved to the **平台账号** (Platform accounts) popover on the right of the "全局默认规则" (Global default rules) card in Adapter Settings. See [Adapter Management](./adapter-management.md)
-
-The "视觉" (Visual) and "表达" (Expression) top-level tabs are also advanced tabs that are collapsed by default; the expand button on the right of the tab bar changed from the "更多" (More) text to an arrow, with the hint "点击箭头展开隐藏配置栏目" (Click the arrow to expand hidden config sections).
 
 ### Command Management
 
 View all registered plugin commands and configure execution permissions; see [Command Management](./command-management.md).
-
-### WebUI Settings
-
-The third tab, **WebUI 设置** (WebUI Settings, `/config/bot?mode=webui`), is the former `/settings` page embedded as of 1.3.2. It manages the WebUI's own preferences and Token across four sub-tabs: appearance, security, other, and about; see [Login & Settings](./index.md) for usage. Under this tab the refresh button and the ellipsis menu on the right are hidden, and edits save directly.
 
 ### Shared Group Settings
 

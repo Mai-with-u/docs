@@ -32,7 +32,7 @@ default_query = {}                         # [可选] 所有请求默认附带�
 model_list_endpoint = "/models"            # [可选] 模型列表端点路径
 reasoning_parse_mode = "auto"              # [可选] 推理内容解析模式：auto(默认) / native / think_tag / none
 tool_argument_parse_mode = "auto"          # [可选] 工具参数解析模式：auto(默认) / strict / repair / double_decode
-max_retry = 3                              # [可选] 最大重试次数
+max_retry = 3                              # [可选] 最多请求几次（含第一次）；填 0 或 1 = 失败不重试
 timeout = 120                              # [可选] API 调用超时，单位秒（默认 120）
 retry_interval = 4                         # [可选] 重试间隔，单位秒（默认 4）
 ```
@@ -45,7 +45,7 @@ retry_interval = 4                         # [可选] 重试间隔，单位秒�
 - **鉴权**：默认 `bearer` 适用于绝大部分服务商。其他可选 `header` / `query` / `none`
 - **客户端**：默认 `openai`。Google Gemini 用 `"google"`，见 [模型额外参数](./model-extra-params.md#gemini-原生-api)
 - **Responses API**：支持 OpenAI Responses 协议的服务商（如 DeepSeek v4 flash 的联网搜索）用 `"openai_responses"`（1.2.0 起正式支持），见 [模型额外参数](./model-extra-params.md#responses-api)
-- **超时与重试**：`timeout` 默认 120s，`max_retry` 默认 3 次，`retry_interval` 默认 4s
+- **超时与重试**：`timeout` 默认 120s，`retry_interval` 默认 4s。`max_retry` 默认 3，算的是**总共请求几次**（第一次也算），所以 3 = 失败后最多再试 2 次，填 0 或 1 就是不重试
 - 其余字段参见上方注释，均有合理默认值
 
 
@@ -192,9 +192,9 @@ max_tokens = 8192                             # [可选] 最大输出 token 数
 hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [expression_use（表达选择） ~vscode-icons:file-type-toml~]
-# [可选] 表达方式选择模型。留空时自动回退到 utils。
-[model_task_config.expression_use]
+```toml [fast_model（快速小任务） ~vscode-icons:file-type-toml~]
+# [可选] 快速模型：挑表达方式、给回复断句这类要马上出结果的小任务，选响应快的模型。留空时自动回退到 utils。
+[model_task_config.fast_model]
 model_list = []                               # [可选] 模型名称列表（→回退 utils）
 max_tokens = 8192                             # [可选] 最大输出 token 数
 temperature = 0.3                             # [可选] 模型温度
@@ -285,7 +285,7 @@ hard_timeout = 60.0                           # [可选] 硬超时（秒）
               │
          ┌──────────┐
          │  utils   │◄──── learner（留空时回退）
-         │          │◄──── expression_use（留空时回退）
+         │          │◄──── fast_model（留空时回退）
          └──────────┘
 
 memory · emoji · vlm · voice · embedding · image_embedding → 留空不自动回退，调用方会跳过或报错

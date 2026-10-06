@@ -129,7 +129,7 @@ visual = true
 - **`default_query`** — 所有请求默认附带的 URL 查询参数字典
 - **`organization`** — OpenAI 官方接口可选的 `organization` 标识
 - **`project`** — OpenAI 官方接口可选的 `project` 标识
-- **`max_retry`** — 单个模型调用失败后的最大重试次数，默认 3
+- **`max_retry`** — 单个模型最多请求几次，第一次也算在内，默认 3；填 0 或 1 表示失败不重试
 - **`retry_interval`** — 两次重试之间的等待秒数，默认 4
 - **`timeout`** — 单次 API 调用的超时秒数，默认 120
 - **`reasoning_parse_mode`** — 推理内容解析模式，见下文
@@ -172,14 +172,14 @@ flowchart LR
 - **`mid_memory`** — 聊天回想模型，留空自动回退到 planner
 - **`utils`** — 小任务模型（概括、整理等），建议选快速的小模型
 - **`learner`** — 学习模型，用于表达方式和黑话学习，留空回退到 utils
-- **`expression_use`** — 表达方式使用模型，留空回退到 utils
+- **`fast_model`** — 快速模型，负责挑表达方式、回复断句等要马上出结果的小任务，留空回退到 utils
 - **`emoji`** — 表情包发送决策模型
 - **`vlm`** — 视觉模型，需要支持识图
 - **`voice`** — 语音识别模型
 - **`embedding`** — 文本嵌入模型
 - **`image_embedding`** — 图片嵌入模型，把图片编码成向量供图片记忆检索；需支持图片输入协议，留空则图片记忆不可检索（1.3.0 新增）
 
-部分角色有空配置回退链：`expression_use` → `utils`，`learner` → `utils`，`mid_memory` → `planner`。留空不报错，框架自动继承。
+部分角色有空配置回退链：`fast_model` → `utils`，`learner` → `utils`，`mid_memory` → `planner`。留空不报错，框架自动继承。
 
 `embedding` 与 `image_embedding` 是例外：它们**忽略 `selection_strategy`**，固定按 `model_list` 顺序取第一个可用模型（避免多个嵌入模型混用导致向量空间不一致）；`image_embedding` 留空时不会回退，图片记忆直接进入"模型不可用"状态。
 
@@ -316,7 +316,7 @@ Anthropic API 的鉴权方式与标准 OpenAI 不同：它用 `x-api-key` 请求
 
 单次 API 调用失败时，MaiBot 会按以下流程处理：
 
-**重试机制**：`LLMUtils._attempt_request_on_model()` 在单个模型级别执行重试。重试次数由 `APIProvider.max_retry` 控制（默认 3 次），间隔由 `APIProvider.retry_interval` 指定（默认 4 秒）。可重试的错误类型：
+**重试机制**：`LLMUtils._attempt_request_on_model()` 在单个模型级别执行重试。`APIProvider.max_retry` 是含第一次在内的总请求次数（默认 3，即失败后最多再试 2 次），间隔由 `APIProvider.retry_interval` 指定（默认 4 秒）。1.3.4 起 OpenAI SDK 自带的重试已关闭，重试只在这一层发生，不会再出现一次超时被重复发送十几次的情况。可重试的错误类型：
 
 - **`EmptyResponseException`** — 模型返回空回复，属于临时问题，记录警告后重试
 - **`NetworkConnectionError`** — 网络错误（连接超时、DNS 故障、代理问题等），常见于不稳定网络

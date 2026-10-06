@@ -96,11 +96,6 @@ Each time a Prompt is saved via `PUT`, the old version is automatically archived
 
 Version IDs must match the `^[A-Za-z0-9_.-]+$` format. `legacy-current` is a reserved ID referring to pre-upgrade custom content.
 
-### Persona Generator
-
-- **`POST /api/webui/config/prompt-generator/generate`** — Use LLM to parse any text block (character card, persona description, etc.) into structured config snippets
-- **`POST /api/webui/config/prompt-generator/apply`** — Write generated config blocks into `bot_config.toml` (only persona/chat related fields are allowed)
-
 ## Entity Endpoint Groups
 
 The following six route modules cover MaiBot's various editable data entities, all mounted under `/api/webui/`. Each module follows a uniform pattern of CRUD + batch operations + statistics/export.

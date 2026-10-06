@@ -44,6 +44,26 @@ Once a plugin ships a `webui.json`, it can bring its own page entries — no Nod
 
 For the full field reference, component types, limits, and troubleshooting, see [WebUI Pages](/en/plugin/webui-pages).
 
+## Install from a ZIP
+
+When all you have is a plugin archive (sent by a friend, packed by yourself, or not yet listed in the market), you do not need to unpack it into `plugins/` by hand:
+
+1. Open the "插件扩展" (Plugin Extensions) page and click the "更多操作" (More actions) button in the top-right corner;
+2. Choose "从 ZIP 安装插件" (Install plugin from ZIP) and select your `.zip` file;
+3. Click "安装插件" (Install plugin) and wait for the "安装成功" (Installed) notice;
+4. **Restart MaiBot** so the plugin loads. "重启麦麦" (Restart MaiBot) is in the same menu.
+
+The archive must meet these rules or it is rejected:
+
+- **Size** — the archive is at most 100 MB; unpacked it is at most 300 MB and 10000 files
+- **Layout** — `_manifest.json` and `plugin.py` sit in the archive root, or inside a single top-level plugin folder; one archive installs one plugin
+- **Content** — no encryption, no `.git` directory, no symbolic links, and no paths such as `../` that escape the folder
+- **Not installed yet** — if a plugin with the same ID is already installed, uninstall it first
+
+::: warning Only install archives you trust
+A ZIP install skips the plugin market listing. MaiBot only checks that the archive is well-formed, not what the code does. Do not install archives from unknown sources.
+:::
+
 ## Update Plugins
 
 When the page reports a new version:

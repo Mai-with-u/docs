@@ -129,7 +129,7 @@ visual = true
 - **`default_query`** — Dictionary of URL query parameters attached to all requests by default.
 - **`organization`** — Optional `organization` identifier for the official OpenAI API.
 - **`project`** — Optional `project` identifier for the official OpenAI API.
-- **`max_retry`** — Maximum retry count after a single model call fails. Defaults to 3.
+- **`max_retry`** — Total requests sent to a single model, the first one included. Defaults to 3; 0 or 1 means no retry.
 - **`retry_interval`** — Wait seconds between retries. Defaults to 4.
 - **`timeout`** — Timeout in seconds for a single API call. Defaults to 120.
 - **`reasoning_parse_mode`** — Reasoning content parsing mode. See below.
@@ -172,14 +172,14 @@ flowchart LR
 - **`mid_memory`** — Chat recall model. Falls back to planner if empty.
 - **`utils`** — Small-task model (summarization, organization, etc.). A fast, small model is recommended.
 - **`learner`** — Learning model, used for expression and jargon learning. Falls back to utils if empty.
-- **`expression_use`** — Expression usage model. Falls back to utils if empty.
+- **`fast_model`** — Fast model for small jobs that need an answer right away, such as picking expressions and splitting replies. Falls back to utils if empty.
 - **`emoji`** — Emoji sending decision model.
 - **`vlm`** — Vision model. Must support image recognition.
 - **`voice`** — Voice recognition model.
 - **`embedding`** — Text embedding model.
 - **`image_embedding`** — Image embedding model that encodes images into vectors for image-memory retrieval; it must support an image-input protocol, and leaving it empty makes image memory unsearchable (new in 1.3.0).
 
-Some roles have empty-config fallback chains: `expression_use` → `utils`, `learner` → `utils`, `mid_memory` → `planner`. Leaving them empty does not cause errors; the framework inherits automatically.
+Some roles have empty-config fallback chains: `fast_model` → `utils`, `learner` → `utils`, `mid_memory` → `planner`. Leaving them empty does not cause errors; the framework inherits automatically.
 
 `embedding` and `image_embedding` are exceptions: they **ignore `selection_strategy`** and always take the first available model in `model_list` order (to avoid mixing multiple embedding models and breaking vector-space consistency). Leaving `image_embedding` empty does not fall back; image memory simply enters the "model unavailable" state.
 
@@ -316,7 +316,7 @@ When a plugin `client_type` is deregistered (plugin unload or reload), `ClientRe
 
 When a single API call fails, MaiBot handles it as follows:
 
-**Retry mechanism**: `LLMUtils._attempt_request_on_model()` performs retries at the individual model level. Retry count is controlled by `APIProvider.max_retry` (default 3), with an interval of `APIProvider.retry_interval` seconds (default 4). Retriable error types:
+**Retry mechanism**: `LLMUtils._attempt_request_on_model()` performs retries at the individual model level. `APIProvider.max_retry` is the total number of requests including the first (default 3, so up to 2 more tries after a failure), with an interval of `APIProvider.retry_interval` seconds (default 4). Since 1.3.4 the OpenAI SDK's own retries are switched off, so retries happen only at this layer and a single timeout is no longer re-sent a dozen times. Retriable error types:
 
 - **`EmptyResponseException`** — Model returned an empty reply, a transient issue. Logged as a warning, then retried.
 - **`NetworkConnectionError`** — Network error (connection timeout, DNS failure, proxy issues, etc.), common on unstable networks.

@@ -7,6 +7,78 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
 
+::: timeline 2026-10-06
+
+### Main program [1.3.4]
+
+* Rich replies are no longer experimental: replies can carry pictures directly; a new "@-mention users in replies" switch is on by default; and stickers gain a new sending mode (the thinking model looks at the stickers and picks one), off by default — leave it off to keep the old behavior.
+
+* Added the **fast model** `fast_model`: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences, go to it. Give it a quick model; if you leave it empty, `utils` is used.
+
+* Learning rules are easier to follow: just "global default", "platform default", and "a specific chat", with no more wildcard syntax.
+
+* Fixed MCP holding on to the CPU when a connection goes wrong.
+
+* Fixed a timed-out request being re-sent many times and wasting tokens.
+
+* Compatible with newer openai SDK releases; fixed providers with non-Bearer auth failing at startup with Missing credentials.
+
+* Improved caching for typo generation, so replies flow more smoothly.
+
+### WebUI [1.8.3]
+
+* Sections you use often in MaiBot Settings can be pinned to the top, one click away.
+
+* WebUI Settings now lives only on its standalone page, opened from the gear in the top bar; the old address redirects.
+
+* Removed the persona generator.
+
+* Built-in search is smarter and finds the official docs more easily.
+
+* Remote access to the WebUI uses less bandwidth.
+
+* The plugin market shows and recommends plugins more sensibly.
+
+* Better on phones, plus a batch of display and functional fixes.
+
+### Configuration changes
+
+* `model_config.toml`: `[model_task_config.expression_use]` is renamed to `[model_task_config.fast_model]`. If you had models listed there, enter them again under `fast_model` after upgrading; if not, nothing to do.
+
+* `model_config.toml`: `max_retry` now means **total requests** (the first one included). The default 3 means up to 2 more tries after a failure; 0 or 1 means no retry.
+
+* `bot_config.toml`: `[experimental].enable_rich_reply` is removed; `[chat].enable_reply_at` (default `true`) and `[emoji].use_new_send_logic` (default `false`) are added.
+
+* `bot_config.toml`: `learning_list` no longer accepts `"*"`; it is rewritten to empty on upgrade.
+
+:::
+
+::: timeline 2026-10-05
+
+### Main program [1.3.3]
+
+* Fixed errors when a request with images saved a failure snapshot or produced a reply result.
+
+* Fixed MaiBot restarting unexpectedly while a plugin was being updated.
+
+* Fixed a false "recovered" report after the plugin process restarted itself: a missing plugin is now retried on its own without disturbing plugins that run fine, and plugins you disabled or uninstalled are not brought back.
+
+* More natural behavior when the bot's group nickname or QQ name differs from the configured name.
+
+### WebUI [1.8.2]
+
+* Plugins can be installed straight from a ZIP archive: Plugin Extensions → "更多操作" (More actions) → "从 ZIP 安装插件" (Install plugin from ZIP).
+
+* The plugin market uses a new default source and loads faster; when a statistics request fails the page no longer errors out, and the plugins already loaded stay visible.
+
+* The sections of MaiBot Settings are now a dropdown list next to the title holding every section, with no more expanded/collapsed split.
+
+* The Millennium style lets you change pixel fonts for clearer text.
+
+* Fixed AI search failing to find the official docs.
+
+:::
+
 ::: timeline 2026-10-04
 
 ### Main program

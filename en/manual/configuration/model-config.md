@@ -32,7 +32,7 @@ default_query = {}                         # [Optional] Default query parameters
 model_list_endpoint = "/models"            # [Optional] Model list endpoint path
 reasoning_parse_mode = "auto"              # [Optional] Reasoning content parse mode: auto (default) / native / think_tag / none
 tool_argument_parse_mode = "auto"          # [Optional] Tool argument parse mode: auto (default) / strict / repair / double_decode
-max_retry = 3                              # [Optional] Maximum number of retries
+max_retry = 3                              # [Optional] Total attempts, first request included; 0 or 1 = never retry
 timeout = 120                              # [Optional] API call timeout in seconds (default 120)
 retry_interval = 4                         # [Optional] Retry interval in seconds (default 4)
 ```
@@ -45,7 +45,7 @@ retry_interval = 4                         # [Optional] Retry interval in second
 - **Authentication**: Default `bearer` works for most providers. Other options are `header` / `query` / `none`
 - **Client**: Default is `openai`. For Google Gemini use `"google"`, see [Model Extra Params](./model-extra-params.md#gemini-native-api)
 - **Responses API**: For providers supporting the OpenAI Responses protocol (e.g. DeepSeek v4 flash web search) use `"openai_responses"` (officially supported since 1.2.0), see [Model Extra Params](./model-extra-params.md#responses-api)
-- **Timeout & Retry**: `timeout` defaults to 120s, `max_retry` defaults to 3 times, `retry_interval` defaults to 4s
+- **Timeout & Retry**: `timeout` defaults to 120s and `retry_interval` to 4s. `max_retry` defaults to 3 and counts **total requests**, the first one included — so 3 means up to 2 more tries after a failure, and 0 or 1 means no retry
 - See comments above for other fields, all have reasonable default values
 
 
@@ -192,9 +192,9 @@ max_tokens = 8192                             # [可选] 最大输出 token 数
 hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [expression_use (expression selection) ~vscode-icons:file-type-toml~]
-# [Optional] Expression selection model. Falls back to utils when empty.
-[model_task_config.expression_use]
+```toml [fast_model (quick small tasks) ~vscode-icons:file-type-toml~]
+# [Optional] Fast model: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences. Choose a model that responds quickly. Falls back to utils when empty.
+[model_task_config.fast_model]
 model_list = []
 max_tokens = 8192
 temperature = 0.3
@@ -281,7 +281,7 @@ When `model_list` for some tasks is empty, other tasks are automatically reused:
               │
          ┌──────────┐
          │  utils   │◄──── learner (falls back when empty)
-         │          │◄──── expression_use (falls back when empty)
+         │          │◄──── fast_model (falls back when empty)
          └──────────┘
 
 memory · emoji · vlm · voice · embedding · image_embedding → No automatic fallback when empty, caller will skip or throw an error

@@ -648,7 +648,7 @@ When the same parameter exists in multiple places, the effective priority is:
 ### Runtime Configuration
 
 - **`timeout`** — request timeout. 60 seconds recommended
-- **`max_retry`** — failed-request retries. 3 retries recommended
+- **`max_retry`** — total attempts, first request included. 3 recommended, meaning up to 2 more tries after a failure
 - **`retry_interval`** — retry interval. 5 seconds recommended
 
 ## Quick Parameter Reference

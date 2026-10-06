@@ -586,7 +586,7 @@ name = "DeepSeek"
 base_url = "https://api.deepseek.com"
 api_key = "sk-your-api-key-here"
 timeout = 120              # 单次请求超时（秒），网络差时可设到 180
-max_retry = 3              # 失败重试次数
+max_retry = 3              # 最多请求几次（含第一次）
 retry_interval = 8         # 重试间隔（秒）
 ```
 
@@ -613,7 +613,7 @@ api_key = "sk-your-backup-key"
 :::
 
 #### 预防建议
-- 设置合理的 `timeout`（60-120 秒）和 `max_retry`（2-3 次）
+- 设置合理的 `timeout`（60-120 秒）和 `max_retry`（2-3，含第一次请求）
 - 网络不稳定时换个网络试试（如切换手机热点）
 - 配置多个 API 提供商做备份，避免单点故障
 - 定期检查 API 服务商状态（关注官方公告）

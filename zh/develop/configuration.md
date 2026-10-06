@@ -60,7 +60,7 @@ MaiBot 运行时依赖 `config/` 目录下两份独立的 TOML 文件，它们�
 
 **`[[models]]`（数组表）** — 每个模型条目定义 `name`（模型别名）、`model_identifier`（API 实际模型名）、`api_provider`（指向 `api_providers` 中的提供商名称）。
 
-**`[model_task_config]`** — 将各类推理任务绑定到模型。当前包含 `replyer`、`planner`、`memory`、`mid_memory`、`utils`、`learner`、`expression_use`、`emoji`、`vlm`、`voice`、`embedding`、`image_embedding` 共 12 个任务段。每个任务段包含 `model_list`（候选模型名列表）、`max_tokens`、`temperature`、`selection_strategy`、`hard_timeout` 等参数；`slow_threshold` 已在 1.3.0 移除。
+**`[model_task_config]`** — 将各类推理任务绑定到模型。当前包含 `replyer`、`planner`、`memory`、`mid_memory`、`utils`、`learner`、`fast_model`、`emoji`、`vlm`、`voice`、`embedding`、`image_embedding` 共 12 个任务段。每个任务段包含 `model_list`（候选模型名列表）、`max_tokens`、`temperature`、`selection_strategy`、`hard_timeout` 等参数；`slow_threshold` 已在 1.3.0 移除。
 
 **`[[api_providers]]`（数组表）** — API 提供商配置。
 
@@ -76,7 +76,7 @@ MaiBot 运行时依赖 `config/` 目录下两份独立的 TOML 文件，它们�
 
 **client_type** — 客户端类型，`openai` 或 `google`（默认 `openai`）。
 
-**max_retry** — 单次 API 调用失败后的最大重试次数（默认 3）。
+**max_retry** — 一次调用最多请求几次，第一次也算在内（默认 3）；填 0 或 1 表示失败不重试。
 
 **timeout** — 单次 API 调用超时，单位秒（默认 60）。
 

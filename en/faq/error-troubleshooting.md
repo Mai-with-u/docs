@@ -586,7 +586,7 @@ name = "DeepSeek"
 base_url = "https://api.deepseek.com"
 api_key = "sk-your-api-key-here"
 timeout = 120              # Single request timeout (seconds), can be set to 180 on poor networks
-max_retry = 3              # Number of retries on failure
+max_retry = 3              # Total attempts, first request included
 retry_interval = 8         # Retry interval (seconds)
 ```
 
@@ -613,7 +613,7 @@ api_key = "sk-your-backup-key"
 :::
 
 #### Prevention Tips
-- Set reasonable `timeout` (60–120 seconds) and `max_retry` (2–3 times)
+- Set reasonable `timeout` (60–120 seconds) and `max_retry` (2–3, counting the first request)
 - Try a different network when your network is unstable (e.g., switch to mobile hotspot)
 - Configure multiple API providers as backups to avoid single points of failure
 - Regularly check API provider status (follow official announcements)
