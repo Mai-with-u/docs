@@ -169,7 +169,7 @@ flowchart LR
 - **`replyer`** — Reply model, determines MaiBot's conversational performance.
 - **`planner`** — Planning model, drives tool calls and action decisions.
 - **`memory`** — Memory model, responsible for long-term memory summarization and extraction.
-- **`mid_memory`** — Chat recall model. Falls back to planner if empty.
+- **`mid_memory`** — Chat recall model. Falls back to `fast_model` (and then `utils`) if empty.
 - **`utils`** — Small-task model (summarization, organization, etc.). A fast, small model is recommended.
 - **`learner`** — Learning model, used for expression and jargon learning. Falls back to utils if empty.
 - **`fast_model`** — Fast model for small jobs that need an answer right away, such as picking expressions and splitting replies. Falls back to utils if empty.
@@ -179,7 +179,7 @@ flowchart LR
 - **`embedding`** — Text embedding model.
 - **`image_embedding`** — Image embedding model that encodes images into vectors for image-memory retrieval; it must support an image-input protocol, and leaving it empty makes image memory unsearchable (new in 1.3.0).
 
-Some roles have empty-config fallback chains: `fast_model` → `utils`, `learner` → `utils`, `mid_memory` → `planner`. Leaving them empty does not cause errors; the framework inherits automatically.
+Some roles have empty-config fallback chains: `fast_model` → `utils`, `learner` → `utils`, `mid_memory` → `fast_model` → `utils`. Leaving them empty does not cause errors; the framework inherits automatically.
 
 `embedding` and `image_embedding` are exceptions: they **ignore `selection_strategy`** and always take the first available model in `model_list` order (to avoid mixing multiple embedding models and breaking vector-space consistency). Leaving `image_embedding` empty does not fall back; image memory simply enters the "model unavailable" state.
 

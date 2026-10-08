@@ -20,7 +20,7 @@ MaiBot has a built-in **Plugin Market** where you can browse, install, and updat
 
 ![Plugin Market](/images/plugin-market/store-overview.jpeg)
 
-The market supports filtering by category and keyword to quickly find the plugin or adapter you need:
+The market supports filtering by category and keyword (author search is also available since 1.3.5) to quickly find the plugin or adapter you need:
 
 ![Plugin Market filtering and categories](/images/plugin-market/store-filter.png)
 
@@ -155,7 +155,7 @@ Only install plugins from trusted sources. Before installing, check the reposito
 **Installing a specific version fails?**
 
 - "Plugin dependencies unsatisfied" — the other plugins or Python packages required by that version are missing
-- "This version does not satisfy the dependency requirement of installed plugin X" — an installed plugin needs this plugin to stay in a specific version range; deal with X first
+- "A plugin dependency reminder" — an installed plugin needs this plugin to stay in a specific version range; since 1.3.5 this no longer blocks the install — the install / switch completes as usual, just keep an eye on the plugins named in the reminder
 - "The plugin has local code modifications; resolve them first" — you edited code inside the plugin directory; back it up and restore the directory
 - "The tag's current commit does not match the version index" / "The downloaded manifest does not match the version index" — the index and repository are out of sync; wait for the index to sync and retry
 - "Version sync failed: …" — the official version index itself could not be fetched; switch mirror source or retry later

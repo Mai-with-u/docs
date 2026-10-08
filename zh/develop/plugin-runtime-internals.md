@@ -417,7 +417,7 @@ Watcher 的参数：
 
 WebUI 的版本选择安装（`src/webui/routers/plugin/release_install.py`）不经过 Watcher，而是走一条显式的停止 → 替换 → 重载链路：
 
-1. 从版本索引解析目标版本（Tag、commit、manifest 快照），校验 commit 与 manifest 一致、依赖满足、且不破坏其他已安装插件对该插件的版本约束
+1. 从版本索引解析目标版本（Tag、commit、manifest 快照），校验 commit 与 manifest 一致、依赖满足；与其他已安装插件的依赖冲突不再阻止安装，而是在响应 `warnings` 中提醒
 2. 通过 `unload_plugins()` 停止插件，把新版本下载到 `plugins/.update_tmp/` 下的临时目录
 3. 从旧目录复制 `config.toml`、`config_back/`、`data/` 等用户数据，写入 `.maibot-release.json` 安装记录，然后把旧目录改名进 `plugins/.update_backups/` 并换上新目录
 4. 调 `reload_plugins_globally(plugin_ids, reason="release_update")` 重新加载

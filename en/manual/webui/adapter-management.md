@@ -57,7 +57,17 @@ The "黑白名单规则" panel opens after selecting an adapter:
 
 The panel **autosaves 2 seconds after you stop editing**, and you can still press Save to submit immediately; the status next to the save button reads "Unsaved changes / Autosaving / Saved HH:MM:SS". To keep the "current account" from going stale, the panel refreshes itself every 30 seconds.
 
-The underlying configuration file is `config/adapter_policy.toml`. See [Connect Platforms](../adapters/index.md). These rules live on the MaiBot main-program side.
+### Policy Groups (since 1.3.5)
+
+Rules for the same adapter can now be saved as **multiple policy groups** and switched per scenario (for example, one set each for "daily / testing / maintenance"):
+
+- **Switching groups** — the dropdown on the toolbar shows the active group; switching saves and takes effect immediately, and the draft you are editing is written into its group first so nothing is lost
+- **New group** — click "+" to create a group: it inherits the global settings by default with empty lists, and its name must not duplicate an existing group; switch to it from the dropdown after creating it
+- **Copy current group** — click "copy" to create a new group with all the rules of the current one; you stay on the current group after creating it
+- **Manage groups** — click "manage" to open the group list and delete groups you no longer need; **the active group cannot be deleted** — switch to another group first
+- **Default group** — rules from before the upgrade are kept as a group named "默认分组" (Default group), so there is nothing to reconfigure
+
+The underlying configuration file is `config/adapter_policy.toml`. See [Connect Platforms](../adapters/index.md). These rules live on the MaiBot main-program side; policy groups are stored in this file too.
 
 Since 1.3.0, adapter plugins can use this built-in allow/deny list directly, and the adapter management page reads and writes the rule that **actually takes effect at runtime** (the most specific match wins), so edits no longer land on an entry hidden by a higher-priority rule.
 
@@ -80,6 +90,7 @@ Since 1.3.2, the "Allow/deny rules" panel **shows group avatars and known group 
 
 - Read the mode hint below each list first: a dimmed list currently has no effect
 - Rules are keyed by account ID, so after switching accounts you need a separate set for the current account
+- Rules are stored per group: check that the active group in the toolbar dropdown is the one you are editing
 - When several rules match, the most specific one wins — make sure no higher-priority rule is shadowing your edit
 
 ## Related Docs

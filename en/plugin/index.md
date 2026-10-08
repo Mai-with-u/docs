@@ -212,7 +212,7 @@ def create_plugin():
 
 ### Component Decorators
 
-The SDK provides 8 component decorators, all imported from the top level of `maibot_sdk`:
+The SDK provides 9 component decorators, all imported from the top level of `maibot_sdk`:
 
 **`@Tool`** — LLM tool/function calling. Tools callable by the LLM, the most commonly used component type
 
@@ -229,6 +229,8 @@ The SDK provides 8 component decorators, all imported from the top level of `mai
 **`@HomeCard`** — WebUI home page card. Shows plugin status, entry points, or custom content on the home page
 
 **`@LLMProvider`** — LLM Provider. Declares new LLM model access points (client_type) to extend model services
+
+**`@ReplyExtension`** — Reply extension. Injects namespaced parameters into the reply tool and participates in reply generation (SDK 2.10.0+; see [Reply Extensions](./reply-extensions.md))
 
 **`@Action`** — Legacy plugin compatibility. Internally auto-converted to `@Tool`; new plugins should directly use `@Tool`
 
@@ -348,6 +350,7 @@ Both use the same communication protocol and component registration mechanism. T
 - [Home Cards](./home-cards.md): Learn how to add plugin cards to the WebUI home page
 - [WebUI Pages](./webui-pages.md): Add custom pages to your plugin with webui.json
 - [LLMProvider Component](./llmprovider.md): Learn how to develop custom LLM Providers to integrate new models
+- [Reply Extensions](./reply-extensions.md): Inject plugin parameters into the reply tool, add requirements before generation, or transform messages before sending
 - [Action Component](./actions.md): Learn about the `@Action` decorator compatible with legacy systems
 - [Configuration Management](./config.md): Learn how to declare and use plugin configurations
 - [API Reference](./api-reference.md): Browse the complete Plugin SDK API

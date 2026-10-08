@@ -297,6 +297,10 @@ async def preserve_selected_reply(self, **kwargs):
 
 如果需要改写 replyer 真正发给模型的消息列表，请使用 `maisaka.replyer.before_model_request`。该 Hook 会在 replyer 已经根据当前模型能力构造好 `messages` 后触发，阻塞模式处理器可以返回新的 `messages`；适合在 `system` 后插入一条合成的第一条 `user` 消息、做临时提示词实验或记录最终请求体。这个 Hook 只改写本次临时 LLM 请求，不会回写聊天历史，也不会影响中期记忆插入。
 
+::: tip 有更省事的做法
+如果只是想给回复注入参数、或在发送前改写回复内容（例如把文字转成语音），可以优先用 1.3.5 起的[回复扩展](./reply-extensions.md)：不用改 Planner Hook，发送、历史记录与失败处理都由主程序负责。
+:::
+
 常见用法是先通过 `maisaka.planner.before_request` 给内置 `reply` 工具追加参数 schema，让 planner 可以在调用 reply 工具时填入参数；随后在 `maisaka.replyer.before_request` 中读取 `reply_tool_args` 并路由模型：
 
 ::: code-group

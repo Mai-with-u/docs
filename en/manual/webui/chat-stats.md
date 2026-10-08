@@ -119,6 +119,8 @@ Select any session under "麦麦的聊天流" (MaiBot's chat streams) on the Mai
 - **Find previous** — click **上条** (Previous) to jump up to the nearest MaiBot-sent message above the viewport and highlight it; if there are none left you get a notice. The neighboring **顶部** (Top) jumps to the earliest entry and **底部** (Bottom) returns to the newest
 - **当前上下文** (Current context, new in 1.3.2) — the **当前上下文** button on the status bar opens a popover with what the running chat stream actually used this round: counts and entries for **回想记忆** (Recalled memory), **表达方式** (Expression styles), **黑话** (Slang), and **激活的工具** (Activated tools). Slang entries show their explanation on hover, the data refreshes every 10 seconds, and a stopped chat stream or a failed read gives a clear notice
 - **Connection state** — the green dot next to the "聊天流" (Chat streams) heading on the left now reflects the underlying connection in real time and disappears when it drops; once the network recovers or the page becomes visible again it reconnects immediately and the timeline continues on its own, with no page refresh
+- **Media preview** (since 1.3.5) — images and stickers in the chat support a large preview: click to zoom in; the "文" button at the top-right switches between "original file / recognized text"
+- **Incremental transfer** (since 1.3.5) — Planner progress is sent as deltas with unnecessary payload trimmed, and a full snapshot is rebuilt automatically on reconnect, making remote observation lighter and smoother
 
 ### Stats Popover
 
@@ -140,6 +142,8 @@ The section shares are estimates converted from character counts, useful for qui
 - **`wait` is collapsed** — only "等待 x 秒" (Wait x seconds) is shown, without the arguments, JSON, or execution result
 - **Merged source badge** — when every tool call in a batch shares one source, the source badge appears only once at the card's top-right; for a single tool the name, latency, and reasoning entry are merged into the card title row
 - **Reasoning entry** — when a matching reasoning record exists, a "推理" (Reasoning) button appears on the card and jumps to the Reasoning Process page
+- **Result image thumbnails** (since 1.3.5) — images returned by tools are shown as thumbnails inside the cards, with a placeholder notice when loading fails
+- **Actual model name** (since 1.3.5) — the Planner card and tool cards show the model actually invoked this time ("模型: xxx"), truncated when too long
 
 ## Stickers
 

@@ -40,7 +40,9 @@ JSON objects are exchanged between client and server. Each client message must i
 
 **`domain: "plugin_progress", topic: "main"`** — Plugin progress. After subscribing, the server immediately pushes a `plugin_progress/snapshot` event replaying the current progress state of all plugins
 
-**`domain: "maisaka_monitor", topic: "main"`** — MaiSaka inference monitoring. After subscribing, the server replays monitor event history, controllable via `data.since_event_id` and `data.replay_limit` (range 1-10000, default 1000). After replay completes, a `maisaka_monitor/stage.snapshot` event is also pushed showing the current state of each stage
+**`domain: "plugin_runtime", topic: "main"`** — Plugin runtime status notifications (since 1.3.5). When plugins register/unregister or the Runner process state changes, a `plugin_runtime/changed` event is pushed (with no data); just refetch the full plugin list snapshot on receipt
+
+**`domain: "maisaka_monitor", topic: "main"`** — MaiSaka inference monitoring. After subscribing, the server first pushes a `maisaka_monitor/planner.reset` event (a marker that resets the Planner delta baseline), then replays monitor event history, controllable via `data.since_event_id` and `data.replay_limit` (range 1-10000, default 1000). After replay completes, a `maisaka_monitor/stage.snapshot` event is also pushed showing the current state of each stage. Planner progress/result events are transferred as deltas per connection: the first one (or the first after a reconnect or re-subscribe) is a full snapshot, and later ones arrive as `planner.delta` carrying only changed fields and appended tool entries
 
 **`unsubscribe`** — Unsubscribe from a domain's topic. Requires `domain` and `topic` fields
 

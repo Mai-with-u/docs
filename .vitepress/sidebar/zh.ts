@@ -39,6 +39,7 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: 'API 组件', link: '/plugin/api-components' },
         { text: '消息网关', link: '/plugin/message-gateway' },
         { text: 'LLMProvider 组件', link: '/plugin/llmprovider' },
+        { text: '回复扩展', link: '/plugin/reply-extensions' },
         { text: 'Action (Legacy)', link: '/plugin/actions' },
         { text: 'API 参考', link: '/plugin/api-reference' },
       ]

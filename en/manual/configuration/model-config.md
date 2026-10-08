@@ -174,10 +174,10 @@ selection_strategy = "random"                 # [可选] 模型选择策略
 hard_timeout = 240.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [mid_memory（中期摘要） ~vscode-icons:file-type-toml~]
-# [可选] 中期摘要：上下文裁切时将历史聊天压缩为摘要。留空时自动回退到 planner。
+```toml [mid_memory (chat recall) ~vscode-icons:file-type-toml~]
+# [Optional] Chat recall: compresses clipped chat history into a summary. Falls back to fast_model when empty, and to utils when fast_model is also empty.
 [model_task_config.mid_memory]
-model_list = []                               # [可选] 模型名称列表（→回退 planner）
+model_list = []                               # [Optional] Model name list (→ fast_model → utils)
 max_tokens = 8192                             # [可选] 最大输出 token 数
 temperature = 0.7                             # [可选] 模型温度
 selection_strategy = "random"                 # [可选] 模型选择策略
@@ -193,7 +193,7 @@ hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
 ```toml [fast_model (quick small tasks) ~vscode-icons:file-type-toml~]
-# [Optional] Fast model: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences. Choose a model that responds quickly. Falls back to utils when empty.
+# [Optional] Fast model: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences. Choose a model that responds quickly. Falls back to utils when empty; chat recall also falls back here when empty.
 [model_task_config.fast_model]
 model_list = []
 max_tokens = 8192
@@ -203,8 +203,9 @@ hard_timeout = 120.0
 ```
 
 ```toml [emoji（表情包选择） ~vscode-icons:file-type-toml~]
-# [可选] 表情包选择：从候选表情包中选出合适的一张发送。
-# 选择优先级：emoji 有模型→用 emoji，planner 全视觉→用 planner，否则→用 vlm
+# [Optional] Emoji pick: pick a suitable sticker from the candidates to send.
+# Selection priority: emoji task has models → use emoji; planner is full visual → use planner; otherwise → use vlm
+# Replacing an old sticker: prefer the emoji task; use planner when unconfigured
 [model_task_config.emoji]
 model_list = []                               # [可选] 模型名称列表
 max_tokens = 8192                             # [可选] 最大输出 token 数
@@ -274,14 +275,14 @@ This change resolves the deadlock where setting up custom or local LLM providers
 When `model_list` for some tasks is empty, other tasks are automatically reused:
 
 ```
-         ┌──────────┐
-         │  planner │◄──── mid_memory (falls back when empty)
-         └──────────┘
-              ▲
+         ┌────────────┐
+         │ fast_model │◄──── mid_memory (falls back when empty)
+         └────────────┘
               │
+              │ falls back when empty
+              ▼
          ┌──────────┐
          │  utils   │◄──── learner (falls back when empty)
-         │          │◄──── fast_model (falls back when empty)
          └──────────┘
 
 memory · emoji · vlm · voice · embedding · image_embedding → No automatic fallback when empty, caller will skip or throw an error

@@ -7,6 +7,25 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
 
+::: timeline 2026-10-07
+### Main program [1.3.5]
+* Fixed the bot being wrongly reported as the recipient when a reply quotes the bot's own message.
+* Fixed the dynamic trigger mode counting stale backlog messages as recent activity, which kept group chats from starting the Planner for a long time.
+* Model task assignment: when chat recall (`mid_memory`) is left empty it now falls back to `fast_model` and then `utils`; the decision to replace an old sticker with a new one goes to the `emoji` task first, and to `planner` when unconfigured.
+* Reply splitting is cleaner: extra trailing commas at segment ends are omitted when segments are sent individually and restored when they are merged.
+* Improved plugin loading logic to reduce inconsistent states.
+* Installing / updating a plugin no longer blocks on dependency version conflicts with other installed plugins; these now surface as a "plugin dependency reminder".
+* New **reply extension** component for plugins: plugins can register their own parameters for the `reply` tool, add requirements before generation, and transform the whole message group before sending (requires plugin SDK 2.10.0+).
+
+### WebUI [1.8.4]
+* Adapter allow/deny lists now support **multiple policy groups**: create, copy, and delete multiple group/private rule sets per adapter and switch between them; existing rules are kept as the "default group", and the active group cannot be deleted.
+* The model task list shows advanced tasks that already have models configured by default — no need to open "advanced settings" to see them.
+* The plugin market supports search by author; released versions show their update date and the detail stats area shows the latest update time.
+* Plugin reviews support an editable username and anonymous submission.
+* MaiBot Observation: images and stickers support a large preview and one-click switching between "recognized text / original file"; tool-returned images are shown as thumbnails, and tool cards show the actual model name used.
+* Chat monitor performance: per-session detail subscriptions with incremental message updates; Planner now uses incremental transfer with trimmed payloads and rebuilds the snapshot baseline on reconnect, saving bandwidth for remote viewing.
+:::
+
 ::: timeline 2026-10-06
 
 ### Main program [1.3.4]

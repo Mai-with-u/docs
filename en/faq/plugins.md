@@ -95,7 +95,7 @@ Correct approach: open the plugin detail page and select the target version unde
 ## Why does a release version install fail?
 
 - **Dependencies unsatisfied** — other plugins or Python packages required by that version are missing
-- **Blocked by another plugin** — an installed plugin requires this plugin to stay in a specific version range: "This version does not satisfy the dependency requirement of installed plugin X"
+- **Blocked by another plugin's dependency requirement (only a reminder since 1.3.5)** — an installed plugin requires this plugin to stay in a specific version range: the install / switch completes as usual and a "plugin dependency reminder" tells you which plugin may stop working
 - **Local code modifications** — you edited code inside the plugin directory: "The plugin has local code modifications; resolve them first"; back it up and restore the directory before switching versions
 - **Index and repository out of sync** — "The tag's current commit does not match the version index" or "The downloaded manifest does not match the version index"; wait for the index to sync and retry
 - **Version sync failed** — the official version index could not be fetched; switch mirror source or retry later

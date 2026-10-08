@@ -83,6 +83,8 @@ The Model Management page manages model providers, models, and task assignment:
 
 Under "Task assignment", selecting the `planner` or `replyer` task shows a runtime summary line below the card: the visual mode (text / multimodal / auto) and the thinking switch state of the currently effective models.
 
+Since 1.3.5, the task list shows **advanced tasks that already have models configured** (such as chat recall, learner, and fast model) by default — you can view and edit them without opening "高级设置" (Advanced settings); unconfigured advanced tasks remain tucked away there.
+
 ### Time-Based Pricing
 
 Besides the default input / output / cache unit prices, model prices can be billed per time range of the day (as of 1.3.0):

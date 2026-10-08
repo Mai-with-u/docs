@@ -416,7 +416,7 @@ When the entire Runner shuts down or restarts, the Watcher's subscriptions are c
 
 The WebUI's version-selection install (`src/webui/routers/plugin/release_install.py`) does not go through the Watcher; it uses an explicit stop → replace → reload chain:
 
-1. Resolve the target version from the version index (tag, commit, manifest snapshot), then verify the commit and manifest match the index, dependencies are satisfied, and the switch does not break other installed plugins' version constraints on this plugin
+1. Resolve the target version from the version index (tag, commit, manifest snapshot), then verify the commit and manifest match the index and dependencies are satisfied; dependency conflicts with other installed plugins no longer block the install and are returned in the response `warnings` instead
 2. Stop the plugin via `unload_plugins()`, download the new version into a temporary directory under `plugins/.update_tmp/`
 3. Carry `config.toml`, `config_back/`, `data/` and other user data from the old directory, write `.maibot-release.json`, then rename the old directory into `plugins/.update_backups/` and swap in the new one
 4. Call `reload_plugins_globally(plugin_ids, reason="release_update")` to reload

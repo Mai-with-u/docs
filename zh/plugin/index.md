@@ -237,7 +237,7 @@ def create_plugin():
 
 ### 组件装饰器
 
-SDK 提供 8 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
+SDK 提供 9 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
 
 **`@Tool`** — LLM 工具/函数调用，LLM 可调用的工具，最常用的组件类型
 
@@ -254,6 +254,8 @@ SDK 提供 8 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
 **`@HomeCard`** — WebUI 首页卡片，在首页展示插件状态、入口或自定义内容
 
 **`@LLMProvider`** — LLM Provider，声明新 LLM 模型接入点（client_type），扩展模型服务
+
+**`@ReplyExtension`** — 回复扩展，为 reply 工具注入命名空间参数并参与回复生成（SDK 2.10.0+，详见 [回复扩展](./reply-extensions.md)）
 
 **`@Action`** — 兼容旧插件，内部自动转换为 `@Tool`，新插件应直接使用 `@Tool`
 
@@ -373,6 +375,7 @@ MaiBot 维护两个独立的 Runner 子进程：
 - [首页卡片](./home-cards.md)：学习如何向 WebUI 首页添加插件卡片
 - [WebUI 页面](./webui-pages.md)：用 webui.json 给插件加自定义页面
 - [LLMProvider 组件](./llmprovider.md)：学习如何开发自定义LLM Provider接入新模型
+- [回复扩展](./reply-extensions.md)：给 reply 工具注入插件参数、生成前追加要求或发送前转换消息
 - [Action 组件](./actions.md)：了解兼容旧系统的 @Action 装饰器
 - [配置管理](./config.md)：学习如何声明和使用插件配置
 - [API 参考](./api-reference.md)：查阅完整的插件 SDK API

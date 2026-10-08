@@ -169,7 +169,7 @@ flowchart LR
 - **`replyer`** — 回复模型，决定麦麦的对话表现
 - **`planner`** — 规划模型，驱动工具调用和行动决策
 - **`memory`** — 记忆模型，负责长期记忆的总结与抽取
-- **`mid_memory`** — 聊天回想模型，留空自动回退到 planner
+- **`mid_memory`** — 聊天回想模型，留空自动回退到 fast_model，fast_model 也留空时回退到 utils
 - **`utils`** — 小任务模型（概括、整理等），建议选快速的小模型
 - **`learner`** — 学习模型，用于表达方式和黑话学习，留空回退到 utils
 - **`fast_model`** — 快速模型，负责挑表达方式、回复断句等要马上出结果的小任务，留空回退到 utils
@@ -179,7 +179,7 @@ flowchart LR
 - **`embedding`** — 文本嵌入模型
 - **`image_embedding`** — 图片嵌入模型，把图片编码成向量供图片记忆检索；需支持图片输入协议，留空则图片记忆不可检索（1.3.0 新增）
 
-部分角色有空配置回退链：`fast_model` → `utils`，`learner` → `utils`，`mid_memory` → `planner`。留空不报错，框架自动继承。
+部分角色有空配置回退链：`fast_model` → `utils`，`learner` → `utils`，`mid_memory` → `fast_model` → `utils`。留空不报错，框架自动继承。
 
 `embedding` 与 `image_embedding` 是例外：它们**忽略 `selection_strategy`**，固定按 `model_list` 顺序取第一个可用模型（避免多个嵌入模型混用导致向量空间不一致）；`image_embedding` 留空时不会回退，图片记忆直接进入"模型不可用"状态。
 

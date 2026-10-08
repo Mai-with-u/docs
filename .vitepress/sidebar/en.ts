@@ -39,6 +39,7 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: 'API Components', link: '/en/plugin/api-components' },
         { text: 'Message Gateway', link: '/en/plugin/message-gateway' },
         { text: 'LLMProvider', link: '/en/plugin/llmprovider' },
+        { text: 'Reply Extensions', link: '/en/plugin/reply-extensions' },
         { text: 'Action (Legacy)', link: '/en/plugin/actions' },
         { text: 'API Reference', link: '/en/plugin/api-reference' },
       ]
