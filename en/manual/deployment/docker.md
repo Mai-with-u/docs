@@ -113,7 +113,7 @@ The default WebUI `host` is `127.0.0.1`, which inside a Docker container means o
 :::
 
 ::: tip
-If your server has the standalone Docker Compose installed, the command should be `docker-compose` (with a hyphen) instead of `docker compose`.
+If your server has the standalone Docker Compose installed, the command should be `docker-compose` (with a hyphen).
 :::
 
 ## Direct Docker Image Deployment

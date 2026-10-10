@@ -48,7 +48,7 @@ curl -X GET http://127.0.0.1:8001/api/webui/plugins/installed \
 
 分支安装模式下，服务端会依次克隆仓库、校验 `_manifest.json`（检查 `manifest_version`、`id`、`name`、`version`、`author` 五个必填字段），成功后在 `plugins/` 目录下生成插件目录。
 
-指定 `version` 时走发布版本安装：按 Tag 浅克隆到临时目录，校验 commit 与 manifest 和索引一致、依赖满足；如果该版本会影响其他已安装插件的依赖要求，不再阻止安装，而是在响应 `warnings` 中提醒，然后停止插件 → 保留 `config.toml` / `config_back/` / `data/` → 写入 `.maibot-release.json` → 原子替换目录（旧目录改名进 `.update_backups/`）→ 重新加载。
+指定 `version` 时走发布版本安装：按 Tag 浅克隆到临时目录，校验 commit 与 manifest 和索引一致、依赖满足；如果该版本会影响其他已安装插件的依赖要求，在响应 `warnings` 中列出受影响的插件，安装继续执行，然后停止插件 → 保留 `config.toml` / `config_back/` / `data/` → 写入 `.maibot-release.json` → 原子替换目录（旧目录改名进 `.update_backups/`）→ 重新加载。
 
 **安装示例：**
 
@@ -90,7 +90,7 @@ curl -X POST http://127.0.0.1:8001/api/webui/plugins/install \
 - **409 Tag 当前指向的 commit 与版本索引不一致** / **409 下载的 manifest 与版本索引不一致** — 索引与仓库状态脱节
 - **502 获取插件版本索引失败** — 官方索引没拉下来，换镜像源或稍后重试
 
-> 自 1.3.5 起，安装不再因「该版本不满足其他已安装插件的依赖要求」而失败：操作照常完成，响应体多一个 `warnings` 数组，逐条列出受影响的插件与版本要求（如「已安装插件 X 要求 Y 版本 …，该插件可能无法运行」），WebUI 会以「插件依赖提醒」弹窗展示。
+响应中的 `warnings` 数组列出受影响的已安装插件及其版本要求。依赖版本冲突不会阻止安装；安装完成后，检查警告中指出的插件是否仍能正常运行。
 
 ### 从 ZIP 安装
 
@@ -252,12 +252,12 @@ curl -X GET http://127.0.0.1:8001/api/webui/plugins/runtime/plugins/example-plug
 - **`POST /api/webui/plugins/stats-proxy/stats/rate`** — 评分 + 评论（请求体 `plugin_id` + `user_id` + 可选 `rating`/`comment`）
 - **`POST /api/webui/plugins/stats-proxy/stats/download`** — 记录插件下载
 
-> **注意** — stats_proxy 各端点不走 Cookie 认证，而是使用 `require_auth` 依赖（`Depends(require_auth)`），在后端内部做鉴权。外部统计服务不可用时返回 HTTP 502。
+> **注意** — stats_proxy 各端点使用 `require_auth` 依赖（`Depends(require_auth)`），在后端内部做鉴权。外部统计服务不可用时返回 HTTP 502。
 
 ## 9. plugin-progress WebSocket 进度跟踪
 
-::: warning 这不是 HTTP
-plugin-progress 是一个 **WebSocket** 端点，不是 HTTP 请求。不能用 `curl` 调用，需要通过 WebSocket 客户端连接。
+::: warning WebSocket 连接
+通过 WebSocket 客户端连接 plugin-progress 端点。
 :::
 
 ### 推荐方式：统一 WebSocket 频道

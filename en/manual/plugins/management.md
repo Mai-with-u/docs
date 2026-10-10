@@ -8,13 +8,7 @@ Installing is only the first step. After a plugin is written, you enable, config
 
 ## View Plugins
 
-The plugin list shows:
-
-- 📋 **Name** and description
-- 🔧 **Version** and author
-- ✅ **Enabled status** (green = enabled, gray = disabled)
-- 📖 **Usage instructions** (click to expand)
-- 🏷️ **Version source and lock state** — plugins installed from a release with "Lock this version" ticked are marked as locked; they never appear in update prompts
+The plugin list shows installed plugins and their runtime status. **Version-locked** plugins are excluded from automatic updates and update notifications.
 
 ## Enable / Disable
 
@@ -24,13 +18,9 @@ The plugin list shows:
 
 ## Configure Plugins
 
-Some plugins support custom settings:
+Edit API keys, trigger words, and feature switches in the plugin settings. Saving invokes the plugin's `on_config_update` callback.
 
-1. Click the plugin's "Settings" button;
-2. Modify options (e.g. API Key, trigger words, feature toggles);
-3. After saving, the runtime invokes the plugin's `on_config_update`.
-
-## Custom Pages (since 1.3.2)
+## Custom Pages
 
 Once a plugin ships a `webui.json`, it can bring its own page entries — no Node install, no changes to the main program:
 
@@ -38,9 +28,9 @@ Once a plugin ships a `webui.json`, it can bring its own page entries — no Nod
 - **Top workspace entries** — a plugin can also declare its own top-level workspace. When one plugin has several workspace pages, the first is the default and the rest collapse into "More Plugin Workspaces"
 - **Page addresses** — of the form `/extensions/{plugin_id}/{page_id}`; a plugin cannot define custom routes or override built-in entries
 
-**Reorder or hide**: open the "Plugin Extensions" page (sidebar → "Integration → Plugin Extensions", at `/plugin-config`). At the bottom of the page is the "Manage Plugin Pages" area, where you drag to reorder or hide a plugin's entries entirely. These preferences live only in your current browser and affect display only — they are not server-side authorization, so clearing the cache or switching browsers restores the defaults.
+**Reorder or hide**: open the "Plugin Extensions" page (sidebar → "Integration → Plugin Extensions", at `/plugin-config`). At the bottom of the page is the "Manage Plugin Pages" area, where you drag to reorder or hide a plugin's entries entirely. These preferences live only in your current browser and affect display only. Clearing the cache or switching browsers restores the defaults.
 
-**Changes not taking effect?** Editing `webui.json` requires a **plugin reload** to take effect; it is not a MaiBot global setting. After reloading, the browser reflects entries within at most 30 seconds, or refresh manually.
+**Changes not taking effect?** Editing `webui.json` requires a **plugin reload** to take effect. After reloading, the browser reflects entries within at most 30 seconds, or refresh manually.
 
 For the full field reference, component types, limits, and troubleshooting, see [WebUI Pages](/en/plugin/webui-pages).
 
@@ -83,7 +73,7 @@ To install a particular version (including one older than what you have now), op
 - Versions disabled in the dropdown are incompatible with your current MaiBot / SDK, and the reason follows in parentheses (e.g. "Requires MaiBot ≥ 1.4.0")
 - "· Recommended" is the newest stable version under the compatibility check and is selected by default
 - Switching versions backs up the old directory and keeps `config.toml` / `config_back/` / `data/`, but **does not roll back plugin data**
-- If the selected version affects other installed plugins' dependency requirements, it no longer blocks the install: a "plugin dependency reminder" will tell you which plugin may stop working (since 1.3.5)
+- If the selected version affects other installed plugins' dependency requirements, it does not block the install: a "plugin dependency reminder" will tell you which plugin may stop working
 
 ### Lock a Version
 

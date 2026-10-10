@@ -34,7 +34,7 @@ The connection endpoint of the API server. The address comes from `maim_message.
 - **`x-apikey`** — the API Key, which can go in a request header or in the query string `?api_key=`. **The query string wins**.
 - **`x-platform`** — the platform name; `?platform=` is supported the same way, and the query string wins.
 - **`x-uuid`** — the connection identifier; the server generates one if you don't pass it. Use it to tell multiple connections on the same platform apart.
-- **Authentication failure** — close code `1000` (not 1008), with an explanation in the reason.
+- **Authentication failure** — close code `1000`, with an explanation in the reason.
 - **Allowlist** — an empty `maim_message.api_server_allowed_api_keys` means **no validation**; the default listen address is `0.0.0.0`, so always populate the allowlist before exposing it.
 - **Heartbeat** — also protocol-level PING/PONG, at uvicorn's default interval.
 :::
@@ -81,7 +81,7 @@ The legacy path sends a message object directly, with two top-level fields:
 :::
 
 ::: warning Never omit either `user_info` or `group_info`
-During normalization MaiBot asserts outright that `user_info.user_id` and `user_info.user_nickname` are non-empty strings, and group messages additionally require `group_info.group_id` and `group_info.group_name` to be non-empty strings. A missing field is not a friendly error—it throws an assertion and the message is dropped.
+During normalization MaiBot asserts outright that `user_info.user_id` and `user_info.user_nickname` are non-empty strings, and group messages additionally require `group_info.group_id` and `group_info.group_name` to be non-empty strings. Missing these fields triggers an assertion, and the message is dropped.
 :::
 
 ## Segment Types

@@ -4,7 +4,7 @@ title: Unified QQ Connector
 
 # Unified QQ Connector
 
-**Log in your own QQ account to connect (officially maintained).** The Unified QQ Connector (repository `MaiBot-SnowLuma-Adapter`; since v1.0.0 it merges the former SnowLuma adapter and the NapCat adapter) lets MaiBot connect to QQ through [SnowLuma](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter) or [NapCat](https://github.com/NapNeko/NapCatQQ): one plugin supports both client types, detects the peer automatically once connected, and handles message sending/receiving, group chats and private chats, with support for voice, emoji parsing, and proactive private messaging. It is an **officially maintained plugin** of MaiBot, plugin-only, running directly inside the MaiBot process.
+**Log in your own QQ account to connect (officially maintained).** The Unified QQ Connector (repository `MaiBot-SnowLuma-Adapter`) lets MaiBot connect to QQ through [SnowLuma](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter) or [NapCat](https://github.com/NapNeko/NapCatQQ): one plugin supports both client types, detects the peer automatically once connected, and handles message sending/receiving, group chats and private chats, with support for voice, emoji parsing, and proactive private messaging. It is an **officially maintained plugin** of MaiBot, plugin-only, running directly inside the MaiBot process.
 
 ::: tip Officially maintained
 The Unified QQ Connector is continuously maintained by the MaiBot official team; if you encounter issues, report them in [GitHub Issues](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter/issues).
@@ -134,7 +134,7 @@ When one MaiBot connects to multiple client links, give each link a **different 
 
 ## Add the allow scope first, then test
 
-The Unified QQ Connector **no longer ships built-in group / private-chat allow/deny lists**—inbound access is controlled uniformly by the host adapter policy: the adapter settings (allow/deny rules) in the WebUI or `config/adapter_policy.toml`, which **allows everything by default** (all group messages are accepted). To restrict the scope, switch the default to deny and only allow the group IDs or users you list.
+The Unified QQ Connector uses the host adapter policy to control inbound access: the adapter settings (allow/deny rules) in the WebUI or `config/adapter_policy.toml`, which **allows everything by default** (all group messages are accepted). To restrict the scope, switch the default to deny and only allow the group IDs or users you list.
 
 See [Adapter Management](../webui/adapter-management.md) for the visual entry; the full syntax of `config/adapter_policy.toml` is covered in the [Access Policy and Account Routing](/en/develop/adapters/policy).
 

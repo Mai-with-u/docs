@@ -47,7 +47,7 @@ enabled = true                # 是否启用 WebUI
 host = ["127.0.0.1", "::1"]  # 绑定地址列表
 port = 8001                   # 端口号
 mode = "production"           # 运行模式：development(开发) 或 production(生产)
-webui_style = 2               # 界面风格：0 原版 / 1 未来复古 / 2 千禧（1.3.2 起开放）
+webui_style = 2               # 界面风格：0 原版 / 1 未来复古 / 2 千禧
 anti_crawler_mode = "basic"   # 防爬虫模式：false / strict / loose / basic
 allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 ```

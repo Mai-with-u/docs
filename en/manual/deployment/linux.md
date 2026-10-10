@@ -97,7 +97,7 @@ uv run bot.py
 
 On first launch, a user agreement prompt will appear. Type **同意** (agree) in the terminal to continue.
 
-Once started, you can chat with MaiBot directly in the terminal: `[debug].enable_console_input` is on by default since 1.3.0, so in an interactive terminal you can type plain messages as well as management commands like `/clear`, `/pm`, `/offline`, and `/online`; typing `exit()` closes only the terminal input while the bot keeps running. When running under systemd or with output redirected to a file, stdin is not an interactive terminal, so terminal input is skipped and one extra warning is logged — MaiBot runs normally regardless.
+Once started, you can chat with MaiBot directly in the terminal: `[debug].enable_console_input` is on by default, so in an interactive terminal you can type plain messages as well as management commands like `/clear`, `/pm`, `/offline`, and `/online`; typing `exit()` closes only the terminal input while the bot keeps running. When running under systemd or with output redirected to a file, stdin is not an interactive terminal, so terminal input is skipped and one extra warning is logged — MaiBot runs normally regardless.
 
 ## Accessing WebUI
 

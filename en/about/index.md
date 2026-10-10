@@ -4,10 +4,10 @@ title: About the Project
 
 # About the Project
 
-MaiBot (MaiSaka) is an interactive agent based on large language models. She is more than just a "helpful assistant" that completes tasks -- she is a digital life form that tries to understand you and interact in a genuinely human style. She does not pursue perfection or efficiency above all else. She pursues warmth and authenticity.
+MaiBot (MaiSaka) is an interactive agent based on large language models. She tries to understand you and interact in a human style, creating a warm and authentic conversational experience.
 
-- 💭 **No one likes GPT-sounding dialogue**: MaiBot uses a more natural conversational style. Instead of long-winded, markdown-heavy replies, she chats in a way that feels casual, varied, and human.
-- 🎭 **No longer stuck in rigid Q&A**: She knows when to speak, how to read the room, when to join a conversation, and when to stay quiet.
+- 💭 **Natural dialogue**: MaiBot varies the length of her replies and uses casual phrasing to simulate human conversation.
+- 🎭 **Joining group conversations**: She knows when to speak, how to read the room, when to join a conversation, and when to stay quiet.
 - 🧠 **MaiSaka becoming human**: In group conversations, MaiBot imitates how people around her speak, learns new slang and in-group language, and keeps evolving.
 - ❤️ **Always learning more about you**: Inspired by personality theory in psychology, MaiBot gradually builds an understanding of your preferences, traits, habits, and behavior style.
 - 🔌 **Plugin system**: Provides powerful APIs and an event system with virtually unlimited room for extension.

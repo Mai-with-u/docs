@@ -36,7 +36,7 @@ pnpm docs:build    # Build the whole site and generate llms.txt
 
 :::
 
-Before submitting, you **must** run `pnpm docs:build` once: it does more than bundle — it validates dead links, container syntax, and snippet import paths.
+Before submitting, you **must** run `pnpm docs:build` once: the build validates dead links, container syntax, and snippet import paths.
 
 ## Hard Rules
 
@@ -61,6 +61,6 @@ Before submitting, you **must** run `pnpm docs:build` once: it does more than bu
 
 - **The build reports a "dead link"** — The link path is wrong, or a page was moved without updating its references; note that English pages need the `/en/` prefix.
 - **The build reports an unclosed container** — The `:::` markers don't pair up; custom containers support nesting, but every level needs its own closing marker.
-- **The build reports a nonexistent snippet path** — Paths in `<<< @/...` are **relative to the site root**, not to the current file.
+- **The build reports a nonexistent snippet path** — Paths in `<<< @/...` are **relative to the site root**.
 - **The page renders but isn't in the sidebar** — The new page wasn't registered in the sidebar, or it was registered under the wrong path group.
 - **Review rejects the PR for a zh/en mismatch** — The `zh/` and `en/` pages, sidebar entries, and code block structures must correspond one-to-one.

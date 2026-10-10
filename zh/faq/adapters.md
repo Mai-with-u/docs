@@ -18,7 +18,7 @@ title: 适配器连接
 
 ## 应该填写哪个 NapCat Token？
 
-适配器连接 NapCat 时使用的是 NapCat WebSocket 服务配置中的访问令牌，填在统一 QQ 连接器配置文件 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 的 `[client]` 节 `token` 字段（WebUI 的插件设置里也能改同名项）。它不是 NapCat WebUI 的登录 Token，也不是 MaiBot WebUI 的访问密码（登录页显示的 Access Token）。
+适配器连接 NapCat 时使用的是 NapCat WebSocket 服务配置中的访问令牌，填在统一 QQ 连接器配置文件 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 的 `[client]` 节 `token` 字段（WebUI 的插件设置里也能改同名项）。
 
 如果 WebSocket 服务没有启用鉴权，`token` 通常留空；如果启用了鉴权，两端必须填写完全相同的值。
 

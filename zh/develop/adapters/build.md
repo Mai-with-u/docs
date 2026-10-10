@@ -67,7 +67,7 @@ flowchart TB
    - **`send_image`** — 入站图片是 base64，多数平台需要先落盘或上传再发。
    - **`poll_events`** — 平台事件收成字典列表，字段约定见下一步。
 
-4. 拼入站报文。这是全篇最容易踩坑的地方：MaiBot 对必填字段是**断言**而不是友好校验，缺一个这条消息就没了。
+4. 拼入站报文。缺少必填字段会触发 MaiBot 的**断言**，消息会被丢弃。
 
    <<< @/zh/examples/adapter-minimal/adapter.py#inbound [入站拼装 ~vscode-icons:file-type-python~]
 

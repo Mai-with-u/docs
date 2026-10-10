@@ -15,10 +15,8 @@ QQ 有两条接入路线，按你的条件选一条即可：
 
 两条路线互不冲突，可以同时启用；开放平台路线还可以通过统一 ID 绑定与本地客户端路线共享数据。
 
-::: tip 1.3.0 的适配器变化
-MaiBot 1.3.0 起，原 SnowLuma 适配器与 NapCat 适配器已合并为**统一 QQ 连接器**（`MaiBot-SnowLuma-Adapter`），独立的 NapCat 适配器停止演进并归档。升级主程序后请同步升级适配器，旧配置会在加载时自动迁移。
-
-同时，适配器内置的群聊 / 私聊黑白名单已移除，入站通行统一由 MaiBot 的适配器策略（`config/adapter_policy.toml` + WebUI 适配器设置）控制。
+::: tip 接入与访问策略
+QQ 可通过统一 QQ 连接器接入 SnowLuma 或 NapCat 客户端。群聊和私聊的访问范围由 MaiBot 的适配器策略（`config/adapter_policy.toml` 或 WebUI「适配器设置」）控制。
 :::
 
 ## 可用适配器一览

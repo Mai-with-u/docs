@@ -10,14 +10,12 @@ Read the plugin's README and confirm required configuration, dependencies, permi
 
 Only after you have confirmed the problem comes from the plugin itself should you report it to the plugin author.
 
-## Avatars disappeared after upgrading to 1.3.2. How do I get them back?
+## Why Are Avatars Missing?
 
-Since 1.3.2, avatars are fetched by a **unified avatar service** that asks the adapter on the current platform route instead of using a hard-coded QQ avatar URL. When avatars are missing, check in order:
+A **unified avatar service** retrieves avatars through the adapter on the current platform route. If avatars are missing, check the following:
 
-- **The old cache is no longer read** — cache files written earlier under `data/avatar/qq/` are skipped outright from 1.3.2 on and are never used as a fallback; you can delete that directory
-- **The adapter does not implement the avatar interface** — only platforms whose current adapter implements the avatar lookup protocol can show avatars. Platforms and target types without it show the **default avatar**, which is expected behavior, not a fault
+- **The adapter does not implement the avatar interface** — only platforms whose current adapter implements the avatar lookup protocol can show avatars. Platforms and target types without it show the **default avatar**
 - **A setting turned it off** — when the "Fetch avatars" switch in the WebUI settings is off, the frontend never requests avatars; turn it on
-- **The platform never had avatars** — custom platforms and non-numeric IDs had no avatars before 1.3.2 at all; now they show avatars as long as the adapter implements the avatar interface
 
 Whether an adapter supports avatars is documented in its own README or release notes, and depends on whether its author implemented the avatar protocol.
 
@@ -44,7 +42,7 @@ Record the last installed or updated plugins and disable them in batches. Compar
 
 ## A plugin's custom page does not appear. What should I do?
 
-Since 1.3.2, plugins can declare WebUI pages through a `webui.json` in their own directory. If you installed such a plugin and see no entry, check in order:
+Plugins can declare WebUI pages through a `webui.json` in their own directory. If you installed such a plugin and see no entry, check in order:
 
 - **Look for a registration failure in the log** — when the declaration is malformed, that plugin's **entire registration fails for this run**. The log prints "plugin WebUI declaration invalid" with the reason (out-of-range fields, component attributes that do not apply, a danger button missing its confirmation text, and so on)
 - **Look for "referenced unregistered static API" in the log** — a page binding whose API short name or `version` does not match what `@API` registered, or one that binds a dynamic API, never attaches
@@ -95,14 +93,13 @@ Correct approach: open the plugin detail page and select the target version unde
 ## Why does a release version install fail?
 
 - **Dependencies unsatisfied** — other plugins or Python packages required by that version are missing
-- **Blocked by another plugin's dependency requirement (only a reminder since 1.3.5)** — an installed plugin requires this plugin to stay in a specific version range: the install / switch completes as usual and a "plugin dependency reminder" tells you which plugin may stop working
+- **Plugin dependency reminder** — An installed plugin requires a different version range. Installation or switching completes, and the reminder lists plugins that may stop working.
 - **Local code modifications** — you edited code inside the plugin directory: "The plugin has local code modifications; resolve them first"; back it up and restore the directory before switching versions
 - **Index and repository out of sync** — "The tag's current commit does not match the version index" or "The downloaded manifest does not match the version index"; wait for the index to sync and retry
 - **Version sync failed** — the official version index could not be fetched; switch mirror source or retry later
 
 ## The plugin market won't open, or install spins forever?
 
-With Fake-IP proxies such as Clash or Surge, the plugin market domain may resolve into `198.18.0.0/15` and be treated as an unsafe address, making it unreachable. Since 1.3.0 the plugin market's HTTPS domains are allowed to fall inside that range, so ordinary proxy setups no longer fail this way.
+The plugin market supports HTTPS domains resolving to the Fake-IP range `198.18.0.0/15`. If access still fails with Clash, Surge, or a similar proxy, check proxy rules or try another mirror.
 
 If it still fails: switch to another mirror source, temporarily disable Fake-IP mode in your proxy, or check the end of the error message — when every mirror source fails, the specific reason for each one is listed.
-

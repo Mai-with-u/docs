@@ -14,7 +14,7 @@ Every model in `model_config.toml` accepts an `extra_params` field for passing p
 - **`body`** — merged into the request body
 - **Other plain keys** — passed as extra request-body fields (the OpenAI SDK's `extra_body`)
 
-When `client_type = "gemini"`, `extra_params` is not split by the rules above. Instead, the Gemini client filters the fields it supports and maps them to `GenerateContentConfig`.
+When `client_type = "gemini"`, the Gemini client filters supported fields in `extra_params` and maps them to `GenerateContentConfig`.
 
 ---
 
@@ -274,9 +274,9 @@ extra_params = {thinking = {type = "enabled"}, reasoning_effort = "high"}
 The four blocks above show **hand-written** `extra_params`. The WebUI switch only checks the template for whether disabling is allowed; per-model limits appear as small print below the switch (for example Kimi k2.7-code and MiniMax M2.x). Zhipu GLM-5.3 is a restriction the template applies per model identifier, so its switch is greyed out directly. Writing `disabled` in the source file for a model that does not support it makes saving report "the current model does not support turning thinking off".
 :::
 
-#### New Plan-based Provider Templates
+#### Subscription-Plan Provider Templates
 
-MaiBot 1.3.1 adds three subscription-plan provider templates. Their thinking switches match the corresponding pay-as-you-go templates:
+The following subscription-plan provider templates are available. Their thinking switches match the corresponding pay-as-you-go templates:
 
 - **GLM Coding Plan** — `https://open.bigmodel.cn/api/coding/paas/v4`
 - **StepFun Step Plan** — `https://api.stepfun.com/step_plan/v1`
@@ -381,7 +381,7 @@ extra_params = {enable_thinking = false}
 
 Some providers (e.g. DeepSeek v4 flash web search) use OpenAI's **Responses protocol** and require `client_type = "openai_responses"` in the provider configuration. The Responses API parameter format differs slightly from Chat Completions:
 
-- **Thinking mode**: use `reasoning = {effort = "..."}` instead of `thinking`/`reasoning_effort`; `effort` accepts `none` / `low` / `high` / `max`
+- **Thinking mode**: use `reasoning = {effort = "..."}`; `effort` accepts `none` / `low` / `high` / `max`
 - **Web search**: add the native `web_search` tool to the `tools` list to enable it
 
 ::: code-group
@@ -425,7 +425,7 @@ extra_params = {reasoning = {effort = "high"}, tools = [{type = "web_search"}]}
 
 ### Gemini Native API
 
-When `client_type = "gemini"`, `extra_params` is not processed by the OpenAI `headers/query/body` rules. The Gemini client filters the fields it supports and maps them to `GenerateContentConfig`.
+When `client_type = "gemini"`, the Gemini client filters supported fields in `extra_params` and maps them to `GenerateContentConfig`.
 
 #### Gemini 2.5 (thinking_budget)
 
@@ -554,7 +554,7 @@ The actual effect after the client splits it:
 
 **`body` fields + other plain keys** — request body JSON: `{"metadata": {"source": "maibot"}, "enable_thinking": false}`
 
-So `extra_params = {enable_thinking = "false"}` is equivalent to `extra_params = {body = {enable_thinking = "false"}}` — both send `enable_thinking` as a request-body JSON field to the provider, rather than a nested `{"extra_params": {"enable_thinking": "false"}}`.
+So `extra_params = {enable_thinking = "false"}` is equivalent to `extra_params = {body = {enable_thinking = "false"}}` — both send `enable_thinking` as a request-body JSON field to the provider.
 
 ## Image Embedding Models
 
@@ -595,7 +595,7 @@ extra_params = {dimensions = 1024}
 
 - Under the Bailian/Ark native protocols, `model` and `input` (plus `encoding_format` on Ark) are reserved fields that `extra_params` must not override — writing them fails
 - Under the Bailian native protocol, the vector dimension can be written as top-level `dimensions` or as `parameters.dimension`; writing both with different values fails
-- Since 1.3.1, an `image_embedding` task with no model configured fails immediately, telling you to specify an image-embedding-capable model under `image_embedding`, instead of failing only at request time
+- The `image_embedding` task requires an embedding model that supports image input; leaving it unconfigured raises an error.
 - The `embedding` and `image_embedding` tasks ignore `selection_strategy` and always take the first available model in `model_list` order — the vector space must stay consistent, since mixing embedding models corrupts the vector store
 
 ## Advanced Auth Configuration

@@ -123,7 +123,7 @@ The core is the `APIRouter(prefix="/api/webui")` created in `src/webui/routes.py
 
 ### Compat Routers
 
-For compatibility with older frontends and some external integrations, the following three routes bypass the `/api/webui` prefix and are registered independently:
+For compatibility with older frontends and some external integrations, the following three routes are registered independently:
 
 **`/api/config/*`** (module `src/webui/routers/config.py`) — Structured read/write of TOML configuration. Paths include `/api/config/schema` (get config form schema), `/api/config/raw` (read/write complete TOML content).
 

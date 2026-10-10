@@ -34,7 +34,7 @@ API 服务器的连接端点，地址取自 `maim_message.api_server_host` 与 `
 - **`x-apikey`** — API Key，可放请求头，也可放查询串 `?api_key=`。**查询串优先**。
 - **`x-platform`** — 平台名，同样支持 `?platform=`，查询串优先。
 - **`x-uuid`** — 连接标识，不传则服务端生成。用它区分同平台的多条连接。
-- **认证失败** — 关闭码 `1000`（不是 1008），原因里带说明。
+- **认证失败** — 关闭码 `1000`，原因里带说明。
 - **白名单** — `maim_message.api_server_allowed_api_keys` 为空表示**不校验**；默认监听 `0.0.0.0`，对外暴露前务必先填白名单。
 - **心跳** — 同为协议层 PING/PONG，间隔走 uvicorn 默认值。
 :::
@@ -81,7 +81,7 @@ API 服务器的连接端点，地址取自 `maim_message.api_server_host` 与 `
 :::
 
 ::: warning `user_info` 和 `group_info` 一个都不能少
-MaiBot 在归一化时会直接断言 `user_info.user_id`、`user_info.user_nickname` 是非空字符串，群消息还要求 `group_info.group_id`、`group_info.group_name` 是非空字符串。缺字段不是友好报错，而是直接抛断言异常、这条消息丢掉。
+MaiBot 在归一化时会直接断言 `user_info.user_id`、`user_info.user_nickname` 是非空字符串，群消息还要求 `group_info.group_id`、`group_info.group_name` 是非空字符串。缺少这些字段会触发断言异常，消息会被丢弃。
 :::
 
 ## 分段类型

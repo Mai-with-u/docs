@@ -307,7 +307,7 @@ Manifest 校验器（`ManifestValidator`）采用 Pydantic 严格模式，主要
 
 ## 验证与排错
 
-**验收动作** — 先用下面的命令确认 JSON 能解析，再把 `_manifest.json` 放进插件目录并重载：WebUI 插件页里它处于已加载状态（而不是被阻止），被拦下时 Runner 日志会给出 `ManifestValidator` 的具体错误。
+**验收动作** — 先用下面的命令确认 JSON 能解析，再把 `_manifest.json` 放进插件目录并重载：WebUI 插件页里它处于已加载状态，被拦下时 Runner 日志会给出 `ManifestValidator` 的具体错误。
 
 ::: code-group
 

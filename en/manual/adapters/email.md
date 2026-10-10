@@ -40,7 +40,7 @@ If you cannot find the app-password page, common reasons are: 2-Step Verificatio
 
 - **Gmail** — IMAP `imap.gmail.com:993` (ssl), SMTP `smtp.gmail.com:587` (starttls); authenticate with an app password
 - **Outlook** — IMAP `outlook.office365.com:993` (ssl), SMTP `smtp.office365.com:587` (starttls); personal accounts use an app password
-- **QQ Mail** — IMAP `imap.qq.com:993` (ssl), SMTP `smtp.qq.com:465` (ssl); authenticate with an **authorization code**, not the QQ login password
+- **QQ Mail** — IMAP `imap.qq.com:993` (ssl), SMTP `smtp.qq.com:465` (ssl); authenticate with an **authorization code**
 
 ::: warning
 Outlook personal mailboxes work with an app password; Microsoft 365 tenants that have disabled basic IMAP authentication cannot be used at this time.
@@ -55,7 +55,7 @@ With `provider = "custom"` the plugin never overwrites the hosts you entered—c
 In the Host's **Bot settings → Other platforms**, add `email:your-bot-mailbox` (the same address as in the adapter). Without it you can still receive mail, but the Host will report "platform email has no bot account configured" when replying.
 
 ::: tip
-Host 1.2.0 and later automatically register the mail account reported by the adapter, so there is no need to write it into "Other platforms" (only an info log is recorded).
+The Host automatically registers the email account reported by the adapter; no manual platform-account configuration is needed.
 :::
 
 ## 3. Configure the adapter connection
@@ -115,9 +115,9 @@ After saving, the adapter drops the old connection and reconnects with the new s
 
 **Log says "staying idle"** — If the log says the adapter stays idle because the plugin or config is not enabled, `plugin.enabled` is still off; if address, password, or hosts are missing, the log warns about each missing field.
 
-**Login failed** — The log warns "IMAP/SMTP login failed, check the app password or authorization code": make sure you used an app password / authorization code, not the web login password; Gmail requires 2-Step Verification first.
+**Login failed** — The log warns "IMAP/SMTP login failed, check the app password or authorization code": make sure you used an app password / authorization code; Gmail requires 2-Step Verification first.
 
-**Receives but cannot reply** — The Host has not registered the mail account. Add `email:your-bot-mailbox` under "Other platforms" in bot settings (Host 1.2.0+ registers it automatically).
+**Receives but cannot reply** — Check that the adapter reports the email account correctly, then inspect account-registration and outbound-send logs.
 
 **No inbound mail** — The default whitelist mode with an empty list rejects everyone; add the sender to `allow_addresses` first. Also confirm the mail actually lands in the folder watched by `receive.folder` (only `INBOX` by default).
 

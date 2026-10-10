@@ -250,8 +250,8 @@ class MyPlugin(MaiBotPlugin):
 `self.config` 在 `on_config_update(scope="self")` 调用时已自动更新，无需手动重新读取。
 :::
 
-::: tip 1.3.2 起：保存配置不再被广播阻塞
-配置热重载广播改在后台任务里执行并**合并下发**：短时间里连续改多次配置，插件只会收到合并后的最新快照，WebUI 的保存请求也不必等广播跑完才返回，保存明显更快。回调语义不变。
+::: tip 配置回调合并
+配置热重载在后台**合并下发**。短时间内连续保存时，插件可能只收到一次回调，内容是该 scope 的完整最新配置；保存请求不等待广播完成。
 :::
 
 更多关于配置热重载的内容，参见 [生命周期](./lifecycle.md#on-config-update)。
@@ -366,4 +366,4 @@ class SimplePlugin(MaiBotPlugin):
 - **WebUI 里看不到新加的字段** — Schema 只在插件加载时生成，改完 `config_model` 要重载插件（或重启 MaiBot）；重载后 Runner 会用模型默认值补齐 `config.toml` 里缺失的字段。
 - **手改 `config.toml` 不生效或串位** — TOML 的分组要与模型嵌套层级对应（`plugin.greeting` 对应 `[plugin]` 下的 `greeting`），类型也要与字段声明一致；`config_version` 由 Runner 维护，不要手改。
 - **可变类型默认值报错** — `list`、`dict` 和嵌套 `PluginConfigBase` 要用 `default_factory=list` / `default_factory=PluginSection`，直接写 `default=[]` 会被当成共享默认值。
-- **连续保存只收到一次回调** — 1.3.2 起热重载广播会合并下发，短时间多次保存只触发一次并带上合并后的最新快照，属预期行为。
+- **连续保存只收到一次回调** — 热重载广播会合并下发，短时间多次保存只触发一次并带上合并后的最新快照，属预期行为。

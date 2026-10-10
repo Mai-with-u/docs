@@ -54,4 +54,4 @@ Enter the page that matches the error topic; when the log already contains a spe
 
 Some answers were adapted from the community-maintained document [MaiBot Tutorial — Quick FAQ / Community Tutorial](https://www.kdocs.cn/l/ctOGhVv6L8Yq). Thanks to all the authors for their support of MaiBot!
 
-The text on this site was not copied verbatim. It was reorganized, corrected, and verified against the current MaiBot configuration and code.
+The content was reorganized, corrected, and verified against the current MaiBot configuration and code.

@@ -41,7 +41,7 @@ Check the log after saving: a successful config-reload message means the new val
 
 ## Configure in the WebUI
 
-If editing files is not your thing, use the built-in web config interface (built in since 1.0.0):
+If editing files is not your thing, use the built-in web config interface:
 
 - Default address `http://127.0.0.1:8001`, works on both phones and desktops
 - The login token is printed in the first-launch log and can also be found in `data/webui.json`

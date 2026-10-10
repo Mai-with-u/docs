@@ -213,7 +213,7 @@ mid_term_memory_lenth = 10       # 最多保留多少条聊天回想；0 = 不�
 :::
 
 ::: tip 字段名 lenth 是历史拼写
-`mid_term_memory_lenth` 的字段名就是「lenth」不是「length」，改对拼写反而会变成未知字段。保持原样即可。
+字段名为 `mid_term_memory_lenth`，请保留这个拼写；修改后会被视为未知字段。
 :::
 
 #### 什么时候发言
@@ -269,9 +269,7 @@ value = 1.0
 **怎么触发思考** — `reply_trigger_mode` 决定新消息何时进入 Planner：
 
 - **`frequency`（频率触发，默认）** — 按新消息数量决定是否思考，配合 `talk_value` / `talk_value_rules` 控制频率
-- **`dynamic`（动态触发，1.3.2 起）** — 估计每批消息的回复可能性，再用 1 小时滑动窗口把实际回复次数拉回"预计回复数 × 频率"的目标，并保留空闲退避。**只在群聊生效，私聊不设门控**；没有新增配置字段，仍用 `talk_value`、`talk_value_rules`、`mentioned_bot_reply` / `inevitable_at_reply` 与 `no_action_backoff_*` 调节
-
-旧版的「必要性触发」（`reply_necessity`）已移除，升级时会自动改写为 `dynamic`。
+- **`dynamic`（动态触发）** — 估计每批消息的回复可能性，再用 1 小时滑动窗口把实际回复次数拉回"预计回复数 × 频率"的目标，并保留空闲退避。**只在群聊生效，私聊不设门控**；通过 `talk_value`、`talk_value_rules`、`mentioned_bot_reply` / `inevitable_at_reply` 与 `no_action_backoff_*` 调节
 
 #### 如何发言
 
@@ -342,7 +340,7 @@ reaction_style = "lively"         # 短反应风格："reserved" / "natural" / "
 
 :::
 
-**丰富回复去哪了** — 1.3.4 起它不再是实验功能，`enable_rich_reply` 这个开关已经删掉：回复带图片默认就能用；回复时 @ 人看 [`[chat].enable_reply_at`](#上下文与回想)；回复带表情包看 [`[emoji].use_new_send_logic`](#表情包)。
+**丰富回复** — 回复可直接携带图片；回复时 @ 人由 [`[chat].enable_reply_at`](#上下文与回想) 控制，回复中的表情由 [`[emoji].use_new_send_logic`](#表情包) 控制。
 
 **复古回复提示词** — `replyer_retro_prompt = true` 时按旧版（0.12.x）方式组织 Replyer 提示词：全部回复指令集中在一份完整模板里，整段作为一条 `user` 消息发送，历史对话渲染成纯文本填入模板占位符，不再发送图片 Item。群聊、"简短回复"、私聊和"私聊且回复麦麦自己"各用一套模板（`retro_replyer`、`retro_replyer_light`、`retro_private_replyer`、`retro_private_replyer_self`），它们在 **Prompt 管理**里以"高级"折叠展示，可以编辑和创建自定义版本。改动热重载生效。
 
@@ -361,7 +359,7 @@ ban_msgs_regex = []         # 按正则过滤消息；非法正则会导致配�
 
 #### 关键词反应
 
-命中关键词或正则后，给麦麦追加一段**反应提示**——注意这是给麦麦看的指令，不是直接发送的消息：
+命中关键词或正则后，给麦麦追加一段**反应提示**，作为生成回复的指令：
 
 ::: code-group
 
@@ -405,16 +403,16 @@ expression_groups = []                # 多个聊天共享学到的表达
 
 **要点：**
 
-- **`use_vector_expression`** — 默认开启，改用表达意图 + 嵌入模型精细召回，效果显著更好；关闭时退回随手抽取的候选。旧配置里的 `expression_selection_mode`（`legacy` / `vector_intent`，以及更早的 `vector`）已被移除，升级后首次启动会自动改写为 `use_vector_expression` 并写回文件
+- **`use_vector_expression`** — 默认开启，改用表达意图 + 嵌入模型精细召回，效果显著更好；关闭时退回随手抽取的候选。
 - **`expression_checked_only`** — 默认 `false`，即未经人工精选的表达也会参与；如果你只想让麦麦使用你审核过的表达，改为 `true`
 - **`learning_list`** — 每条规则管一个范围，`use` 控制是否使用已学内容，`learn` 控制是否继续学习，`type` 可选 `"group"` / `"private"`。范围有三种写法，越具体的越优先：
   - **指定聊天** — 填 `item_id`（群号或 QQ 号），`platform` 可填可不填
   - **平台默认** — 只填 `platform`，`item_id` 留空，管这个平台上没单独设置的聊天
   - **全局默认** — 两个都留空，前面都没命中时用它
 
-  1.3.4 起不再支持 `"*"` 通配，旧配置里的 `"*"` 升级时会自动改成留空，效果不变
+  `item_id` 不支持 `"*"` 通配；默认规则应留空。
 
-从 1.2.0 起，表达向量索引支持在线维护：新增、历史回填与失败恢复按最近聚类中心增量分配，索引文件损坏会自动重建而不是反复异常重启。该过程自动运行，无需配置。
+表达向量索引会自动维护新增数据、历史回填与失败恢复；索引文件损坏时自动重建，无需配置。
 
 #### 黑话学习
 
@@ -434,7 +432,7 @@ jargon_groups = []  # 多个聊天共享学到的黑话
 
 #### 视觉
 
-控制图片消息进入规划器和回复器的方式。**是否直接发送图片由模型能力自动决定**：当任务（如 `planner`）配置的模型全部为 `visual = true` 时才启用多模态输入，否则退化为纯文本 + 识图结果；旧版手动的「规划/回复阶段视觉模式」开关已在 1.3.2 移除。
+控制图片消息进入规划器和回复器的方式。**是否直接发送图片由模型能力自动决定**：当任务（如 `planner`）配置的模型全部为 `visual = true` 时才启用多模态输入，否则退化为纯文本 + 识图结果。
 
 ::: code-group
 
@@ -723,7 +721,7 @@ enable_llm_cache_stats = false           # [进阶] 记录模型 prompt cache �
 
 - **终端输入** — `enable_console_input` 默认开启：在交互式终端里可以直接输入普通消息，或用 `/clear`、`/pm`、`/offline`、`/online`、`/help` 等指令管理聊天和适配器，输入 `exit()` 关闭。非交互终端（systemd、nohup、`docker run` 不带 `-it`）只会多打一条 warning，不影响运行；改动需重启
 - **强制插件兼容** — `force_plugin_compatibility = true` 会跳过插件 manifest 声明的 Host/SDK 版本区间校验直接加载，**仅作临时兜底**，可能加载实际不兼容的插件；它只记一条 warning，且不影响插件市场的版本兼容性判断。开启后需重启
-- **`/clear` 指令** — 1.3.2 起 `/clear` 是内置命令，默认可用，不再需要调试开关；如需禁用，用 `[plugin].disabled_commands = ["core.clear"]`
+- **`/clear` 指令** — `/clear` 是默认可用的内置命令；如需禁用，用 `[plugin].disabled_commands = ["core.clear"]`
 
 #### 遥测
 

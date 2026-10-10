@@ -286,7 +286,7 @@ Tutorial pages use it to wrap an ordered list, and the numbers render as circula
 
 ## Snippet Import
 
-Use `<<<` to embed real files from the repository into the docs, so that example code and docs don't have to be maintained twice. `@/` means the **site root** (not the directory the current file lives in).
+Use `<<<` to embed real files from the repository into the docs, so that example code and docs don't have to be maintained twice. `@/` means the **site root**.
 
 **Usage example:**
 

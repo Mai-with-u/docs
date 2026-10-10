@@ -107,7 +107,7 @@ ORDER BY day DESC, total_cost DESC;
 4. **写入压缩包** — 以 1 MB chunk 为单位流式写入 zip。每处理一个 chunk 更新 `processed_bytes`，刷新 `progress` 百分比。达到 100% 之前 progress 最高显示 99%。
 5. **完成或清理** — 正常完成时 `status="completed"`、`progress=100`。取消时清理已生成的临时 zip。异常时记录 `error` 字段。
 
-`_raise_if_cancelled()` 检查 `job.cancel_requested` 标志，该标志由 `POST /export/{job_id}/cancel` 端点设置。由于 zip 写入是单线程的，取消并非即时生效，而是等当前 chunk 写完后下一次检查才触发。
+`_raise_if_cancelled()` 检查 `job.cancel_requested` 标志，该标志由 `POST /export/{job_id}/cancel` 端点设置。由于 zip 写入是单线程的，取消在当前 chunk 写完后的下一次检查中生效。
 
 ### Import Job 安全校验
 

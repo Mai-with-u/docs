@@ -44,7 +44,7 @@ retry_interval = 4                         # [可选] 重试间隔，单位秒�
 - **必填**：`name`（服务商名称）、`base_url`（端点地址）、`api_key`（密钥，`auth_type = "none"` 时除外）
 - **鉴权**：默认 `bearer` 适用于绝大部分服务商。其他可选 `header` / `query` / `none`
 - **客户端**：默认 `openai`。Google Gemini 用 `"gemini"`，见 [模型额外参数](./model-extra-params.md#gemini-原生-api)
-- **Responses API**：支持 OpenAI Responses 协议的服务商（如 DeepSeek v4 flash 的联网搜索）用 `"openai_responses"`（1.2.0 起正式支持），见 [模型额外参数](./model-extra-params.md#responses-api)
+- **Responses API**：支持 OpenAI Responses 协议的服务商（如 DeepSeek v4 flash 的联网搜索）用 `"openai_responses"`，见 [模型额外参数](./model-extra-params.md#responses-api)
 - **超时与重试**：`timeout` 默认 120s，`retry_interval` 默认 4s。`max_retry` 默认 3，算的是**总共请求几次**（第一次也算），所以 3 = 失败后最多再试 2 次，填 0 或 1 就是不重试
 - 其余字段参见上方注释，均有合理默认值
 
@@ -256,23 +256,11 @@ hard_timeout = 60.0                           # [可选] 硬超时（秒）
 - **视觉**：`vlm` 需 `visual = true` 的多模态模型，推荐 `qwen-vl`
 - **嵌入**：`embedding` 推荐专门嵌入模型（如 `text-embedding-3-small`），未配置则记忆搜索不可用
 - **图片嵌入**：`image_embedding` 需支持图片输入的嵌入模型，供图片记忆使用；未配置时图片资产仍会保存，但检索状态显示模型不可用
-- **不再有慢请求阈值**：旧版任务配置里的 `slow_threshold` 已移除，慢请求改由日志与统计观测；升级时会自动忽略该字段
 - 模型配置中的 `temperature` / `max_tokens` 会覆盖此处设置
 
-### 模型提供商独立保存（v1.2.5+）
+### 模型提供商独立保存
 
-
-在旧版本中，若添加服务商时模型列表为空，表单保存可能会被前端拦截。自 MaiBot v1.2.5（WebUI v1.7.4）起，支持服务商与具体模型解耦保存：
-
-
-* **支持空模型列表暂存**：进入 **模型管理 → 添加/编辑提供商**，填写提供商基础信息（名称、API Base URL、API Key）后，即使尚未添加任何具体模型，也可直接点击「保存提供商」。
-
-* **后置添加模型**：保存提供商后，可随时进入该提供商卡片点击「添加模型」手动录入，或使用自动探测功能拉取可用模型列表。
-
-
-::: tip 为什么这样改
-此改动解决了首次配置自定义或本地大模型服务商时，因无可用模型而无法先保存 Provider 鉴权信息的死锁问题。
-:::
+服务商可以在模型列表为空时保存。先配置名称、API 地址与密钥，再手动添加模型或自动探测可用模型。
 
 ### 回退规则
 

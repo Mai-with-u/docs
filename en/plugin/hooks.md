@@ -300,12 +300,12 @@ async def preserve_selected_reply(self, **kwargs):
 - **`reference_info`** `str` — Reference information passed by the reply tool. It can be rewritten.
 - **`reply_tool_args`** `dict` — Extra reply tool arguments. Changes continue to later replyer hooks.
 
-`model_name` is a concrete model name, not a task name. To route through another task's model pool, change `task_name`. If both `task_name` and `model_name` are set, the task supplies generation options such as temperature, token limit, and timeout, while `model_name` selects the actual model.
+`model_name` is a concrete model name. To route through another task's model pool, change `task_name`. If both `task_name` and `model_name` are set, the task supplies generation options such as temperature, token limit, and timeout, while `model_name` selects the actual model.
 
 If you need to rewrite the exact message list sent by the replyer, use `maisaka.replyer.before_model_request`. This Hook fires after the replyer has built `messages` for the currently selected model capability. Blocking handlers can return a new `messages` list; this is useful for inserting a synthetic first `user` message after `system`, experimenting with temporary prompts, or logging the final request body. The Hook only changes this temporary LLM request and does not write back to chat history or affect mid-term memory insertion.
 
 ::: tip An easier alternative
-If you only want to inject parameters into a reply or rewrite reply content before sending (for example, turning text into voice), prefer the [Reply Extension](./reply-extensions.md) (since 1.3.5): no Planner Hook changes, and sending, history, and failure handling are managed by the main program.
+If you only want to inject parameters into a reply or rewrite reply content before sending (for example, turning text into voice), prefer the [Reply Extension](./reply-extensions.md): no Planner Hook changes, and sending, history, and failure handling are managed by the main program.
 :::
 
 A common pattern is to first use `maisaka.planner.before_request` to add a parameter schema to the built-in `reply` tool so the planner can fill that parameter, then read `reply_tool_args` in `maisaka.replyer.before_request` to route the model:
@@ -369,7 +369,7 @@ async def replace_expression_selection(self, **kwargs):
 
 ## Host Validation Rules
 
-During plugin registration, the Host validates `@HookHandler` declarations. An invalid declaration fails plugin registration outright (rather than ending in the half-successful state of "loaded, but the Hook never fires"). The rules are:
+During plugin registration, the Host validates `@HookHandler` declarations. An invalid declaration fails plugin registration outright. The rules are:
 
 1. **The Hook name must be registered**: the `hook` argument must be a name that already exists in the built-in Hook list above. Passing an unregistered Hook name fails registration.
 2. **mode must satisfy the Hook's capability constraints**: the Host checks whether `mode` is compatible with that Hook point's capabilities (for example, a Hook that only allows parameter modification cannot run in a mode that forbids it).
@@ -437,7 +437,7 @@ async def on_pre_process(self, **kwargs):
 
 **Verification** — reload the plugin, then trigger the chain once (for example, have the bot receive a message so `chat.receive.before_process` fires): the Runner log shows your handler's output and the message is modified or aborted as expected, which means the hook name, mode, and return value are all correct.
 
-- **Plugin registration fails outright instead of the Hook silently not firing** — the Host validates declarations at registration time: `hook` must be a name from the built-in list, and one wrong word (such as `chat.receive.before_processing`) fails registration, with the offending component named in the log.
+- **Plugin registration fails** — the Host validates declarations at registration time: `hook` must be a name from the built-in list, and one wrong word (such as `chat.receive.before_processing`) fails registration, with the offending component named in the log.
 - **You declared `ErrorPolicy.ABORT` for a Hook that does not allow abort** — `send_service.after_send`, `maisaka.planner.*`, `maisaka.replyer.*`, and `maisaka.reply.before_post_process` do not allow abort, so that declaration fails registration; drop the policy or subscribe to a Hook that allows abort.
 - **Your `modified_kwargs` changes are ignored** — return values are honored only in `mode=HookMode.BLOCKING`; `OBSERVE` handlers run concurrently in the background and their `modified_kwargs` and `abort` requests are discarded.
 - **The plugin raises `RuntimeError` after upgrading to SDK 2.0** — it still contains `@WorkflowStep`, which SDK 2.0 removed with no compatibility mapping; migrate to `@HookHandler` (`blocking=True` → `mode=HookMode.BLOCKING`, `priority=10` → `order=HookOrder.EARLY`).

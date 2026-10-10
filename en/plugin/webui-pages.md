@@ -4,7 +4,7 @@ title: WebUI Pages
 
 # WebUI Pages
 
-Since 1.3.2 (WebUI 1.8.1), a plugin can place a `webui.json` in its own directory to **declare** custom pages for the WebUI — a top workspace or a sidebar entry. The host renders the page, so you do not need to install Node, build a frontend, or modify the main program; edit `webui.json` and reload the plugin to take effect.
+A plugin can place a `webui.json` in its own directory to **declare** custom pages for the WebUI — a top workspace or a sidebar entry. The host renders the page, so you do not need to install Node, build a frontend, or modify the main program; edit `webui.json` and reload the plugin to take effect.
 
 The mechanism only describes "what to show and which API to bind". A page can call **only your own** plugin APIs; it cannot inject HTML / JS / CSS or request arbitrary addresses.
 
@@ -90,10 +90,10 @@ class MyPlugin(MaiBotPlugin):
 - **`workspace_title`** — the name of the workspace that holds `workspace` pages; a plugin may have several `workspace` pages, and the first one is the default, with the rest going into the top "more" overflow menu
 - **`id` / `title` / `description`** — page identifier, title, and description. The host generates the path as `/extensions/{plugin_id}/{page_id}`; a plugin cannot define arbitrary routes or override built-in entries
 - **`icon`** — only the five built-in icons `puzzle`, `chart`, `settings`, `database`, and `list` are accepted
-- **Entry ordering** — users can reorder entries or hide a whole plugin's entries in the "manage plugin pages" area at the bottom of the "Plugin Extensions" page (`/plugin-config`); that preference is stored only in the current browser and only affects display, not backend authorization
+- **Entry ordering** — users can reorder entries or hide a whole plugin's entries in the "manage plugin pages" area at the bottom of the "Plugin Extensions" page (`/plugin-config`); that preference is stored only in the current browser and only affects display
 
 ::: tip Two independent channels from "plugin configuration"
-`webui.json` only handles custom pages. It is **not a manifest field**, page declarations themselves do not need to be added to `capabilities`, and bound APIs do not need `public=True`. SDK operations such as claiming uploads still require their own manifest permissions. A plugin's `config.toml` and its auto-generated config form are still handled by the Plugin Configuration page; the two do not affect each other.
+`webui.json` only handles custom pages. Page declarations themselves do not need to be added to `capabilities`, and bound APIs do not need `public=True`. SDK operations such as claiming uploads still require their own manifest permissions. A plugin's `config.toml` and its auto-generated config form are still handled by the Plugin Configuration page; the two do not affect each other.
 :::
 
 The official example plugin `hello_world_plugin` ships two pages (a top `overview` and a sidebar `greeting`) as a minimal reference; see its `webui.json` for the complete declaration, with page paths like `/extensions/maibot-team.hello-world-plugin/overview`.
@@ -110,7 +110,7 @@ Each page declares the APIs it calls through `queries` (read-only) and `actions`
 - `queries` run **in order** when the page opens and refreshes; after an `actions` call succeeds, queries run again to refresh the data
 - APIs must belong to the current plugin and be enabled; cross-plugin calls, dynamic APIs, and arbitrary request addresses are unsupported (`public=True` does not automatically expose an API to the WebUI)
 - Action parameters are taken from the current form fields according to `parameters`; optional fields left empty are not sent. Parameter types are `string` / `integer` / `number` / `boolean`, with optional `required`, `max_length` (default 4000, maximum 65536), `minimum`, `maximum`, and `choices`; there is **no implicit type conversion**, and undeclared parameters are rejected
-- **Dangerous actions must declare a `confirmation` message** (so must buttons with `variant: "danger"`), and the host shows a confirm dialog. Confirmation only prevents misclicks; it is not independent authorization or business validation
+- **Dangerous actions must declare a `confirmation` message** (so must buttons with `variant: "danger"`), and the host shows a confirm dialog. Confirmation prevents misclicks; the plugin API must still enforce authorization and business validation
 
 ::: tip Keep queries read-only
 The host cannot tell whether a Python method has side effects, so it relies on the declaration. Put anything with side effects in `actions`, or refreshing the page will repeat the write.
@@ -136,7 +136,7 @@ A page is a component tree under `content`. All colors, spacing, fonts, dark mod
 
 **`value` may be a scalar or a data reference** `{ "source": "query alias", "field": "totals.count" }`: `source` must be an alias declared in this page's `queries`, and an empty `field` means the query's full return value. Tables and charts must use data references; computed expressions and scripts are unsupported.
 
-**Data validation before rendering** (done by the frontend; when it fails the whole page shows an `invalidData` error rather than silently truncating):
+**Data validation before rendering** (done by the frontend; when it fails the whole page shows an `invalidData` error):
 
 - `table` binds an array of objects, 50 rows per page
 - `chart` binds an array of objects, at most 2000 rows; `x` must be a string or number and `y` must be a number; `chart_type` is `line` / `bar`
@@ -144,7 +144,7 @@ A page is a component tree under `content`. All colors, spacing, fonts, dark mod
 
 ## Upload and interaction capabilities
 
-Declare top-level `required_capabilities` in `webui.json` when using uploads or new interaction controls. `file_upload` means file uploads are supported; `interactive_controls` means the newer controls are supported. These are compatibility checks, not permissions, and their names have no version suffix. Existing declarations may omit the field. Upgrade both the host and dashboard if a required capability is missing; updating the Python SDK alone does not add frontend controls.
+Declare top-level `required_capabilities` in `webui.json` when using uploads or new interaction controls. `file_upload` means file uploads are supported; `interactive_controls` means the newer controls are supported. These check frontend feature compatibility; SDK permissions are declared in the manifest’s `capabilities`. Capability names have no version suffix. Existing declarations may omit the field. Upgrade both the host and dashboard if a required capability is missing; updating the Python SDK alone does not add frontend controls.
 
 Claiming uploads requires SDK 2.11.0+ and the upload-enabled host introduced in the MaiBot 1.3.6 development version. Before SDK 2.11.0 is published, local development can point `MAIBOT_PLUGIN_SDK_PATH` to the SDK source. Separately declare `webui.claim_upload` in the plugin manifest's `capabilities`; this grants API access and is distinct from page compatibility.
 

@@ -25,7 +25,7 @@ Your plugin must be a **public GitHub repository** whose root directory contains
 **`README.md`** — Recommended: feature introduction, installation instructions, configuration notes, and usage examples
 
 ::: tip What "plugin repository" means
-The plugin repository is **your own standalone (or project) GitHub repository** (e.g. `https://github.com/you/my-plugin`) — not MaiBot's `plugins/` directory. The plugin center locates it via the `urls.repository` field in `_manifest.json`.
+The plugin repository is **your own standalone (or project) GitHub repository** (e.g. `https://github.com/you/my-plugin`). The plugin center locates it via the `urls.repository` field in `_manifest.json`.
 :::
 
 ## Publishing a Release: Tags Must Match the Manifest
@@ -35,7 +35,7 @@ The plugin market's install dialog works by **release version**: the official in
 Align every item when publishing a new version:
 
 - **The Git Tag matches `_manifest.json`'s `version` exactly** — tag `1.4.2` or `v1.4.2`, and the manifest `version` must be `1.4.2`
-- **`version` uses strict three-part form** — `x.y.z`, with no `-rc1` / `+build` style suffixes; mark prereleases with GitHub's Prerelease flag instead of changing the version format
+- **`version` uses strict three-part form** — `x.y.z`, with no `-rc1` / `+build` style suffixes; mark prereleases with GitHub's Prerelease flag
 - **The plugin `id` must not change** — a release that changes `id` from `com.you.plugin` to something else is rejected as "the release changed the plugin ID"
 - **`manifest_version` stays on a supported protocol version** — currently fixed at `2`
 - **`_manifest.json` must be readable from that tag's commit** — tags with rewritten history or a deleted manifest are rejected

@@ -14,7 +14,7 @@ titleTemplate: :title · 模型高级参数
 - **`body`** — 合并到请求体
 - **其他普通键** — 作为请求体额外字段传入（OpenAI SDK 的 `extra_body`）
 
-当 `client_type = "gemini"` 时，`extra_params` 不按上述规则拆分，而是由 Gemini 客户端按自身支持的字段筛选和映射到 `GenerateContentConfig`。
+当 `client_type = "gemini"` 时，`extra_params` 由 Gemini 客户端按自身支持的字段筛选和映射到 `GenerateContentConfig`。
 
 ---
 
@@ -274,9 +274,9 @@ extra_params = {thinking = {type = "enabled"}, reasoning_effort = "high"}
 上面四段是**手写** `extra_params` 的参考。WebUI 开关只按模板判断能不能关闭，模型个体的限制写在开关下方的小字里（例如 Kimi k2.7-code、MiniMax M2.x）；智谱 GLM-5.3 是模板按模型标识单独收紧的限制，开关会直接置灰。在源文件里给不支持的模型写了 `disabled`，保存时会报「当前模型不支持关闭思考」。
 :::
 
-#### 新增的服务商套餐模板
+#### 服务商套餐模板
 
-MaiBot 1.3.1 新增三个套餐制服务商模板，思考开关与对应按量付费模板一致：
+套餐制服务商模板包括以下三种，思考开关与对应按量付费模板一致：
 
 - **智谱编程套餐（GLM Coding Plan）** — `https://open.bigmodel.cn/api/coding/paas/v4`
 - **阶跃 Step Plan** — `https://api.stepfun.com/step_plan/v1`
@@ -381,7 +381,7 @@ extra_params = {enable_thinking = false}
 
 部分服务商（如 DeepSeek v4 flash 联网搜索）使用 OpenAI 的 **Responses 协议**，需要在服务商配置中设置 `client_type = "openai_responses"`。Responses API 的参数格式与 Chat Completions 略有不同：
 
-- **思考模式**：使用 `reasoning = {effort = "..."}` 而不是 `thinking`/`reasoning_effort`，`effort` 可选 `none` / `low` / `high` / `max`
+- **思考模式**：使用 `reasoning = {effort = "..."}`，`effort` 可选 `none` / `low` / `high` / `max`
 - **联网搜索**：把 `web_search` 原生工具写入 `tools` 列表即可启用
 
 ::: code-group
@@ -425,7 +425,7 @@ extra_params = {reasoning = {effort = "high"}, tools = [{type = "web_search"}]}
 
 ### Gemini 原生 API
 
-当 `client_type = "gemini"` 时，`extra_params` 不按 OpenAI 的 `headers/query/body` 规则处理，而是由 Gemini 客户端按自身支持的字段筛选和映射到 `GenerateContentConfig`。
+当 `client_type = "gemini"` 时，`extra_params` 由 Gemini 客户端按自身支持的字段筛选和映射到 `GenerateContentConfig`。
 
 #### Gemini 2.5（thinking_budget）
 
@@ -554,7 +554,7 @@ extra_params = {
 
 **`body` 内字段 + 其他普通键** — 请求体 JSON：`{"metadata": {"source": "maibot"}, "enable_thinking": false}`
 
-所以 `extra_params = {enable_thinking = "false"}` 等价于 `extra_params = {body = {enable_thinking = "false"}}`，都会把 `enable_thinking` 作为请求体 JSON 字段发给服务商，而不是发送嵌套的 `{"extra_params": {"enable_thinking": "false"}}`。
+所以 `extra_params = {enable_thinking = "false"}` 等价于 `extra_params = {body = {enable_thinking = "false"}}`，都会把 `enable_thinking` 作为请求体 JSON 字段发给服务商。
 
 ## 图片嵌入模型
 
@@ -595,7 +595,7 @@ extra_params = {dimensions = 1024}
 
 - 走百炼/方舟原生协议时，`model`、`input`（方舟再加 `encoding_format`）是保留字段，不允许通过 `extra_params` 覆盖，写了会报错
 - 百炼原生协议下，向量维度既可以写顶层 `dimensions`，也可以写 `parameters.dimension`，两处都写且值不同会报错
-- 1.3.1 起 `image_embedding` 任务没配模型时会立刻报错，提示你在 `image_embedding` 里指定支持图片嵌入的模型，不会再一路拖到请求阶段才失败
+- `image_embedding` 任务没配模型时会报错，需要指定支持图片输入的嵌入模型
 - `embedding` 和 `image_embedding` 两个嵌入任务会忽略 `selection_strategy`，始终按 `model_list` 配置顺序取第一个可用模型——向量空间必须保持一致，多个嵌入模型混用会污染向量库
 
 ## 高级鉴权配置

@@ -30,7 +30,7 @@ title: 模型与 API
 
 依次检查：
 
-1. 选择的确实是 embedding 模型，而不是聊天或视觉模型。
+1. 选择的是 embedding 模型。
 2. 模型标识符、API Key 和 `base_url` 正确。
 3. 服务提供标准 OpenAI 兼容接口时，端点通常为 `/v1/embeddings`。
 4. 输入没有超过模型长度限制。

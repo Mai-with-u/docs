@@ -155,4 +155,4 @@ During debugging you can temporarily skip validation with `debug.force_plugin_co
 - **Component registration failed** — registration is all-or-nothing: if one component's type or Hook name is invalid, the whole plugin fails to register, and the log points at the specific one.
 - **A capability call was rejected** — it is not declared in `capabilities`; add it by capability name and reload.
 - **Code changes have no effect** — confirm the file really is inside the plugin directory; a failed reload rolls back automatically, and the rollback is visible in the log.
-- **Model / send calls fail without an exception** — plugin component exceptions do not become RPC errors; they are written into the response payload as `success: false`, so remember to check the return value.
+- **Model / send calls fail without an exception** — plugin component exceptions are reported in the response payload as `success: false`, so remember to check the return value.

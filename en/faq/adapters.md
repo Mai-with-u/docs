@@ -18,7 +18,7 @@ Also verify the logged-in QQ account, group ID, speaking permission, and whether
 
 ## Which NapCat token should I use?
 
-Use the access token configured for the NapCat WebSocket service, entered in the `token` field of the `[client]` section in `plugins/MaiBot-SnowLuma-Adapter/config.toml` (the same field is editable in the WebUI plugin settings). It is not the NapCat WebUI login token or the MaiBot WebUI access password (shown as "Access Token" on the login page). If WebSocket authentication is disabled, leave `token` empty; otherwise both sides must use exactly the same value.
+Use the access token configured for the NapCat WebSocket service, entered in the `token` field of the `[client]` section in `plugins/MaiBot-SnowLuma-Adapter/config.toml` (the same field is editable in the WebUI plugin settings). If WebSocket authentication is disabled, leave `token` empty; otherwise both sides must use exactly the same value.
 
 ## Why can't the Unified QQ Connector reach SnowLuma / NapCat?
 

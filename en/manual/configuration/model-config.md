@@ -44,7 +44,7 @@ retry_interval = 4                         # [Optional] Retry interval in second
 - **Required**: `name` (provider name), `base_url` (endpoint URL), `api_key` (key, except when `auth_type = "none"`)
 - **Authentication**: Default `bearer` works for most providers. Other options are `header` / `query` / `none`
 - **Client**: Default is `openai`. For Google Gemini use `"gemini"`, see [Model Extra Params](./model-extra-params.md#gemini-native-api)
-- **Responses API**: For providers supporting the OpenAI Responses protocol (e.g. DeepSeek v4 flash web search) use `"openai_responses"` (officially supported since 1.2.0), see [Model Extra Params](./model-extra-params.md#responses-api)
+- **Responses API**: For providers supporting the OpenAI Responses protocol (e.g. DeepSeek v4 flash web search) use `"openai_responses"`, see [Model Extra Params](./model-extra-params.md#responses-api)
 - **Timeout & Retry**: `timeout` defaults to 120s and `retry_interval` to 4s. `max_retry` defaults to 3 and counts **total requests**, the first one included — so 3 means up to 2 more tries after a failure, and 0 or 1 means no retry
 - See comments above for other fields, all have reasonable default values
 
@@ -256,19 +256,11 @@ hard_timeout = 60.0                           # [Optional] Hard timeout (seconds
 - **Vision**: `vlm` requires a multimodal model from `visual = true`, `qwen-vl` recommended
 - **Embedding**: `embedding` recommends a dedicated embedding model (e.g., `text-embedding-3-small`); if not configured, memory search will be unavailable
 - **Image Embedding**: `image_embedding` requires an embedding model that supports image input, used by image memory; when unconfigured, image assets are still saved, but the retrieval status shows the model as unavailable
-- **No more slow-request threshold**: the legacy `slow_threshold` in task config has been removed, and slow requests are now observed via logs and statistics; the field is ignored automatically on upgrade
 - `temperature` / `max_tokens` in model config will override settings here
 
-### Standalone Model Provider Saving (v1.2.5+)
+### Save Providers Independently
 
-In earlier versions, attempting to save a provider with an empty model list was blocked by frontend form validation. Starting with MaiBot v1.2.5 (WebUI v1.7.4), providers and models are decoupled during configuration:
-
-* **Support Saving Without Models**: Navigate to **Model Management → Add/Edit Provider**. After filling in the basic provider details (Name, API Base URL, API Key), you can click **Save Provider** immediately even if no specific models have been added yet.
-* **Deferred Model Addition**: Once the provider is saved, you can add models at any time under its provider card—either by clicking **Add Model** manually or by using the auto-detection feature to fetch available models from the endpoint.
-
-::: tip Preventing Configuration Deadlock
-This change resolves the deadlock where setting up custom or local LLM providers without pre-existing model lists prevented saving provider credentials.
-:::
+A provider can be saved with an empty model list. Configure its name, API URL, and key first, then add models manually or discover available models automatically.
 
 ### Fallback Rules
 

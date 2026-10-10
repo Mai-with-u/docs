@@ -56,7 +56,7 @@ force_plugin_compatibility = true
 
 :::
 
-When enabled, the version range check is skipped and only one warning is logged (including the declared Host / SDK range and the current version), so the load is no longer rejected; **you must restart MaiBot for the change to take effect**. This is a temporary fallback, not a recommended practice — the plugin may genuinely be incompatible, and forcing the load can cause runtime errors. Once a compatible plugin version is available, set it back to `false` and update the plugin. For a full description of this switch, see [Bot Configuration · Debug](../manual/configuration/bot-config.md#debugging).
+When enabled, the version range check is skipped and only one warning is logged (including the declared Host / SDK range and the current version), so the load is no longer rejected; **you must restart MaiBot for the change to take effect**. Use this switch temporarily to diagnose version compatibility; forcing an incompatible plugin to load can cause runtime errors. Once a compatible plugin version is available, set it back to `false` and update the plugin. For a full description of this switch, see [Bot Configuration · Debug](../manual/configuration/bot-config.md#debugging).
 
 ### Prevention Tips
 - Check the documentation before installing a plugin to confirm compatible MaiBot version
@@ -80,7 +80,7 @@ When enabled, the version range check is skipped and only one warning is logged 
 ### Solutions
 
 **Step 1: Confirm the Adapter Is Connected**
-In 1.3.1, platform accounts are maintained on the adapter side and are not filled into `bot_config.toml`. First confirm that NapCat (or another adapter) is started and connected to MaiBot according to the [Adapters](/en/manual/adapters/) documentation.
+Platform accounts are maintained on the adapter side and are not filled into `bot_config.toml`. First confirm that NapCat (or another adapter) is started and connected to MaiBot according to the [Adapters](/en/manual/adapters/) documentation.
 
 **Step 2: Check Adapter Connection Status**
 ::: code-group

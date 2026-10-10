@@ -21,7 +21,7 @@ Open the Long-term Memory page; the tab bar is organized by purpose:
 
 The "更多操作" (More actions) menu in the top-right corner also has **查看记忆状态** (View memory status) and **打开图谱** (Open graph); `tab=graph` in old links still opens the graph directly.
 
-When memory needs a vector rebuild, a **"重建向量" (Rebuild vectors) button appears directly on the right of the top tab bar** (since 1.3.2), so you no longer have to dig into Memory inspection; it carries a hover note and shows an in-progress state while rebuilding.
+Use "重建向量" (Rebuild vectors) when memory vectors need rebuilding.
 
 ## Search Memory
 
@@ -67,9 +67,7 @@ Review memory changes for each chat flow:
 
 ![Audit timeline](/images/webui/knowledge-timeline.webp)
 
-- Memory audit events (add, update, delete, etc.) paginated in reverse chronological order
-- Filter by chat flow and event type
-- Change summaries are merged directly into the event list
+Filter memory additions, updates, deletions, and change summaries by chat stream and event type.
 
 ## Import & Memory Bundles
 
@@ -96,7 +94,7 @@ The **导入导出** (Import & export) tab lets you teach MaiBot new knowledge m
 
 Members include `manifest.json`, `knowledge.json`, an optional `state.json`, paragraph and relation vectors, and for image memory `images.json`, `images/assets/` (original images), and an optional `vectors/images.npz` (image vectors).
 
-**Capacity and compatibility**: a bundle holds at most 4096 members, a single member may not exceed 256 MiB uncompressed, and total uncompressed size may not exceed 1 GiB (the old 32-member limit has been relaxed). Legacy-format (v1) text-only bundles can still be installed directly. Installation **calls no LLM at all**: package vectors are reused when usable, and when missing or unusable only the image vector index is rebuilt — no extraction is redone.
+**Capacity and compatibility**: a bundle holds at most 4096 members, a single member may not exceed 256 MiB uncompressed, and total uncompressed size may not exceed 1 GiB. Legacy-format (v1) text-only bundles can still be installed directly. Installation **calls no LLM at all**: package vectors are reused when usable, and when missing or unusable only the image vector index is rebuilt — no extraction is redone.
 
 ## Correct Memory
 
@@ -114,9 +112,7 @@ Don't want to remember something? The **记忆抹除** (Memory purge) tab suppor
 
 ![Delete memory](/images/webui/knowledge-delete.webp)
 
-- Single delete: find the memory and click "删除" (Delete)
-- Bulk delete: select multiple items and delete together
-- Delete by source: delete all memories of a chat flow
+Delete individual memories, multiple memories, or all memories from a chat stream.
 
 ⚠️ **Note**: deleted items go to the recycle bin and can be restored
 
@@ -146,13 +142,12 @@ If MaiBot's memory is poor, run a tuning task to optimize retrieval (**记忆检
 
 ![Retrieval tuning](/images/webui/knowledge-tuning.webp)
 
-- The page keeps only the description and the start button
-- Tuning parameters live in the "调优参数" (Tuning parameters) dialog; they only affect the next tuning task, and defaults are usually fine
+- Tuning parameters affect only the next tuning task; the defaults are usually appropriate
 - After a task completes, review the evaluation result and apply the recommendation with one click if it passes validation
 
 ## Runtime Maintenance
 
-**记忆检修 → 状态维护** (Memory inspection → State maintenance) provides runtime self-checks, the auto-save switch, vector rebuild, paragraph vector backfill, image asset reconciliation, import tasks, and delete operation records. The "更多操作 → 查看记忆状态" (More actions → View memory status) dialog in the top-right corner centralizes the runtime status (including vector rebuild and data refresh); when a rebuild is needed, a shortcut "重建向量" (Rebuild vectors) button also appears on the right of the top tab bar.
+**记忆检修 → 状态维护** (Memory inspection → State maintenance) provides runtime checks, auto-save, vector rebuild, paragraph vector backfill, image asset reconciliation, and operation records. View the current runtime state under "更多操作 → 查看记忆状态" (More actions → View memory status).
 
 ![State maintenance](/images/webui/knowledge-maintenance.webp)
 

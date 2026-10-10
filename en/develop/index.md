@@ -17,6 +17,6 @@ The card wall helps you pick a route; the sidebar pages explain each route in de
 - **Programmatic access** — start at the [API overview](./webui-api/), then branch into auth & setup, system control, data & memory, plugin management, and realtime stats.
 - **Data & Statistics** — [Data & Statistics](./statistics-io.md): aggregation tables, export paths, and the Data-Transfer pipeline.
 
-## Not here to write code?
+## Deployment and usage
 
-If you just want to run MaiBot yourself, you don't need this section — head to the [User Manual](/en/manual/) for guided deployment and configuration. Stuck on something? Check the [FAQ](/en/faq/) first.
+For deployment and configuration tutorials, see the [User Manual](/en/manual/). For troubleshooting, check the [FAQ](/en/faq/).

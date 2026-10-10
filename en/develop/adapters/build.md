@@ -67,7 +67,7 @@ flowchart TB
    - **`send_image`** — inbound images are base64; most platforms need them written to disk or uploaded before they can be sent.
    - **`poll_events`** — collect platform events into a list of dictionaries; the field conventions are in the next step.
 
-4. Assemble the inbound packet. This is the easiest place in the whole page to trip up: MaiBot uses **assertions** rather than friendly validation for required fields, and one missing field loses the whole message.
+4. Assemble the inbound packet. Missing required fields trigger MaiBot’s **assertions**, and the message is dropped.
 
    <<< @/zh/examples/adapter-minimal/adapter.py#inbound [inbound assembly ~vscode-icons:file-type-python~]
 

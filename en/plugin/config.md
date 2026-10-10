@@ -250,8 +250,8 @@ class MyPlugin(MaiBotPlugin):
 `self.config` is automatically updated when `on_config_update(scope="self")` is called, so there is no need to manually re-read it.
 :::
 
-::: tip Since 1.3.2: saving configuration no longer blocks on the broadcast
-Config hot-reload broadcasts now run in a background task and are **coalesced before delivery**: when you change configuration several times in quick succession, the plugin receives only one merged latest snapshot, and the WebUI save request no longer waits for the broadcast to finish, so saving is noticeably faster. Callback semantics are unchanged.
+::: tip Coalesced Configuration Callbacks
+Configuration reloads are **coalesced and delivered in the background**. Several saves in quick succession may produce a single callback containing the complete latest configuration for that scope. Save requests do not wait for the broadcast.
 :::
 
 For more on configuration hot reloading, see [Lifecycle](./lifecycle.md#on-config-update).
@@ -366,4 +366,4 @@ However, it is recommended to always use `config_model` for better type safety a
 - **A newly added field never shows up in the WebUI** — the Schema is generated only when the plugin loads, so reload the plugin (or restart MaiBot) after editing `config_model`; on reload the Runner fills missing `config.toml` fields with the model defaults.
 - **A hand-edited `config.toml` is ignored or lands in the wrong section** — TOML groups must mirror the nested model (`plugin.greeting` lives under `[plugin]`) and value types must match the field declarations; `config_version` is maintained by the Runner, so leave it alone.
 - **Pydantic rejects a mutable default** — use `default_factory=list` / `default_factory=PluginSection` for `list`, `dict`, and nested `PluginConfigBase` fields instead of `default=[]`, which would be shared.
-- **Several quick saves trigger only one callback** — since 1.3.2 the hot-reload broadcast is coalesced; consecutive saves deliver a single merged latest snapshot, which is expected.
+- **Several quick saves trigger only one callback** — the hot-reload broadcast is coalesced; consecutive saves deliver a single merged latest snapshot, which is expected.

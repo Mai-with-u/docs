@@ -40,7 +40,7 @@ JSON objects are exchanged between client and server. Each client message must i
 
 **`domain: "plugin_progress", topic: "main"`** — Plugin progress. After subscribing, the server immediately pushes a `plugin_progress/snapshot` event replaying the current progress state of all plugins
 
-**`domain: "plugin_runtime", topic: "main"`** — Plugin runtime status notifications (since 1.3.5). When plugins register/unregister or the Runner process state changes, a `plugin_runtime/changed` event is pushed (with no data); just refetch the full plugin list snapshot on receipt
+**`domain: "plugin_runtime", topic: "main"`** — Plugin runtime status notifications. When plugins register/unregister or the Runner process state changes, a `plugin_runtime/changed` event is pushed (with no data); just refetch the full plugin list snapshot on receipt
 
 **`domain: "maisaka_monitor", topic: "main"`** — MaiSaka inference monitoring. After subscribing, the server first pushes a `maisaka_monitor/planner.reset` event (a marker that resets the Planner delta baseline), then replays monitor event history, controllable via `data.since_event_id` and `data.replay_limit` (range 1-10000, default 1000). After replay completes, a `maisaka_monitor/stage.snapshot` event is also pushed showing the current state of each stage. Planner progress/result events are transferred as deltas per connection: the first one (or the first after a reconnect or re-subscribe) is a full snapshot, and later ones arrive as `planner.delta` carrying only changed fields and appended tool entries
 
@@ -167,9 +167,9 @@ All reasoning process endpoints require Cookie auth and are mounted under the `/
 
 **`action`** — Filter by action name (only effective for planner and jargon learning stages)
 
-The response body includes `items` (log entry list), `total`, `stages`, `stage_infos`, `sessions`, `session_infos`, etc. Each entry contains `stage`, `session_id`, `stem` (filename stem), `output_preview` (replyer stage), `action_preview` (planner stage), `model_name`, `duration_ms`, and (since 1.2.0) token usage stats such as `prompt_tokens`, `completion_tokens`, `total_tokens`.
+The response body includes `items` (log entry list), `total`, `stages`, `stage_infos`, `sessions`, `session_infos`, etc. Each entry contains `stage`, `session_id`, `stem` (filename stem), `output_preview` (replyer stage), `action_preview` (planner stage), `model_name`, `duration_ms`, and token usage stats such as `prompt_tokens`, `completion_tokens`, `total_tokens`.
 
-**`GET /api/webui/reasoning-process/file?path=<relative_path>`** — Read the complete text content of a single reasoning log (txt or json). Returns `content`, `size`, `modified_at`, `model_name`, `duration_ms`, `prompt_tokens`, `completion_tokens`, `total_tokens` (since 1.2.0), and the message sender avatar map `message_avatars`
+**`GET /api/webui/reasoning-process/file?path=<relative_path>`** — Read the complete text content of a single reasoning log (txt or json). Returns `content`, `size`, `modified_at`, `model_name`, `duration_ms`, `prompt_tokens`, `completion_tokens`, `total_tokens`, and the message sender avatar map `message_avatars`
 
 **`GET /api/webui/reasoning-process/html?path=<relative_path>`** — Preview a reasoning log as HTML. Returns a `text/html` file stream, suitable for rendering a structured preview of the prompt directly in the browser
 

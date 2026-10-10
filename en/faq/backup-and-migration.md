@@ -64,5 +64,5 @@ Check version compatibility, configuration upgrades, database migration failures
 
 This is the WebUI outbound URL safety check. After confirming that the target is a trusted local or private-network model service, you can disable `enforce_public_outbound_url`. Doing so permits private addresses and reduces protection against server-side request forgery.
 
-For Docker or remote services, also confirm that `127.0.0.1` is not incorrectly pointing to the current container.
+For Docker or remote services, use a model-service address reachable from the environment running MaiBot.
 

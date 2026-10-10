@@ -113,7 +113,7 @@ WebUI 的 `host` 默认值是 `127.0.0.1`，在 Docker 容器内这意味着只�
 :::
 
 ::: tip
-如果你的服务器安装的是独立版 Docker Compose，命令需要写成 `docker-compose`（带短横线）而不是 `docker compose`。
+如果你的服务器安装的是独立版 Docker Compose，命令需要写成 `docker-compose`（带短横线）。
 :::
 
 ## Docker 镜像直接部署

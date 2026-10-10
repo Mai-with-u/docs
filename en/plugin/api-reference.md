@@ -79,7 +79,7 @@ await self.ctx.send.hybrid([
 
 Note: `send.custom()` carries both the `custom_type/data` and `message_type/content` field sets at once, for compatibility with Host implementations across versions. The plugin side only needs to keep passing `custom_type` and `data`.
 
-**Return value (since 1.2.0)**: by default all `send.*` methods return `bool`, indicating whether the message was sent successfully. When `return_details=True` is passed, they return a detailed result containing the final message ID confirmed by the platform, which is convenient for later references (such as recall):
+**Return value**: by default all `send.*` methods return `bool`, indicating whether the message was sent successfully. When `return_details=True` is passed, they return a detailed result containing the final message ID confirmed by the platform, which is convenient for later references (such as recall):
 
 ::: code-group
 
@@ -115,7 +115,7 @@ db = self.ctx.db
 
 The return value of `db.count()` is always an `int`. Even when the Host-side RPC returns an object with a `count` field, the SDK unwraps it automatically.
 
-Note: `model_name` here must be a model class name that exists in the Host-side `src.common.database.database_model`, such as `"ChatHistory"` or `"ActionRecord"`. The legacy `table` parameter name and the `db.get(key_field, key_value)` form are deprecated.
+Note: `model_name` here must be a model class name that exists in the Host-side `src.common.database.database_model`, such as `"ChatHistory"` or `"ActionRecord"`.
 
 ::: code-group
 
@@ -268,7 +268,7 @@ config = self.ctx.config
 
 - `await config.get(key, default=None)` — read a field from the **global Bot configuration** (`bot_config.toml`); `key` supports dot-separated paths
 - `await config.get_plugin(plugin_name=None)` — get the configuration of the specified plugin; when `plugin_name` is omitted, the current plugin
-- `await config.get_all()` — get **all configuration of the current plugin**; the name is misleading — it does not read the global Bot configuration
+- `await config.get_all()` — get **all configuration of the current plugin**
 
 The structure and defaults of plugin configuration are defined by the plugin's `config_model`. The Runner stores the values of the current installation in the auto-generated `config.toml` under the plugin directory; `config.get_plugin()` and `config.get_all()` read that runtime configuration already loaded by the Runner, while `config.get()` reads the Host's global Bot configuration and has nothing to do with the plugin's own `config.toml`.
 
@@ -349,7 +349,7 @@ chat = self.ctx.chat
 - `await chat.get_stream_by_group_id(group_id, platform="qq")` — find a chat stream by group ID
 - `await chat.get_stream_by_user_id(user_id, platform="qq")` — find a private chat stream by user ID
 - `await chat.open_session(platform, chat_type, **kwargs)` — open or create a chat stream
-- `await chat.get_avatar(platform, target_id, target_type="user", account_id="", scope="", force_refresh=False)` — query an avatar (since 1.3.2)
+- `await chat.get_avatar(platform, target_id, target_type="user", account_id="", scope="", force_refresh=False)` — query an avatar
 
 ::: code-group
 
@@ -423,7 +423,7 @@ await self.ctx.maisaka.context.append(
 
 :::
 
-`maisaka.proactive.trigger()` does not send fixed text directly, nor does it impersonate a user message. It writes `intent` into Maisaka's internal context and wakes the Planner, letting Maisaka decide on its own — based on personality, memory, current context, and available tools — whether to reply and how to phrase it. The target chat stream must already exist.
+`maisaka.proactive.trigger()` writes `intent` into Maisaka's internal context and wakes the Planner, letting Maisaka decide on its own — based on personality, memory, current context, and available tools — whether to reply and how to phrase it. The target chat stream must already exist.
 
 ## person — User Information
 
@@ -798,5 +798,3 @@ logger.warning("Configuration missing, using defaults")
 ::: tip Automatic log forwarding
 Logs in the Runner process are automatically transmitted to the main process over IPC, with no extra configuration needed. You can find all logs output by the plugin in the main process logs.
 :::
-
-> **Note**: the legacy asynchronous `await self.ctx.logging.info(...)` API has been removed. Use the standard `logging` style shown above instead.

@@ -15,7 +15,7 @@ title: 系统控制
 3. 调用主循环停掉插件运行时
 4. 以退出码 `42` 结束进程
 
-退出码 42 是一个约定：外部进程管理器（systemd、supervisord、docker restart policy 等）可以据此判断这是"应重启"而非异常崩溃。如果你通过 `python main.py` 直接启动，进程会退出而不会自动重启，需要由外部 wrapper 捕获退出码 42 后重新启动。
+退出码 42 是一个约定：外部进程管理器（systemd、supervisord、docker restart policy 等）可以据此识别重启请求。如果你通过 `python main.py` 直接启动，进程会退出而不会自动重启，需要由外部 wrapper 捕获退出码 42 后重新启动。
 
 ::: code-group
 
@@ -51,7 +51,7 @@ curl -X POST http://127.0.0.1:8001/api/webui/system/reload-config \
 
 :::
 
-**当前实现状态：** 该端点是一个占位端点，返回 `{"success": true, "message": "配置重载功能待实现"}`。实际热重载逻辑在 `ConfigManager.reload_config()` 中（见 `src/config/config.py`），目前由其他内部路径（如 WebUI 配置保存、模型切换等）通过 `config_manager.reload_config(changed_scopes=...)` 按需调用，而不是由这个公开端点统一触发。
+**当前实现状态：** 该端点是一个占位端点，返回 `{"success": true, "message": "配置重载功能待实现"}`。实际热重载逻辑在 `ConfigManager.reload_config()` 中（见 `src/config/config.py`），目前由其他内部路径（如 WebUI 配置保存、模型切换等）通过 `config_manager.reload_config(changed_scopes=...)` 按需调用。
 
 **后续规划：** 待该端点完善后，它将支持传入 `changed_scopes` 参数来指定重载范围（如 `bot`、`model`），仅重载发生变化的配置段。
 
@@ -406,4 +406,4 @@ curl -s -X POST "http://127.0.0.1:8001/api/webui/system/restart" \
 
 **systemd service 配置提示：**
 
-在 `[Service]` 段中加入 `RestartExitStatus=42`，并配合 `Restart=on-failure` 或 `Restart=always`，即可让 MaiBot 在收到 WebUI 重启指令后由 systemd 自动拉起。重启时插件运行时会被优雅停止，但不等于完整的 graceful shutdown（MaiBot 的退出走 `os._exit(42)`，跳过正常的 Python 清理流程）。
+在 `[Service]` 段中加入 `RestartExitStatus=42`，并配合 `Restart=on-failure` 或 `Restart=always`，即可让 MaiBot 在收到 WebUI 重启指令后由 systemd 自动拉起。重启时会先停止插件运行时，再通过 `os._exit(42)` 退出 MaiBot，跳过正常的 Python 清理流程。

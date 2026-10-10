@@ -46,7 +46,7 @@ enabled = true                # Enable WebUI
 host = ["127.0.0.1", "::1"]  # Bind address list
 port = 8001                   # Port
 mode = "production"           # Mode: development or production
-webui_style = 2               # Style: 0 original / 1 future retro / 2 millennium (available since 1.3.2)
+webui_style = 2               # Style: 0 original / 1 future retro / 2 millennium
 anti_crawler_mode = "basic"   # Anti-crawler mode: false / strict / loose / basic
 allowed_ips = "127.0.0.1"     # IP allowlist (comma-separated)
 ```

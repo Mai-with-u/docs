@@ -15,7 +15,7 @@ This page covers the ops endpoints under the `/api/webui/system/*` namespace of 
 3. Call the main loop to stop the plugin runtime
 4. Exit the process with exit code `42`
 
-Exit code 42 is a convention: external process managers (systemd, supervisord, Docker restart policy, etc.) can use it to determine this is an "intended restart" rather than an abnormal crash. If you start MaiBot directly via `python main.py`, the process will exit without auto-restarting — an external wrapper is needed to catch exit code 42 and restart it.
+Exit code 42 is a convention: external process managers (systemd, supervisord, Docker restart policy, etc.) can use it to identify a restart request. If you start MaiBot directly via `python main.py`, the process will exit without auto-restarting — an external wrapper is needed to catch exit code 42 and restart it.
 
 ::: code-group
 
@@ -51,7 +51,7 @@ curl -X POST http://127.0.0.1:8001/api/webui/system/reload-config \
 
 :::
 
-**Current implementation status:** This endpoint is a placeholder, returning `{"success": true, "message": "配置重载功能待实现"}`. The actual hot-reload logic resides in `ConfigManager.reload_config()` (see `src/config/config.py`). Currently, it's invoked on-demand via `config_manager.reload_config(changed_scopes=...)` by other internal paths (e.g., WebUI config save, model switch), not uniformly triggered by this public endpoint.
+**Current implementation status:** This endpoint is a placeholder, returning `{"success": true, "message": "配置重载功能待实现"}`. The actual hot-reload logic resides in `ConfigManager.reload_config()` (see `src/config/config.py`). Currently, it's invoked on-demand via `config_manager.reload_config(changed_scopes=...)` by other internal paths (e.g., WebUI config save, model switch).
 
 **Future roadmap:** When this endpoint is completed, it will support passing `changed_scopes` parameter to specify the reload scope (e.g., `bot`, `model`), reloading only the changed config sections.
 
@@ -406,4 +406,4 @@ curl -s -X POST "http://127.0.0.1:8001/api/webui/system/restart" \
 
 **systemd service configuration tip:**
 
-Add `RestartExitStatus=42` in the `[Service]` section, combined with `Restart=on-failure` or `Restart=always`, to have systemd auto-restart MaiBot after receiving the WebUI restart command. The plugin runtime is gracefully stopped during restart, but this is not equivalent to a full graceful shutdown (MaiBot exits via `os._exit(42)`, skipping the normal Python cleanup flow).
+Add `RestartExitStatus=42` in the `[Service]` section, combined with `Restart=on-failure` or `Restart=always`, to have systemd auto-restart MaiBot after receiving the WebUI restart command. Restart first stops the plugin runtime, then exits MaiBot through `os._exit(42)`, skipping the normal Python cleanup flow.

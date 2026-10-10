@@ -25,7 +25,7 @@ title: 发布插件
 **`README.md`** — 建议包含功能介绍、安装方式、配置说明和使用示例
 
 ::: tip 什么是插件仓库
-插件仓库是**独立于 MaiBot 主仓库**的你的个人/项目仓库（例如 `https://github.com/you/my-plugin`），不是 MaiBot 的 `plugins/` 目录。插件中心通过 `_manifest.json` 的 `urls.repository` 字段定位它。
+插件仓库是**独立于 MaiBot 主仓库**的你的个人/项目仓库（例如 `https://github.com/you/my-plugin`）。插件中心通过 `_manifest.json` 的 `urls.repository` 字段定位它。
 :::
 
 ## 发布 Release 版本：Tag 必须与 manifest 一致
@@ -35,7 +35,7 @@ title: 发布插件
 发布新版本时逐条对齐：
 
 - **Git Tag 与 `_manifest.json` 的 `version` 完全一致** — Tag 写 `1.4.2` 或 `v1.4.2`，manifest 的 `version` 就必须是 `1.4.2`
-- **`version` 用严格三段式** — `x.y.z`，不带 `-rc1`、`+build` 之类后缀；预发布请用 GitHub 的 Prerelease 标记，而不是改版本号格式
+- **`version` 用严格三段式** — `x.y.z`，不带 `-rc1`、`+build` 之类后缀；预发布请用 GitHub 的 Prerelease 标记
 - **插件 `id` 不能变** — 一个发布版本如果把 `id` 从 `com.you.plugin` 改成别的，会被判定为"发布版本改变了插件 ID"而驳回
 - **`manifest_version` 保持受支持的协议版本** — 当前固定为 `2`
 - **该 Tag 的 commit 里必须能读到 `_manifest.json`** — 改写历史、删过 manifest 的 Tag 会被驳回

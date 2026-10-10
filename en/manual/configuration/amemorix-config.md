@@ -159,7 +159,7 @@ Supported `chats` entry formats: `stream:<stream-id>`, `group:<group-id>`, `user
 **Impact of changes**:
 
 - For a filtered chat stream: summary and person-fact writebacks are skipped, queries return empty, and episodes are therefore never generated — the chat effectively "doesn't exist" to the memory system
-- **Person profile injection is not affected by filtering** (profiles are maintained per person, not per chat), but a long-filtered chat produces no new facts, so the corresponding person's profile gradually goes stale
+- **Person profile injection is not affected by filtering** (profiles are maintained per person), but a long-filtered chat produces no new facts, so the corresponding person's profile gradually goes stale
 - After removing a long-filtered chat from the list, **historical messages are not backfilled** — only new messages enter memory from then on
 
 ::: warning An empty list means opposite things in the two modes
@@ -206,7 +206,7 @@ person_profile_injection_max_profiles = 3  # Max profiles auto-injected per roun
 
 **Impact of changes**:
 
-- Disabling `enable_memory_query_tool` removes MaiMai's ability to "actively recall", but passive channels (profile injection, heuristic recall) still work — if memory seems to hurt reply quality, prefer disabling active query rather than the whole memory system
+- Disabling `enable_memory_query_tool` removes MaiMai's ability to "actively recall", but passive channels (profile injection, heuristic recall) still work — if memory seems to hurt reply quality, disable active query first and observe reply quality
 - Raising `memory_query_default_limit` (range `1-20`) improves recall, but results go straight into the prompt — too large means token cost and noise; rarely go beyond 10
 - Raising `person_profile_injection_max_profiles` (range `1-5`) helps in crowded group chats, but each profile costs prompt space
 
@@ -232,7 +232,7 @@ chat_summary_writeback_context_length = 36     # Max messages looked back per wr
 
 ### Heuristic Recall
 
-An advanced feature, off by default: instead of waiting for MaiMai to actively call the query tool, every Planner round generates an "impression" from recent chat, automatically retrieves related memories and injects them (into the Planner prompt as "【Heuristic Memory - internal reference】").
+An advanced feature, off by default: every Planner round generates an "impression" from recent chat, automatically retrieves related memories and injects them (into the Planner prompt as "【Heuristic Memory - internal reference】").
 
 ::: code-group
 
@@ -363,7 +363,7 @@ A vector pool has two working states, switched fully automatically:
 - **Untrained** (vector count < `runtime_train_threshold`): exact brute-force retrieval — most accurate but memory-hungry and slow at scale
 - **Trained** (background training kicks in and persists once the threshold is reached): switches to SQ8-quantized approximate retrieval — dramatically better memory usage and speed, at the cost of slight quantization error in scores
 
-Raising `runtime_train_threshold` = staying in exact mode longer (higher memory usage); lowering it = entering quantized mode sooner. Note it's not the only trigger — at startup, ≥ 40 vectors already triggers a training attempt, so small deployments usually run quantized after a restart.
+Raising `runtime_train_threshold` = staying in exact mode longer (higher memory usage); lowering it = entering quantized mode sooner. At startup, ≥ 40 vectors already triggers a training attempt, so small deployments usually run quantized after a restart.
 
 `batch_size` / `max_concurrent` only affect vectorization throughput: lower them if your embedding service rate-limits strictly, raise them for a generous self-hosted service. `enable_cache` caches the text→vector mapping; worth enabling when memory content is highly repetitive (many similar paragraphs).
 
@@ -406,7 +406,7 @@ Asynchronously supplies vectors to paragraphs that lack them (due to degradation
 
 ## Image Memory
 
-Image memory encodes images themselves into vectors, preserving their visual features, so later new images can recall historical images and their associated discussions, facts, and experiences. It does not replace image retrieval with VLM-generated text descriptions — those descriptions only participate as "cognitive" records for explanation, and the real similarity matching is done by a separate image vector pool.
+Image memory encodes images themselves into vectors, preserving their visual features, so later new images can recall historical images and their associated discussions, facts, and experiences. A separate image vector pool handles similarity matching; VLM-generated descriptions serve as "cognitive" records for explanation.
 
 ::: tip Prerequisites
 Image memory needs the **image embedding model**: first configure a model that supports "image input to vector" in `[model_task_config.image_embedding]` of `model_config.toml`. When left empty, images themselves and their cognition are still saved normally, but the retrieval status shows the model as unavailable and the feature degrades.
@@ -455,7 +455,7 @@ min_train_threshold = 40          # Min samples before the image vector index tr
 
 **Export and migration**: images can be exported and installed along with `.amembundle` memory bundles, and a bundle may optionally carry directly associated knowledge. On install, if the image embedding model fingerprint matches the source instance, image vectors are reused directly; when inconsistent or vectors are missing, content installation still completes, the image status shows as pending build, and vectors are rebuilt later with the local model. See [View and Manage Memory](../webui/memory-management.md#image-memory).
 
-**Failure and degradation**: image memory is fault-tolerant in layers — when no image embedding model is configured, image assets and cognition are still saved normally and only the retrieval status shows "model unavailable"; a failed model probe retries at `probe_retry_seconds` rather than firing at the background job polling frequency; when a new image has no vector yet, retrieval falls back to encoding the queried image online; changing the image embedding model or preprocessing version switches the vector generation, and old-generation vectors no longer participate in retrieval, so a rebuild is required.
+**Failure and degradation**: image memory is fault-tolerant in layers — when no image embedding model is configured, image assets and cognition are still saved normally and only the retrieval status shows "model unavailable"; a failed model probe retries at `probe_retry_seconds`; when a new image has no vector yet, retrieval falls back to encoding the queried image online; changing the image embedding model or preprocessing version switches the vector generation, and old-generation vectors no longer participate in retrieval, so a rebuild is required.
 
 **Scope**: image retrieval reuses the same chat-stream sharing resolution as text retrieval — with global sharing off, only the current chat stream, configured sharing groups, and global bundle content are searched; with it on, the existing global memory rules apply. See [Cross-Chat-Stream Sharing](#cross-chat-stream-sharing).
 
@@ -496,7 +496,7 @@ enable_parallel = true       # Run candidate collection in threads (avoids block
 - `top_k_final` is the **final** truncation of the whole pipeline and the max number of results entering the prompt per query. Raising it improves recall but costs tokens; consider it together with `memory_query_default_limit`
 - `top_k_paragraphs` / `top_k_relations` **only take effect with `vector_pools.mode = "single"`**; under the default `dual` mode, paragraph candidacy is controlled by `vector_pools.paragraph_top_k`. If a change seems to do nothing, check which pool mode you're in first
 - `alpha` (0~1) weights **paragraph score × α and relation score × (1−α)** — unrelated to the `fusion` method below. Higher leans toward narrative paragraphs, lower toward entity relations; relation-intent queries automatically override it with 0.35
-- PPR gives paragraphs related to graph entities an extra boost. It's not a required link: **timeout or error just falls back to the original ranking, without raising errors**. If retrieval occasionally stalls on a large graph, lower `ppr_timeout_seconds` rather than disabling it
+- PPR gives paragraphs related to graph entities an extra boost. **timeout or error just falls back to the original ranking, without raising errors**. If retrieval occasionally stalls on a large graph, lower `ppr_timeout_seconds`
 - `enable_parallel`'s only effect is moving candidate collection into threads to avoid blocking the event loop — keep it on
 
 ### Retrieval Fusion
@@ -552,7 +552,7 @@ return_relation_items = false    # Return standalone relation items on relation 
 **Impact of changes**:
 
 - The three main weights (semantic / sparse / graph) decide the final composite score of candidates. Raise `sparse_weight` for more "literal" matching, `semantic_weight` for more "semantic" matching
-- `graph_weight` does not act linearly: the system automatically discounts it based on graph reliability, redistributing the freed weight proportionally to the other two channels. Observe for a while before drawing conclusions after tuning it
+- The system discounts `graph_weight` based on graph reliability, redistributing the freed weight proportionally to the other two channels. Observe for a while before drawing conclusions after tuning it
 - The `relation_intent` subsection wholesale takes over the weights only when a query is judged as "asking about relations" (e.g. "what's the relationship between A and B"), expanding graph candidacy to 80
 - `mode = "single"` falls back to the legacy single mixed-store retrieval, where the pool parameters above don't apply and `retrieval.top_k_paragraphs` takes over again. Don't switch without a compatibility need
 
@@ -635,7 +635,7 @@ min_results = 4       # Minimum retained results
 
 - The dynamic threshold is computed from the score distribution of each batch: the median of three candidates — the `percentile` value, mean minus 1.5 standard deviations, and the score-gap point — **then clamped into `[min_threshold, max_threshold]`**
 - Raising `percentile` = stricter relative to the distribution; but the real hard boundary is `min_threshold` — however flat the distribution, anything below it is cut
-- `max_threshold` is **not** "above this gets discarded" — quite the opposite: with the threshold clamped at the cap, results scoring ≥ the cap always pass. It merely prevents an over-concentrated distribution from pushing the threshold high enough to kill everything
+- `max_threshold` caps the threshold, results scoring ≥ the cap always pass. It merely prevents an over-concentrated distribution from pushing the threshold high enough to kill everything
 - `min_results` is the safety net: if fewer than this many results survive filtering, the top N by score are forcibly kept. In other words a query always returns at least 4 results (given candidates), so it indirectly decides how much "noise is better than nothing" you tolerate
 
 **Common adjustments**: results too noisy → raise `min_threshold` (e.g. 0.35); always finding nothing → lower `min_threshold`, or check whether it's actually an [embedding fingerprint problem](#memory-vectorization). Move one number at a time, in steps of 0.05 or less.
@@ -699,11 +699,11 @@ evidence_classification_max_tokens = 1200  # Max output tokens of evidence class
 
 **Impact of changes**:
 
-- Every memory write enqueues the involved people, and the queue debounces by `refresh_debounce_seconds` (default 120s) — meaning **profiles catch up within about 2 minutes of new chat writes**; `refresh_interval_minutes` is only the safety net. So "profiles not timely" is usually not fixed by lowering the interval — check that profiles are enabled and person-fact writeback is on instead
+- Every memory write enqueues the involved people, and the queue debounces by `refresh_debounce_seconds` (default 120s) — meaning **profiles catch up within about 2 minutes of new chat writes**; `refresh_interval_minutes` is only the safety net. If profiles are slow to update, check that profiles are enabled and person-fact writeback is on
 - Periodic refresh only processes people active within the last `active_window_hours` (default 72h). Shrinking the window = profiles of long-absent people stop updating (saves cost); growing it = more profiles stay fresh (each round capped by `max_refresh_per_cycle`)
-- Refresh has an "evidence fingerprint" short-circuit: unchanged evidence only extends the TTL without recomputing — **no LLM cost**. So lowering `refresh_interval_minutes` mainly costs more scanning, not a cost explosion
+- Refresh has an "evidence fingerprint" short-circuit: unchanged evidence only extends the TTL without recomputing — **no LLM cost**. So lowering `refresh_interval_minutes` mainly costs more scanning
 - `top_k_evidence` decides how much evidence is sampled per refresh (relation evidence, vector evidence and fact ledger all derive from it). Larger = fuller profiles but more expensive and slower
-- Note: `evidence_classification_max_tokens` feeds the profile generation fingerprint — **changing it forces a full recompute of everyone's profile at the next refresh** (fingerprint short-circuit no longer applies), a concentrated LLM cost when you have many people. The legacy `evidence_classification_temperature` has been removed; if it is still left in the config, it is ignored on load
+- Note: `evidence_classification_max_tokens` feeds the profile generation fingerprint — **changing it forces a full recompute of everyone's profile at the next refresh** (fingerprint short-circuit no longer applies), a concentrated LLM cost when you have many people.
 
 
 ## Memory Evolution
@@ -733,7 +733,7 @@ lifecycle_batch_size = 1000                 # Due relations processed per round
 **The life of a relation**:
 
 1. **Active**: participates in retrieval and graph computation normally. Each time it is **finally used** by a query it gets a small reinforcement (`access_reinforcement_alpha`, limited by the cooldown); when new evidence arrives for the same relation, strength resets straight to 1.0 and the clock restarts
-2. **Frozen**: strength decayed below `prune_threshold` → marked inactive and removed from the graph projection (**not deleted**). While frozen, regaining evidence that pushes strength above `revive_threshold` revives it
+2. **Frozen**: strength decayed below `prune_threshold` → marked inactive and removed from the graph projection (data is retained). While frozen, regaining evidence that pushes strength above `revive_threshold` revives it
 3. **Archived**: still not revived after `freeze_duration_hours` of freezing → moved into the recycle bin (recoverable in WebUI), then physically purged only after a further grace period
 
 `revive_threshold` must be greater than `prune_threshold` (enforced in code); the zone between them is a "hysteresis band" preventing relations from flapping around the threshold.
@@ -763,7 +763,7 @@ debug = false                  # Enable debugging (logs retrieval-path diagnosti
 **Impact of changes**:
 
 - The memory body (SQLite) commits immediately on every write and does not depend on auto-save. Auto-save persists **in-memory structures like vector indexes and graph snapshots**
-- With it disabled or stretched out, a crash loses not the memories themselves but the index state — on restart, indexes and the graph are rebuilt by replaying vector data, so **recovery works but startup is noticeably slower**. Not recommended to disable at large data volumes
+- With it disabled or stretched out, a crash requires restoring unsaved index state — on restart, indexes and the graph are rebuilt by replaying vector data, so **recovery works but startup is noticeably slower**. Not recommended to disable at large data volumes
 - `debug` logs detailed retrieval-path diagnostics — turn it on temporarily when investigating "why was/wasn't this found", and keep it off otherwise to avoid log noise
 
 
@@ -988,7 +988,7 @@ After that, open WebUI "Long-term memory → Image memory" and confirm the retri
 
 **A change seems to do nothing**: first confirm you changed the right path — `retrieval` only affects queries, `integration` writebacks only affect new data, and `memory` evolution only affects relations. Also confirm the system isn't in embedding degraded state (search the logs for `degraded` or `vector_rebuild_required`).
 
-**Nothing can be found after switching embedding models**: that's the fingerprint-mismatch protection at work — your data isn't lost. Reverting to the original model/dimension restores it; if you do want the new model, run a vector rebuild in WebUI memory management.
+**Nothing can be found after switching embedding models**: retrieval is disabled because the vector fingerprints do not match. Reverting to the original model/dimension restores it; if you do want the new model, run a vector rebuild in WebUI memory management.
 
 **Memories from other groups leak into the current chat**: check, in order, `global_memory_sharing_enabled`, `shared_memory_groups`, and `heuristic_memory_cross_chat_enabled` — they run from smallest scope/strongest constraint to largest scope/weakest constraint.
 

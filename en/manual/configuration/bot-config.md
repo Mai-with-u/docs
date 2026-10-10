@@ -213,7 +213,7 @@ mid_term_memory_lenth = 10       # How many recall entries to keep; 0 = keep non
 :::
 
 ::: tip The field name lenth is a historical typo
-The field really is `mid_term_memory_lenth` — "lenth", not "length". "Fixing" the spelling turns it into an unknown field. Leave it as is.
+Keep the field name `mid_term_memory_lenth` exactly as written; changing its spelling produces an unknown field.
 :::
 
 #### When to Speak
@@ -269,9 +269,7 @@ value = 1.0
 **How thinking is triggered** — `reply_trigger_mode` decides when new messages enter the Planner:
 
 - **`frequency` (default)** — decides whether to think based on the number of new messages, with `talk_value` / `talk_value_rules` controlling the rate
-- **`dynamic` (since 1.3.2)** — estimates the reply likelihood of each message batch, then uses a one-hour sliding window to pull the actual reply count back toward the target of "expected replies × frequency", keeping idle backoff. It **only applies to group chats; private chats have no gate**. No config field was added; keep tuning `talk_value`, `talk_value_rules`, `mentioned_bot_reply` / `inevitable_at_reply`, and `no_action_backoff_*`
-
-The old necessity trigger (`reply_necessity`) has been removed and is rewritten to `dynamic` on upgrade.
+- **`dynamic`** — estimates the reply likelihood of each message batch, then uses a one-hour sliding window to pull the actual reply count back toward the target of "expected replies × frequency", keeping idle backoff. It **only applies to group chats; private chats have no gate**. Configure it with `talk_value`, `talk_value_rules`, `mentioned_bot_reply` / `inevitable_at_reply`, and `no_action_backoff_*`
 
 #### How to Speak
 
@@ -342,7 +340,7 @@ reaction_style = "lively"         # "reserved" / "natural" / "lively"
 
 :::
 
-**Where did rich replies go** — since 1.3.4 they are no longer experimental and the `enable_rich_reply` switch is gone: pictures in replies work out of the box; @-mentions in replies follow [`[chat].enable_reply_at`](#context-and-recall); stickers in replies follow [`[emoji].use_new_send_logic`](#emoji-stickers).
+**Rich replies** — Replies can include images. @-mentions follow [`[chat].enable_reply_at`](#context-and-recall), and stickers follow [`[emoji].use_new_send_logic`](#emoji-stickers).
 
 **Retro reply prompt** — with `replyer_retro_prompt = true`, the Replyer prompt is organized the legacy (0.12.x) way: all reply instructions live in a single complete template sent as one `user` message, and the dialogue history is rendered as plain text into template placeholders instead of being sent as image Items. Group chat, "short reply", private chat, and "private chat replying to Mai herself" each use their own template (`retro_replyer`, `retro_replyer_light`, `retro_private_replyer`, `retro_private_replyer_self`); they appear under **Prompt Management** collapsed as "advanced" and can be edited or given custom versions. Changes hot-reload.
 
@@ -361,7 +359,7 @@ ban_msgs_regex = []         # Filter messages by regex; invalid regex fails conf
 
 #### Keyword Reactions
 
-When a keyword or regex matches, Mai receives an extra **reaction prompt** — note it is an instruction for Mai, not a message sent directly:
+When a keyword or regex matches, Mai receives an extra **reaction prompt**, used as an instruction for generating a reply:
 
 ::: code-group
 
@@ -405,16 +403,16 @@ expression_groups = []                # Multiple chats share learned expressions
 
 **Key points:**
 
-- **`use_vector_expression`** — on by default; it switches to expression intent plus embedding-model recall, which selects noticeably better. When off it falls back to quick-picked candidates. The old `expression_selection_mode` (`legacy` / `vector_intent`, and the even older `vector`) has been removed; on first launch after upgrading it is rewritten to `use_vector_expression` and saved back
+- **`use_vector_expression`** — on by default; it switches to expression intent plus embedding-model recall, which selects noticeably better. When off it falls back to quick-picked candidates.
 - **`expression_checked_only`** — defaults to `false`, so expressions you have not curated are used as well; set it to `true` if Mai should only use expressions you have reviewed
 - **`learning_list`** — each rule covers one scope: `use` controls whether learned content is used, `learn` whether learning continues, and `type` accepts `"group"`/`"private"`. There are three ways to write the scope, and the most specific one wins:
   - **A specific chat** — fill in `item_id` (group number or user ID); `platform` is optional
   - **Platform default** — fill in only `platform` and leave `item_id` empty; covers chats on that platform with no rule of their own
   - **Global default** — leave both empty; used when nothing above matched
 
-  Since 1.3.4 the `"*"` wildcard is no longer supported here. An old `"*"` is rewritten to empty on upgrade, with the same effect
+  `item_id` does not support the `"*"` wildcard; leave it empty for default rules.
 
-Since 1.2.0, the expression vector index is maintained online: inserts, backfill, and failure recovery allocate incrementally from the nearest cluster center, and a corrupted index file is rebuilt automatically instead of crashing in a loop. This runs by itself, no configuration needed.
+The expression vector index automatically handles new data, backfill, and failure recovery. Corrupted index files are rebuilt automatically; no configuration is needed.
 
 #### Jargon Learning
 
@@ -434,7 +432,7 @@ jargon_groups = []  # Multiple chats share learned jargon
 
 #### Vision
 
-Controls how image messages enter the planner and replyer. **Whether images are sent directly is now decided automatically by model capability**: multimodal input is enabled only when every model configured for a task (such as `planner`) has `visual = true`; otherwise it degrades to plain text plus recognition results. The old manual "planner/replyer vision mode" switches were removed in 1.3.2.
+Controls how image messages enter the planner and replyer. **Whether images are sent directly is decided automatically by model capability**: multimodal input is enabled only when every model configured for a task (such as `planner`) has `visual = true`; otherwise it degrades to plain text plus recognition results.
 
 ::: code-group
 
@@ -723,7 +721,7 @@ enable_llm_cache_stats = false           # [Advanced] Record prompt-cache statis
 
 - **Terminal input** — `enable_console_input` is on by default: in an interactive terminal you can type ordinary messages or manage chats and adapters with `/clear`, `/pm`, `/offline`, `/online`, `/help`, and type `exit()` to close it. A non-interactive terminal (systemd, nohup, `docker run` without `-it`) only logs one extra warning and is otherwise unaffected; changing this requires a restart
 - **Force plugin compatibility** — `force_plugin_compatibility = true` skips the Host/SDK version-range checks declared by a plugin manifest and loads it anyway; it is **only a temporary fallback** and may load plugins that are in fact incompatible. It logs a single warning and does not affect the plugin market's version compatibility filtering. Requires a restart
-- **The `/clear` command** — since 1.3.2 `/clear` is a built-in command that is available by default and no longer needs a debug switch; to disable it, use `[plugin].disabled_commands = ["core.clear"]`
+- **The `/clear` command** — `/clear` is a built-in command available by default; to disable it, use `[plugin].disabled_commands = ["core.clear"]`
 
 #### Telemetry
 

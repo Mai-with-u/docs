@@ -56,7 +56,7 @@ force_plugin_compatibility = true
 
 :::
 
-开启后版本区间校验被跳过，日志里只记一条 warning（含插件声明的 Host / SDK 范围和当前版本），不再因此拒绝加载；**修改后需要重启 MaiBot 生效**。这是临时兜底而非推荐做法——插件可能真的不兼容，强行加载可能在运行期报错。确认插件有兼容版本后，请把它改回 `false` 并更新插件。该开关的完整说明见 [Bot 配置 · 调试](../manual/configuration/bot-config.md#调试)。
+开启后版本区间校验被跳过，日志里只记一条 warning（含插件声明的 Host / SDK 范围和当前版本），不再因此拒绝加载；**修改后需要重启 MaiBot 生效**。该开关用于临时排查版本兼容问题；强行加载不兼容的插件可能导致运行期报错。确认插件有兼容版本后，请把它改回 `false` 并更新插件。该开关的完整说明见 [Bot 配置 · 调试](../manual/configuration/bot-config.md#调试)。
 
 ### 预防建议
 - 安装插件前先看说明，确认兼容的 MaiBot 版本
@@ -80,7 +80,7 @@ force_plugin_compatibility = true
 ### 解决方案
 
 **步骤一：确认适配器已连接**
-1.3.1 的平台账号由适配器侧维护，不在 `bot_config.toml` 里填写。先确认 NapCat（或其他适配器）已启动，并按[适配器文档](/manual/adapters/)连上 MaiBot。
+平台账号由适配器侧维护，不在 `bot_config.toml` 里填写。先确认 NapCat（或其他适配器）已启动，并按[适配器文档](/manual/adapters/)连上 MaiBot。
 
 **步骤二：检查适配器连接状态**
 ::: code-group

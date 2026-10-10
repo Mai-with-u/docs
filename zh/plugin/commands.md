@@ -176,9 +176,9 @@ sequenceDiagram
     Runner-->>Host: 返回结果
 ```
 
-## 命令鉴权（1.2.0 起） {#command-authorization}
+## 命令鉴权 {#command-authorization}
 
-从 1.2.0 起，命令可以声明为**操作员级别**（`permission="operator"`），触发时由主程序统一鉴权：
+命令可以声明为**操作员级别**（`permission="operator"`），触发时由主程序统一鉴权：
 
 ::: code-group
 

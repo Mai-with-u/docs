@@ -15,10 +15,8 @@ QQ offers two routes—pick the one that fits your setup:
 
 The two routes are not mutually exclusive—you can enable both at the same time; the open-platform route can also share data with the local-client route through unified ID binding.
 
-::: tip Adapter changes in 1.3.0
-Since MaiBot 1.3.0, the former SnowLuma adapter and NapCat adapter have merged into the **Unified QQ Connector** (`MaiBot-SnowLuma-Adapter`), and the standalone NapCat adapter has stopped evolving and is archived. After upgrading the main program, upgrade the adapter as well; legacy configs are migrated automatically on load.
-
-Also, the adapters' built-in group / private-chat allow/deny lists have been removed—inbound access is controlled uniformly by MaiBot's adapter policy (`config/adapter_policy.toml` + the WebUI adapter settings).
+::: tip Connections and Access Policy
+The Unified QQ Connector supports SnowLuma and NapCat clients. Group and private-chat access is controlled by MaiBot's adapter policy (`config/adapter_policy.toml` or WebUI Adapter Settings).
 :::
 
 ## Available Adapters

@@ -79,7 +79,7 @@ await self.ctx.send.hybrid([
 
 说明：`send.custom()` 会同时携带 `custom_type/data` 和 `message_type/content` 两套字段名，用于兼容不同版本的 Host 实现。插件侧只需要继续传 `custom_type` 与 `data`。
 
-**返回值（1.2.0 起）**：默认情况下所有 `send.*` 方法返回 `bool`，表示是否发送成功。传入 `return_details=True` 时，返回包含平台确认的最终消息 ID 的详细结果，便于后续引用（如撤回）：
+**返回值**：默认情况下所有 `send.*` 方法返回 `bool`，表示是否发送成功。传入 `return_details=True` 时，返回包含平台确认的最终消息 ID 的详细结果，便于后续引用（如撤回）：
 
 ::: code-group
 
@@ -115,7 +115,7 @@ db = self.ctx.db
 
 `db.count()` 的返回值始终是 `int`。即使 Host 侧 RPC 返回的是带 `count` 字段的对象，SDK 也会自动解包。
 
-注意：这里的 `model_name` 必须是 Host 侧 `src.common.database.database_model` 中存在的模型类名，例如 `"ChatHistory"`、`"ActionRecord"`。旧版 `table` 参数名和 `db.get(key_field, key_value)` 形式已经废弃。
+注意：这里的 `model_name` 必须是 Host 侧 `src.common.database.database_model` 中存在的模型类名，例如 `"ChatHistory"`、`"ActionRecord"`。
 
 ::: code-group
 
@@ -268,7 +268,7 @@ config = self.ctx.config
 
 - `await config.get(key, default=None)` — 读取**全局 Bot 配置**（`bot_config.toml`）中的字段，`key` 支持点分割
 - `await config.get_plugin(plugin_name=None)` — 获取指定插件的配置，`plugin_name` 省略时为当前插件
-- `await config.get_all()` — 获取**当前插件**的全部配置；名字容易误解，它读的不是全局 Bot 配置
+- `await config.get_all()` — 获取**当前插件**的全部配置
 
 插件配置的结构和默认值由插件的 `config_model` 定义。Runner 将当前安装实例的值保存在插件目录下自动生成的 `config.toml` 中，`config.get_plugin()` 与 `config.get_all()` 读取的是 Runner 已加载的这份运行时配置；`config.get()` 读的则是 Host 的全局 Bot 配置，与插件自己的 `config.toml` 无关。
 
@@ -349,7 +349,7 @@ chat = self.ctx.chat
 - `await chat.get_stream_by_group_id(group_id, platform="qq")` — 按群 ID 查找聊天流
 - `await chat.get_stream_by_user_id(user_id, platform="qq")` — 按用户 ID 查找私聊流
 - `await chat.open_session(platform, chat_type, **kwargs)` — 打开或创建聊天流
-- `await chat.get_avatar(platform, target_id, target_type="user", account_id="", scope="", force_refresh=False)` — 查询头像（1.3.2 起）
+- `await chat.get_avatar(platform, target_id, target_type="user", account_id="", scope="", force_refresh=False)` — 查询头像
 
 ::: code-group
 
@@ -423,7 +423,7 @@ await self.ctx.maisaka.context.append(
 
 :::
 
-`maisaka.proactive.trigger()` 不会直接发送固定文本，也不会伪装成用户消息。它会把 `intent` 写入 Maisaka 内部上下文并唤醒 Planner，让 Maisaka 基于人格、记忆、当前上下文和可用工具自行决定是否回复以及如何表达。目标聊天流必须已经存在。
+`maisaka.proactive.trigger()` 把 `intent` 写入 Maisaka 内部上下文并唤醒 Planner，让 Maisaka 基于人格、记忆、当前上下文和可用工具自行决定是否回复以及如何表达。目标聊天流必须已经存在。
 
 ## person — 用户信息
 
@@ -797,5 +797,3 @@ logger.warning("配置缺失，使用默认值")
 ::: tip 日志自动转发
 Runner 进程中的日志会自动通过 IPC 传输到主进程，无需额外配置。在主进程日志中可以找到插件输出的所有日志。
 :::
-
-> **注意**：旧版的 `await self.ctx.logging.info(...)` 异步 API 已移除。请改用上述标准 `logging` 写法。

@@ -19,7 +19,7 @@ MaiBot supports two kinds of "adapter"—pick the one that fits your scenario:
 Both routes end up in the same routing and policy layer, and they can coexist; you can also run a platform on an external adapter first and switch it to a plugin gateway later.
 
 ::: tip Which route do the official adapters take today?
-Since 1.3.0, the officially maintained adapters (Unified QQ Connector, QQ Official Bot, etc.) are all distributed as **plugins** — installation and enabling are covered in [Connect Platforms](/en/manual/adapters/). The standalone-process route is mainly for self-built adapters or non-Python implementations.
+The officially maintained adapters (Unified QQ Connector, QQ Official Bot, etc.) are all distributed as **plugins** — installation and enabling are covered in [Connect Platforms](/en/manual/adapters/). The standalone-process route is mainly for self-built adapters or non-Python implementations.
 :::
 
 ## Who Does What

@@ -33,11 +33,11 @@ Yes, and it is a **separate** model task. Text embeddings (`embedding`) and imag
 Check these in order:
 
 1. Whether `[model_task_config.image_embedding]`'s `model_list` actually contains a model (leaving it empty does **not** fall back to the text embedding)
-2. Whether that model supports an "image input to vector" protocol rather than text only
+2. Whether that model supports an "image input to vector" protocol
 3. Whether the provider address uses HTTPS and the key is valid
 4. Open **Long-term memory → Image memory → Job diagnostics** to see the last error and retry count
 
-When the model is unavailable, MaiBot retries at `[a_memorix.image_memory].probe_retry_seconds` rather than silently switching to another model.
+When the model is unavailable, MaiBot retries at `[a_memorix.image_memory].probe_retry_seconds`.
 
 ## Is a similar image the same image?
 
@@ -57,11 +57,10 @@ Inspect the source message for ambiguity, then review extraction and write-back 
 
 ## How many examples are required to learn jargon?
 
-There is no guaranteed fixed count. Sample consistency, context, and the learning model all affect the result. More consistent examples improve reliability, but learned meanings should still be reviewed and corrected in the WebUI when necessary.
+Sample consistency, context, and the learning model all affect the result. More consistent examples improve reliability, but learned meanings should still be reviewed and corrected in the WebUI when necessary.
 
 ## How can several chats share expressions or jargon?
 
 Place the desired chat streams in the same expression or jargon sharing group. In sharing groups, `platform` and `item_id` accept the `"*"` wildcard; see [Bot Configuration](../manual/configuration/bot-config.md) for the full fields. Use a global wildcard only when you really want every chat to share learning results.
 
-This applies to sharing groups only. `learning_list`, which decides which chat learns and which chat uses, no longer accepts `"*"` since 1.3.4 — leave the field empty for a default rule.
-
+This applies to sharing groups only. `learning_list`, which decides which chat learns and which chat uses, does not accept `"*"` — leave the field empty for a default rule.

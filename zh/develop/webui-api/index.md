@@ -123,7 +123,7 @@ curl -X GET http://127.0.0.1:8001/api/webui/ws-token \
 
 ### 兼容路由（Compat Routers）
 
-为了兼容旧版前端和一些外部集成，以下三条路由不走 `/api/webui` 前缀，而是独立注册：
+为了兼容旧版前端和一些外部集成，以下三条路由独立注册：
 
 **`/api/config/*`**（模块 `src/webui/routers/config.py`） — TOML 配置的结构化读写。路径如 `/api/config/schema`（获取配置表单 schema）、`/api/config/raw`（读写完整 TOML 内容）。
 

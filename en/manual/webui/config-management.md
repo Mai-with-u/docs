@@ -55,7 +55,7 @@ The Model Management page manages providers, models, and task assignments:
 
 ### Time-Based Pricing
 
-Besides default input, output, and cache prices, models can use different prices for daily time periods (since 1.3.0):
+Besides default input, output, and cache prices, models can use different prices for daily time periods:
 
 - Expand **分时价格** (Time-Based Pricing) when editing a model and click "添加时段" (Add Period)
 - Each row takes a **start time**, **end time** (`HH:MM`, server local time), and **input**, **output**, and **cache** prices (CNY per million tokens)

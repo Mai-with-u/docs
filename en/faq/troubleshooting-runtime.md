@@ -184,7 +184,7 @@ do_replace = true            # Replace old emojis when limit is reached
 
 **Step 1: Rebuild Memory Index**
 
-Both the paragraph index and the vector index of long-term memory are rebuilt in WebUI's "Memory" page. 1.3.1 has no standalone command-line rebuild tool. Open WebUI → Memory page and run the corresponding rebuild entry as prompted.
+Both the paragraph index and the vector index of long-term memory are rebuilt in WebUI's "Memory" page. Open WebUI → Memory page and run the corresponding rebuild entry as prompted.
 
 **Step 2: Check the Memory Data Directory**
 
@@ -283,7 +283,7 @@ If the current disk is indeed too small, consider moving MaiBot's logs and data 
 
 ### Solutions
 **Rebuild the Person Index**
-When character card information is abnormal, first refresh or rebuild the index in WebUI's person/user management page; 1.3.1 has no standalone command-line rebuild tool.
+When character card information is abnormal, first refresh or rebuild the index in WebUI's person/user management page.
 
 **Check Character Card Format**
 ::: code-group

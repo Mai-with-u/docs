@@ -300,12 +300,12 @@ async def preserve_selected_reply(self, **kwargs):
 - **`reference_info`** `str` — 本次 reply 工具传入的引用信息，可以被改写。
 - **`reply_tool_args`** `dict` — reply 工具额外参数，修改后会传给后续 replyer hook。
 
-`model_name` 是具体模型名，不是 task 名；如果只想切换到另一个任务的模型池，修改 `task_name` 即可。如果同时设置 `task_name` 和 `model_name`，任务提供温度、token 上限、超时等生成参数，`model_name` 指定实际调用的模型。
+`model_name` 是具体模型名；如果只想切换到另一个任务的模型池，修改 `task_name` 即可。如果同时设置 `task_name` 和 `model_name`，任务提供温度、token 上限、超时等生成参数，`model_name` 指定实际调用的模型。
 
 如果需要改写 replyer 真正发给模型的消息列表，请使用 `maisaka.replyer.before_model_request`。该 Hook 会在 replyer 已经根据当前模型能力构造好 `messages` 后触发，阻塞模式处理器可以返回新的 `messages`；适合在 `system` 后插入一条合成的第一条 `user` 消息、做临时提示词实验或记录最终请求体。这个 Hook 只改写本次临时 LLM 请求，不会回写聊天历史，也不会影响中期记忆插入。
 
 ::: tip 有更省事的做法
-如果只是想给回复注入参数、或在发送前改写回复内容（例如把文字转成语音），可以优先用 1.3.5 起的[回复扩展](./reply-extensions.md)：不用改 Planner Hook，发送、历史记录与失败处理都由主程序负责。
+如果只是想给回复注入参数、或在发送前改写回复内容（例如把文字转成语音），可以优先用[回复扩展](./reply-extensions.md)：不用改 Planner Hook，发送、历史记录与失败处理都由主程序负责。
 :::
 
 常见用法是先通过 `maisaka.planner.before_request` 给内置 `reply` 工具追加参数 schema，让 planner 可以在调用 reply 工具时填入参数；随后在 `maisaka.replyer.before_request` 中读取 `reply_tool_args` 并路由模型：
@@ -369,7 +369,7 @@ async def replace_expression_selection(self, **kwargs):
 
 ## Host 校验规则
 
-Host 在插件注册阶段会对 `@HookHandler` 声明进行校验，不合法时插件直接注册失败（而非"加载成功但 Hook 不生效"的半成功状态）。校验规则如下：
+Host 在插件注册阶段会对 `@HookHandler` 声明进行校验，不合法时插件直接注册失败。校验规则如下：
 
 1. **Hook 名称必须已注册**：`hook` 参数必须是上述内置 Hook 清单中已存在的名称。传入未注册的 Hook 名称会导致注册失败。
 2. **mode 必须符合 Hook 的能力约束**：Host 会检查 `mode` 是否与该 Hook 点的能力兼容（例如，仅允许改参的 Hook 不能以不可改参的模式运行）。
@@ -437,7 +437,7 @@ async def on_pre_process(self, **kwargs):
 
 **验收动作** — 重载插件后触发一次对应链路（如让机器人在群里收一条消息命中 `chat.receive.before_process`）：Runner 日志里出现你处理器的输出，且消息按预期被改写或中止，说明 Hook 名、模式与返回值都对。
 
-- **插件注册直接失败，而不是 Hook 不触发** — Host 在注册阶段校验声明：`hook` 必须是内置 Hook 清单里已有的名字，写错一个词（如 `chat.receive.before_processing`）就是注册失败，日志会指出具体是哪个组件。
+- **插件注册失败** — Host 在注册阶段校验声明：`hook` 必须是内置 Hook 清单里已有的名字，写错一个词（如 `chat.receive.before_processing`）就是注册失败，日志会指出具体是哪个组件。
 - **对不允许 abort 的 Hook 声明了 `ErrorPolicy.ABORT`** — `send_service.after_send`、`maisaka.planner.*`、`maisaka.replyer.*`、`maisaka.reply.before_post_process` 都不允许 abort，声明 `ABORT` 会注册失败；去掉该策略，或换到允许 abort 的 Hook。
 - **`modified_kwargs` 改了没生效** — 只有 `mode=HookMode.BLOCKING` 下返回值才被采纳；`OBSERVE` 模式后台并发执行，返回的 `modified_kwargs` 与 `abort` 请求一律忽略。
 - **升级 SDK 2.0 后插件加载报 `RuntimeError`** — 代码里还有 `@WorkflowStep`：SDK 2.0 已移除且没有兼容映射，按迁移表改成 `@HookHandler`（`blocking=True` → `mode=HookMode.BLOCKING`，`priority=10` → `order=HookOrder.EARLY`）。

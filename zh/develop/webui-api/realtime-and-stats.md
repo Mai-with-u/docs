@@ -40,7 +40,7 @@ WebSocket 连接通过一个可选的握手 Token 认证。连接时，服务端
 
 **`domain: "plugin_progress", topic: "main"`** — 插件进度。订阅后服务端立即推送一条 `plugin_progress/snapshot` 事件回放当前所有插件的进度状态
 
-**`domain: "plugin_runtime", topic: "main"`** — 插件运行状态变更通知（1.3.5 起）。插件注册、卸载及 Runner 进程状态变化时推送 `plugin_runtime/changed` 事件（不携带数据）；收到后重新拉取完整插件列表快照即可
+**`domain: "plugin_runtime", topic: "main"`** — 插件运行状态变更通知。插件注册、卸载及 Runner 进程状态变化时推送 `plugin_runtime/changed` 事件（不携带数据）；收到后重新拉取完整插件列表快照即可
 
 **`domain: "maisaka_monitor", topic: "main"`** — MaiSaka 推理监控。订阅后服务端先推送一条 `maisaka_monitor/planner.reset` 事件（重置 Planner 增量基准的标记），随后回放监控事件历史，可通过 `data.since_event_id` 和 `data.replay_limit`（范围 1-10000，默认 1000）控制回放范围。回放完成后还会推送一条 `maisaka_monitor/stage.snapshot` 事件展示各阶段当前状态。Planner 进度与结果事件按连接做增量下发：首次（或重连、重订阅后）为完整快照，之后以 `planner.delta` 只携带变化字段与追加的工具条目
 
@@ -167,9 +167,9 @@ MaiBot 将每次推理过程（prompt 构建、LLM 调用、工具执行）记�
 
 **`action`** — 按动作名过滤（仅对 planner 和黑话学习阶段有效）
 
-返回体包含 `items`（日志条目列表）、`total`、`stages`、`stage_infos`、`sessions`、`session_infos` 等字段。每个条目包含 `stage`、`session_id`、`stem`（文件名主干）、`output_preview`（replyer 阶段）、`action_preview`（planner 阶段）、`model_name`、`duration_ms` 以及（1.2.0 起）`prompt_tokens`、`completion_tokens`、`total_tokens` 等 Token 用量统计。
+返回体包含 `items`（日志条目列表）、`total`、`stages`、`stage_infos`、`sessions`、`session_infos` 等字段。每个条目包含 `stage`、`session_id`、`stem`（文件名主干）、`output_preview`（replyer 阶段）、`action_preview`（planner 阶段）、`model_name`、`duration_ms` 以及`prompt_tokens`、`completion_tokens`、`total_tokens` 等 Token 用量统计。
 
-**`GET /api/webui/reasoning-process/file?path=<相对路径>`** — 读取单条推理日志的完整文本内容（txt 或 json）。返回 `content`、`size`、`modified_at`、`model_name`、`duration_ms`、`prompt_tokens`、`completion_tokens`、`total_tokens`（1.2.0 起）以及消息发送者的头像映射 `message_avatars`
+**`GET /api/webui/reasoning-process/file?path=<相对路径>`** — 读取单条推理日志的完整文本内容（txt 或 json）。返回 `content`、`size`、`modified_at`、`model_name`、`duration_ms`、`prompt_tokens`、`completion_tokens`、`total_tokens`以及消息发送者的头像映射 `message_avatars`
 
 **`GET /api/webui/reasoning-process/html?path=<相对路径>`** — 以 HTML 形式预览推理日志。返回 `text/html` 文件流，适合在浏览器中直接渲染 prompt 的结构化预览
 

@@ -10,18 +10,16 @@ Adapters connect messaging platforms such as QQ, email, and iMessage to MaiBot. 
 
 ## View Discovered Accounts
 
-Once an adapter connects, it reports the platform account identity it actually holds to MaiBot. Click the **平台账号** (Platform accounts) collapse button on the right of the "全局默认规则" (Global default rules) card at the top of the Adapter Management page to see these **discovered accounts** in a popover:
+Once an adapter connects, it reports the platform account identity it actually holds to MaiBot. View these **discovered accounts** under "适配器设置 → 平台账号" (Adapter Settings → Platform accounts):
 
 - **Account identity** — the account ID / nickname actually reported by the adapter
 - **Owning adapter** — which adapter instance each account belongs to
 - **Online status** — whether the account is currently online and the adapter connection is healthy
 - **Identity source** — distinguishes "adapter-discovered accounts" from "fallback platform accounts", so they are never confused
 
-Adapter-discovered accounts render as compact cards showing the platform name, account ID, an "在线 / 离线" (Online / Offline) badge, and the last report time. Manually entered platform / account rows use the same card style with pencil (edit) and trash (delete) icons, and a row whose platform or account is incomplete stays in edit mode instead of showing an empty card.
-
 ## Auto ID Discovery
 
-Since 1.2.0, adapters can **auto-discover and report their own ID**, no need to fill it in the configuration manually. The Adapter Management page shows the auto-discovered IDs and identity information, helping you confirm each adapter instance's identity is correctly recognized.
+Adapters can **auto-discover and report their own ID**, no need to fill it in the configuration manually. The Adapter Management page shows the auto-discovered IDs and identity information, helping you confirm each adapter instance's identity is correctly recognized.
 
 ## Access Policy Entry
 
@@ -35,9 +33,7 @@ The "黑白名单规则" panel opens after selecting an adapter:
 
 - **Mode hint** — a line under each list states the current mode, e.g. "黑名单模式：接收所有群聊消息，只需在『不接收消息的聊天ID』中添加要屏蔽的群号" (Blacklist mode: receive all group messages, just add the groups to block under "Chat IDs that don't receive messages") or the whitelist equivalent
 - **Inactive lists are dimmed** — when the default is "接收所有消息" (Receive all messages) the "接收消息的聊天ID" (Chat IDs that receive messages) block is dimmed and its input is disabled while empty; when the default is "默认不接收消息" (Don't receive messages by default) the "不接收消息的聊天ID" block is dimmed the same way, so you never fill in a list that has no effect
-- **Current account badge** — the toolbar shows "当前账号 ID：xxx" (Current account ID: xxx); when this adapter instance has no dedicated rules it shows "无专属规则，按全局默认生效" (No dedicated rules, governed by the global defaults)
 - **Account switch notice** — rules are keyed by account ID. After signing in with a different account an alert explains that the current account will get its own new rules while the historical accounts' rules stay in the configuration but no longer apply
-- **Toolbar placement** — the current account badge, save status, and "保存" (Save) button render on the same row as the tab, so you no longer have to scroll to the top of the panel
 
 ### Policy Groups
 

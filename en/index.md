@@ -5,7 +5,7 @@ description: MaiBot documentation — deployment, configuration, plugin developm
 hero:
   name: MaiBot
   text: An LLM-powered interactive agent
-  tagline: 'Not just a bot, but a "digital life" living inside your conversations'
+  tagline: 'A "digital life" living inside your conversations'
   image:
     src: /title_img/mai.png
     alt: MaiBot

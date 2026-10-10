@@ -304,7 +304,7 @@ Treat it as a temporary tool for answering "is a version number blocking this pl
 
 ## Verify and Troubleshoot
 
-**Verification** — confirm the JSON parses with the command below, then drop `_manifest.json` into the plugin directory and reload: the WebUI plugin page shows the plugin as loaded rather than blocked, and any rejection is named in the Runner log by `ManifestValidator`.
+**Verification** — confirm the JSON parses with the command below, then drop `_manifest.json` into the plugin directory and reload: the WebUI plugin page shows the plugin as loaded, and any rejection is named in the Runner log by `ManifestValidator`.
 
 ::: code-group
 

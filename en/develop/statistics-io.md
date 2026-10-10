@@ -107,7 +107,7 @@ An export job's state machine is `pending → running → completed | failed | c
 4. **Write archive** — Streams data into the zip in 1 MB chunks. After each chunk, `processed_bytes` is updated and `progress` percentage is refreshed. Before reaching 100%, progress is capped at 99%.
 5. **Complete or clean up** — On normal completion, `status="completed"`, `progress=100`. On cancellation, the generated temporary zip is cleaned up. On exception, the `error` field is recorded.
 
-`_raise_if_cancelled()` checks the `job.cancel_requested` flag, which is set by the `POST /export/{job_id}/cancel` endpoint. Since zip writing is single-threaded, cancellation is not instantaneous; it takes effect on the next check after the current chunk finishes writing.
+`_raise_if_cancelled()` checks the `job.cancel_requested` flag, which is set by the `POST /export/{job_id}/cancel` endpoint. Since zip writing is single-threaded, cancellation takes effect on the next check after the current chunk finishes writing.
 
 ### Import Job Security Validation
 

@@ -48,7 +48,7 @@ Install, update, and uninstall on the same plugin are mutually exclusive. If tha
 
 In branch-install mode, the server clones the repo in order, validates `_manifest.json` (checking five required fields: `manifest_version`, `id`, `name`, `version`, `author`), and upon success creates the plugin directory under `plugins/`.
 
-When `version` is given, the release-install path runs: shallow-clone by tag into a temporary directory, verify the commit and manifest match the index and dependencies are satisfied; if the version affects other installed plugins' dependency requirements it no longer blocks the install and is instead reported in the response `warnings`, then stop the plugin → preserve `config.toml` / `config_back/` / `data/` → write `.maibot-release.json` → atomically replace the directory (the old one is renamed into `.update_backups/`) → reload.
+When `version` is given, the release-install path runs: shallow-clone by tag into a temporary directory, verify the commit and manifest match the index and dependencies are satisfied; if the version affects other installed plugins' dependency requirements the response `warnings` lists the affected plugins and installation proceeds, then stop the plugin → preserve `config.toml` / `config_back/` / `data/` → write `.maibot-release.json` → atomically replace the directory (the old one is renamed into `.update_backups/`) → reload.
 
 **Install examples:**
 
@@ -90,7 +90,7 @@ curl -X POST http://127.0.0.1:8001/api/webui/plugins/install \
 - **409 The tag's current commit does not match the version index** / **409 The downloaded manifest does not match the version index** — the index and repository are out of sync
 - **502 Failed to fetch the plugin version index** — the official index could not be fetched; switch mirror source or retry later
 
-> Since 1.3.5, installation no longer fails because "this version does not satisfy the dependency requirement of installed plugin X": the operation completes as usual, and the response body carries an extra `warnings` array listing the affected plugins and version requirements (e.g. "installed plugin X requires Y version …, that plugin may stop working"). The WebUI shows it as a "plugin dependency reminder" popup.
+The response's `warnings` array lists affected installed plugins and their version requirements. Dependency-version conflicts do not block installation. After installation, check that the plugins named in the warnings still work correctly.
 
 ### Install from ZIP
 
@@ -252,12 +252,12 @@ This module reverse-proxies to an external plugin statistics service (default ad
 - **`POST /api/webui/plugins/stats-proxy/stats/rate`** — Rate + comment (request body `plugin_id` + `user_id` + optional `rating`/`comment`)
 - **`POST /api/webui/plugins/stats-proxy/stats/download`** — Record plugin download
 
-> **Note** — The stats_proxy endpoints do not use Cookie authentication; they use the `require_auth` dependency (`Depends(require_auth)`) for backend-side authorization. Returns HTTP 502 when the external statistics service is unavailable.
+> **Note** — The stats_proxy endpoints use the `require_auth` dependency (`Depends(require_auth)`) for backend-side authorization. Returns HTTP 502 when the external statistics service is unavailable.
 
 ## 9. plugin-progress WebSocket Progress Tracking
 
-::: warning This is not HTTP
-plugin-progress is a **WebSocket** endpoint, not an HTTP request. You cannot call it with `curl` — you need to connect via a WebSocket client.
+::: warning WebSocket connection
+Connect to the plugin-progress endpoint with a WebSocket client.
 :::
 
 ### Recommended: Unified WebSocket Channel

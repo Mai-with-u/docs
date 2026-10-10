@@ -71,12 +71,7 @@ class StatusCardPlugin(MaiBotPlugin):
 
 ## WebUI 管理
 
-用户可以在 WebUI 首页点击"编辑卡片"进入编辑模式：
-
-- 拖拽卡片调整顺序。
-- 隐藏内置卡片或插件卡片。
-- 恢复已隐藏卡片。
-- 新增本地自定义 Markdown 卡片。
+用户可以调整首页卡片的顺序和显示状态，也可以添加自定义 Markdown 卡片。
 
 布局保存在浏览器本地，不会写入插件配置。插件卡片的默认顺序由 `order` 决定，但用户调整后以本地布局为准。
 
@@ -86,7 +81,7 @@ class StatusCardPlugin(MaiBotPlugin):
 - 链接会被 Host 和 WebUI 双重校验，仅允许内部路径、`http(s)` 和 `mailto`。
 - Host 会裁剪过长文本和过大的内容块列表，避免插件向首页塞入过大的任意 JSON。
 
-::: tip 需要整页而不是一张卡片？
+::: tip 自定义整页
 首页卡片只能放在 WebUI 首页。如果要给插件一个完整页面（顶部工作区或侧边栏入口），用 [WebUI 页面](./webui-pages.md)。
 :::
 
@@ -95,7 +90,7 @@ class StatusCardPlugin(MaiBotPlugin):
 **验收动作** — 重载插件后打开 WebUI 首页，出现该卡片（标题是 `title`，内容按内容块渲染）；禁用或卸载插件后卡片从首页候选中消失，说明注册与生命周期清理都正常。
 
 - **首页看不到卡片** — 先确认插件处于已加载、已启用状态；卡片随插件加载注册，插件没起来或声明注册失败时整张卡片都不会出现，Runner 日志里会有相应错误。
-- **卡片是空白的** — `content` 的每个内容块都要带齐该类型的字段：`stat` 需要 `label` 与 `value`，`key_value` 用 `entries`（不是 `items`），`actions` 用 `actions` 数组。
+- **卡片是空白的** — `content` 的每个内容块都要带齐该类型的字段：`stat` 需要 `label` 与 `value`，`key_value` 用 `entries`，`actions` 用 `actions` 数组。
 - **卡片上的按钮点了没反应** — `link_url` 与 `actions[].url` 只允许内部路径（以 `/` 开头）、`http(s)` 和 `mailto`，Host 与 WebUI 会双重校验，其他协议（如 `javascript:`）会被拦掉。
 - **顺序和自己设的不一样** — `order` 只决定默认顺序，用户在「编辑卡片」里拖动或隐藏后以浏览器本地布局为准；要回到默认顺序，在编辑模式里恢复卡片。
 - **Markdown 里的 HTML 或内联事件不生效** — 这是有意为之的安全边界：HTML 按普通文本处理、内联事件不会执行，样式请用 Markdown 语法表达。

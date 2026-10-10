@@ -5,7 +5,7 @@ description: MaiBot（麦麦）文档中心 —— 部署、配置、插件开�
 hero:
   name: MaiBot
   text: 基于 LLM 的交互式智能体
-  tagline: '不仅仅是一个机器人，而是一个活跃在对话中的"数字生命"'
+  tagline: '一个活跃在对话中的"数字生命"'
   image:
     src: /title_img/mai.png
     alt: MaiBot

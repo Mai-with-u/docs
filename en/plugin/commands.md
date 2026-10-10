@@ -176,9 +176,9 @@ sequenceDiagram
     Runner-->>Host: Return result
 ```
 
-## Command Authorization (since 1.2.0) {#command-authorization}
+## Command Authorization {#command-authorization}
 
-Since 1.2.0, a command can be declared as **operator level** (`permission="operator"`) and the main program authorizes it uniformly at trigger time:
+A command can be declared as **operator level** (`permission="operator"`) and the main program authorizes it uniformly at trigger time:
 
 ::: code-group
 

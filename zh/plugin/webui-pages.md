@@ -4,7 +4,7 @@ title: WebUI 页面
 
 # WebUI 页面
 
-从 1.3.2（WebUI 1.8.1）起，插件可以在自己的目录里放一个 `webui.json`，向 WebUI **声明**自定义页面——顶部工作区或侧边栏入口。页面由宿主统一渲染，你不需要安装 Node、打包前端或改动主程序；改完 `webui.json` 重载插件即可生效。
+插件可以在自己的目录里放一个 `webui.json`，向 WebUI **声明**自定义页面——顶部工作区或侧边栏入口。页面由宿主统一渲染，你不需要安装 Node、打包前端或改动主程序；改完 `webui.json` 重载插件即可生效。
 
 这套机制只描述「显示什么、绑定哪个 API」，页面只能调用**你自己的**插件 API，不能注入 HTML / JS / CSS，也不能请求任意地址。
 
@@ -90,10 +90,10 @@ class MyPlugin(MaiBotPlugin):
 - **`workspace_title`** — `workspace` 页面所在工作区的名称；同一插件可以有多个 `workspace` 页面，第一个是默认页，其余收进顶部的「更多」溢出菜单
 - **`id` / `title` / `description`** — 页面标识、标题与说明。访问路径由宿主生成，形如 `/extensions/{plugin_id}/{page_id}`，插件不能自定义路由或覆盖内置入口
 - **`icon`** — 只接受 `puzzle`、`chart`、`settings`、`database`、`list` 五个内置图标
-- **入口排序** — 用户可以在「插件扩展」页（`/plugin-config`）最下方的「管理插件页面」区域调整入口顺序或隐藏整个插件的入口；该偏好只保存在当前浏览器，只影响展示，不是后端授权
+- **入口排序** — 用户可以在「插件扩展」页（`/plugin-config`）最下方的「管理插件页面」区域调整入口顺序或隐藏整个插件的入口；该偏好只保存在当前浏览器，只影响展示
 
 ::: tip 和「插件配置」是两条独立通道
-`webui.json` 只负责自定义页面，**不是 manifest 字段**，页面声明本身不需要写进 `capabilities`，绑定的 API 不要求 `public=True`。上传领取等 SDK 接口仍需各自的 manifest 能力授权。插件的 `config.toml` 及其自动生成的配置表单仍由「插件配置」页负责，两者互不影响。
+`webui.json` 只负责自定义页面，页面声明本身不需要写进 `capabilities`，绑定的 API 不要求 `public=True`。上传领取等 SDK 接口仍需各自的 manifest 能力授权。插件的 `config.toml` 及其自动生成的配置表单仍由「插件配置」页负责，两者互不影响。
 :::
 
 官方示例插件 `hello_world_plugin` 内置了两页（顶部概览 `overview` 与侧边 `greeting`），可作为最小参考；完整声明见其 `webui.json`，页面路径形如 `/extensions/maibot-team.hello-world-plugin/overview`。
@@ -110,7 +110,7 @@ class MyPlugin(MaiBotPlugin):
 - `queries` 在页面打开和刷新时**依次执行**；`actions` 成功后会自动重新执行查询刷新数据
 - API 必须属于当前插件、处于启用状态；跨插件调用、动态 API、任意请求地址都不支持（`public=True` 不会自动对 WebUI 开放）
 - 操作参数按 `parameters` 从当前表单字段取值，可选且留空的字段不会发送。参数类型为 `string` / `integer` / `number` / `boolean`，可声明 `required`、`max_length`（默认 4000，上限 65536）、`minimum`、`maximum`、`choices`，**不做隐式类型转换**，未声明的参数会被拒绝
-- **危险操作必须写确认文案 `confirmation`**（`variant: "danger"` 的按钮也必须有），宿主会弹确认框。确认只是防误触，不是独立的授权或业务校验
+- **危险操作必须写确认文案 `confirmation`**（`variant: "danger"` 的按钮也必须有），宿主会弹确认框。确认用于防误触；插件 API 仍需执行授权和业务校验
 
 ::: tip queries 请保持只读
 宿主无法判断 Python 方法是否有副作用，只能按声明区分。把有副作用的调用放进 `actions`，否则每次刷新页面都会重复触发写操作。
@@ -136,7 +136,7 @@ class MyPlugin(MaiBotPlugin):
 
 **`value` 可以是标量，也可以是数据引用** `{ "source": "查询别名", "field": "totals.count" }`：`source` 必须是本页 `queries` 里声明的别名，`field` 留空表示取查询的完整返回值。表格和图表必须使用数据引用，不支持计算表达式或脚本。
 
-**渲染前的数据校验**（由前端做，不满足时整页显示 `invalidData` 错误而不是静默截断）：
+**渲染前的数据校验**（由前端做，不满足时整页显示 `invalidData` 错误）：
 
 - `table` 绑定对象数组，每页固定 50 行
 - `chart` 绑定对象数组，最多 2000 行；`x` 必须是字符串或数字，`y` 必须是数字；`chart_type` 为 `line` / `bar`
@@ -144,7 +144,7 @@ class MyPlugin(MaiBotPlugin):
 
 ## 上传与交互能力
 
-使用上传或新版交互组件时，在 `webui.json` 顶层声明 `required_capabilities`。`file_upload` 表示支持文件上传，`interactive_controls` 表示支持新版交互；这是功能兼容检查，不是权限授权。名称不带版本后缀。旧声明可省略此字段；缺少所需能力时，升级宿主及其 dashboard，仅升级 Python SDK 不会增加前端组件。
+使用上传或新版交互组件时，在 `webui.json` 顶层声明 `required_capabilities`。`file_upload` 表示支持文件上传，`interactive_controls` 表示支持新版交互；该字段用于检查前端功能兼容性；SDK 接口权限仍由 manifest 的 `capabilities` 声明。名称不带版本后缀。旧声明可省略此字段；缺少所需能力时，升级宿主及其 dashboard，仅升级 Python SDK 不会增加前端组件。
 
 上传领取需要 SDK 2.11.0+ 和本次支持上传的宿主（MaiBot 1.3.6 开发版）。SDK 2.11.0 尚未发布时，本地开发可用 `MAIBOT_PLUGIN_SDK_PATH` 指向 SDK 源码。插件在 `_manifest.json` 的 `capabilities` 中另外声明 `webui.claim_upload`，这是调用领取接口的权限，与页面兼容标识分开。
 

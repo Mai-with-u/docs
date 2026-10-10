@@ -20,7 +20,7 @@ MaiBot has a built-in **Plugin Market** where you can browse, install, and updat
 
 ![Plugin Market](/images/plugin-market/store-overview.jpeg)
 
-The market supports filtering by category and keyword (author search is also available since 1.3.5) to quickly find the plugin or adapter you need:
+The market supports filtering by category, keyword, and author to quickly find the plugin or adapter you need:
 
 ![Plugin Market filtering and categories](/images/plugin-market/store-filter.png)
 
@@ -42,7 +42,7 @@ The Plugin Market is indexed from GitHub repositories. If it's not there, use th
 
 ### Choose Which Version to Install
 
-Since 1.3.0 the official version index maintains a **release version list** for every indexed plugin (built from the repository's Git Releases). You can pick exactly which one to install in the "Install version" card on the plugin detail page.
+The official version index maintains a **release version list** for every indexed plugin (built from the repository's Git Releases). You can pick exactly which one to install in the "Install version" card on the plugin detail page.
 
 Each entry in the version dropdown carries a suffix describing its state:
 
@@ -65,7 +65,7 @@ Automatic updates only move forward. If the recommended version is older than wh
 
 Select a different version on the detail page of an installed plugin and install it to switch versions:
 
-- The old plugin directory is backed up wholesale to `plugins/.update_backups/` rather than deleted
+- The old plugin directory is backed up wholesale to `plugins/.update_backups/`
 - `config.toml`, `config_back/`, and `data/` are carried over, so you do not re-enter configuration
 - **Downgrading does not roll back plugin data** — databases and state files written by the newer version are not restored
 - During the switch the plugin is stopped and reloaded, so it is briefly unavailable; the MaiBot core does not need a restart
@@ -155,12 +155,12 @@ Only install plugins from trusted sources. Before installing, check the reposito
 **Installing a specific version fails?**
 
 - "Plugin dependencies unsatisfied" — the other plugins or Python packages required by that version are missing
-- "A plugin dependency reminder" — an installed plugin needs this plugin to stay in a specific version range; since 1.3.5 this no longer blocks the install — the install / switch completes as usual, just keep an eye on the plugins named in the reminder
+- "A plugin dependency reminder" — an installed plugin needs this plugin to stay in a specific version range; this does not block the install — the install / switch completes as usual, just keep an eye on the plugins named in the reminder
 - "The plugin has local code modifications; resolve them first" — you edited code inside the plugin directory; back it up and restore the directory
 - "The tag's current commit does not match the version index" / "The downloaded manifest does not match the version index" — the index and repository are out of sync; wait for the index to sync and retry
 - "Version sync failed: …" — the official version index itself could not be fetched; switch mirror source or retry later
 
 **The plugin market won't open, or install spins forever?**
 
-- With Fake-IP proxies such as Clash or Surge, the plugin market domain may resolve into `198.18.0.0/15` and be treated as an unsafe address. 1.3.0 lifted this restriction for the plugin market's HTTPS domains; if it still fails, switch to another mirror source or temporarily disable Fake-IP mode in your proxy
+- The plugin market supports HTTPS domains resolving to the Fake-IP range `198.18.0.0/15`. If proxy access still fails, check proxy rules, switch mirror source, or temporarily disable Fake-IP mode
 - When every mirror source fails, the error message ends with the specific reason for each one — follow those hints

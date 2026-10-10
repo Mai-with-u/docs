@@ -4,7 +4,7 @@ title: 统一 QQ 连接器
 
 # 统一 QQ 连接器
 
-**登录你自己的 QQ 号接入（官方维护）。** 统一 QQ 连接器（仓库 `MaiBot-SnowLuma-Adapter`，v1.0.0 起由原 SnowLuma 适配器与 NapCat 适配器合并而成）让 MaiBot 通过 [SnowLuma](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter) 或 [NapCat](https://github.com/NapNeko/NapCatQQ) 接入 QQ：一个插件同时支持两类客户端，连接建立后自动判定对端类型，收发消息、处理群聊和私聊，支持语音、表情解析与主动私聊。它是 MaiBot **官方维护的插件**，只有插件模式，直接在 MaiBot 进程内运行。
+**登录你自己的 QQ 号接入（官方维护）。** 统一 QQ 连接器（仓库 `MaiBot-SnowLuma-Adapter`）让 MaiBot 通过 [SnowLuma](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter) 或 [NapCat](https://github.com/NapNeko/NapCatQQ) 接入 QQ：一个插件同时支持两类客户端，连接建立后自动判定对端类型，收发消息、处理群聊和私聊，支持语音、表情解析与主动私聊。它是 MaiBot **官方维护的插件**，只有插件模式，直接在 MaiBot 进程内运行。
 
 ::: tip 官方持续维护
 统一 QQ 连接器由 MaiBot 官方团队持续维护，遇到问题欢迎在 [GitHub Issues](https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter/issues) 反馈。
@@ -134,7 +134,7 @@ ignore_self_message = false                    # 忽略机器人自身发送的�
 
 ## 先加名单，再测试
 
-统一 QQ 连接器**已移除内置的群聊 / 私聊黑白名单**——入站通行统一由宿主适配器策略控制：WebUI 的适配器设置（黑白名单规则）或 `config/adapter_policy.toml`，默认**全部放行**（所有群消息都接受）。想限制范围时，把「默认不阅读」打开、只放行指定的群号或用户即可。
+统一 QQ 连接器的入站访问范围由宿主适配器策略控制：WebUI 的适配器设置（黑白名单规则）或 `config/adapter_policy.toml`，默认**全部放行**（所有群消息都接受）。想限制范围时，把「默认不阅读」打开、只放行指定的群号或用户即可。
 
 策略的可视化入口见 [适配器管理](../webui/adapter-management.md)；`config/adapter_policy.toml` 的完整写法见[访问策略与账户路由](/develop/adapters/policy)。
 
