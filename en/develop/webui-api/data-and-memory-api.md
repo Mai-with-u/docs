@@ -184,7 +184,7 @@ The Memory endpoint group is the largest endpoint collection in this subdirector
 - **`router(prefix="/memory")`** — Main router, paths start with `/api/webui/memory`
 - **`compat_router(prefix="/api")`** — Compat router, paths start with `/api` (bypassing the `/api/webui` prefix)
 
-Below is a curated selection of 15 high-frequency endpoints by scenario. For the complete endpoint list, see the [`memory.py` source](https://github.com/MaiM-with-u/MaiBot/blob/main/src/webui/routers/memory.py).
+Below is a curated selection of 15 high-frequency endpoints by scenario. For the complete endpoint list, see the [`memory.py` source](https://github.com/Mai-with-u/MaiBot/blob/main/src/webui/routers/memory.py).
 
 ### High-Frequency Endpoint Quick Reference
 

@@ -10,13 +10,13 @@ title: 致谢与链接
 
 感谢所有为 MaiBot 贡献代码的开发者：
 
-<img src="https://contrib.rocks/image?repo=MaiM-with-u/MaiBot" alt="MaiBot Contributors" />
+<img src="https://contrib.rocks/image?repo=Mai-with-u/MaiBot" alt="MaiBot Contributors" />
 
 ### 文档贡献者
 
 感谢每一位参与 MaiBot 文档维护与建设的朋友。
 
-<img src="https://contrib.rocks/image?repo=MaiM-with-u/docs" alt="Docs Contributors" />
+<img src="https://contrib.rocks/image?repo=Mai-with-u/docs" alt="Docs Contributors" />
 
 也感谢池雨、摆烂の咕咕、时栖等群友的贡献。
 

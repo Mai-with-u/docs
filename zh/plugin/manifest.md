@@ -52,7 +52,7 @@ title: Manifest
       "value": "wrench"
     }
   },
-  "capabilities": ["send_message"],
+  "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": {
     "default_locale": "zh-CN",
     "locales_path": "i18n",
@@ -75,7 +75,7 @@ title: Manifest
 - **`urls`** `object` — 插件相关链接集合（见下文）
 - **`host_application`** `object` — Host 兼容区间（见下文）
 - **`sdk`** `object` — SDK 兼容区间（见下文）
-- **`capabilities`** `string[]` — 插件声明的能力请求列表，不允许包含空值
+- **`capabilities`** `string[]` — 插件声明的能力请求列表，不允许包含空值。**能力名是逐项的**（如 `send.text`、`emoji.get_random`、`config.get`），Host 按名字精确比对：声明了哪项才能调用哪项，没声明的调用会被拒绝并报"未获授权能力"。完整清单见 [API 参考](./api-reference) 各能力组。
 - **`i18n`** `object` — 国际化配置（见下文）
 
 ## 可选字段
@@ -304,3 +304,22 @@ Manifest 校验器（`ManifestValidator`）采用 Pydantic 严格模式，主要
 - **不影响插件市场** — 版本索引的兼容性判断不读这个开关，市场与版本下拉里显示的"不兼容"仍然按 manifest 声明计算
 
 把它当作排查"插件是不是被版本号挡住"的临时手段，不要长期开启：跳过校验后，因接口变化导致的运行期异常不会有任何前置提示。
+
+## 验证与排错
+
+**验收动作** — 先用下面的命令确认 JSON 能解析，再把 `_manifest.json` 放进插件目录并重载：WebUI 插件页里它处于已加载状态（而不是被阻止），被拦下时 Runner 日志会给出 `ManifestValidator` 的具体错误。
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+# 在插件目录里运行：多余的逗号、注释会让这一步直接报错
+python -m json.tool _manifest.json
+```
+
+:::
+
+- **报「extra fields not permitted」** — 校验器是 Pydantic 严格模式，不允许出现未声明的字段：自定义注释字段、临时字段都要删掉。
+- **报 ID / 版本 / 作者字段格式错误** — `id` 必须匹配 `^[a-z0-9]+(?:[.-][a-z0-9]+)+$`（全小写、至少一个 `.` 或 `-`），`version` 与两个区间的上下界必须是严格三段式 `X.Y.Z`，`author` 必须是 `{ name, url }` 且 `url` 以 `http://` 或 `https://` 开头。
+- **插件被阻止加载且日志提示版本不兼容** — Host 超出区间除「主次版本相同」记 warning 外都是 error，SDK 超出区间一律 error；把 `max_version` 改成 `999.999.999`、只认真约束 `min_version`，临时排查可开「强制插件兼容」，但它需要重启 MaiBot 且只跳过版本区间。
+- **`display.icon` 的本地图标不显示或被拒** — `type="local"` 的 `value` 必须是插件目录内的相对路径，后缀为 `.png`/`.jpg`/`.jpeg`/`.webp`/`.svg`；在线 URL 一律不允许，绝对路径、`..` 和符号链接也会被拒，加载失败会退回 `fallback`。
+- **日志提示依赖或 `llm_providers` 冲突** — 不能依赖自身、重复声明同一依赖或形成循环依赖；`client_type` 要与 `@LLMProvider` 声明完全一致，两个插件声明同一个 `client_type` 时双方都会被禁止加载。

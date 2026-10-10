@@ -286,3 +286,13 @@ self.ctx.logger.info("API 信息: %s", api_info)
 - **同步**：`@API` 自动 → `register_dynamic_api()` 需调用 sync_dynamic_apis()
 - **适用场景**：`@API` 固定不变的 API → `register_dynamic_api()` 按需启用/禁用的 API
 - **WebUI 页面绑定**：`@API` 支持 → `register_dynamic_api()` **不支持**，自定义页面只能绑定静态 API
+
+## 验证与排错
+
+**验收动作** — 在调用方插件的 `on_load` 里打印 `await self.ctx.api.list()`：输出里出现 `com.example.translate.translate` 这类「插件 ID + API 名称」全名，并且 `ctx.api.call()` 能返回对方插件的字典，说明注册与调用都通了。
+
+- **`ctx.api.list()` 里没有这个 API** — `public` 默认是 `False`，只有显式声明 `public=True` 的 API 才允许其他插件调用。
+- **调用时提示找不到 API** — `ctx.api.call()` 传入的 `version` 必须与注册版本完全一致（`@API` 省略时为 `"1"`）；自定义 WebUI 页面绑定 API 同样精确匹配，没有模糊匹配。
+- **动态 API 注册了但调用方看不到** — `register_dynamic_api()` 之后必须 `await self.sync_dynamic_apis()`，否则它只存在于插件进程内，主程序侧查不到。
+- **插件卸载后调用方仍能看到旧 API** — `on_unload()` 里要 `clear_dynamic_apis()` 再 `sync_dynamic_apis(offline_reason=...)`，把下线状态同步给主程序。
+- **动态 API 能调用，但自定义页面绑定失败** — WebUI 页面只能绑定 `@API` 静态声明的 API，动态注册的 API 不支持页面绑定。

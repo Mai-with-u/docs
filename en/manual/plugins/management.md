@@ -51,7 +51,7 @@ When all you have is a plugin archive (sent by a friend, packed by yourself, or 
 1. Open the "插件扩展" (Plugin Extensions) page and click the "更多操作" (More actions) button in the top-right corner;
 2. Choose "从 ZIP 安装插件" (Install plugin from ZIP) and select your `.zip` file;
 3. Click "安装插件" (Install plugin) and wait for the "安装成功" (Installed) notice;
-4. **Restart MaiBot** so the plugin loads. "重启麦麦" (Restart MaiBot) is in the same menu.
+4. **No MaiBot restart is needed**: the file watcher detects the new plugin and generates `config.toml` from its `config_model`; plugins whose `enabled` defaults to `false` just need to be enabled manually in the list. Only when the log explicitly reports a watching or loading failure should you fall back to "重启麦麦" (Restart MaiBot) in the same menu.
 
 The archive must meet these rules or it is rejected:
 
@@ -147,3 +147,13 @@ Only fully restart MaiBot when the log explicitly reports that watching, loading
 **Q: Are config and data still there after switching versions?** `config.toml`, `config_back/`, and `data/` are preserved; but a downgrade does not roll back new content the plugin wrote into data files.
 **Q: Installed but no effect?** Confirm it's enabled, the config is correct, and check MaiBot logs.
 **Q: Can I develop my own?** Yes! See [Plugin Development](/en/plugin/).
+
+## Verify and Troubleshoot
+
+**Verification** — install a test plugin with "Install from ZIP": it appears in the list with its toggle off by default; switch it on and the log reports a successful load while `plugins/<plugin-name>/config.toml` is generated; then edit one plugin setting and confirm it saves — installation, enabling, and configuration all work.
+
+- **The ZIP is rejected as badly structured** — `_manifest.json` and `plugin.py` must sit at the archive root or inside a single top-level plugin folder, and one archive may contain only one plugin; a wrapper folder, a second plugin directory, `.git`, or `__MACOSX` entries all get refused.
+- **"ZIP extracts to more than 300 MB or contains more than 10000 files" / "ZIP file cannot exceed 100 MB"** — trim the package before uploading: leave out test data, virtual environments, and logs; if it is genuinely too large, install from the plugin marketplace or Git instead.
+- **"Plugin validation failed: …"** — `_manifest.json` did not pass validation: fix the `id`, version, URL, or dependency fields named in the message, keeping `manifest_version` at `2` and `version` in strict `X.Y.Z`. If a plugin with the same ID is already installed, the message asks you to uninstall it first.
+- **The plugin is listed after install but the bot does nothing** — a freshly installed plugin has `enabled` set to `false`, so turn the toggle on manually; while disabled it is never loaded and produces no runtime logs at all.
+- **The toggle is on but the plugin still does not run** — read the log: a failed load, an uninstallable dependency, or a missing lifecycle method is named there. Use "More actions → Restart MaiBot" only when the log explicitly reports a watcher, load, unload, or config-callback failure, and fix the first error in the log before restarting.

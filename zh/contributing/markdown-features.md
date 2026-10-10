@@ -4,9 +4,9 @@ title: 文档编写特性
 
 # 文档编写特性
 
-编写者注：本页收录本站用到的**非 VitePress 原生**的插件特性，这些特性需要编写者在 Markdown 中写特定语法才能触发。VitePress 原生的 custom container（`::: tip` / `::: warning` 等）、代码块行号高亮、代码片段导入等特性请参见 [VitePress 官方文档](https://vitepress.dev/guide/markdown)。
+编写者注：本页收录本站用到的**非 VitePress 原生**的插件特性，这些特性需要编写者在 Markdown 中写特定语法才能触发。VitePress 原生的 custom container（`::: tip` / `::: warning` 等）、代码块行号高亮等特性请参见 [VitePress 官方文档](https://vitepress.dev/guide/markdown)；代码片段导入本站也已启用，见下文「代码片段导入」。
 
-本页遵守[文档写作约定](https://github.com/MaiM-with-u/MaiBot/blob/main/docs/CONTRIBUTE.md)：**内容页禁止使用 Markdown 表格**，请用列表或定义式描述；索引页可以按需使用表格。
+本页遵守[参与文档站](./)里的硬规则：**内容页禁止使用 Markdown 表格**，请用定义列表或 `::: fields` 容器；索引页可以按需使用表格。
 
 ## Mermaid 图表
 
@@ -94,12 +94,12 @@ flowchart TD
 ::: code-group
 
 ```bash [稳定版（推荐）~vscode-icons:file-type-git~]
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 
 ```bash [开发版（尝鲜）~vscode-icons:file-type-git~]
-git clone -b dev https://github.com/MaiM-with-u/MaiBot.git
+git clone -b dev https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 
@@ -121,7 +121,7 @@ uv sync
 ::: code-group
 
 ```bash [稳定版 ~vscode-icons:file-type-git~]
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 ```
 
 ```bash [uv 安装]
@@ -190,11 +190,138 @@ Mermaid 流程图（` ```mermaid `）用于渲染图表，` ```mmd ` 用于展�
 
 翻译成英文时，code-group 结构、图标 ID、代码内容必须与中文版**完全一致**（术语可翻译，代码/字段/图标不翻译）。标签文字可译，但图标 `~vscode-icons:<id>~` 原样保留。
 
-## 可选 Vue 组件
+## 接口卡片 `::: endpoint`
 
-以下两个 Vue 组件已在主题中注册，可以在 Markdown 中直接以 HTML 标签形式使用。组件源码位于 `.vitepress/theme/components/` 目录，在 `.vitepress/theme/index.ts` 中通过 `app.component()` 注册。
+写接口 / 协议参考时用它。卡片标题会**成为真正的 `<h3>`**：既进右侧「本页目录」，也自动生成锚点，锚点由 `方法 + 路径` 推导（`POST /api/x` → `#post-api-x`）。
 
-> 当前暂无 MD 文件使用这些组件，按需启用。
+**用法示例：**
+
+````markdown
+::: endpoint POST /api/webui/auth/verify
+验证 Token 并登录，成功后写入 Cookie。
+
+::: fields
+- **token** — `string`，必填。待验证的 Token。
+:::
+:::
+````
+
+**效果预览：**
+
+::: endpoint POST /api/webui/auth/verify
+验证 Token 并登录，成功后写入 Cookie。
+
+::: fields
+- **token** — `string`，必填。待验证的 Token。
+:::
+:::
+
+规则：
+
+- 信息串写 `方法 路径`，方法从 `GET` / `POST` / `PUT` / `PATCH` / `DELETE` / `OPTIONS` / `HEAD` / `WS` 中选，会自动上色；
+- 只写一段文字（如 `::: endpoint 出站回执`）也可以，就变成一张普通小节卡片；
+- **卡片体里可以再嵌套 `::: fields`、`::: tip`、`::: code-group`**——本站的自定义容器支持嵌套，与 VitePress 原生容器不同；
+- 每张卡片都要有自己的收尾 `:::`，漏写会在构建时报出具体行号。
+
+## 字段速查 `::: fields`
+
+接口字段、参数、配置项这类「名称 — 说明」的密集列表用它，替代被禁止的表格。容器内写普通列表，列表项以 `**名称**` 开头即可。
+
+**用法示例：**
+
+````markdown
+::: fields
+- **`stream_id`** — 聊天流 ID，必填。
+- **`count`** — 返回条数，默认 `20`。
+:::
+````
+
+**效果预览：**
+
+::: fields
+- **`stream_id`** — 聊天流 ID，必填。
+- **`count`** — 返回条数，默认 `20`。
+:::
+
+需要标注「必填 / 可选」时，在条目里直接用 `<Badge>`：
+
+::: fields
+- **`token`** <Badge type="danger" text="必填" /> — 待验证的 Token。
+- **`remember`** <Badge type="tip" text="可选" /> — 是否延长有效期，默认 `false`。
+:::
+
+## 编号步骤 `::: steps`
+
+教程类页面用它包住有序列表，编号会渲染成圆形徽标。**只包一层 `<ol>`**，步骤正文照常写 Markdown。
+
+**用法示例：**
+
+````markdown
+::: steps
+1. 装依赖。
+2. 改配置。
+
+   ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+   [bot]
+   platform = "qq"
+   ```
+
+3. 启动。
+:::
+````
+
+**效果预览：**
+
+::: steps
+1. 装依赖。
+2. 改配置。
+
+   ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+   [bot]
+   platform = "qq"
+   ```
+
+3. 启动。
+:::
+
+## 代码片段导入
+
+用 `<<<` 把仓库里的真实文件嵌进文档，避免示例代码与文档各写一份。`@/` 指**站点根目录**（不是当前文件所在目录）。
+
+**用法示例：**
+
+````markdown
+::: code-group
+
+<<< @/zh/examples/adapter-minimal/adapter.py#bridge [bridge 部分 ~vscode-icons:file-type-python~]
+
+:::
+````
+
+规则：
+
+- 标题写在**最后**：`<<< @/路径/file.py{1,3-5} [标题 ~图标~]`（行号在前、标题在后，顺序反了会把标题当成文件名）；
+- `#region名` 可以只导入文件中 `# region 名` 与 `# endregion 名` 之间的片段；
+- `{1,3-5}` 是高亮行号；
+- 文件路径写错会在构建时报错，这是有意的——它同时充当示例代码的存在性校验。
+
+## 注册的 Vue 组件
+
+以下 Vue 组件已在主题中注册，可以在 Markdown 中直接以 HTML 标签形式使用。组件源码位于 `.vitepress/theme/components/` 目录，在 `.vitepress/theme/index.ts` 中通过 `app.component()` 注册。
+
+### IntegrationRoutes 接入路线卡片
+
+接入路线卡片，适合放在总览 / 导航类页面：按当前语言自动切换中英文案，数据（标题、链接、适用人群）在 `.vitepress/theme/utils/integration-routes.ts` 里维护。当前没有页面在用，按需启用。
+
+- **`only`** (可选, 默认 `''`) — 逗号分隔的路线键，只显示其中几条，例如 `only="adapter,plugin"`
+
+````html
+<IntegrationRoutes />
+````
+
+**效果预览：**
+
+<IntegrationRoutes only="adapter,plugin,model" />
 
 ### xgplayer 视频播放器
 
@@ -247,10 +374,10 @@ allowfullscreen>
 - **`logo`** (可选, 默认 `''`) — 左侧 logo 图片地址
 
 ````html
-<Linkcard url="https://github.com/MaiM-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
+<Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
 ````
 
 **效果预览：**
 
-<Linkcard url="https://github.com/MaiM-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
+<Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
 

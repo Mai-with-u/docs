@@ -120,3 +120,12 @@ SDK 内部会将 `@Action` 的所有参数转换为 `@Tool` 等价的元数据�
 - `invoke_method` 固定为 `"plugin.invoke_action"`（兼容旧调用路径）
 
 转换后，Host 侧只维护一套 Tool 抽象，不再区分 Action 和 Tool 的调用流程。
+
+## 验证与排错
+
+**验收动作** — 重载仍在使用 `@Action` 的旧插件：Runner 日志里出现 `@Action` 的 `DeprecationWarning`，WebUI 插件详情的工具列表里出现同名 Tool，说明 SDK 已在内部把它转换成 `@Tool`。
+
+- **迁移后 LLM 不再调用这个能力** — `@Tool` 没有 `activation_type` / `activation_keywords`，它始终作为候选工具交给 LLM 判断；需要关键词直接触发就改用 [`@Command`](./commands.md)。
+- **参数传不进来或类型对不上** — `@Action` 的 `action_parameters` 会全部按 `string` 转换，`@Tool` 则按 `ToolParameterInfo` 的 `param_type` 校验；数字、布尔参数要写成 `ToolParamType.INTEGER` / `ToolParamType.BOOLEAN`。
+- **工具被选中但不知道怎么用** — `@Tool` 用 `brief_description` + `detailed_description` 取代了单个 `description`，参数说明与使用要求要写进 `detailed_description`，否则 LLM 看不到。
+- **调用返回时报序列化失败** — 处理函数要返回可序列化的字典，迁移时把 `return results` 改成 `return {"results": results}`。

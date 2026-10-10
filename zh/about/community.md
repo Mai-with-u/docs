@@ -30,7 +30,7 @@ title: 交流群
 
 ## 其他平台
 
-<Linkcard url="https://github.com/MaiM-with-u/MaiBot" title="GitHub" description="MaiBot 主仓库 — 代码、Issue、PR" />
+<Linkcard url="https://github.com/Mai-with-u/MaiBot" title="GitHub" description="MaiBot 主仓库 — 代码、Issue、PR" />
 
 <Linkcard url="https://x.com/MaiWithYou" title="X" description="MaiBot 官方 X 账号" />
 

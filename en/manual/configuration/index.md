@@ -17,6 +17,14 @@ All of MaiBot's settings live in two TOML files under `config/`: change the bot 
 Both files are generated automatically **after the first launch of MaiBot**. If you cannot find them, start MaiBot once.
 :::
 
+## Configuration Topics
+
+Beyond the two main files, these topics have their own pages:
+
+- **[Model Extra Parameters](/en/manual/configuration/model-extra-params)** — thinking modes, provider parameter templates, custom request headers, and other advanced model settings
+- **[MCP Configuration](/en/manual/configuration/mcp-config)** — let MaiBot call external tool services (weather, files, APIs)
+- **[A_Memorix Configuration](/en/manual/configuration/amemorix-config)** — storage, retrieval, vectorization, and tuning for the memory engine
+
 ## Does It Take Effect Immediately
 
 MaiBot watches both files for changes. Whether a restart is required depends on whether the setting controls runtime behavior or how a service starts.
@@ -25,7 +33,7 @@ MaiBot watches both files for changes. Whether a restart is required depends on 
 
 **Hot-reloaded by the plugin runtime** — A plugin's own `config.toml` has a separate lifecycle. The runtime watches it and calls the plugin configuration-update hook. Enabling, disabling, installing, uninstalling, and source updates normally do not require restarting all of MaiBot.
 
-**Requires a full MaiBot restart** — `[webui]` and `[maim_message]` listen addresses and ports, `[mcp]` server connections, `[plugin_runtime]` binding and IPC settings, the `[log]` event-loop watchdog (`event_loop_watchdog_*`), and `[debug].force_plugin_compatibility` are established at startup and are not rebound by a file reload.
+**Requires a full MaiBot restart** — `[webui]` and `[maim_message]` listen addresses and ports, `[plugin_runtime]` binding and IPC settings, the `[log]` event-loop watchdog (`event_loop_watchdog_*`), and `[debug].force_plugin_compatibility` are established at startup and are not rebound by a file reload.
 
 ::: tip How to tell
 Check the log after saving: a successful config-reload message means the new value took over; for listen addresses, MCP connections, and other startup-only settings, restart MaiBot.

@@ -204,7 +204,11 @@ class SendInterceptorPlugin(MaiBotPlugin):
 
 ## 内置 Hook 清单
 
-以下为 Host 运行时中心表注册的全部 Hook 点。每个 Hook 注明是否允许 abort（中止调用链）和是否允许改参（修改后续处理器接收的 kwargs）。
+以下是 Host 运行时中心表注册的全部 Hook 点，共 22 个。每个 Hook 注明是否允许 abort（中止调用链）和是否允许改参（修改后续处理器接收的 kwargs）。
+
+::: warning 清单以 Host 实际注册的为准
+清单以当前 Host 实际注册的为准，共 22 个。插件 SDK 的文档里另列有 3 个尚未注册的 Hook（`emoji.register.after_build_emotion`、`jargon.query.before_search`、`jargon.query.after_search`）——**订阅它们会导致插件注册失败**，请以下表为准。
+:::
 
 ### 聊天消息链
 
@@ -221,12 +225,9 @@ class SendInterceptorPlugin(MaiBotPlugin):
 - **`emoji.maisaka.before_select`** — Maisaka 选择表情前 — 允许 abort ✅ · 允许改参 ✅
 - **`emoji.maisaka.after_select`** — Maisaka 选出表情后 — 允许 abort ✅ · 允许改参 ✅
 - **`emoji.register.after_build_description`** — 表情包描述生成完成后 — 允许 abort ✅ · 允许改参 ✅
-- **`emoji.register.after_build_emotion`** — 表情包情绪标签生成完成后 — 允许 abort ✅ · 允许改参 ✅
 
 ### 黑话（Jargon）链
 
-- **`jargon.query.before_search`** — Maisaka 黑话查询前 — 允许 abort ✅ · 允许改参 ✅
-- **`jargon.query.after_search`** — Maisaka 黑话查询完成后 — 允许 abort ✅ · 允许改参 ✅
 - **`jargon.extract.before_persist`** — 黑话条目写库前 — 允许 abort ✅ · 允许改参 ✅
 - **`jargon.inference.before_finalize`** — 黑话推断结果写回前 — 允许 abort ✅ · 允许改参 ✅
 
@@ -268,7 +269,9 @@ class SendInterceptorPlugin(MaiBotPlugin):
 
 `skip_post_process` 只跳过正文文本后处理，不会跳过图片、At 或表情等富回复附件的组装。处理器必须保留其余 `kwargs`，并且三个策略字段必须返回布尔值。
 
-```python
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
 from maibot_sdk import HookHandler
 from maibot_sdk.types import HookMode
 
@@ -282,6 +285,8 @@ async def preserve_selected_reply(self, **kwargs):
 
     return {"action": "continue", "modified_kwargs": kwargs}
 ```
+
+:::
 
 #### 在 replyer 请求前切换模型或追加提示词
 
@@ -337,20 +342,8 @@ class ThinkingLevelPlugin(MaiBotPlugin):
 
 只新增或修改 hook 名本身通常不需要改插件 SDK 运行时代码：`@HookHandler` 接收的是字符串 hook 名，是否可用由 Host 注册的 HookSpec 校验。只有需要 SDK 常量、类型提示、文档或示例同步时，才需要更新 SDK 侧内容。
 
-## Host 校验规则
+### 示例：改写表达方式选择
 
-Host 在插件注册阶段会对 `@HookHandler` 声明进行校验，不合法时插件直接注册失败（而非"加载成功但 Hook 不生效"的半成功状态）。校验规则如下：
-
-1. **Hook 名称必须已注册**：`hook` 参数必须是上述内置 Hook 清单中已存在的名称。传入未注册的 Hook 名称会导致注册失败。
-2. **mode 必须符合 Hook 的能力约束**：Host 会检查 `mode` 是否与该 Hook 点的能力兼容（例如，仅允许改参的 Hook 不能以不可改参的模式运行）。
-3. **error_policy=ABORT 须 Hook 允许 abort**：只有当该 Hook 的"允许 abort"列为"是"时，才能声明 `error_policy=ErrorPolicy.ABORT`。对于不允许 abort 的 Hook 声明 `ABORT` 策略将导致注册失败。
-
-运行时 Host 会将这份 Hook 清单公开给 WebUI 后端路由 `/plugins/runtime/hooks`，便于面板或调试工具直接读取动态中心表。
-
-### 表达方式选择链
-
-- **`expression.select.before_select`** — 表达候选池载入后、默认选择结果生成前；可改写 `candidates`、`max_num` 或 `abort` 跳过本次选择
-- **`expression.select.after_selection`** — 默认选择结果生成后；可改写 `selected_expression_ids` 或 `selected_expressions`
 
 `before_select` 会收到 `chat_id`、`session_id`、`chat_info`、`chat_history`、`reply_message`、`reply_tool_args`、`target_message`、`reply_reason`、`max_num`、`think_level`、`candidates`。`reply_tool_args` 包含 reply 工具里除 `msg_id`、`set_quote`、`reference_info` 外的额外参数。`after_selection` 在此基础上额外包含 `selected_expression_ids` 与 `selected_expressions`。
 
@@ -367,6 +360,16 @@ async def replace_expression_selection(self, **kwargs):
 ```
 
 :::
+
+## Host 校验规则
+
+Host 在插件注册阶段会对 `@HookHandler` 声明进行校验，不合法时插件直接注册失败（而非"加载成功但 Hook 不生效"的半成功状态）。校验规则如下：
+
+1. **Hook 名称必须已注册**：`hook` 参数必须是上述内置 Hook 清单中已存在的名称。传入未注册的 Hook 名称会导致注册失败。
+2. **mode 必须符合 Hook 的能力约束**：Host 会检查 `mode` 是否与该 Hook 点的能力兼容（例如，仅允许改参的 Hook 不能以不可改参的模式运行）。
+3. **error_policy=ABORT 须 Hook 允许 abort**：只有当该 Hook 的"允许 abort"列为"是"时，才能声明 `error_policy=ErrorPolicy.ABORT`。对于不允许 abort 的 Hook 声明 `ABORT` 策略将导致注册失败。
+
+运行时 Host 会将这份 Hook 清单公开给 WebUI 后端路由 `/plugins/runtime/hooks`，便于面板或调试工具直接读取动态中心表。
 
 ## 处理器返回值
 
@@ -423,3 +426,13 @@ async def on_pre_process(self, **kwargs):
 ```
 
 :::
+
+## 验证与排错
+
+**验收动作** — 重载插件后触发一次对应链路（如让机器人在群里收一条消息命中 `chat.receive.before_process`）：Runner 日志里出现你处理器的输出，且消息按预期被改写或中止，说明 Hook 名、模式与返回值都对。
+
+- **插件注册直接失败，而不是 Hook 不触发** — Host 在注册阶段校验声明：`hook` 必须是内置 Hook 清单里已有的名字，写错一个词（如 `chat.receive.before_processing`）就是注册失败，日志会指出具体是哪个组件。
+- **对不允许 abort 的 Hook 声明了 `ErrorPolicy.ABORT`** — `send_service.after_send`、`maisaka.planner.*`、`maisaka.replyer.*`、`maisaka.reply.before_post_process` 都不允许 abort，声明 `ABORT` 会注册失败；去掉该策略，或换到允许 abort 的 Hook。
+- **`modified_kwargs` 改了没生效** — 只有 `mode=HookMode.BLOCKING` 下返回值才被采纳；`OBSERVE` 模式后台并发执行，返回的 `modified_kwargs` 与 `abort` 请求一律忽略。
+- **升级 SDK 2.0 后插件加载报 `RuntimeError`** — 代码里还有 `@WorkflowStep`：SDK 2.0 已移除且没有兼容映射，按迁移表改成 `@HookHandler`（`blocking=True` → `mode=HookMode.BLOCKING`，`priority=10` → `order=HookOrder.EARLY`）。
+- **执行顺序和自己预期相反** — 排序规则是「模式 → order → 来源 → 插件 ID → 处理器名」：内置插件永远排在第三方插件之前，`HookOrder.EARLY` 只保证同一模式内靠前。

@@ -18,7 +18,7 @@ hero:
       link: /develop/
     - theme: alt
       text: GitHub
-      link: https://github.com/MaiM-with-u/MaiBot
+      link: https://github.com/Mai-with-u/MaiBot
 ---
 
 <AuroraBackground />

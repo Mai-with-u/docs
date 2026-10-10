@@ -8,13 +8,13 @@ title: 部署与启动
 
 先查看启动日志中的第一条实际错误。常见原因包括 Python 或依赖版本不符合要求、配置文件不存在或格式错误、模型配置不完整、端口被占用和文件权限不足。
 
-不要在没有确认原因时反复卸载重装。带有明确错误代码时，可在[错误排查](./error-troubleshooting.md)中继续查询。
+不要在没有确认原因时反复卸载重装。配置、端口等启动类问题见[启动与访问错误排查](./troubleshooting-startup.md)，模型配置问题见[模型与规则错误排查](./troubleshooting-model.md#api-key-错误-余额不足)；带有明确错误代码时，可在[错误排查](./error-troubleshooting.md)中继续查询。
 
 ## 配置文件不存在或格式错误怎么办？
 
 优先通过 WebUI 修改配置。必须手动编辑时，确认 TOML 的字符串带引号、数字不带引号、布尔值使用小写 `true` 或 `false`，并检查段落名称和数组格式。
 
-配置文件路径和字段说明见[配置文件](../manual/configuration/index.md)。
+逐步排查步骤见[启动与访问错误排查 · 配置文件找不到或格式不对](./troubleshooting-startup.md#配置文件找不到或格式不对)。配置文件路径和字段说明见[配置文件](../manual/configuration/index.md)。
 
 ## 端口被占用怎么办？
 
@@ -25,13 +25,13 @@ title: 部署与启动
 - Docker 部署中的 NapCat 管理面板通常映射到 `6099`。
 - NapCat 或 SnowLuma 的正向 WebSocket 常使用 `3001`，但应以适配器配置为准。
 
-找到占用端口的进程后，可以关闭重复进程，或者同时修改服务端和客户端的端口配置。详细命令见[端口占用排查](./error-troubleshooting.md#场景-3端口被占用)。
+找到占用端口的进程后，可以关闭重复进程，或者同时修改服务端和客户端的端口配置。详细命令见[端口占用排查](./troubleshooting-startup.md#端口被占用)。
 
 ## WebUI 怎么打开？
 
 本地部署默认访问 `http://127.0.0.1:8001`。请先确认启动日志已经显示 WebUI 服务启动成功；修改过端口时，应使用修改后的端口。
 
-Docker 部署还需要正确配置端口映射和监听地址，详见[Docker 安装](../manual/deployment/docker.md)。
+页面打不开时的排查步骤见[启动与访问错误排查 · WebUI 页面打不开](./troubleshooting-startup.md#webui-页面打不开)。Docker 部署还需要正确配置端口映射和监听地址，详见[Docker 安装](../manual/deployment/docker.md)。
 
 ## WebUI 中找不到某个配置项怎么办？
 

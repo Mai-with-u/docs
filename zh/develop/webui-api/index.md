@@ -1,12 +1,12 @@
 ---
-title: WebUI HTTP API 入口
+title: 程序化对接
 ---
 
-# WebUI HTTP API 入口
+# 程序化对接
 
-本子目录覆盖 MaiBot WebUI 后端对外暴露的 HTTP / WebSocket API，面向部署运维和需要脚本化管理的使用者。如果你只是通过浏览器使用 WebUI 面板，无需阅读这些内容。
+**想让自己的程序读取或控制麦麦，就用这套 HTTP / WebSocket 接口。** 做面板、监控告警、批量运维、自动化脚本都走这里；只在浏览器里用 WebUI 面板的话，不需要读这一节。
 
-开始之前，先看完本页。它交代了整个 API 的骨架：服务器怎么跑起来的、你怎么登录、有哪些路由组、以及遇到具体场景该跳去哪篇。
+本页交代整套 API 的骨架：服务怎么起、怎么登录、有哪些路由组、具体场景跳哪一篇。接口清单本身以运行时自带的交互式文档为准（见下文）。
 
 ## FastAPI 后端简介
 
@@ -31,7 +31,7 @@ WebUI 的后端是一个 FastAPI 应用，随 MaiBot 主进程一起启动。默
 - **`webui.trusted_proxies`** — 反向代理 IP 列表
 - **`webui.trust_xff`** — 是否信任 `X-Forwarded-For` 头
 
-这些字段定义在 `src/config/official_configs.py` 的 `WebUIConfig` 类中，全部可通过 [WebUI 配置界面](/manual/webui/) 或 [`/api/config/raw`](#兼容路由) 读写。
+这些字段定义在 `src/config/official_configs.py` 的 `WebUIConfig` 类中，全部可通过 [WebUI 配置界面](/manual/webui/) 或 [`/api/config/raw`](#兼容路由-compat-routers) 读写。
 
 ## 认证模型：三种方式
 
@@ -111,7 +111,7 @@ curl -X GET http://127.0.0.1:8001/api/webui/ws-token \
 - **`/config/*`** — 运行配置读写（TOML 格式）
 - **`/person/*`** — 人物信息管理
 - **`/model/*`** — 模型列表与连通性验证
-- **`/plugin/*`** — 插件生命周期管理
+- **`/plugins/*`** — 插件生命周期管理（实际路径即 `/api/webui/plugins/*`）
 - **`/system/*`** — 系统控制与数据迁移
 - **`/memory/*`** — 长期记忆图谱
 - **`/emoji/*`** — 表情包管理
@@ -119,7 +119,7 @@ curl -X GET http://127.0.0.1:8001/api/webui/ws-token \
 - **`/statistics/*`** — 统计数据
 - **`/avatar/*`** — 头像
 - **`/ws-token`** — WebSocket 临时 Token
-- WebSocket 端点（`unified` 统一通道、`logs` 日志流、`plugin/progress` 插件进度）
+- WebSocket 端点：`/api/webui/ws` 统一通道。日志流与插件进度都是它的**订阅域**（`logs:main`、`plugin_progress:main`）；1.3.4 里遗留的 `/ws/logs`、`/ws/plugin-progress` 两个独立端点并未挂载。
 
 ### 兼容路由（Compat Routers）
 
@@ -173,11 +173,11 @@ MaiBot 初次启动时，TokenManager 会生成一个临时 Token 并打印在�
 
 此外还有 `POST /api/webui/setup/reset`，用于清空配置状态重建引导流程。通常在迁移或重置时使用。
 
-## 路线图
+## 按场景找接口
 
-你需要做什么，就去对应的子篇：
+你要做什么，就去对应的子篇：
 
-- **［本页］WebUI HTTP API 入口** — API 骨架、认证、路由结构、健康检查、首次配置
+- **［本页］接口总览** — API 骨架、认证、路由结构、健康检查、首次配置
 - **[认证与配置](./auth-and-setup)** — 完整的 Token 替换/重生成/登出流程，First Run Setup 的自动化脚本
 - **[系统控制](./system-control)** — 重启、关闭、日志查看、运行状态查询等运维端点
 - **[插件生命周期 API](./plugin-lifecycle-api)** — 安装、卸载、启用、禁用插件的 HTTP 接口

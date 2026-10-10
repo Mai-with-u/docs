@@ -212,11 +212,28 @@ Below is a complete minimum viable plugin, including the manifest declaration an
 
 ```json [JSON ~vscode-icons:file-type-json~]
 {
+  "manifest_version": 2,
   "id": "com.example.llm-provider",
-  "name": "Example LLM Provider",
   "version": "1.0.0",
+  "name": "Example LLM Provider",
   "description": "示例 LLM Provider 插件",
-  "author": "example",
+  "author": {
+    "name": "example",
+    "url": "https://github.com/example"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/example/mai-llm-provider"
+  },
+  "host_application": {
+    "min_version": "1.3.0",
+    "max_version": "1.99.99"
+  },
+  "sdk": {
+    "min_version": "2.0.0",
+    "max_version": "2.99.99"
+  },
+  "capabilities": [],
   "llm_providers": [
     {
       "client_type": "example.provider",
@@ -224,11 +241,18 @@ Below is a complete minimum viable plugin, including the manifest declaration an
       "description": "示例 LLM Provider",
       "version": "1.0.0"
     }
-  ]
+  ],
+  "i18n": {
+    "default_locale": "zh-CN",
+    "locales_path": "i18n",
+    "supported_locales": ["zh-CN"]
+  }
 }
 ```
 
 :::
+
+`manifest_version`, `author` (an object), `license`, `urls`, `host_application`, `sdk`, `capabilities`, and `i18n` are all required; the Host refuses to load the plugin if any one of them is missing. `capabilities` is empty here because the example Provider only implements methods the Host calls into and never calls a Host capability itself; if your plugin uses `ctx.send.*`, `ctx.llm.*`, and so on, you must declare each capability by name (for example `send.text`).
 
 **main.py**:
 
@@ -290,3 +314,13 @@ When a Provider plugin is uninstalled, disabled, or fails to hot-reload, the Hos
 ::: info
 Plugin Providers currently do not support custom streaming handlers or response parsers on the Host side.
 :::
+
+## Verify and Troubleshoot
+
+**Verification** — add an `api_providers` entry in the WebUI model configuration, set its `client_type` to the value your plugin declares, and run one conversation through it: the reply comes from your plugin Provider (the example returns "来自 example.provider 的响应"), which proves the manifest declaration, decorator registration, and request dispatch all work.
+
+- **The plugin is refused with "LLM Provider declaration mismatch"** — the Runner sorts the `client_type` values from `_manifest.json` and from `@LLMProvider` and compares them; a missing entry, a spelling difference, or a duplicate inside one plugin blocks loading. Do not put `handler_name` or `metadata` in the manifest either — strict mode rejects undeclared fields.
+- **The plugin is blocked with an "LLM Provider client_type conflict"** — when two plugins declare the same `client_type`, the pre-load scan blocks both of them and names the plugins involved; a clash with a built-in Provider instead fails at registration with "… is already registered by host". Switch to a plugin-prefixed identifier such as `com.example.my-plugin.provider` and update the manifest and the decorator together.
+- **You want streaming output but never get it** — plugin Providers do not support custom streaming handlers or response parsers on the Host side, so extra manifest fields will not help; do the streaming inside your plugin and hand the Host a complete result.
+- **`item_schema_version mismatch`** — this check only triggers when the return value carries `output_items`: you must also return the `item_schema_version` matching the current Host, and a missing or stale value raises `RespParseException`; for plain text, return `content` only and do not hand-build `output_items`.
+- **An `embedding` or `audio_transcription` request raises `NotImplementedError`** — with `LLMProviderBase` only `get_response()` is mandatory and the other two raise by default; implement `get_embedding()` / `get_audio_transcriptions()`, or go back to manual dispatch on `operation` in your handler.

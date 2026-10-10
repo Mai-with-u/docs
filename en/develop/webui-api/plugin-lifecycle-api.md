@@ -6,7 +6,7 @@ title: Plugin Lifecycle API
 
 This document covers the complete HTTP interface for plugin installation, updates, enable/disable toggling, config editing, runtime component queries, icon retrieval, statistics proxying, and progress tracking. It targets deployment ops personnel and scripted users. All endpoints are mounted under `/api/webui/plugins/` and require Cookie authentication (see [Authentication Model](./index.md#authentication-model-three-methods)).
 
-If you need to debug plugin Host/Runner communication protocols, circuit breaker logic, or process lifecycles, see [Runtime Architecture](../plugin-runtime-internals.md). This page covers only API operations and does not go into runtime protocol details.
+If you need to debug plugin Host/Runner communication protocols, circuit breaker logic, or process lifecycles, see [Plugin Lifecycle](/en/plugin/lifecycle). This page covers only API operations and does not go into runtime protocol details.
 
 ## 1. Installed Plugin Queries
 
@@ -231,7 +231,7 @@ curl -X GET http://127.0.0.1:8001/api/webui/plugins/runtime/plugins/example-plug
 
 :::
 
-> **Distinction note** — The component queries in this section are read-only data pulls at the API level and do not involve Host/Runner inter-process communication protocols (such as RPC message serialization, fault circuit-breaker recovery, Runner lifecycle management, etc.). For those, see [Runtime Architecture](../plugin-runtime-internals.md).
+> **Distinction note** — The component queries in this section are read-only data pulls at the API level and do not involve Host/Runner inter-process communication protocols (such as RPC message serialization, fault circuit-breaker recovery, Runner lifecycle management, etc.). For those, see [Plugin Lifecycle](/en/plugin/lifecycle).
 
 ## 7. Plugin Icon Retrieval
 
@@ -293,7 +293,7 @@ The `progress` object contains current operation info:
 
 ## 10. Relationship with Runtime Architecture
 
-Everything covered in this page is at the HTTP / WebSocket API operation level. When you need to understand the runtime mechanisms behind these operations (such as how a plugin gets loaded by the Host after `POST /install`, how the Runner subprocess spawns, or how config hot-refreshes after `PUT /config`), go to **[Runtime Architecture](../plugin-runtime-internals.md)**. That document specifically covers:
+Everything covered in this page is at the HTTP / WebSocket API operation level. When you need to understand the runtime mechanisms behind these operations (such as how a plugin gets loaded by the Host after `POST /install`, how the Runner subprocess spawns, or how config hot-refreshes after `PUT /config`), go to **[Plugin Lifecycle](/en/plugin/lifecycle)**. That document specifically covers:
 
 - Host / Runner dual-process model and spawn conventions
 - `_manifest.json` parsing flow in the runtime

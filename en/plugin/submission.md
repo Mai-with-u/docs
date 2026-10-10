@@ -108,3 +108,23 @@ Go through this list before submitting:
 - [plugin-repo repository](https://github.com/Mai-with-u/plugin-repo) — plugin index and contribution guide
 - [Manifest System](./manifest.md) — full `_manifest.json` field reference
 - [Development Guide](./) — start writing a plugin from scratch
+
+## Verify and Troubleshoot
+
+**Verification** — watch the label flow after you open the Issue: CI comments its validation result, the label moves from `pending-validation` to `validated`, a maintainer's `/approve` moves it to `approved`, and the plugin detail page can install that version. Check the tag and manifest locally first:
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+# Run in your plugin repository root: the latest tag and the manifest version must agree
+git describe --tags --abbrev=0
+python -c "import json; print(json.load(open('_manifest.json'))['version'])"
+```
+
+:::
+
+- **The label stays at `validation-failed`** — after fixing the repository you must comment `/recheck` for CI to run again; editing files alone does not restart validation.
+- **A version lands in `rejected_releases` and the market shows "N release versions failed validation"** — the tag (`1.4.2` or `v1.4.2`) must correspond to a plain three-part `1.4.2` in the manifest, `id` must not change, `manifest_version` stays `2`, and `_manifest.json` must be readable from that tag's commit; then tag and create the Release again.
+- **CI says it cannot read `_manifest.json`** — the plugin repository must be public on GitHub, `urls.repository` must be a public HTTPS URL without a `.git` suffix, and the manifest must sit in the repository root.
+- **`LICENSE` validation fails** — the root directory needs a `LICENSE` whose type matches the `license` field in `_manifest.json`, and `plugin.py` must expose the `create_plugin()` factory.
+- **Approved and searchable, but the installed plugin fails to load** — usually it was never verified against a real MaiBot, or its `host_application` / `sdk` upper bound is pinned to a patch release; set the upper bound to `999.999.999`, constrain `min_version` seriously, and reload it locally once more (including any `webui.json` pages).

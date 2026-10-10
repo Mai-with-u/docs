@@ -12,9 +12,10 @@ title: 关于本文档
 
 文档按功能模块组织，zh/ 和 en/ 目录镜像同步：
 
-- **用户手册** (`manual/`) — 部署安装（源码/Docker/一键包）、平台适配器配置（NapCat/SnowLuma/QQ 官方/邮件等）、Bot 与模型配置详解、功能使用说明、WebUI 管理操作
-- **开发文档** (`develop/`) — 技术栈与项目结构、架构设计（消息管线 / Maisaka 推理引擎 / 记忆系统 / 插件运行时等）、贡献指南、文档编写特性
-- **插件开发** (`plugin/`) — 插件 Manifest、生命周期、Tool/Command/Hook/Event 组件开发、API 参考
+- **用户手册** (`manual/`) — 部署安装（Windows/Linux/Docker/一键包）、接入平台（QQ 本地客户端、QQ 官方机器人、邮件、QQ 语音通话、iMessage）、Bot 与模型配置（含 MCP）、插件安装与管理、WebUI 管理操作
+- **开发文档** (`develop/`) — 只讲「怎么接入」：适配器五篇（概览、消息协议、编写适配器、访问策略、排错）、插件接入、WebUI API 程序化对接、数据统计；模型与 MCP 的配置说明归用户手册的 `manual/configuration/`
+- **插件开发** (`plugin/`) — 插件 Manifest、生命周期、配置、Tool/Command/Hook/Event 等组件开发、API 参考、发布流程
+- **文档站协作** (`contributing/`) — 本仓库的协作硬规则、风格指南与 Markdown 写作特性
 - **常见问题** (`faq/`) — 部署、配置、模型、插件、数据迁移等 FAQ；错误排查指南
 - **更新日志** (`changelog/`) — 各版本更新记录
 - **关于** (`about/`) — 关于本项目、关于本文档、交流群、致谢与链接、EULA、隐私条款
@@ -57,11 +58,13 @@ pnpm docs:preview
 欢迎参与文档建设！你可以通过以下方式贡献：
 
 - Fork 本仓库，修改或新增文档内容后提交 PR
-- 新增文件后，修改所在目录的 index.md 使其包含你的文档
-- 在 `.vitepress/` 下修改 config.mts 或 sidebar 文件，确保导航能正确指向你的页面
+- 新增页面时，把它同时注册到 `.vitepress/sidebar/zh.ts` 与 `.vitepress/sidebar/en.ts`（英文侧链接带 `/en/` 前缀）；只有顶部导航需要时才改 `.vitepress/config.mts`
+- 同一个 PR 内同步 `en/` 镜像，术语、代码与文件名保持一致
+- 提交前跑一次 `pnpm docs:build`，它会校验死链、容器配对与代码片段路径，并生成 llms.txt
+- 页面下线或路径变更时，在 `public/_redirects` 补一行 301 指向新地址
 
-详细的贡献流程可以参考本仓库 [README](https://github.com/MaiM-with-u/docs) 的"贡献"部分；如果想参与 MaiBot 代码开发，请参阅贡献指南。
+详细的贡献流程可以参考本仓库 [README](https://github.com/Mai-with-u/docs) 的"贡献"部分；如果想参与 MaiBot 代码开发，请参阅贡献指南。
 
 ## 文档编写特性
 
-本站除了 VitePress 原生功能，还配置了一些额外的 Markdown 插件和自定义组件。准备写文档的话，建议先看看 [文档编写特性](/develop/markdown-features) 页，了解 Mermaid 图表、更新时间线、代码组图标、Linkcard 组件等特性的用法和约束。
+本站除了 VitePress 原生功能，还配置了一些额外的 Markdown 插件和自定义组件。准备写文档的话，建议先看看 [文档编写特性](/contributing/markdown-features) 页，了解 Mermaid 图表、更新时间线、代码组图标、Linkcard 组件等特性的用法和约束。

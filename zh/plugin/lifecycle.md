@@ -260,7 +260,7 @@ class MyPlugin(MaiBotPlugin):
 ::: code-group
 
 ```python [Python ~vscode-icons:file-type-python~]
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Iterable
 
 from maibot_sdk import (
     CONFIG_RELOAD_SCOPE_SELF,
@@ -354,3 +354,13 @@ sequenceDiagram
     Runner->>Plugin: on_unload()
     Note over Plugin: 清理资源
 ```
+
+## 验证与排错
+
+**验收动作** — 重载插件后先看日志：`on_load()` 里打的日志出现；再到 WebUI 插件配置页改一个字段并保存，日志随即出现你写在 `on_config_update()` 里的 `scope="self"` 记录——三个生命周期方法、签名和 `ctx` 注入就都验过了。
+
+- **加载被拒，日志提示「必须实现 on_load()」/`on_unload()`/`on_config_update()`** — Runner 在注册阶段逐个比对方法有没有被插件类覆写：只继承 `MaiBotPlugin` 不写方法，或把方法定义到了另一个类上，都会命中这条。三个方法都要在插件类里定义。
+- **保存配置时 Runner 日志出现 `TypeError`** — Runner 固定按 `(scope, config_data, version)` 三个位置参数调用 `on_config_update()`，签名少参数、顺序写反或不接受这三个参数都会失败；照抄 `async def on_config_update(self, scope: str, config_data: dict, version: str) -> None`。
+- **加载阶段就报订阅声明错误** — `config_reload_subscriptions` 必须是可迭代集合：写成字符串（`= "bot"`）抛 `TypeError`，写了 `"self"` 或其他不支持的值得 `ValueError`（只认 `"bot"` 和 `"model"`）。
+- **改了全局配置却收不到回调** — 只有 `scope="self"` 始终触发；`"bot"` / `"model"` 必须在类变量里声明过才会回调，且要写在插件类上（`ClassVar[Iterable[str]]`），写成实例属性不生效。
+- **访问 `self.ctx` 抛 `RuntimeError: 插件上下文尚未初始化`** — `self.ctx`、`self.config` 只在 `create_plugin()` 返回实例、Runner 注入 `PluginContext` 之后才可用；在模块顶层或 `__init__()` 里访问会失败，把初始化挪进 `on_load()`。

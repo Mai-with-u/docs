@@ -40,7 +40,7 @@ from maibot_sdk import MessageGateway
 
 ## ctx.gateway 能力代理
 
-- `await self.ctx.gateway.route_message(gateway_name, message_dict, route_metadata=None, ...)` — 注入入站消息到 Host
+- `await self.ctx.gateway.route_message(gateway_name, message, route_metadata=None, external_message_id="", dedupe_key="")` — 注入入站消息到 Host
 - `await self.ctx.gateway.update_state(gateway_name, ready, platform="", account_id="", scope="", metadata=None)` — 上报网关状态
 
 ### 状态管理
@@ -115,7 +115,7 @@ class NapCatGatewayPlugin(MaiBotPlugin):
         """
         accepted = await self.ctx.gateway.route_message(
             gateway_name="napcat_gateway",
-            message_dict={
+            message={
                 "message_id": payload["message_id"],
                 "platform": "qq",
                 "message_info": {
@@ -211,7 +211,7 @@ class WebhookReceiverPlugin(MaiBotPlugin):
         """接收 Webhook 回调并注入消息。"""
         accepted = await self.ctx.gateway.route_message(
             gateway_name="webhook_receiver",
-            message_dict={
+            message={
                 "message_id": payload["id"],
                 "platform": "webhook",
                 "message_info": {
@@ -274,7 +274,7 @@ sequenceDiagram
 
     Platform->>Plugin: 推送消息（WebSocket/HTTP 回调等）
     Plugin->>Plugin: 转换为 Host 消息格式
-    Plugin->>Host: ctx.gateway.route_message(gateway_name, message_dict, ...)
+    Plugin->>Host: ctx.gateway.route_message(gateway_name, message, ...)
     Host->>Host: 验证消息格式和网关状态
     Host-->>Plugin: 返回是否接受
     Host->>Host: 将消息投递到消息处理链
@@ -305,3 +305,13 @@ stateDiagram-v2
 - **`scope`** `str` — 路由作用域（如 `"primary"`、`"default"`）
 
 `platform`、`protocol`、`account_id`、`scope` 也可以在运行时通过 `ctx.gateway.update_state()` 动态上报，无需在装饰器中固定。
+
+## 验证与排错
+
+**验收动作** — 插件加载后从外部平台发一条测试消息：`ctx.gateway.route_message(...)` 返回 `True`，消息进入处理链并收到机器人回复；再让机器人回一条，外部平台能收到——入站和出站两个方向就都通了。
+
+- **注入消息抛 `RuntimeError`，提示「未声明可接收的消息网关」** — 该网关的 `route_type` 不含入站方向：`"send"` 只能发出站消息，要注入入站消息得声明 `"receive"` 或 `"duplex"`。
+- **提示「消息网关 … 尚未就绪，不能注入外部消息」** — Host 只接受 `ready=True` 的网关：确认上报时机，`ready=True` 要在链路真正可用之后上报，连接尚未建立就上报会让注入被挡；断开或卸载时补一次 `ready=False`。
+- **装饰器一执行就报「不支持的消息网关路由类型」** — `route_type` 只认 `"send"`、`"receive"`、`"duplex"`（别名 `"recv"`、`"recive"`），写成 `"both"`、`"in"` 之类在插件导入阶段就失败。
+- **报「入站消息缺少平台信息」** — Host 依次取 `message["platform"]`、`route_metadata["platform"]`、`update_state` 上报值和装饰器 `platform`，四处都为空就拒收；至少在 `@MessageGateway(platform=...)` 或 `update_state(platform=...)` 里写死平台名。
+- **`route_message()` 返回 `False`（不是异常）** — 入站消息被 `config/adapter_policy.toml` 拦下了：命中的平台 / 账号条目是 `block`，或写了 `disabled = true`。放开该条目（或对测试群显式 `allow`）即可；文件不存在时等于全部放行。

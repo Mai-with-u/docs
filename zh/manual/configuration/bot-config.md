@@ -616,8 +616,8 @@ enable = true  # 是否启用 MCP 工具接入能力
 
 :::
 
-::: tip MCP 服务器连接需要重启
-`[mcp]` 下的服务器连接只在启动时建立，文件重载不会重新连接。改完服务器配置重启 MaiBot。
+::: tip MCP 服务器连接会自动重建
+改 `[mcp]` 段保存后，MaiBot 会用新配置重建 MCP 连接，不需要重启；重建结果与启动时一样打印在日志里。少数不在重载判定范围内的字段（如 `elicitation` 整节、`sampling.include_context_support`）仍需重启才生效，详见 [MCP 配置](./mcp-config.md)。
 :::
 
 #### 插件管理
@@ -782,7 +782,7 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 
 **启动时直接报错退出** — TOML 语法错误，或字段值非法（`ban_msgs_regex` 正则非法、关键词规则缺 `reaction`、`chat_prompts` 缺字段）。先用上面的命令定位语法问题；字段校验的错误信息会直接点名问题字段，改掉即可。
 
-**改了没生效** — 你改的段落可能属于「仅启动时生效」：`[webui]` 与 `[maim_message]` 的监听地址和端口、`[mcp]` 服务器连接、`[plugin_runtime]` 的 IPC、`[log]` 的 `event_loop_watchdog_*`、`[debug]` 的 `enable_console_input` 与 `force_plugin_compatibility`。重启 MaiBot。其余段落看 [配置概览](./index.md#改了会立即生效吗)。
+**改了没生效** — 你改的段落可能属于「仅启动时生效」：`[webui]` 与 `[maim_message]` 的监听地址和端口、`[plugin_runtime]` 的 IPC、`[log]` 的 `event_loop_watchdog_*`、`[debug]` 的 `enable_console_input` 与 `force_plugin_compatibility`。重启 MaiBot。其余段落看 [配置概览](./index.md#改了会立即生效吗)。
 
 **麦麦不理人** — 依次检查：宿主适配器策略有没有放行这个群（见 [统一 QQ 连接器](../adapters/qq-local-client.md) 的「先加名单，再测试」）；`talk_value` 是否被调得过低；`qq_account` 与适配器登录的 QQ 是否一致。
 

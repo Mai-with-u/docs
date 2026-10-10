@@ -6,7 +6,7 @@ title: Docker Deployment
 
 ## Prerequisites
 
-MaiBot Docker deployment requires Docker and Docker Compose, plus at least 2GB of available memory. It supports Linux, macOS, and Windows (via Docker Desktop).
+MaiBot Docker deployment requires Docker and Docker Compose, plus at least 2GB of available memory. It supports Linux, macOS, and Windows (via Docker Desktop). If you'd rather not write the compose files yourself, hand the [installation prompt](./installation-agent) to an AI assistant and let it follow the deployment flow for you.
 
 First, verify your environment:
 

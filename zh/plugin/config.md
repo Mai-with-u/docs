@@ -323,14 +323,14 @@ WebUI 会根据 Schema 渲染配置表单，用户可以在浏览器中直接编
 ::: code-group
 
 ```python [Python ~vscode-icons:file-type-python~]
-# 读取插件自身配置
-value = await self.ctx.config.get("plugin.greeting")
-
-# 读取其他插件配置
-value = await self.ctx.config.get_plugin("com.other.plugin")
-
-# 读取全局 Bot 配置
+# 读取本插件的全部配置
 all_config = await self.ctx.config.get_all()
+
+# 读取指定插件的配置（不传 plugin_name 时是当前插件）
+plugin_config = await self.ctx.config.get_plugin("com.other.plugin")
+
+# 读取全局 Bot 配置里的单个字段
+global_value = await self.ctx.config.get("plugin.permission")
 ```
 
 :::
@@ -357,3 +357,13 @@ class SimplePlugin(MaiBotPlugin):
 :::
 
 但建议始终使用 `config_model`，以获得更好的类型安全和 WebUI 集成体验。
+
+## 验证与排错
+
+**验收动作** — 在 WebUI 插件配置页改一个字段（如问候语）并保存：`plugins/<插件名>/config.toml` 里出现该值，插件日志随即打印新值（`on_config_update` 被触发），说明配置模型、WebUI Schema 与热重载都通了。
+
+- **`self.config` 抛 `RuntimeError`** — 两种情况：插件没有声明 `config_model`，或者调用发生在配置注入之前（比如模块顶层）；前者改用 `get_plugin_config_data()`，后者把访问挪到 `on_load()` 之后。
+- **WebUI 里看不到新加的字段** — Schema 只在插件加载时生成，改完 `config_model` 要重载插件（或重启 MaiBot）；重载后 Runner 会用模型默认值补齐 `config.toml` 里缺失的字段。
+- **手改 `config.toml` 不生效或串位** — TOML 的分组要与模型嵌套层级对应（`plugin.greeting` 对应 `[plugin]` 下的 `greeting`），类型也要与字段声明一致；`config_version` 由 Runner 维护，不要手改。
+- **可变类型默认值报错** — `list`、`dict` 和嵌套 `PluginConfigBase` 要用 `default_factory=list` / `default_factory=PluginSection`，直接写 `default=[]` 会被当成共享默认值。
+- **连续保存只收到一次回调** — 1.3.2 起热重载广播会合并下发，短时间多次保存只触发一次并带上合并后的最新快照，属预期行为。

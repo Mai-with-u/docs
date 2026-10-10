@@ -51,7 +51,7 @@ alias_names = []
 - **`platform`** — 填 `"qq"`，即本地客户端适配器的平台标识。
 - **`qq_account`** — 填客户端登录的那个 QQ 号（字符串格式），两处必须完全一致。
 
-也可以在 WebUI 中设置：`麦麦设置 → 基础 → 平台账号`，平台选 `qq`，账号填机器人 QQ 号。
+也可以在 WebUI 的**适配器设置**里设置：点页面顶部「全局默认规则」卡片右侧的 **平台账号**，平台选 `qq`，账号填机器人 QQ 号。
 
 ## 配置适配器连接
 
@@ -136,7 +136,7 @@ ignore_self_message = false                    # 忽略机器人自身发送的�
 
 统一 QQ 连接器**已移除内置的群聊 / 私聊黑白名单**——入站通行统一由宿主适配器策略控制：WebUI 的适配器设置（黑白名单规则）或 `config/adapter_policy.toml`，默认**全部放行**（所有群消息都接受）。想限制范围时，把「默认不阅读」打开、只放行指定的群号或用户即可。
 
-策略的可视化入口见 [适配器管理](../webui/adapter-management.md)；`config/adapter_policy.toml` 的完整写法见[统一适配器访问策略](/develop/message-server-and-adapters#统一适配器访问策略)。
+策略的可视化入口见 [适配器管理](../webui/adapter-management.md)；`config/adapter_policy.toml` 的完整写法见[访问策略与账户路由](/develop/adapters/policy)。
 
 ::: tip 先小范围验证更稳
 先在适配器策略里只加一个测试群和一个测试用户，确认收发正常后再扩大放行范围；排查「没反应」时，这一层是第一现场。

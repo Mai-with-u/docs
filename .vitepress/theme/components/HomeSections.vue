@@ -131,7 +131,7 @@ const t = computed(() =>
           { icon: 'plug', title: 'Connect Platforms', desc: 'QQ, Email, iMessage and more adapters', href: '/manual/adapters/' },
           { icon: 'sliders', title: 'Configuration', desc: 'Persona, models and memory, item by item', href: '/manual/configuration/' },
           { icon: 'code', title: 'Plugin Development', desc: 'Give Mai brand-new abilities', href: '/plugin/' },
-          { icon: 'branch', title: 'Contribute', desc: 'Architecture, APIs and deep-dive topics', href: '/develop/' },
+          { icon: 'branch', title: 'Integration Guides', desc: 'Write adapters, plugins and API clients', href: '/develop/' },
           { icon: 'help', title: 'FAQ', desc: 'Hit a snag? Look here first', href: '/faq/' },
         ],
         bannerTitle: 'Hang out with Mai-pals',
@@ -198,7 +198,7 @@ const t = computed(() =>
           { icon: 'plug', title: '接入聊天平台', desc: 'QQ、邮件、iMessage 等适配器', href: '/manual/adapters/' },
           { icon: 'sliders', title: '配置详解', desc: '人设、模型、记忆，每一项都讲清楚', href: '/manual/configuration/' },
           { icon: 'code', title: '插件开发', desc: '给麦麦写点新能力', href: '/plugin/' },
-          { icon: 'branch', title: '参与开发', desc: '架构、API 与进阶专题', href: '/develop/' },
+          { icon: 'branch', title: '接入开发', desc: '写适配器、插件，或对接 HTTP API', href: '/develop/' },
           { icon: 'help', title: '常见问题', desc: '遇到坑？先来这看看', href: '/faq/' },
         ],
         bannerTitle: '和麦友一起玩',
@@ -333,7 +333,7 @@ const t = computed(() =>
         <a class="hs-btn hs-btn--solid" :href="`${prefix}/about/community`">{{ t.bannerPrimary }}</a>
         <a
           class="hs-btn hs-btn--ghost no-icon"
-          href="https://github.com/MaiM-with-u/MaiBot"
+          href="https://github.com/Mai-with-u/MaiBot"
           target="_blank"
           rel="noopener"
         >GitHub</a>

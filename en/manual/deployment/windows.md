@@ -18,6 +18,8 @@ You can also join a QQ group and get it from the group files — see [Community 
 
 After downloading, double-click the installer and follow the prompts. On first launch, the one-key package will automatically set up the Python environment and install dependencies, then walk you through a configuration wizard.
 
+If you'd rather not babysit every step, hand the [installation prompt](./installation-agent) to an AI assistant and let it follow the source deployment flow for you.
+
 ::: tip
 If you run into issues, check the [FAQ](/en/faq/) first — most common situations are covered there.
 :::

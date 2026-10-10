@@ -265,3 +265,13 @@ sequenceDiagram
     EH3-->>Host: 返回结果
     Note over Host: 若 intercept_message=True，主流程等待每个处理器返回
 ```
+
+## 验证与排错
+
+**验收动作** — 让机器人在群里收一条消息：`ON_MESSAGE` 处理器的计数或日志随之增加；再把含测试关键词的消息发给 `ON_MESSAGE_PRE_PROCESS` 过滤示例，消息被拦下不再进入后续流程，说明订阅与拦截都生效了。
+
+- **事件完全不触发** — `event_type` 要传 `EventType` 枚举值（如 `EventType.ON_MESSAGE`），传字符串 `"on_message"` 不会被识别。
+- **拦截没生效、消息照常处理** — `intercept_message` 默认是 `False`（fire-and-forget），处理器返回值会被忽略；要中断或改写消息链必须显式设 `True`。
+- **多个处理器顺序不对** — `weight` 数值越高越先执行，默认 `0`；拦截类处理器要给高权重，否则别的处理器已经先放行了消息。
+- **想在固定阶段订阅自定义钩子点** — `@EventHandler` 只认固定 `EventType`，命名 Hook（如 `heart_fc.heart_flow_cycle_start`）要用 [`@HookHandler`](./hooks.md)。
+- **处理器里取不到字段** — 不同 `EventType` 的 `kwargs` 载荷不同：先打印 `kwargs.keys()`，或用 `message.get("raw_message", "")` 这类带默认值的读取方式确认字段名确实存在。

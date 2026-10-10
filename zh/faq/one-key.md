@@ -20,19 +20,13 @@ title: 一键包
 
 ## 一键包中的 NapCat 连接失败怎么办？
 
-依次确认：
+一键包通常配合 SnowLuma / NapCat 客户端使用，客户端通过**统一 QQ 连接器**（`MaiBot-SnowLuma-Adapter`）接入 MaiBot。连接失败时，按[适配器连接](./adapters.md)中「统一 QQ 连接器为什么连不上 SnowLuma / NapCat」的步骤排查即可；如果旧版一键包装的是已归档的独立 NapCat 适配器，[NapCat 适配器（已归档）](../manual/adapters/napcat.md)仅作历史参考，请升级到统一 QQ 连接器。
 
-1. NapCat 已登录正确的 QQ 账号。
-2. NapCat 已启用正向 WebSocket 或 WebSocket 服务器。
-3. NapCat 的监听端口和适配器端口一致。
-4. WebSocket 访问令牌和适配器配置一致。
-5. NapCat 适配器已启用，聊天过滤中包含目标群聊或用户。
+## 把一键包客户端从 NapCat 换成 SnowLuma 后连接失败怎么办？
 
-NapCat WebUI 的登录 Token 与 WebSocket 访问令牌不是同一个概念，不要直接混用。详细说明见[NapCat QQ 连接](../manual/adapters/napcat.md)。
+确认统一 QQ 连接器已启用：WebUI 的**插件管理**里 `MaiBot-SnowLuma-Adapter` 处于启用状态，SnowLuma 已登录并监听正向 WebSocket。然后核对 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 的 `[client]` 节：`server` / `port` 指向 SnowLuma 的监听地址，`token` 与 SnowLuma 的访问令牌一致，`client_type` 保持 `auto`（也可显式写成 `snowluma`）。
 
-## 切换到 SnowLuma 后连接失败怎么办？
-
-确认 SnowLuma 适配器已启用，SnowLuma 的地址、端口和访问令牌与插件配置一致，并检查 SnowLuma 本身是否已经正常登录和监听。详见[统一 QQ 连接器](../manual/adapters/qq-local-client.md)。
+一个连接器同时支持两类客户端，切换时不用换插件，改 `[client]` 配置即可。详见[统一 QQ 连接器](../manual/adapters/qq-local-client.md)。
 
 ::: info 内容来源
 本页的一键包问题分类参考了社区协作文档[《麦麦教程-常见问题速查/社区教程》](https://www.kdocs.cn/l/ctOGhVv6L8Yq)。2026 年 7 月 12 日导出版本的页面信息显示创建者为池雨、修改者为无为青年；本站仅保留能够按当前文档确认的通用步骤。

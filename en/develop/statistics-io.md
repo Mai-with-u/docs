@@ -1,16 +1,16 @@
 ---
-title: Data Import/Export
+title: Data and Statistics
 ---
 
 # Data Import/Export
 
 MaiBot continuously generates data at runtime: messages, model calls, tool executions, online duration, and more. This data has three consumption paths: **real-time dashboards** query raw tables directly via HTTP API, **hourly aggregation** is periodically written to summary tables by a background service for direct SQL reads, and **async export** packages files into zip archives through WebUI data-transfer endpoints. The three paths are independent, each serving different operational scenarios.
 
-This document assumes you have already read [Database](./database.md) (for table structure) and [Data & Memory API](./webui-api/data-and-memory-api.md) (for user-side curl examples of data-transfer). Below we break down the principles, data availability boundaries, and typical operational commands for each path from a backend perspective.
+This page explains each path from an integrator's point of view: how to use it, when the data becomes available, and the typical operational commands. For authentication and calling conventions see [Programmatic Access](./webui-api/); for the graphical export/import UI see [Data Management](/en/manual/webui/data-management).
 
 ## Hourly Aggregation Tables
 
-MaiBot maintains four hourly-bucket aggregation tables prefixed with `statistics_*`, periodically written by an independent **incremental aggregation service**. These four tables are independent of the core tables in the [Database](./database.md#22-张表总览) ER diagram and do not participate in the main `session_id` relationship chain.
+MaiBot maintains four hourly-bucket aggregation tables prefixed with `statistics_*`, periodically written by an independent **incremental aggregation service**. These four tables are independent of the other core tables and do not participate in the main `session_id` relationship chain.
 
 **`statistics_message_hourly`** — Aggregates hourly message counts uniquely by `(bucket_time, chat_id)`. `bucket_time` is the hour boundary, and `latest_timestamp` records the actual timestamp of the newest message in the bucket. Chat types are differentiated as `group` and `private`.
 
@@ -81,44 +81,15 @@ ORDER BY day DESC, total_cost DESC;
 
 :::
 
-If MaiBot is running, always set WAL mode and `busy_timeout` when connecting to the database file to avoid lock conflicts. See [Database / Connections and Sessions](./database.md#连接与会话) for details.
+If MaiBot is running, always set WAL mode and `busy_timeout` when connecting to the database file to avoid lock conflicts. See [Data Management](/en/manual/webui/data-management) for details.
 
 ### Method 2: Statistics HTTP Endpoint
 
-Functions in `statistics_service.py` aggregate directly from raw tables (`llm_usage`, `mai_messages`, `online_time`, `tool_records`) in real time, returning structured JSON data. The WebUI frontend consumes this data through three endpoints.
-
-**`GET /api/webui/statistics/dashboard?hours=24`** — Returns five data groups in one call: `summary`, `model_stats`, `hourly_data`, `daily_data`, `recent_activity`. Has a built-in 20-minute local cache; subsequent requests within the cache validity period do not hit the database.
-
-**`GET /api/webui/statistics/summary?hours=24`** — Returns summary only: total requests, total cost, total tokens, online duration, message count, reply count, average response time, cost per hour, and tokens per hour.
-
-**`GET /api/webui/statistics/models?hours=24`** — Returns Top 10 model stats only: request count, cost, tokens, and average response time per model.
-
-All endpoints require authentication (Cookie or Bearer token). Below are three curl examples:
-
-::: code-group
-
-```bash [curl Dashboard ~vscode-icons:file-type-http~]
-curl -X GET "http://127.0.0.1:8001/api/webui/statistics/dashboard?hours=168" \
-  -H "Cookie: maibot_session=YourToken"
-```
-
-```bash [curl Summary ~vscode-icons:file-type-http~]
-curl -X GET "http://127.0.0.1:8001/api/webui/statistics/summary?hours=24" \
-  -H "Cookie: maibot_session=YourToken"
-```
-
-```bash [curl Model Stats ~vscode-icons:file-type-http~]
-curl -X GET "http://127.0.0.1:8001/api/webui/statistics/models?hours=720" \
-  -H "Cookie: maibot_session=YourToken"
-```
-
-:::
-
-The `hours` parameter accepts any positive integer such as 24 (last day), 168 (last week), 720 (last 30 days). Caching is bucketed by the `hours` value; different parameters have independent caches.
+Functions in `statistics_service.py` aggregate directly from raw tables (`llm_usage`, `mai_messages`, `online_time`, `tool_records`) in real time, returning structured JSON — this is what the WebUI dashboard consumes. The three endpoints (dashboard / summary / models), their parameters, caching behavior and curl examples live in [Realtime Channel & Statistics](./webui-api/realtime-and-stats.md#statistics-queries) and are not repeated here.
 
 ## Data-Transfer Export/Import: Backend Job Flow
 
-`data_transfer.py` (474 lines) implements a complete async job system. For the frontend perspective on curl operations, see [Data & Memory API](./webui-api/data-and-memory-api.md#data-transfer-导出导入). Here we expand on the backend execution details.
+`data_transfer.py` (474 lines) implements a complete async job system. For the frontend perspective on curl operations, see [Data & Memory API](./webui-api/data-and-memory-api.md#data-transfer-async-export-import). Here we expand on the backend execution details.
 
 ### Job Lifecycle
 

@@ -5,8 +5,6 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 # Changelog
 
-For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases).
-
 ::: timeline 2026-10-06
 
 ### Main program [1.3.4]
@@ -133,13 +131,13 @@ For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-w
 
 ### Webui [1.8.0]
 
-* MaiMai Observation now shows thinking and tool-execution status as soon as the Planner returns, and updates results in place when a tool finishes; fixed new rounds overwriting old cards after a restart; `tool_search` now shows the search terms and activated tool list separately.
+* Mai Observation now shows thinking and tool-execution status as soon as the Planner returns, and updates results in place when a tool finishes; fixed new rounds overwriting old cards after a restart; `tool_search` now shows the search terms and activated tool list separately.
 
-* MaiMai Settings moves manual save, shared-group settings, and source-file editing into an ellipsis menu, keeping detailed settings and command management at the top; shared-group settings replace core settings, and the sidebar chat-management entry is removed.
+* Mai Settings moves manual save, shared-group settings, and source-file editing into an ellipsis menu, keeping detailed settings and command management at the top; shared-group settings replace core settings, and the sidebar chat-management entry is removed.
 
-* In MaiMai Chat, the local user identity box moves to the right of the input area, with avatar and nickname editable in the same box; chat-stream browsing is removed from chat management and unified in the MaiMai Chat page, while chat management keeps shared-group management.
+* In Mai Chat, the local user identity box moves to the right of the input area, with avatar and nickname editable in the same box; chat-stream browsing is removed from chat management and unified in the Mai Chat page, while chat management keeps shared-group management.
 
-* Improved the mobile experience and chat-stream reading in MaiMai Chat with related fixes, refreshed the login page styling, and removed unused feature code.
+* Improved the mobile experience and chat-stream reading in Mai Chat with related fixes, refreshed the login page styling, and removed unused feature code.
 
 * Fixed being unable to change the embedding model in the WebUI.
 
@@ -173,7 +171,7 @@ For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-w
 
 * Improved the long-term memory interaction experience; the long-term memory page adds image-memory management for viewing image assets, cognitions, and related memories, with confirmation, correction, and record deletion.
 
-* Improved the MaiMai Observation page, adding "Find previous"; it shows context segment ratios, session cumulative tokens, and average cache hit rate, and chat-stream settings can be opened directly from the chat view.
+* Improved the Mai Observation page, adding "Find previous"; it shows context segment ratios, session cumulative tokens, and average cache hit rate, and chat-stream settings can be opened directly from the chat view.
 
 ### Memory
 
@@ -224,10 +222,10 @@ For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-w
 :::
 
 ::: timeline 2026-09-01
-- [1.2.4] Plugin tools can request ending the Planner after execution; models can stop sending the temperature parameter; WebUI [1.7.3] merges MaiMai Observation into the chat workspace and streamlines memory management
+- [1.2.4] Plugin tools can request ending the Planner after execution; models can stop sending the temperature parameter; WebUI [1.7.3] merges Mai Observation into the chat workspace and streamlines memory management
 - Maisaka: when a plugin tool returns `stop_after_execution: true` successfully, the Planner ends after the current tool batch finishes and waits for new messages
 - Models: model advanced settings add a "Send temperature parameter" switch (`send_temperature`, on by default); when off, MaiBot no longer sends any MaiBot-managed temperature — model-level, task-level, or from extra parameters — for compatibility with models that reject this parameter
-- WebUI [1.7.3]: the standalone "MaiMai Observation" page merges into the chat workspace; the sidebar now shows chattable sessions and read-only chat streams (marked with an "Observing" badge) in one place, and clicking a chat stream opens its reasoning timeline inline
+- WebUI [1.7.3]: the standalone "Mai Observation" page merges into the chat workspace; the sidebar now shows chattable sessions and read-only chat streams (marked with an "Observing" badge) in one place, and clicking a chat stream opens its reasoning timeline inline
 - WebUI [1.7.3]: long-term memory run status moves into the "More actions" menu, simplifying the top of the memory management page; tuning parameters and import common/advanced parameters collapse into dialogs; the audit timeline layout is adjusted — the audit scope now spans the full row and change summaries merge into the event list
 - WebUI [1.7.3]: emoji keyword-recognition prompts integrate into the "Prompt Management" page, with per-language editing, custom versions, and hot reload
 - Long-term memory: multiple fixes for person profile refresh, authoritative fact and alias maintenance, and memory import/audit flows; no config changes
@@ -308,35 +306,93 @@ For dev and detailed changelogs, see [GitHub Releases](https://github.com/MaiM-w
 - Messaging: the host can control adapter admission; fixed handling of oversized emoji images
 :::
 
+::: timeline 2026-07-04
+- [1.0.11] Attempted fix for the self-reply issue
+- Improved the logic of necessity-triggered mode
+- Continued work on the planner reasoning without replying issue
+- Fixed the WebUI embedding model test
+- Improved the `send_image` tool
+- Fixed an error when the prompt manager compares against defaults
+:::
+
+::: timeline 2026-07-03
+- [1.0.10] Maisaka: fewer cases of reasoning without replying; added the experimental "rich reply capability" feature
+- Memory: added a global shared-memory switch and memory sharing groups, and improved memory-related settings
+- WebUI: home page cards can be sorted, removed, and resized
+- Plugins: custom home page cards can be added
+:::
+
+::: timeline 2026-07-02
+- [1.0.9] Memory: the memory system was updated with a large performance boost and a better long-term memory WebUI experience
+- WebUI: added model testing, improved expression and jargon configuration, and faster plugin management updates
+- Fixes: @ now works when the bot's actual nickname differs, fixed the Docker WebUI address issue, and more
+- Plugins: a unified persistent data API for plugins, plus statistics-related plugin APIs
+:::
+
+::: timeline 2026-06-25
+- [1.0.8] Maisaka: reply frequency logic changed, with fewer empty tool calls and errors
+- Learning upgrade: expressions gained "fine/super fine" modes, improving accuracy 3x
+- Better jargon learning quality, with cluster browsing in the WebUI
+- WebUI: improved the Mai observation experience, fixed leftover plugin downloads, and added multi-host binding
+- **Note: this version has significant changes; see the notes below**
+:::
+
+::: timeline 2026-06-19
+- [1.0.7] WebUI: improved Mai observation real-time behavior and avatar display, added a chat management tab
+- Mai reasoning replay is now available, making debugging easier
+- Better config editing: sticky header and a denser information layout
+- Faster jargon management loading, plus font size adjustment support
+:::
+
+::: timeline 2026-06-16
+- [1.0.6] Maisaka: fixed some APIs not supporting the `tool_choice` parameter, improved planner and Telegram calls
+- [1.0.5] WebUI: completed configuration item name descriptions, removed the startup page animation for low-performance devices
+- Storage optimization: greatly reduced database size bloat, with automatic background cleanup of redundant data
+:::
+
+::: timeline 2026-06-15
+- [1.0.4] Fixes: Docker playwright issue, adjusted the default WebUI log column width
+- Storage optimization: greatly reduced database bloat, with automatic background cleanup
+:::
+
+::: timeline 2026-06-14
+- [1.0.3] Maisaka: special marking of its own messages, improved mid-term memory and context handling
+- Behavior learning improvements: scenario matching, feedback consolidation, use-it-or-lose-it, and similar-behavior merging
+- WebUI: avatar cache display, reasoning process filtering enhancements, and structured prompt display
+:::
+
+::: timeline 2026-06-13
+- [1.0.2] Maisaka: multiple expression selection no longer breaks the cache
+- [1.0.1] WebUI: more complete plugin installation progress display, improved configuration page and model vendor list
+- Plugin compatibility: minor versions within the same major version load compatibly, relaxed manifest validation
+- Stability: statistics output interval slowed to 15 minutes, reducing log spam
+:::
+
 ::: timeline 2026-06-12
-- [1.0.0] **Systematic upgrade!** Maisaka inference engine refactored with Planner-Replyer deep integration
-- Thinking effort mechanism: dynamically controls reply time and length
-- A-Memorix Memory Engine v1.0: knowledge graphs, character profiles, chat summaries
-- Feedback correction system: automatically corrects outdated memories
-- MCP built-in plugin; global memory configuration added
-- WebUI: Model preset marketplace, comprehensive security hardening, frontend auth refactoring
+- [1.0.0] **Major release!** Maisaka's core reply mechanism is upgraded to agent-style work
+- A_Memorix memory system becomes the mainline: paragraphs, entities, relationships, sources, vectors, and graphs are stored in a unified way
+- WebUI/Dashboard completes a new interface system upgrade: chat, configuration, plugins, memory, and other core capabilities are integrated
+- The plugin system is refactored into an independent `plugin_runtime`, supporting independent start/stop, reload, and runtime status tracking
+- For dev builds and more detailed changelogs, see [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases).
 - For a more complete illustrated explanation, see the [MaiBot 1.0.0 Update Feature](./v1-0-0.md)
 :::
 
 ::: timeline 2026-01-11
 - [0.12.2] Optimized private chat wait logic, force quote reply on timeout
 - Fixed disconnection issues with some adapters, optimized memory retrieval logic
+- Updated the README
 :::
 
 ::: timeline 2025-12-31
 - [0.12.1] Year-end summary feature (WebUI), optional LLM judgment for quote replies
 - Expression optimization: automatic and manual evaluation support
 - Reply and planning records viewable in WebUI
-- Global memory blacklist: exclude specific group chats from global memory
 :::
 
 ::: timeline 2025-12-21
 - [0.12.0] Thinking effort mechanism: dynamic reply time and length control
-- Planner and Replyer integration, new private chat system
-- MaiMai dreaming feature, MCP plugin as built-in
-- Global memory configuration added
+- Planner and Replyer integration for better reply logic
+- New private chat system that absorbs PFC mechanisms
+- Mai dreaming feature; MCP plugin as a built-in plugin (disabled by default)
+- WebUI major update: model preset marketplace released, comprehensive security hardening, frontend auth refactoring
 :::
-
-## Earlier Versions
-
-For changelog of earlier versions, see [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases).

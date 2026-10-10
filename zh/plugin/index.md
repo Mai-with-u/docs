@@ -135,7 +135,7 @@ plugins/
     "min_version": "1.0.0",
     "max_version": "2.99.99"
   },
-  "capabilities": ["send_message"],
+  "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": {
     "default_locale": "zh-CN"
   }
@@ -364,15 +364,10 @@ MaiBot 维护两个独立的 Runner 子进程：
 
 ## 下一步
 
-- [发布插件](./submission.md)：插件开发完成后，提交到官方插件中心
-- [Manifest 系统](./manifest.md)：了解 `_manifest.json` 的完整字段定义与校验规则
-- [生命周期](./lifecycle.md)：学习插件加载、卸载与配置热重载的生命周期方法
-- [Hook 系统](./hooks.md)：学习如何使用 @HookHandler 拦截和改写消息
-- [Tool 组件](./tools.md)：学习如何开发 LLM 可调用的工具组件
-- [Command 组件](./commands.md)：学习如何开发斜杠命令组件
-- [首页卡片](./home-cards.md)：学习如何向 WebUI 首页添加插件卡片
-- [WebUI 页面](./webui-pages.md)：用 webui.json 给插件加自定义页面
-- [LLMProvider 组件](./llmprovider.md)：学习如何开发自定义LLM Provider接入新模型
-- [Action 组件](./actions.md)：了解兼容旧系统的 @Action 装饰器
-- [配置管理](./config.md)：学习如何声明和使用插件配置
-- [API 参考](./api-reference.md)：查阅完整的插件 SDK API
+**基础** — [Manifest 系统](./manifest.md)：`_manifest.json` 的完整字段定义与校验规则 · [生命周期](./lifecycle.md)：加载、卸载与配置热重载 · [配置管理](./config.md)：声明和使用插件配置
+
+**组件** — [Tool 组件](./tools.md)：LLM 可调用的工具 · [Command 组件](./commands.md)：斜杠命令 · [Hook 系统](./hooks.md)：拦截和改写消息 · [事件处理器](./event-handlers.md)：监听生命周期事件 · [消息网关](./message-gateway.md)：用插件接入新平台 · [API 组件](./api-components.md)：插件间接口 · [LLMProvider 组件](./llmprovider.md)：接入新模型服务 · [首页卡片](./home-cards.md)：WebUI 首页卡片 · [WebUI 页面](./webui-pages.md)：声明式自定义页面 · [Action 组件](./actions.md)：兼容旧系统的 @Action 装饰器
+
+**深入** — [Vibe Coding](./vibe-coding.md)：用 AI 辅助写插件 · [API 参考](./api-reference.md)：完整的插件 SDK API · [发布插件](./submission.md)：提交到官方插件中心
+
+**接入视角** — [插件接入](/develop/plugin)：插件能接到哪些地方、运行边界与版本兼容（适合开发前阅读）

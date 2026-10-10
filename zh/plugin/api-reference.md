@@ -265,25 +265,24 @@ config = self.ctx.config
 
 :::
 
-- `await config.get(key, default=None)` — 获取配置值，`key` 支持点分割
-- `await config.get_plugin(plugin_name=None)` — 获取指定插件的配置
-- `await config.get_all()` — 获取插件全部配置
+- `await config.get(key, default=None)` — 读取**全局 Bot 配置**（`bot_config.toml`）中的字段，`key` 支持点分割
+- `await config.get_plugin(plugin_name=None)` — 获取指定插件的配置，`plugin_name` 省略时为当前插件
+- `await config.get_all()` — 获取**当前插件**的全部配置；名字容易误解，它读的不是全局 Bot 配置
 
-配置结构和默认值由插件的 `config_model` 定义。Runner 将当前安装实例的值保存在插件目录下自动生成的 `config.toml` 中，配置能力代理读取的是 Runner 已加载的运行时配置。
+插件配置的结构和默认值由插件的 `config_model` 定义。Runner 将当前安装实例的值保存在插件目录下自动生成的 `config.toml` 中，`config.get_plugin()` 与 `config.get_all()` 读取的是 Runner 已加载的这份运行时配置；`config.get()` 读的则是 Host 的全局 Bot 配置，与插件自己的 `config.toml` 无关。
 
 `config.get()`、`config.get_plugin()` 和 `config.get_all()` 都会直接返回配置值或配置字典，不需要手动从 RPC 结果中读取 `value` 字段。
 
 ::: code-group
 
 ```python [Python ~vscode-icons:file-type-python~]
-# 读取单个值
-api_key = await self.ctx.config.get("api_key", "")
-timeout = await self.ctx.config.get("network.timeout", 30)
+# 读取全局 Bot 配置中的单个字段
+permission = await self.ctx.config.get("plugin.permission", [])
 
-# 读取指定插件配置
+# 读取指定插件的配置（省略参数则为当前插件）
 config = await self.ctx.config.get_plugin("com.example.my-plugin")
 
-# 读取全部配置
+# 读取当前插件的全部配置
 all_config = await self.ctx.config.get_all()
 ```
 

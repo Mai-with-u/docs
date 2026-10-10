@@ -6,7 +6,7 @@ title: Install Plugins
 
 Plugins are like "Apps" you install for MaiBot, giving it more capabilities—games, drawing, music, weather queries, and **adapters that connect platforms like QQ, email, and voice calls**—almost everything is a plugin.
 
-You can install from the built-in **Plugin Market** with one click, or build your own. This page only covers "how to install and manage plugins as a user"; for development see [Plugin Development](/en/plugin/).
+You can install from the built-in **Plugin Market** with one click, or build your own. This page only covers "how to install and manage plugins as a user"; to write your own, start with [Plugin Integration](/en/develop/plugin) (what you can hook into, and the boundaries), then move on to the [Plugin Development Guide](/en/plugin/).
 
 ## What is a Plugin
 
@@ -113,7 +113,7 @@ git clone https://github.com/author/plugin-name.git plugins/plugin-name
 https://github.com/author/plugin-name
 ```
 
-> ⚠️ Currently only installation via Git repository URL is supported; local file upload is not supported.
+> ⚠️ Besides a Git repository URL, the "更多操作 → 从 ZIP 安装插件" (More actions → Install plugin from ZIP) entry on the Plugin Extensions page also accepts a local ZIP upload; see [Manage Plugins](./management#install-from-a-zip).
 
 ## After Install: Disabled by Default
 

@@ -24,7 +24,7 @@ This Token is only for the first login of the current startup. After signing in,
 
 ![WebUI login page](/images/webui/login.webp)
 
-> 1.3.1 restyled the login page: a compact left-aligned card with a command-line style title prefix, and the input placeholder and help dialog now call the credential a "访问密码" (access password) instead of an "Access Token" (MaiBot Settings → WebUI Settings → Security still writes Access Token; both names refer to the same thing).
+> 1.3.1 restyled the login page: a compact left-aligned card with a command-line style title prefix, and the input placeholder and help dialog now call the credential a "访问密码" (access password) instead of an "Access Token" (the "Security" tab of **WebUI Settings** still writes Access Token; both names refer to the same thing).
 
 3. On first login, the setup wizard opens; the first step is setting a persistent Token
 
@@ -38,7 +38,7 @@ The persistent Token must satisfy all of: at least 10 characters, at least one u
 
 ## First-Time Setup Wizard
 
-The wizard has three steps, and any step can be skipped with **跳过向导** (Skip wizard); you can re-run it later under "MaiBot Settings → WebUI Settings → Other":
+The wizard has three steps, and any step can be skipped with **跳过向导** (Skip wizard); you can re-run it later in the "Other" tab of **WebUI Settings** (open it from the gear on the right of the top bar):
 
 ### Set Login Password
 
@@ -173,7 +173,7 @@ For the full chat and statistics walkthrough see [Chat History and Statistics](.
 
 ## Forgot Your Password?
 
-If you can still sign in, change or regenerate the Token under "MaiBot Settings → WebUI Settings → Security":
+If you can still sign in, change or regenerate the Token in the "Security" tab of **WebUI Settings** (`/settings`, opened from the gear on the right of the top bar):
 
 ![Security settings](/images/webui/settings-security.webp)
 

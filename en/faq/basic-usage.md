@@ -18,11 +18,21 @@ See [Model Configuration](../manual/configuration/model-config.md). Avoid relyin
 
 ## Can one MaiBot serve multiple chats?
 
-Yes. The adapter's chat filters determine which groups and private chats are accepted. In allowlist mode only listed chats are processed; in blocklist mode listed chats are ignored.
+Yes. Which groups and private chats are accepted is decided centrally by the **MaiBot main program's adapter policy**—adapter plugins no longer ship built-in lists, and everything is allowed by default. There are two entry points:
+
+- **WebUI** — **Adapter Settings** under the "Configuration" group in the sidebar (`/adapter-management`): the "Global default rules" card at the top sets the default action for group and private chats, and selecting an adapter opens an **Allow/deny rules** tab where you list the group / user IDs to receive or block (edits autosave);
+- **Config file** — `config/adapter_policy.toml`: put fallback rules in `[defaults.group]` / `[defaults.private]` and per-instance `allow_ids` / `deny_ids` under `[[adapters]]` entries.
+
+See [Adapter Management](../manual/webui/adapter-management.md).
 
 ## Which platforms are supported?
 
-Platform support is provided by adapters. This documentation includes NapCat, SnowLuma, QQ Official, QQBot, Email, QQ Voice Call, and iMessage adapters. Actual capabilities depend on the installed adapter version.
+Platform support is provided by adapters. QQ has two routes:
+
+- **Local client login** — install the **Unified QQ Connector** (plugin name `MaiBot-SnowLuma-Adapter`) and log in your own QQ account; one plugin supports both SnowLuma and NapCat clients;
+- **Open platform bot** — install the **QQ Official Bot** adapter and apply for an AppID + AppSecret on the QQ Open Platform; no QQ client login is required.
+
+Email, QQ Voice Call, iMessage, and other community adapters are available as well. Since 1.3.0 the former standalone SnowLuma and NapCat adapters have merged into the Unified QQ Connector, and the standalone NapCat adapter is archived; actual capabilities depend on the installed adapter version. See [Connect Platforms](../manual/adapters/index.md) for selection and installation.
 
 ## What should I do before first use?
 
@@ -31,4 +41,6 @@ Start with the smallest working configuration and verify the message path before
 ## What should I include when asking for help?
 
 Include the operating system, MaiBot version, deployment method, adapter version, complete error log, relevant configuration, and reproduction steps. Remove API keys, access tokens, cookies, and other secrets before sharing anything.
+
+See [Getting Help](/en/faq/getting-help) for the full self-check list and the issue template.
 

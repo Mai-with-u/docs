@@ -279,3 +279,13 @@ def create_plugin():
 ```
 
 :::
+
+## 验证与排错
+
+**验收动作** — 在群里发一次该命令的触发词（如 `/hello`）：机器人回复处理函数返回的 `response` 文本；再发一次别名，同样能触发，说明正则匹配、处理函数与返回值三段都通了。
+
+- **发命令没反应** — `pattern` 匹配的是整条消息：确认它以 `^` 开头、需要精确匹配时以 `$` 收尾，参数用 `\s+` 分隔（例如 `^/echo\s+(?P<text>.+)$`），消息里多一个空格就会不匹配。
+- **命令误触发** — 模式没锚定（如 `pattern=r"/hello"`）时，任何包含该子串的消息都会命中；补上 `^` / `$` 收窄范围。
+- **`matched_groups` 取不到值** — 只有 `(?P<name>...)` 命名捕获组会出现在 `matched_groups` 里，写成普通括号或把组名拼错，拿到的就是空字典。
+- **命令执行了但机器人没回复** — 处理函数必须返回 `(success, response, weight)` 三元组，漏掉返回值或只返回字符串都会解析失败。
+- **提示「没有权限」** — 命令声明了 `permission="operator"`：把用户按 `platform:id` 加进 `[plugin].permission`，或在 `[plugin.command_permissions.<插件 ID>.<命令名>]` 下配 `allow_users` / `allow_chats`。

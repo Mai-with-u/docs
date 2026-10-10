@@ -51,7 +51,7 @@ Below is a complete Manifest example:
       "value": "wrench"
     }
   },
-  "capabilities": ["send_message"],
+  "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": {
     "default_locale": "zh-CN",
     "locales_path": "i18n",
@@ -74,7 +74,7 @@ Below is a complete Manifest example:
 - **`urls`** `object` — Collection of plugin-related links (see below)
 - **`host_application`** `object` — Host compatibility range (see below)
 - **`sdk`** `object` — SDK compatibility range (see below)
-- **`capabilities`** `string[]` — List of capability requests declared by the plugin, empty values are not allowed
+- **`capabilities`** `string[]` — List of capability requests declared by the plugin; empty values are not allowed. **Capability names are per item** (such as `send.text`, `emoji.get_random`, `config.get`) and the Host matches them exactly: you may only call what you declared, and an undeclared call is rejected with "capability not granted". See the capability groups in the [API Reference](./api-reference).
 - **`i18n`** `object` — Internationalization configuration (see below)
 
 ## Optional Fields
@@ -301,3 +301,22 @@ With the main-program config `[debug] force_plugin_compatibility` (the "Force pl
 - **Does not affect the Plugin Market** — version-index compatibility checks do not read this switch; the "incompatible" labels in the market and the version dropdown are still computed from the declared ranges
 
 Treat it as a temporary tool for answering "is a version number blocking this plugin?" rather than a permanent setting: with the check skipped, runtime failures caused by interface changes come with no upfront signal.
+
+## Verify and Troubleshoot
+
+**Verification** — confirm the JSON parses with the command below, then drop `_manifest.json` into the plugin directory and reload: the WebUI plugin page shows the plugin as loaded rather than blocked, and any rejection is named in the Runner log by `ManifestValidator`.
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+# Run inside the plugin directory: a stray comma or comment fails right here
+python -m json.tool _manifest.json
+```
+
+:::
+
+- **`extra fields not permitted`** — the validator runs Pydantic in strict mode and rejects any field outside the declared structure: remove custom comment or scratch fields.
+- **Format errors on `id`, `version`, or `author`** — `id` must match `^[a-z0-9]+(?:[.-][a-z0-9]+)+$` (lowercase, at least one `.` or `-`), `version` and both range bounds must be strict `X.Y.Z`, and `author` must be a `{ name, url }` object whose `url` starts with `http://` or `https://`.
+- **The plugin is blocked as version-incompatible** — a Host mismatch is an error unless major and minor match (patch-level tolerance), and an SDK mismatch is always an error; set `max_version` to `999.999.999` and constrain `min_version` seriously, or enable "Force plugin compatibility" for triage — it needs a MaiBot restart and skips version ranges only.
+- **A local `display.icon` does not render or is rejected** — with `type="local"`, `value` must be a relative path inside the plugin directory ending in `.png`, `.jpg`, `.jpeg`, `.webp`, or `.svg`; online URLs are never allowed, and absolute paths, `..`, and symbolic links are refused. A failed load falls back to `fallback`.
+- **The log reports a dependency or `llm_providers` conflict** — no self-dependency, duplicate declaration, or circular dependency, and each `client_type` must match its `@LLMProvider` declaration exactly; when two plugins declare the same `client_type`, both are blocked.

@@ -10,13 +10,13 @@ title: Acknowledgements & Links
 
 Thanks to all developers who have contributed code to MaiBot:
 
-<img src="https://contrib.rocks/image?repo=MaiM-with-u/MaiBot" alt="MaiBot Contributors" />
+<img src="https://contrib.rocks/image?repo=Mai-with-u/MaiBot" alt="MaiBot Contributors" />
 
 ### Documentation Contributors
 
 Thanks to all who have contributed to MaiBot documentation.
 
-<img src="https://contrib.rocks/image?repo=MaiM-with-u/docs" alt="Docs Contributors" />
+<img src="https://contrib.rocks/image?repo=Mai-with-u/docs" alt="Docs Contributors" />
 
 Special thanks to 池雨, 摆烂の咕咕, 时栖, and other community members for their contributions.
 

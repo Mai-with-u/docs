@@ -30,7 +30,7 @@ If you are developing MaiBot plugins, feel free to join the plugin development g
 
 ## Other Platforms
 
-<Linkcard url="https://github.com/MaiM-with-u/MaiBot" title="GitHub" description="MaiBot main repository — code, issues, PRs" />
+<Linkcard url="https://github.com/Mai-with-u/MaiBot" title="GitHub" description="MaiBot main repository — code, issues, PRs" />
 
 <Linkcard url="https://x.com/MaiWithYou" title="X" description="MaiBot official X account" />
 

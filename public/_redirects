@@ -1,0 +1,41 @@
+/features/*    /manual/    301
+/manual/features/*    /manual/    301
+/en/features/*    /en/manual/    301
+/en/manual/features/*    /en/manual/    301
+
+/manual/adapters/snowluma    /manual/adapters/qq-local-client    301
+/manual/adapters/snowluma/*    /manual/adapters/qq-local-client    301
+/en/manual/adapters/snowluma    /en/manual/adapters/qq-local-client    301
+/en/manual/adapters/snowluma/*    /en/manual/adapters/qq-local-client    301
+/manual/adapters/qqbot    /manual/adapters/qq-official    301
+/manual/adapters/qqbot/*    /manual/adapters/qq-official    301
+/en/manual/adapters/qqbot    /en/manual/adapters/qq-official    301
+/en/manual/adapters/qqbot/*    /en/manual/adapters/qq-official    301
+
+# 开发文档改成「怎么接入」：分区根与两个交还给使用文档的主题
+/develop    /develop/adapters/    301
+/develop/    /develop/adapters/    301
+/en/develop    /en/develop/adapters/    301
+/en/develop/    /en/develop/adapters/    301
+/develop/llm-providers    /manual/configuration/model-config    301
+/en/develop/llm-providers    /en/manual/configuration/model-config    301
+/develop/mcp-integration    /manual/configuration/mcp-config    301
+/en/develop/mcp-integration    /en/manual/configuration/mcp-config    301
+
+# 已下线页面（线上 sitemap 里都有，逐条 1:1 映射）
+/develop/message-server-and-adapters    /develop/adapters/    301
+/en/develop/message-server-and-adapters    /en/develop/adapters/    301
+/develop/configuration    /manual/configuration/    301
+/en/develop/configuration    /en/manual/configuration/    301
+/develop/database    /develop/statistics-io    301
+/en/develop/database    /en/develop/statistics-io    301
+/develop/observability    /manual/configuration/bot-config    301
+/en/develop/observability    /en/manual/configuration/bot-config    301
+/develop/event-pipeline-hooks    /plugin/hooks    301
+/en/develop/event-pipeline-hooks    /en/plugin/hooks    301
+/develop/plugin-runtime-internals    /plugin/    301
+/en/develop/plugin-runtime-internals    /en/plugin/    301
+/develop/style-guide    /contributing/style-guide    301
+/en/develop/style-guide    /en/contributing/style-guide    301
+/develop/markdown-features    /contributing/markdown-features    301
+/en/develop/markdown-features    /en/contributing/markdown-features    301

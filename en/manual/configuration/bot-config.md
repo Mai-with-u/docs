@@ -616,8 +616,8 @@ enable = true  # Whether to enable MCP tool integration
 
 :::
 
-::: tip MCP server connections need a restart
-Connections under `[mcp]` are established at startup only; a file reload does not reconnect. Restart MaiBot after changing server config.
+::: tip MCP server connections are rebuilt automatically
+After you save a change to `[mcp]`, MaiBot rebuilds the MCP connections with the new configuration — no restart needed, and the result is logged exactly as it is at startup. A few fields outside the reload signature (such as the whole `elicitation` section and `sampling.include_context_support`) still require a restart; see [MCP Configuration](./mcp-config.md).
 :::
 
 #### Plugin Management
@@ -782,7 +782,7 @@ Then watch the log or the WebUI: once the file is saved, a successful config-rel
 
 **Startup fails immediately** — a TOML syntax error or an invalid field value (broken regex in `ban_msgs_regex`, a keyword rule missing `reaction`, an incomplete `chat_prompts` entry). Run the command above to locate syntax problems; field-validation errors name the offending field directly.
 
-**Change had no effect** — the section you touched may be startup-only: `[webui]` and `[maim_message]` listen addresses and ports, `[mcp]` server connections, `[plugin_runtime]` IPC, `[log]`'s `event_loop_watchdog_*`, `[debug]`'s `enable_console_input` and `force_plugin_compatibility`. Restart MaiBot. For everything else see [Configuration Overview](./index.md#does-it-take-effect-immediately).
+**Change had no effect** — the section you touched may be startup-only: `[webui]` and `[maim_message]` listen addresses and ports, `[plugin_runtime]` IPC, `[log]`'s `event_loop_watchdog_*`, `[debug]`'s `enable_console_input` and `force_plugin_compatibility`. Restart MaiBot. For everything else see [Configuration Overview](./index.md#does-it-take-effect-immediately).
 
 **Mai ignores people** — check in order: does the host adapter policy allow this group (see "Add the allow scope first, then test" in the [Unified QQ Connector](/en/manual/adapters/qq-local-client)); is `talk_value` set too low; does `qq_account` match the adapter's logged-in QQ.
 

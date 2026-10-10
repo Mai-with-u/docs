@@ -14,7 +14,7 @@ Browse questions by topic. If the log already contains a specific error or statu
 
 **[One-click Package](./one-key.md)** — Installation paths, user data, instance migration, and bundled adapters.
 
-**[Adapter Connections](./adapters.md)** — NapCat, SnowLuma, chat filtering, and connection settings.
+**[Adapter Connections](./adapters.md)** — the unified QQ connector, the QQ official bot, and the access policy.
 
 **[Chat and Replies](./chat-and-reply.md)** — Speaking frequency, self-replies, consecutive messages, and reply splitting.
 
@@ -25,6 +25,22 @@ Browse questions by topic. If the log already contains a specific error or statu
 **[Plugin Issues](./plugins.md)** — Plugin activation, command conflicts, downloads, and diagnosis.
 
 **[Backup and Migration](./backup-and-migration.md)** — What to back up, migration steps, and restore checks.
+
+## Troubleshooting
+
+Enter the page that matches the error topic; when the log already contains a specific error code or keyword, use the quick reference on the overview page to jump straight there.
+
+**[Error Troubleshooting Overview](/en/faq/error-troubleshooting)** — error code quick reference, keyword index, and the troubleshooting flowchart.
+
+**[Startup and Access Troubleshooting](/en/faq/troubleshooting-startup)** — configuration files, MCP, ports, WebUI access and login, Git operations.
+
+**[Model and Rule Troubleshooting](/en/faq/troubleshooting-model)** — API keys, network timeouts, regular expressions, keyword rules.
+
+**[Runtime and Data Troubleshooting](/en/faq/troubleshooting-runtime)** — missing replies, databases, emojis, memory, disk space, data anomalies.
+
+**[Plugin and Adapter Troubleshooting](/en/faq/troubleshooting-plugins-adapters)** — plugin loading failures, adapter connections and reconnects.
+
+**[Getting Help](/en/faq/getting-help)** — self-checks before asking, the issue checklist, community channels, and how to export logs.
 
 ## Quick checks
 

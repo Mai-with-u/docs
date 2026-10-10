@@ -23,11 +23,11 @@ MaiBot (MaiSaka) is an interactive agent based on large language models. She is 
 
 ## Related Projects
 
-<Linkcard url="https://github.com/MaiM-with-u/Amaidesu" title="Amaidesu" description="Let MaiBot stream on Bilibili" />
+<Linkcard url="https://github.com/Mai-with-u/Amaidesu" title="Amaidesu" description="Let MaiBot stream on Bilibili" />
 
 <Linkcard url="https://github.com/MoFox-Studio/MoFox-Core" title="MoFox_Bot" description="Enhanced Fork based on MaiCore 0.10.0 — more stable and fun" />
 
-<Linkcard url="https://github.com/MaiM-with-u/Maicraft" title="MaiCraft" description="Let MaiBot play Minecraft with you (currently paused)" />
+<Linkcard url="https://github.com/Mai-with-u/Maicraft" title="MaiCraft" description="Let MaiBot play Minecraft with you (currently paused)" />
 
 ## Open Source & License
 
@@ -36,3 +36,10 @@ MaiBot is released under the **GPL-3.0** license. Please read the [End User Lice
 ::: warning Important
 MaiBot is an open-source project and is completely free to use. If you see anyone selling MaiBot, please be careful and avoid being scammed.
 :::
+
+## Learn More
+
+- [About This Docs](./about-docs) — how this documentation site is built and previewed locally
+- [Community Groups](./community) — join the groups to ask questions and hang out
+- [Acknowledgements & Links](./acknowledgements) — thanks to the projects and communities along the way
+- [Contribute to Docs](/en/contributing/) — found something wrong or missing? Fix it with us; the rules live here

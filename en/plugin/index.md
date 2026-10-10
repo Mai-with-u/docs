@@ -58,6 +58,31 @@ pip install maibot-plugin-sdk
 
 :::
 
+If you are also modifying `maibot-plugin-sdk` locally, you can set an environment variable so that MaiBot's plugin Runner automatically prefers the local SDK source:
+
+::: code-group
+
+```powershell [PowerShell ~vscode-icons:file-type-powershell~]
+$env:MAIBOT_PLUGIN_SDK_PATH = "C:\GitHub\MaiBot-dev\maibot-plugin-sdk"
+uv run python bot.py
+```
+
+:::
+
+That path must point to an SDK repository containing `pyproject.toml` and `maibot_sdk/`. Once set, the Runner puts that path at the front of `PYTHONPATH` and uses the local SDK's `project.version` for plugin manifest compatibility checks. Do not point this environment variable at an untrusted directory; it puts the Python code in that directory onto the plugin runtime import path.
+
+To build a local SDK distribution package, run the following in the SDK repository:
+
+::: code-group
+
+```powershell [PowerShell ~vscode-icons:file-type-powershell~]
+uv sync --extra dev
+uv run pytest
+uv build
+```
+
+:::
+
 ::: tip Note
 The package name is `maibot-plugin-sdk`, but in code, import using `maibot_sdk`:
 ::: code-group
@@ -110,7 +135,7 @@ Declare plugin metadata in `_manifest.json` (for full field descriptions, see [M
     "min_version": "1.0.0",
     "max_version": "2.99.99"
   },
-  "capabilities": ["send_message"],
+  "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": {
     "default_locale": "zh-CN"
   }
@@ -339,15 +364,10 @@ Both use the same communication protocol and component registration mechanism. T
 
 ## Next Steps
 
-- [Publish a Plugin](./submission.md): Submit your finished plugin to the official plugin center
-- [Manifest System](./manifest.md): Learn the complete field definitions and validation rules for `_manifest.json`
-- [Lifecycle](./lifecycle.md): Learn the lifecycle methods for plugin loading, unloading, and configuration hot-reloading
-- [Hook System](./hooks.md): Learn how to use `@HookHandler` to intercept and modify messages
-- [Tool Component](./tools.md): Learn how to develop tool components callable by LLMs
-- [Command Component](./commands.md): Learn how to develop slash command components
-- [Home Cards](./home-cards.md): Learn how to add plugin cards to the WebUI home page
-- [WebUI Pages](./webui-pages.md): Add custom pages to your plugin with webui.json
-- [LLMProvider Component](./llmprovider.md): Learn how to develop custom LLM Providers to integrate new models
-- [Action Component](./actions.md): Learn about the `@Action` decorator compatible with legacy systems
-- [Configuration Management](./config.md): Learn how to declare and use plugin configurations
-- [API Reference](./api-reference.md): Browse the complete Plugin SDK API
+**Basics** — [Manifest System](./manifest.md): field definitions and validation rules for `_manifest.json` · [Lifecycle](./lifecycle.md): loading, unloading and config hot-reload · [Configuration Management](./config.md): declaring and using plugin config
+
+**Components** — [Tool Component](./tools.md): LLM-callable tools · [Command Component](./commands.md): slash commands · [Hook System](./hooks.md): intercept and rewrite messages · [Event Handlers](./event-handlers.md): listen to lifecycle events · [Message Gateway](./message-gateway.md): connect a new platform as a plugin · [API Components](./api-components.md): inter-plugin APIs · [LLMProvider Component](./llmprovider.md): integrate new model services · [Home Cards](./home-cards.md): WebUI home-page cards · [WebUI Pages](./webui-pages.md): declarative custom pages · [Action Component](./actions.md): the legacy `@Action` decorator
+
+**Going Deeper** — [Vibe Coding](./vibe-coding.md): AI-assisted plugin development · [API Reference](./api-reference.md): the complete Plugin SDK API · [Publish a Plugin](./submission.md): submit to the official plugin center
+
+**Integration Perspective** — [Plugin Integration](/en/develop/plugin): the integration surfaces, runtime boundaries and version compatibility (read before you start)

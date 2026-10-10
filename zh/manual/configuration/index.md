@@ -17,6 +17,14 @@ MaiBot 的全部设置都在 `config/` 目录下的两个 TOML 文件里：改�
 两个文件都在**首次启动 MaiBot 后**自动生成。找不到就先启动一次。
 :::
 
+## 配置专题
+
+两个主文件之外，这些主题各有专页：
+
+- **[模型额外参数](./model-extra-params.md)** — 思考模式、服务商参数模板、自定义请求头等进阶模型设置
+- **[MCP 配置](./mcp-config.md)** — 让麦麦调用外部工具服务（查天气、读文件、调 API）
+- **[A_Memorix 配置](./amemorix-config.md)** — 记忆引擎的存储、检索、向量化与调优
+
 ## 改了会立即生效吗
 
 MaiBot 会监听这两个文件的变化。是否需要重启，取决于该设置控制的是运行时行为，还是服务的启动方式。
@@ -25,7 +33,7 @@ MaiBot 会监听这两个文件的变化。是否需要重启，取决于该设�
 
 **由插件运行时热重载** — 插件自己的 `config.toml` 有独立生命周期。运行时会监听它并调用插件配置更新钩子。启用、禁用、安装、卸载和源码更新一般不需要重启整个 MaiBot。
 
-**需要完全重启 MaiBot** — `[webui]` 与 `[maim_message]` 的监听地址和端口、`[mcp]` 服务器连接、`[plugin_runtime]` 的绑定与 IPC 设置、`[log]` 的事件循环看门狗（`event_loop_watchdog_*`）、`[debug].force_plugin_compatibility` 在启动时建立，文件重载不会重新绑定。
+**需要完全重启 MaiBot** — `[webui]` 与 `[maim_message]` 的监听地址和端口、`[plugin_runtime]` 的绑定与 IPC 设置、`[log]` 的事件循环看门狗（`event_loop_watchdog_*`）、`[debug].force_plugin_compatibility` 在启动时建立，文件重载不会重新绑定。
 
 ::: tip 如何判断
 保存后看日志：出现配置重载成功的信息说明新值已生效；改了监听地址、MCP 连接这类启动期设置，重启 MaiBot。

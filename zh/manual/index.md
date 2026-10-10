@@ -49,18 +49,37 @@ title: 快速上手
 <div class="nav-grid">
 
 <div class="nav-card">
-  <h3>⚙️ 配置详解</h3>
+  <h3>⚙️ 配置</h3>
   <p>人格、昵称、聊天风格、记忆开关……所有配置文件都能在 WebUI 里改，也能直接编辑 TOML。</p>
   <a href="/manual/configuration/">配置概览 →</a>
 </div>
 
 <div class="nav-card">
-  <h3>🔌 平台适配器</h3>
+  <h3>🔌 接入平台</h3>
   <p>除了 QQ，麦麦还可以接入邮件、iMessage 等平台。查看不同适配器的接入方式和维护状态。</p>
   <a href="/manual/adapters/">接入平台 →</a>
 </div>
 
+<div class="nav-card">
+  <h3>🧩 插件</h3>
+  <p>从内置插件市场一键安装新能力——游戏、画图、天气，以及各平台适配器。</p>
+  <a href="/manual/plugins/">安装插件 →</a>
 </div>
+
+<div class="nav-card">
+  <h3>🖥️ WebUI 管理面板</h3>
+  <p>WebUI 全功能指南：配置、适配器、命令、记忆、数据与聊天统计，全在浏览器里完成。</p>
+  <a href="/manual/webui/">登录与设置 →</a>
+</div>
+
+</div>
+
+## 💻 我是开发者
+
+想给麦麦写插件、写适配器，或用自己的程序对接麦麦？开发文档有独立的接入总览，按「你想做什么」分了六条路线。
+
+- [接入总览](/develop/) — 六条接入路线，按受众与前置条件选型
+- [插件开发指南](/plugin/) — 最常走的路：给麦麦加命令、加工具、改行为
 
 ## 💬 遇到问题？
 

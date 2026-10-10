@@ -353,3 +353,12 @@ sequenceDiagram
     Runner->>Plugin: on_unload()
     Note over Plugin: Cleans up resources
 ```
+## Verify and Troubleshoot
+
+**Verification** — reload the plugin and read the log first: the line your `on_load()` prints appears; then change one field on the WebUI plugin config page and save, and the `scope="self"` record from your `on_config_update()` shows up right after — all three lifecycle methods, their signatures, and the injected `ctx` are verified.
+
+- **Loading is refused with "must implement on_load()" / `on_unload()` / `on_config_update()`** — before registration the Runner checks each method against the base class: a plugin that only inherits `MaiBotPlugin` without overriding one, or that defines it on another class, hits this. Define all three on the plugin class itself.
+- **Saving configuration fails with a `TypeError` in the Runner log** — the Runner always calls `on_config_update()` with the three positional arguments `(scope, config_data, version)`; a signature with fewer parameters, a different order, or one that does not accept them fails. Copy `async def on_config_update(self, scope: str, config_data: dict, version: str) -> None`.
+- **Loading fails on the subscription declaration** — `config_reload_subscriptions` must be an iterable collection: assigning a plain string (`= "bot"`) raises `TypeError`, while `"self"` or any unsupported value raises `ValueError` (only `"bot"` and `"model"` are valid).
+- **A global configuration change never reaches your callback** — only `scope="self"` always fires; `"bot"` / `"model"` fire only when declared. Declare the class variable on the plugin class (`ClassVar[Iterable[str]]`); an instance attribute is ignored.
+- **Reading `self.ctx` raises a `RuntimeError` about the plugin context not being initialized** — `self.ctx` and `self.config` exist only after `create_plugin()` returned the instance and the Runner injected `PluginContext`; reading them at module level or in `__init__()` fails. Move that initialization into `on_load()`.

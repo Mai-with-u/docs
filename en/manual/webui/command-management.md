@@ -4,7 +4,7 @@ title: Command Management
 
 # Command Management
 
-Since 1.2.0, MaiBot provides **unified management** for plugin commands: view all registered commands in the WebUI and configure **execution permissions** (authorization) for each command. The entry point is the **命令管理** (Command Management) tab at the top of the **麦麦设置** (MaiBot Settings) page (sidebar "配置管理" / Configuration group → MaiBot Settings), at `/config/bot?mode=commands`. This tab is now the second of the three tabs (Detailed Settings / Command Management / WebUI Settings).
+Since 1.2.0, MaiBot provides **unified management** for plugin commands: view all registered commands in the WebUI and configure **execution permissions** (authorization) for each command. The entry point is the **命令管理** (Command Management) tab at the top of the **麦麦设置** (MaiBot Settings) page (sidebar "配置管理" / Configuration group → MaiBot Settings), at `/config/bot?mode=commands`. MaiBot Settings has two tabs at the top (Detailed Settings / Command Management) and an ellipsis menu, and Command Management is the second tab.
 
 ![Command management](/images/webui/config-bot-commands.webp)
 

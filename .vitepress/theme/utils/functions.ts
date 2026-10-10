@@ -10,6 +10,8 @@ export function extractDescription(data: string, maxLength = 150): string {
       if (paragraph.length) break
       continue
     }
+    // 容器标记（::: tip / ::: endpoint / 结尾的 :::）不是正文，任何位置都跳过
+    if (/^:::[a-zA-Z-]*$/.test(t)) continue
     if (paragraph.length === 0) {
       if (/^#{1,6}\s/.test(t)) continue
       if (/^(-{3,}|\*{3,}|_{3,})$/.test(t)) continue
@@ -24,6 +26,7 @@ export function extractDescription(data: string, maxLength = 150): string {
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/`([^`]*)`/g, '$1')
     .replace(/[*_~]/g, '')
+    .replace(/:::[a-zA-Z-]*/g, '')
     .replace(/\s+/g, ' ')
     .trim()
 

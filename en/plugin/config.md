@@ -323,14 +323,14 @@ In addition to using `self.config` and `self.get_plugin_config_data()`, you can 
 ::: code-group
 
 ```python [Python ~vscode-icons:file-type-python~]
-# Read the plugin's own configuration
-value = await self.ctx.config.get("plugin.greeting")
-
-# Read other plugin's configuration
-value = await self.ctx.config.get_plugin("com.other.plugin")
-
-# Read global Bot configuration
+# Read all configuration of this plugin
 all_config = await self.ctx.config.get_all()
+
+# Read the configuration of a specific plugin (omit plugin_name for the current plugin)
+plugin_config = await self.ctx.config.get_plugin("com.other.plugin")
+
+# Read a single field from the global Bot configuration
+global_value = await self.ctx.config.get("plugin.permission")
 ```
 
 :::
@@ -357,3 +357,13 @@ class SimplePlugin(MaiBotPlugin):
 :::
 
 However, it is recommended to always use `config_model` for better type safety and WebUI integration.
+
+## Verify and Troubleshoot
+
+**Verification** — change one field (for example the greeting) on the WebUI plugin config page and save: the value appears in `plugins/<plugin-name>/config.toml` and the plugin log immediately prints the new value because `on_config_update` fired — the configuration model, the WebUI Schema, and hot reload all work.
+
+- **`self.config` raises `RuntimeError`** — two causes: the plugin never declared `config_model`, or you read it before the configuration is injected (for example at module level); use `get_plugin_config_data()` in the first case and move the access after `on_load()` in the second.
+- **A newly added field never shows up in the WebUI** — the Schema is generated only when the plugin loads, so reload the plugin (or restart MaiBot) after editing `config_model`; on reload the Runner fills missing `config.toml` fields with the model defaults.
+- **A hand-edited `config.toml` is ignored or lands in the wrong section** — TOML groups must mirror the nested model (`plugin.greeting` lives under `[plugin]`) and value types must match the field declarations; `config_version` is maintained by the Runner, so leave it alone.
+- **Pydantic rejects a mutable default** — use `default_factory=list` / `default_factory=PluginSection` for `list`, `dict`, and nested `PluginConfigBase` fields instead of `default=[]`, which would be shared.
+- **Several quick saves trigger only one callback** — since 1.3.2 the hot-reload broadcast is coalesced; consecutive saves deliver a single merged latest snapshot, which is expected.

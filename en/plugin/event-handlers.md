@@ -265,3 +265,13 @@ sequenceDiagram
     EH3-->>Host: 返回结果
     Note over Host: 若 intercept_message=True，主流程等待每个处理器返回
 ```
+
+## Verify and Troubleshoot
+
+**Verification** — have the bot receive a message in a group: your `ON_MESSAGE` counter or log entry increases; then send a message containing the test keyword to the `ON_MESSAGE_PRE_PROCESS` filter example and it is stopped instead of reaching the rest of the flow — subscription and interception both work.
+
+- **The event never fires** — pass an `EventType` enum member (for example `EventType.ON_MESSAGE`); a plain string such as `"on_message"` is not recognized.
+- **Interception has no effect and the message is processed anyway** — `intercept_message` defaults to `False` (fire-and-forget) and your return value is ignored; set it to `True` to block or modify the message chain.
+- **Handlers run in the wrong order** — a higher `weight` runs first and the default is `0`; give intercepting handlers a high weight, otherwise another handler has already let the message through.
+- **You need a custom hook point at a fixed stage** — `@EventHandler` only accepts fixed `EventType` values; a named Hook such as `heart_fc.heart_flow_cycle_start` requires [`@HookHandler`](./hooks.md).
+- **A field is missing inside your handler** — each `EventType` carries a different `kwargs` payload: log `kwargs.keys()` first, or read with a default such as `message.get("raw_message", "")`, to confirm the field name really exists.

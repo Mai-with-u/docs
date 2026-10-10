@@ -212,11 +212,28 @@ def create_plugin():
 
 ```json [JSON ~vscode-icons:file-type-json~]
 {
+  "manifest_version": 2,
   "id": "com.example.llm-provider",
-  "name": "Example LLM Provider",
   "version": "1.0.0",
+  "name": "Example LLM Provider",
   "description": "示例 LLM Provider 插件",
-  "author": "example",
+  "author": {
+    "name": "example",
+    "url": "https://github.com/example"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/example/mai-llm-provider"
+  },
+  "host_application": {
+    "min_version": "1.3.0",
+    "max_version": "1.99.99"
+  },
+  "sdk": {
+    "min_version": "2.0.0",
+    "max_version": "2.99.99"
+  },
+  "capabilities": [],
   "llm_providers": [
     {
       "client_type": "example.provider",
@@ -224,11 +241,18 @@ def create_plugin():
       "description": "示例 LLM Provider",
       "version": "1.0.0"
     }
-  ]
+  ],
+  "i18n": {
+    "default_locale": "zh-CN",
+    "locales_path": "i18n",
+    "supported_locales": ["zh-CN"]
+  }
 }
 ```
 
 :::
+
+`manifest_version`、`author`（对象）、`license`、`urls`、`host_application`、`sdk`、`capabilities`、`i18n` 都是必填项，缺一个 Host 就会拒绝加载。这里的 `capabilities` 留空，是因为示例 Provider 只实现被 Host 调用的方法，不主动调用任何 Host 能力；如果插件要用 `ctx.send.*`、`ctx.llm.*` 等能力，必须在这里按能力名（如 `send.text`）逐项声明。
 
 **main.py**：
 
@@ -290,3 +314,13 @@ def create_plugin():
 ::: info
 插件 Provider 暂不支持 Host 侧自定义流式处理器或响应解析器。
 :::
+
+## 验证与排错
+
+**验收动作** — 在 WebUI 模型配置里加一条 `api_providers`，把 `client_type` 填成插件声明的值，用它跑一次对话：回复来自插件 Provider（示例里是「来自 example.provider 的响应」），说明 manifest 声明、装饰器注册与请求分发三段都通了。
+
+- **插件被拒绝加载，日志提示「LLM Provider 声明不一致」** — Runner 会把 `_manifest.json` 的 `llm_providers` 与 `@LLMProvider` 收集到的 `client_type` 排序后逐一比对：任一边漏写、拼写不一致或同一插件内重复声明都会拒绝加载；manifest 里也不要写 `handler_name` / `metadata`，严格模式不接受未声明字段。
+- **插件被拦下，日志提示「LLM Provider client_type 冲突」** — 两个插件声明了同一个 `client_type` 时，加载前的扫描会把双方一起阻止，原因里列出重复声明的插件 ID；与主程序内置 Provider 重名则在注册阶段报「… 已由 host 注册」。换成带插件前缀的独立标识（如 `com.example.my-plugin.provider`），并同步改 manifest 与装饰器两处。
+- **想要流式输出但拿不到** — 插件 Provider 不支持 Host 侧自定义流式处理器或响应解析器，在 manifest 里加字段也没用；流式对接在插件内部完成，只把最终结果作为普通返回值交给 Host。
+- **报 `item_schema_version 不匹配`** — 这项校验只在返回值带 `output_items` 时触发：必须同时回传与当前 Host 一致的 `item_schema_version`，漏传或用旧值都会抛 `RespParseException`；只想返回文本就只回 `content`，不要手工拼 `output_items`。
+- **收到 `embedding` 或 `audio_transcription` 请求时抛 `NotImplementedError`** — 继承 `LLMProviderBase` 时只有 `get_response()` 是必须实现的，另外两个默认抛错；补上 `get_embedding()` / `get_audio_transcriptions()`，或改回在处理方法里按 `operation` 手动分发。

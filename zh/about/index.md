@@ -23,11 +23,11 @@ MaiBot（麦麦 / MaiSaka）是一个基于大语言模型的可交互智能体�
 
 ## 相关项目
 
-<Linkcard url="https://github.com/MaiM-with-u/Amaidesu" title="Amaidesu" description="让麦麦在 B 站开播" />
+<Linkcard url="https://github.com/Mai-with-u/Amaidesu" title="Amaidesu" description="让麦麦在 B 站开播" />
 
 <Linkcard url="https://github.com/MoFox-Studio/MoFox-Core" title="MoFox_Bot" description="基于 MaiCore 0.10.0 的增强型 Fork，更稳定更有趣" />
 
-<Linkcard url="https://github.com/MaiM-with-u/Maicraft" title="MaiCraft" description="让麦麦陪你玩 Minecraft（暂时停止维护中）" />
+<Linkcard url="https://github.com/Mai-with-u/Maicraft" title="MaiCraft" description="让麦麦陪你玩 Minecraft（暂时停止维护中）" />
 
 ## 开源与许可
 
@@ -36,3 +36,10 @@ MaiBot 基于 **GPL-3.0** 许可证开源。使用前请阅读 [最终用户许�
 ::: warning 重要
 MaiBot 是开源项目，完全免费使用。如果你看到有人售卖 MaiBot，请注意辨别，避免上当受骗。
 :::
+
+## 了解更多
+
+- [关于文档站](./about-docs) — 这个文档站是怎么建的、怎么本地预览
+- [交流群](./community) — 加群提问、唠嗑、看麦麦整活
+- [致谢与友链](./acknowledgements) — 感谢一路相伴的项目与社区
+- [参与文档建设](/contributing/) — 发现文档有错漏？来动手改，规范都在这里

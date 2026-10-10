@@ -6,7 +6,7 @@ title: Docker 部署
 
 ## 准备工作
 
-MaiBot Docker 部署需要 Docker 和 Docker Compose，以及至少 2GB 可用内存。支持 Linux、macOS 以及 Windows（通过 Docker Desktop）。
+MaiBot Docker 部署需要 Docker 和 Docker Compose，以及至少 2GB 可用内存。支持 Linux、macOS 以及 Windows（通过 Docker Desktop）。不想自己写编排文件的话，也可以把[安装提示词](./installation-agent)交给 AI 助手，让它照着部署流程代劳。
 
 先验证一下你的环境：
 

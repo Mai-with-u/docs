@@ -148,3 +148,7 @@ package-lock.json
 # OpenCode
 .sisyphus
 .omo
+
+# Python 字节码（质量脚本的 py_compile 检查可能产生）
+__pycache__/
+*.pyc

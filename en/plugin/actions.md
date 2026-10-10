@@ -119,3 +119,12 @@ The SDK internally converts all parameters of `@Action` into equivalent metadata
 - `invoke_method` is fixed to `"plugin.invoke_action"` (for compatibility with legacy invocation paths)
 
 After conversion, the Host side maintains a single Tool abstraction, no longer distinguishing between Action and Tool invocation flows.
+
+## Verify and Troubleshoot
+
+**Verification** — reload a legacy plugin that still uses `@Action`: the Runner log contains a `DeprecationWarning` for `@Action` and the WebUI plugin detail page lists the same name as a Tool, which means the SDK converted it internally.
+
+- **The LLM stops calling the capability after migration** — `@Tool` has no `activation_type` / `activation_keywords`; it is always offered as a candidate and the LLM decides. Use [`@Command`](./commands.md) when you need keyword triggering.
+- **Arguments never arrive, or their types are rejected** — every `action_parameters` entry is converted as `string`, while `@Tool` validates against each `ToolParameterInfo.param_type`; declare `ToolParamType.INTEGER` / `ToolParamType.BOOLEAN` for numeric and boolean arguments.
+- **The tool is selected but the model uses it wrongly** — `@Tool` replaces the single `description` with `brief_description` + `detailed_description`; move the parameter notes and usage requirements into `detailed_description`, or the LLM never sees them.
+- **The call fails on serialization** — return a serializable dictionary: change `return results` to `return {"results": results}`.

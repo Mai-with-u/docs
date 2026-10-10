@@ -85,7 +85,7 @@ plugins/my-plugin/
     "max_version": "2.99.99"
   },
   "dependencies": [],
-  "capabilities": ["send_message"],
+  "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": {
     "default_locale": "zh-CN"
   }
@@ -273,3 +273,24 @@ def create_plugin() -> MyPlugin:
 - 依赖声明完整，避免要求用户手动安装未声明依赖。
 - 没有提交 `.venv/`、`__pycache__/`、日志、数据库、密钥或本地配置。
 - 如果准备提交到插件仓库，阅读插件仓库贡献指南并按其要求整理元信息。
+
+## 验证与排错
+
+**验收动作** — 把「AI 任务简报」加上你的具体需求交给 AI，拿到产物后放进 `plugins/<plugin-name>/` 并启动 MaiBot：WebUI 插件管理里能看到它、`_manifest.json` 通过校验、`/ping` 有响应，且变更文件只在插件目录里。
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+# 在插件目录里跑：JSON 都解析不过，就不用往下看了
+python -m json.tool _manifest.json
+# 只应列出插件目录下的改动；出现 src/ 说明 AI 越界了
+git status --short
+```
+
+:::
+
+- **AI 顺手改了主程序，或给新代码用了 `@Action`** — 提示词里缺约束：「AI 任务简报」必须写死只改 `plugins/<plugin-name>/`、必须实现 `on_load` / `on_unload` / `on_config_update` 和 `create_plugin()`、新代码只用 `@Tool` / `@Command` / `@HookHandler` 这类组件；漏一条，diff 里就可能多出 `src/` 的改动。
+- **插件被 Host 拒绝加载，报 manifest 校验错误** — 对照「Manifest 要点」逐条查：`manifest_version` 必须是 `2`，`id` 全小写且带 `.` / `-`，`version` 是严格 `X.Y.Z`，URL 以 `http://` 或 `https://` 开头，`host_application` 与 `sdk` 都要有上下界；先跑上面的 `json.tool` 排除语法问题。
+- **能力调用被拒，或加载时报「未注册的能力」** — `capabilities` 与代码对不上：代码里调了 `ctx.send.text`、`ctx.config.get` 却没声明，Host 会拒绝对应能力；反过来声明了拼错或未注册的能力名，注册阶段就失败。按实际调用逐项对齐。
+- **提示「缺少 create_plugin 工厂函数」** — 生成的 `plugin.py` 要么没写 `create_plugin()`，要么返回的不是 `MaiBotPlugin` 子类实例；同时确认插件类继承 `MaiBotPlugin` 并声明了 `config_model`。
+- **让 AI 改已有插件，diff 却牵扯全仓库** — 修改类提示词要写上「只改该插件目录、先读 `_manifest.json` 和现有配置模型、不做无关重构、不整理全仓库格式」；拿到结果先看变更文件列表，多出来的改动直接打回。

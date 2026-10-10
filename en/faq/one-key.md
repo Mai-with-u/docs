@@ -20,13 +20,13 @@ Do not move only a similarly named subdirectory because layouts differ between p
 
 ## Why does the bundled NapCat connection fail?
 
-Confirm that NapCat is logged into the correct account, a forward WebSocket server is enabled, ports match, the WebSocket access token matches, the adapter is enabled, and the target chat passes its filter.
+One-click packages are normally used together with a SnowLuma / NapCat client, which connects to MaiBot through the **Unified QQ Connector** (`MaiBot-SnowLuma-Adapter`). When the connection fails, follow the steps in [Adapter Connections](/en/faq/adapters) under "Why can't the Unified QQ Connector reach SnowLuma / NapCat?"; if an older package installed the archived standalone NapCat adapter, the [NapCat Adapter (archived)](../manual/adapters/napcat.md) page is historical reference only—upgrade to the Unified QQ Connector.
 
-The NapCat WebUI login token is not the WebSocket access token. See [NapCat Connection](../manual/adapters/napcat.md).
+## Why does SnowLuma fail after switching the package's client from NapCat?
 
-## Why does SnowLuma fail after switching adapters?
+Confirm the Unified QQ Connector is enabled (`MaiBot-SnowLuma-Adapter` enabled in the WebUI **Plugin Management**) and that SnowLuma is logged in and listening on a forward WebSocket server. Then check the `[client]` section of `plugins/MaiBot-SnowLuma-Adapter/config.toml`: `server` / `port` must target SnowLuma's listener, `token` must match its access token, and `client_type` should stay `auto` (or be pinned to `snowluma`).
 
-Confirm that the SnowLuma adapter is enabled and that its address, port, and token match the SnowLuma WebSocket service. See [Unified QQ Connector](../manual/adapters/qq-local-client.md).
+One connector supports both client types, so there is no need to swap plugins—editing `[client]` is enough. See [Unified QQ Connector](../manual/adapters/qq-local-client.md).
 
 ::: info Source note
 The one-click-package question categories on this page were adapted from the community [Quick FAQ / Community Tutorial](https://www.kdocs.cn/l/ctOGhVv6L8Yq). Metadata from the July 12, 2026 export identifies 池雨 as the creator and 无为青年 as the modifier. This page keeps only general steps that can be verified against the current documentation.

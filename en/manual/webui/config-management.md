@@ -123,11 +123,9 @@ Form edits are auto-saved (about 2 seconds debounce); you can also click **手�
 
 As of 1.3.2 hot reloading is scoped per section: changing speaking frequency, learning rules, or chat prompts on the MaiBot Chat page reloads only the matching section on the backend instead of re-reading the whole file, so saving and taking effect are both faster.
 
-**Used automatically by subsequent work** — personality, chat policy, reply frequency, model providers, models, and task assignments.
+Runtime settings such as personality, chat policy and model assignments take effect on save; startup-only settings such as listener addresses and MCP connections need a full MaiBot restart — see the [Configuration Overview](../configuration/index.md#does-it-take-effect-immediately) for the complete list.
 
-**Requires a full MaiBot restart** — WebUI enable/bind/port settings, `maim_message` listeners and authentication, MCP connections, and process-level plugin-runtime settings.
-
-A plugin's own configuration is managed by the plugin lifecycle and normally hot-reloads. See the [Config Files](../configuration/) for the complete boundary.
+A plugin's own configuration is managed by the plugin lifecycle and normally hot-reloads.
 
 ## Modification Suggestions
 

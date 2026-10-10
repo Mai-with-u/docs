@@ -108,3 +108,23 @@ flowchart TD
 - [plugin-repo 仓库](https://github.com/Mai-with-u/plugin-repo) — 插件索引与贡献指南
 - [Manifest 系统](./manifest.md) — `_manifest.json` 完整字段定义
 - [开发指南](./) — 从零开始编写插件
+
+## 验证与排错
+
+**验收动作** — 提 Issue 后看标签流转：CI 评论校验结果，标签从 `pending-validation` 变成 `validated`，维护者 `/approve` 后变成 `approved`，插件详情页能安装该版本。提交前先在插件仓库根目录跑一遍下面两条命令，确认 Tag 与 manifest 对得上。
+
+::: code-group
+
+```bash [Bash ~vscode-icons:file-type-shell~]
+# 最新 Tag 与 manifest 的 version 必须一致（Tag 带 v 前缀时只比较后面的三段式）
+git describe --tags --abbrev=0
+python -c "import json; print(json.load(open('_manifest.json'))['version'])"
+```
+
+:::
+
+- **标签停在 `validation-failed`** — 按 Issue 提示改完仓库后必须评论 `/recheck`，CI 才会重新验证；只改代码不留言，Issue 不会自己恢复。
+- **版本进了 `rejected_releases`，市场里显示「有 N 个发布版本未通过校验」** — Tag（`1.4.2` 或 `v1.4.2`）对应的 manifest `version` 必须是纯三段式 `1.4.2`，`id` 不能改名，`manifest_version` 保持 `2`，且该 Tag 的 commit 里必须能读到 `_manifest.json`；修好后重新打 Tag 并创建 Release。
+- **CI 提示读不到 `_manifest.json`** — 插件仓库必须是公开的 GitHub 仓库，`urls.repository` 要填公开 HTTPS 地址且不带 `.git` 后缀，manifest 必须放在仓库根目录。
+- **`LICENSE` 相关校验失败** — 根目录要有 `LICENSE`，许可证类型与 `_manifest.json` 的 `license` 字段一致，并确认 `plugin.py` 里有 `create_plugin()` 工厂函数。
+- **审核通过、市场能搜到，但装上后加载失败** — 多半是没在真实 MaiBot 里验证过，或 `host_application` / `sdk` 上界被锁死在小版本而挡住；上界改成 `999.999.999`、只认真约束 `min_version`，再在本地重载插件复验一次（含 `webui.json` 页面）。

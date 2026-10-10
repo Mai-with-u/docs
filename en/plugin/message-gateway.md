@@ -40,7 +40,7 @@ from maibot_sdk import MessageGateway
 
 ## ctx.gateway Capability Proxy
 
-- `await self.ctx.gateway.route_message(gateway_name, message_dict, route_metadata=None, ...)` — Inject inbound messages into the Host
+- `await self.ctx.gateway.route_message(gateway_name, message, route_metadata=None, external_message_id="", dedupe_key="")` — Inject inbound messages into the Host
 - `await self.ctx.gateway.update_state(gateway_name, ready, platform="", account_id="", scope="", metadata=None)` — Report gateway status
 
 ### Status Management
@@ -115,7 +115,7 @@ class NapCatGatewayPlugin(MaiBotPlugin):
         """
         accepted = await self.ctx.gateway.route_message(
             gateway_name="napcat_gateway",
-            message_dict={
+            message={
                 "message_id": payload["message_id"],
                 "platform": "qq",
                 "message_info": {
@@ -211,7 +211,7 @@ class WebhookReceiverPlugin(MaiBotPlugin):
         """接收 Webhook 回调并注入消息。"""
         accepted = await self.ctx.gateway.route_message(
             gateway_name="webhook_receiver",
-            message_dict={
+            message={
                 "message_id": payload["id"],
                 "platform": "webhook",
                 "message_info": {
@@ -274,7 +274,7 @@ sequenceDiagram
 
     Platform->>Plugin: 推送消息（WebSocket/HTTP 回调等）
     Plugin->>Plugin: 转换为 Host 消息格式
-    Plugin->>Host: ctx.gateway.route_message(gateway_name, message_dict, ...)
+    Plugin->>Host: ctx.gateway.route_message(gateway_name, message, ...)
     Host->>Host: 验证消息格式和网关状态
     Host-->>Plugin: 返回是否接受
     Host->>Host: 将消息投递到消息处理链
@@ -305,3 +305,13 @@ stateDiagram-v2
 - **`scope`** `str` — Routing scope (e.g., `"primary"`, `"default"`)
 
 `platform`, `protocol`, `account_id`, and `scope` can also be reported dynamically at runtime via `ctx.gateway.update_state()` without being fixed in the decorator.
+
+## Verify and Troubleshoot
+
+**Verification** — after the plugin loads, send one test message from the external platform: `ctx.gateway.route_message(...)` returns `True`, the message enters the processing chain and gets a reply; then have the bot answer and confirm the external platform receives it — both directions work.
+
+- **Injection raises a `RuntimeError` saying no receivable gateway is declared** — that gateway's `route_type` has no inbound direction: `"send"` only handles outbound traffic, so declare `"receive"` or `"duplex"` to inject inbound messages.
+- **A `RuntimeError` says the gateway is not ready and cannot inject external messages** — the Host accepts only gateways with `ready=True`: check when you report it, since `ready=True` must come after the link is actually usable, and reporting it before the connection is up gets the injection rejected; report `ready=False` when the link drops or the plugin unloads.
+- **The decorator itself fails with an unsupported route type** — `route_type` accepts only `"send"`, `"receive"`, and `"duplex"` (aliases `"recv"` and `"recive"`); a value such as `"both"` or `"in"` fails while the plugin module is imported.
+- **"inbound message is missing platform information"** — the Host falls back through `message["platform"]`, `route_metadata["platform"]`, the value reported by `update_state`, and the decorator's `platform`; when all four are empty it rejects the message. Pin the platform name in `@MessageGateway(platform=...)` or `update_state(platform=...)`.
+- **`route_message()` returns `False` instead of raising** — the inbound message was blocked by `config/adapter_policy.toml`: the matching platform / account entry is `block`, or it sets `disabled = true`. Allow that entry (or explicitly `allow` your test group); a missing file means everything is allowed.

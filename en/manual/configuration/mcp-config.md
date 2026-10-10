@@ -6,7 +6,7 @@ title: MCP Configuration
 MCP (Model Context Protocol) enables MaiBot to connect with external tools, transforming it from "just chatting" to "both speaking and acting" — checking weather, searching news, reading files, calling APIs, and more, all within reach. All of the configuration lives under the `[mcp]` section of `bot_config.toml`, covered below in the order "master switch → client capabilities → server list".
 
 ::: tip 💡 Understand the Concepts First
-If you are not yet familiar with what MCP is, see the [MCP integration developer guide](/en/develop/mcp-integration) for its overall design.
+If you are not yet familiar with what MCP is, start with [Configuration Structure](#configuration-structure-overview) and [Server Configuration](#server-configuration).
 :::
 
 ## Managing MCP Services in the WebUI
@@ -19,7 +19,7 @@ The visual entry point for MCP services is the **插件扩展** (Plugin Extensio
 - The standalone sidebar **MCP 设置** entry from before 1.3.1 is gone, and the old address `/mcp-settings` redirects to the plugin extensions page; the MCP service group is not shown on the "适配器设置" (Adapter Settings) path
 - The MCP service list's description reads "连接本地或远程工具服务，保存后即可供麦麦调用" (Connect local or remote tool services; they become available to MaiBot after saving)
 
-This page edits the same `[mcp]` configuration, whose fields are covered below; a MaiBot restart is required for changes to take effect.
+This page edits the same `[mcp]` configuration, whose fields are covered below; **saving the file rebuilds the MCP connections automatically — no restart needed**.
 
 ## Configuration Structure Overview
 
@@ -433,11 +433,25 @@ url = "https://mcp.example.com/weather"
 
 ---
 
+## Tool Naming and Conflicts
+
+MaiBot hands MCP tools to the model under their **original names** — there is no server prefix, so `read_file` from the `filesystem` server is simply `read_file`. Name conflicts are resolved in three layers, and every layer only logs a warning instead of failing:
+
+- **Built-in reserved names** — a tool whose name collides with a MaiBot built-in is skipped entirely; the reserved names are `reply`, `no_action`, `stop`, `create_table`, `list_tables`, `view_table`
+- **Between servers** — when several servers expose the same tool name, the one configured first wins and later duplicates are skipped
+- **Against plugin tools** — the final aggregation deduplicates in the order "built-in tools → plugin tools → MCP tools", so on a name clash the **plugin tool wins and the MCP tool is completely invisible to the model**
+
+When a conflict happens the console prints warnings such as `与内置工具冲突`, `与 <server> 冲突` or `检测到重复工具名`, which tell you which layer blocked it. To be sure a tool stays available, rename it on the server side, or verify that no plugin has claimed the name.
+
+::: tip Only tools are discovered in the current release
+MCP Prompts and Resources are not discovered in the current release — their counters in the console stay at 0. Only Tools are actually available.
+:::
+
 ## Frequently Asked Questions
 
 ### Q: Configuration changes are not taking effect?
 
-After saving the configuration, you **must restart MaiBot** for the changes to take effect. The startup logs will display the connection result:
+MCP connections are rebuilt automatically after you save — no restart needed. The rebuild result is logged exactly as it is at startup:
 
 ```
 ✓ MCP server 'playwright' connected (Tools 12 / Prompts 0 / Resources 0 / Templates 0)
@@ -473,6 +487,6 @@ It depends on the service you are connecting to. For GitHub MCP, go to GitHub Se
 
 ## Next Steps
 
-- To learn about MCP's overall design → [MCP integration developer guide](/en/develop/mcp-integration)
+- Duplicate tool names, or fewer tools than expected → [Tool Naming and Conflicts](#tool-naming-and-conflicts)
 - To view all configuration options → [Bot Configuration](./bot-config.md)
 - To change configuration in the browser → [Configuration Management](../webui/config-management.md); for the WebUI Settings and Plugin Extensions entry points see [Login & Settings](../webui/index.md)

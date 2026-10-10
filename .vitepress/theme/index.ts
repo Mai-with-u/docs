@@ -16,6 +16,7 @@ import 'vitepress-markdown-timeline/dist/theme/index.css'
 import 'virtual:group-icons.css'
 import './style.css'
 import './styles/base.css'
+import './styles/markdown-extras.css'
 import './styles/millennium.css'
 
 // 首屏恢复界面风格（没选过就用默认的千禧）。构建产物里 config.mts 的
@@ -51,6 +52,7 @@ export default {
     app.component('Linkcard', defineAsyncComponent(() => import('./components/Linkcard.vue')))
     app.component('AuroraBackground', defineAsyncComponent(() => import('./components/AuroraBackground.vue')))
     app.component('HomeSections', defineAsyncComponent(() => import('./components/HomeSections.vue')))
+    app.component('IntegrationRoutes', defineAsyncComponent(() => import('./components/IntegrationRoutes.vue')))
 
     if (inBrowser) {
       NProgress.configure({ showSpinner: false })

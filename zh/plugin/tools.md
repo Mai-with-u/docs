@@ -37,6 +37,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 - **`brief_description`** `str` — 工具主描述（优先使用）。传给 LLM 的工具描述摘要，帮助 LLM 判断是否需要调用
 - **`detailed_description`** `str` — 详细描述，可包含参数使用说明、注意事项等。SDK 会自动合并参数 Schema 生成完整描述
 - **`parameters`** `list | dict | None` — 工具参数定义，支持两种格式（见下文）
+- **`core_tool`** `bool` — 可选，通过 `**metadata` 传入，默认 `False`。设为 `True` 时工具进入核心工具列表，LLM 每轮直接可见（未显式设置 `visibility` 时等价于 `visibility="visible"`）；默认的 `False` 会进入 deferred 池，需要模型先用工具搜索发现它，才会出现在后续轮次。核心工具越多、模型选择成本越高，只给高频低风险的工具设 `True`
 
 描述字段约定：
 - `description`：关于工具的描述，包括使用方法，使用情景，注意事项。当 `brief_description` 为空时，`description` 会作为回退描述。
@@ -352,3 +353,13 @@ def create_plugin():
 - 使用 `@Action` 时会触发 `DeprecationWarning`
 
 新插件应直接使用 `@Tool`，享受更丰富的参数类型支持和更规范的 Schema 生成。
+
+## 验证与排错
+
+**验收动作** — 在聊天里让 LLM 调用一次该工具（默认进 deferred 池的工具，要先被 `tool_search` 搜到）：你为 LLM 准备的可读文字出现在 Tool Result 里，参数按声明传进处理函数、返回值被正常解析，Tool 这条链路就通了。
+
+- **参数没传进处理函数，或调用时报 `TypeError`** — `ToolParameterInfo.name` 必须与处理函数的具名参数一一对应（声明了 `limit` 就要有 `limit`，或留 `**kwargs` 兜底），类型也要和 `ToolParamType` 对齐：`ARRAY` 配 `items_schema`，`OBJECT` 用 `properties` / `required_properties`，否则生成的 JSON Schema 与函数签名对不上。
+- **工具注册了，模型却「看不到」** — 不设 `visibility` 时，`core_tool` 默认 `False`，工具进 deferred 池，模型要先用 `tool_search` 搜到它才会出现在后续轮次；只给高频低风险工具设 `core_tool=True`（未显式设 `visibility` 时等价于 `visibility="visible"`），核心工具越多模型选择成本越高。
+- **模型拿不到可读结果** — 返回 `dict` 时 Host 取 `content`（回退 `message`）作为给 LLM 的文字；只返回 `{"results": [...]}` 这类自定义字段时 `content` 为空，Tool Result 里没有可读结论，模型容易误判。把结论性文字写进 `content`，结构化数据照旧放自定义字段。
+- **工具被当成执行失败** — `stop_after_execution` 必须是布尔值，返回 `"true"`、`1` 之类会让这次调用按失败处理；而且只有成功结果上的 `true` 才生效，`success` 为 `False` 时该字段被忽略。
+- **图片没进模型的上下文** — 媒体不要以 base64 塞进 `content`，用 `content_items` 返回（`type: "image"`，配 `data` 或 `uri`，并写对 `mime_type`）；否则模型只把它当一段普通文字，或因字段不合法而解析失败。

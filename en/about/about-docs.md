@@ -12,9 +12,10 @@ This website is the official documentation for MaiBot, built with [VitePress](ht
 
 The documentation is organized by module, with `zh/` and `en/` directories mirrored:
 
-- **User Manual** (`manual/`) — Deployment and installation (source/Docker/one-click), adapter configuration (NapCat/SnowLuma/QQ Official/Email, etc.), Bot and model configuration, feature guides, WebUI management
-- **Development** (`develop/`) — Tech stack and project structure, architecture design (message pipeline / Maisaka reasoning engine / memory system / plugin runtime, etc.), contributing guide, markdown features
-- **Plugin Development** (`plugin/`) — Plugin Manifest, lifecycle, Tool/Command/Hook/Event component development, API reference
+- **User Manual** (`manual/`) — Deployment and installation (Windows/Linux/Docker/one-click), connecting platforms (QQ local client, QQ official bot, email, QQ voice call, iMessage), Bot and model configuration (including MCP), plugin installation and management, WebUI operations
+- **Development** (`develop/`) — Integration only: the five adapter pages (overview, message protocol, writing an adapter, access policy, troubleshooting), plugin integration, programmatic access via the WebUI API, and data statistics; model and MCP configuration lives in the User Manual under `manual/configuration/`
+- **Plugin Development** (`plugin/`) — Plugin Manifest, lifecycle, configuration, developing Tool/Command/Hook/Event components, API reference, publishing
+- **Docs Site** (`contributing/`) — This repository's contribution rules, style guide, and Markdown features
 - **FAQ** (`faq/`) — Deployment, configuration, models, plugins, data migration FAQs; troubleshooting guide
 - **Changelog** (`changelog/`) — Version release notes
 - **About** (`about/`) — About the Project, About This Docs, Community Groups, Acknowledgements & Links, EULA, Privacy Policy
@@ -57,13 +58,15 @@ pnpm docs:preview
 You are welcome to contribute to the documentation! Here's how:
 
 - Fork this repository, modify or add documentation content, and submit a PR
-- After adding new files, update the relevant index.md to include your document
-- Modify config.mts or sidebar files under `.vitepress/` to ensure proper navigation to your pages
+- When adding a page, register it in both `.vitepress/sidebar/zh.ts` and `.vitepress/sidebar/en.ts` (English-side links carry the `/en/` prefix); touch `.vitepress/config.mts` only when the top navigation needs it
+- Sync the `en/` mirror in the same PR, keeping terminology, code, and filenames consistent
+- Run `pnpm docs:build` before submitting: it validates dead links, container pairing, and snippet paths, and generates llms.txt
+- When a page is retired or its path changes, add a 301 line for it in `public/_redirects`
 
-For the detailed documentation workflow, see the [documentation repository README](https://github.com/MaiM-with-u/docs). Code contributions follow the [MaiBot contribution guide](https://github.com/MaiM-with-u/MaiBot/blob/main/docs/CONTRIBUTE.md).
+For the detailed documentation workflow, see the [documentation repository README](https://github.com/Mai-with-u/docs). Code contributions follow the [MaiBot contribution guide](https://github.com/Mai-with-u/MaiBot/blob/main/docs/CONTRIBUTE.md).
 
 ## Markdown Features
 
-In addition to VitePress's native features, this site is configured with extra Markdown plugins and custom components. Contributors should first read the [Markdown Features](/en/develop/markdown-features) page to learn about Mermaid charts, timestamps, code group icons, the Linkcard component, and related conventions.
+In addition to VitePress's native features, this site is configured with extra Markdown plugins and custom components. Contributors should first read the [Markdown Features](/en/contributing/markdown-features) page to learn about Mermaid charts, timestamps, code group icons, the Linkcard component, and related conventions.
 
 For the list of documentation contributors, see [Acknowledgements & Links](./acknowledgements).

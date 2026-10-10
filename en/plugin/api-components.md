@@ -286,3 +286,13 @@ self.ctx.logger.info("API info: %s", api_info)
 - **Synchronization**: `@API` Automatic → `register_dynamic_api()` Requires calling sync_dynamic_apis()
 - **Applicable scenarios**: `@API` Fixed APIs → `register_dynamic_api()` APIs enabled/disabled on demand
 - **WebUI page binding**: `@API` Supported → `register_dynamic_api()` **Not supported**; custom pages can only bind static APIs
+
+## Verify and Troubleshoot
+
+**Verification** — log `await self.ctx.api.list()` from the calling plugin's `on_load`: the output contains the fully qualified name (plugin ID + API name, such as `com.example.translate.translate`) and `ctx.api.call()` returns the other plugin's dictionary, which means registration and invocation both work.
+
+- **The API is missing from `ctx.api.list()`** — `public` defaults to `False`; only APIs declared with `public=True` may be called by other plugins.
+- **The call says the API cannot be found** — the `version` you pass to `ctx.api.call()` must match the registered version exactly (omitted in `@API` means `"1"`); custom WebUI page binding is matched the same way, with no fuzzy matching.
+- **A dynamically registered API never shows up for callers** — call `await self.sync_dynamic_apis()` after `register_dynamic_api()`; without it the API only exists inside your plugin process.
+- **Callers still see an API after the plugin unloads** — `on_unload()` must call `clear_dynamic_apis()` and then `sync_dynamic_apis(offline_reason=...)` to publish the offline state.
+- **The dynamic API is callable but your custom page cannot bind it** — WebUI pages can only bind statically declared `@API` components; dynamically registered APIs are not supported for page binding.

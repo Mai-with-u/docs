@@ -51,7 +51,7 @@ Adapters usually need two kinds of connections:
 - **Platform → Adapter** — e.g. SnowLuma / NapCat logs into QQ and pushes messages to the adapter; open-platform bots require applying for an official bot account first.
 - **Adapter → MaiBot** — plugin-version adapters usually don't need extra config for this layer; only standalone versions do.
 
-How to apply for platform accounts and which addresses/tokens to fill in are covered in each adapter's doc.
+How to apply for platform accounts and which addresses/tokens to fill in are covered in each adapter's doc. If you want to **write your own adapter** (for a platform we don't cover yet), that's a development topic — see [Adapter Integration](/en/develop/adapters/).
 
 ## Set the allow scope first, then test
 

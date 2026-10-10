@@ -8,13 +8,13 @@ title: Deployment and Startup
 
 Find the first real error in the startup log. Common causes include incompatible Python or dependency versions, missing or invalid configuration, incomplete model settings, occupied ports, and file permissions.
 
-Do not repeatedly reinstall before identifying the cause. Search [Error Troubleshooting](./error-troubleshooting.md) when the log contains a specific error.
+Do not repeatedly reinstall before identifying the cause. See [Startup and Access Troubleshooting](/en/faq/troubleshooting-startup) for configuration and port problems and [Model and Rule Troubleshooting](/en/faq/troubleshooting-model#api-key-error-insufficient-balance) for model settings; search [Error Troubleshooting](./error-troubleshooting.md) when the log contains a specific error.
 
 ## What if a configuration file is missing or invalid?
 
 Prefer editing through the WebUI. When editing TOML manually, quote strings, leave numbers unquoted, use lowercase `true` and `false`, and verify section names and array syntax.
 
-See [Config Files](../manual/configuration/index.md) for paths and fields.
+For the step-by-step checklist, see [Configuration File Not Found or Incorrect Format](/en/faq/troubleshooting-startup#configuration-file-not-found-or-incorrect-format). See [Config Files](../manual/configuration/index.md) for paths and fields.
 
 ## What if a port is already in use?
 
@@ -25,13 +25,13 @@ First identify the service from the log:
 - The NapCat panel in Docker is commonly mapped to `6099`.
 - NapCat or SnowLuma forward WebSocket services often use `3001`, but their adapter settings are authoritative.
 
-Stop the duplicate process or change both server and client settings to the same free port. See [Port conflict troubleshooting](./error-troubleshooting.md#scenario-3-port-already-in-use).
+Stop the duplicate process or change both server and client settings to the same free port. See [Port conflict troubleshooting](/en/faq/troubleshooting-startup#port-occupied).
 
 ## How do I open the WebUI?
 
 For a local installation, open `http://127.0.0.1:8001` after the startup log confirms the WebUI is running. If you changed the port, use the new value.
 
-Docker deployments also require correct port mapping and bind addresses. See [Docker Installation](../manual/deployment/docker.md).
+When the page won't load, follow [WebUI Page Won't Open](/en/faq/troubleshooting-startup#webui-page-won-t-open). Docker deployments also require correct port mapping and bind addresses. See [Docker Installation](../manual/deployment/docker.md).
 
 ## Why is a setting missing from the WebUI?
 

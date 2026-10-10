@@ -4,7 +4,7 @@ title: Tool Component
 
 # Tool Component
 
-`@Tool` is the most core component type in the MaiBot plugin system. It allows plugins to expose callabled tool functions to the LLM, enabling the LLM to proactively call external capabilities during the reasoning process—such as searching knowledge bases, querying databases, calling external APIs, etc.
+`@Tool` is the most core component type in the MaiBot plugin system. It allows plugins to expose callable tool functions to the LLM, enabling the LLM to proactively call external capabilities during the reasoning process—such as searching knowledge bases, querying databases, calling external APIs, etc.
 
 ::: tip Tool vs Action
 `@Action` is a legacy decorator that the SDK automatically converts into an `@Tool` declaration. New plugins should use `@Tool` directly and avoid `@Action`. See [Action Component (Legacy)](actions.md) for details.
@@ -37,6 +37,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 - **`brief_description`** `str` — Primary tool description (preferred). A summary of the tool description sent to the LLM to help it decide whether it needs to call it.
 - **`detailed_description`** `str` — Detailed description, which can include parameter usage instructions, notes, etc. The SDK automatically merges the parameter Schema to generate a complete description.
 - **`parameters`** `list | dict | None` — Tool parameter definitions, supporting two formats (see below).
+- **`core_tool`** `bool` — Optional, passed through `**metadata`, defaults to `False`. With `True` the tool enters the core tool list and is directly visible to the LLM on every turn (equivalent to `visibility="visible"` when `visibility` is not set explicitly); with the default `False` it goes into the deferred pool and only appears in later turns after the model discovers it through tool search. More core tools mean a higher model selection cost, so reserve `True` for high-frequency, low-risk tools.
 
 Description field conventions:
 - `description`: Description of the tool, including usage methods, scenarios, and notes. When `brief_description` is empty, `description` serves as the fallback description.
@@ -149,6 +150,7 @@ async def handle_greet(self, stream_id: str, **kwargs):
 :::
 
 ### Return Value
+
 The return value of a Tool handler is returned to the LLM as the tool execution result. The return value can be:
 
 - `dict`: Recommended, as the LLM can understand structured data
@@ -174,6 +176,7 @@ async def handle_shutdown(self, stream_id: str, **kwargs):
 :::
 
 ### Returning Images and Other Media
+
 If a Tool needs to pass an image to Maisaka for further observation or reasoning, do not embed base64 images directly into `content`. It is recommended to return `dict`, placing the text for the LLM to read in `content` and the image itself in `content_items`:
 
 ::: code-group
@@ -225,14 +228,138 @@ return {
 
 Common fields in `content_items` are as follows:
 
-- **`type` / `content_type`** `str` — Content type. Images use `image`; `audio` and `resource_link` are also supported.
-- **`resource`** `binary` — The image body
-- **`data`** `base64` — The text for the LLM to read
-- **`str`** `uri` — MIME type
-- **`str`** `data:image/...;base64,...` — Image URI
-- **`mime_type`** `str` — Description of parameters and call constraints
-- **`image/png`** `image/jpeg` — Display name
-- **`image/webp`** `name` — Description metadata
-- **`str`** `description` — Tool parameter description
-- **`str`** `metadata` — Tool usage scenario
-- **`dict`** `tool_result:<tool_call_id>:1` — Tool notes
+- **`type` / `content_type`** `str` — Content type. Images use `image`; `audio`, `resource_link`, `resource`, and `binary` are also supported
+- **`data` / `base64`** `str` — Base64 string of the media binary; for images, prefer this field
+- **`uri`** `str` — Media URI. Images may use `data:image/...;base64,...`
+- **`mime_type`** `str` — MIME type, e.g. `image/png`, `image/jpeg`, `image/webp`
+- **`name`** `str` — File name or display name
+- **`description`** `str` — Short description of the media content
+- **`metadata`** `dict` — Extra metadata
+
+Maisaka splits this kind of return into two context messages: the first is still a plain-text Tool Result containing a media index such as `tool_result:<tool_call_id>:1`; a normal user message is then appended, carrying the same index and the real image component. This keeps compatibility with model APIs that do not support returning images directly inside a tool result, while letting models with vision input observe the image as an ordinary image message.
+
+::: tip View logic
+In the LLM input and Prompt preview, the extracted image follows the normal `ImageComponent` display logic and looks basically the same as a real received image message. The difference is that its source is marked as `tool_result_media`, and its message ID is the tool media index, so it is not treated as a platform message actually sent by the user.
+:::
+
+### Common Extra Arguments in `kwargs`
+
+- **`stream_id`** `str` — Current chat stream ID, usable for sending messages with `ctx.send.text()` and similar
+- **`message`** `dict` — The original message that triggered this tool call
+
+::: tip stream_id
+`stream_id` is one of the most important arguments of a Tool component — it identifies the current conversation stream. Use `ctx.send.text("message", stream_id)` to send a message into the matching chat stream.
+:::
+
+## Description Generation Rules
+
+The SDK automatically generates the complete description for a tool, with the following priority:
+
+1. **`brief_description`**: used first (if provided)
+2. **`description`**: fallback (used when `brief_description` is empty)
+3. **`detailed_description`**: if provided, the SDK merges it with the parameter Schema to generate the complete description
+4. **Auto-generated**: if none of the fields above are provided, the SDK uses `"工具 {name}"` as the description
+
+The auto-generated parameter description has this format:
+   ```
+   参数说明：
+   - query：string，必填。搜索关键词
+   - limit：integer，可选。返回结果数量上限。默认值：5
+   ```
+
+## Complete Example
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+from typing import Any
+
+from maibot_sdk import MaiBotPlugin, Tool
+from maibot_sdk.types import ToolParameterInfo, ToolParamType
+
+
+class SearchPlugin(MaiBotPlugin):
+    async def on_load(self) -> None:
+        self.ctx.logger.info("搜索插件已加载")
+
+    async def on_unload(self) -> None:
+        pass
+
+    async def on_config_update(self, scope: str, config_data: dict, version: str) -> None:
+        pass
+
+    @Tool(
+        "search_web",
+        description="搜索互联网获取信息",
+        parameters=[
+            ToolParameterInfo(
+                name="query",
+                param_type=ToolParamType.STRING,
+                description="搜索关键词",
+                required=True,
+            ),
+            ToolParameterInfo(
+                name="limit",
+                param_type=ToolParamType.INTEGER,
+                description="返回结果数量上限",
+                required=False,
+                default=5,
+            ),
+        ],
+    )
+    async def search(self, query: str, limit: int = 5, **kwargs):
+        """搜索互联网"""
+        results = await self._do_search(query, limit)
+        return {"results": results, "count": len(results)}
+
+    @Tool(
+        "get_weather",
+        description="获取指定城市的天气信息",
+        parameters=[
+            ToolParameterInfo(
+                name="city",
+                param_type=ToolParamType.STRING,
+                description="城市名称",
+                required=True,
+            ),
+        ],
+    )
+    async def get_weather(self, city: str, **kwargs):
+        """查询天气"""
+        weather = await self._fetch_weather(city)
+        return {"city": city, "weather": weather}
+
+    async def _do_search(self, query: str, limit: int) -> list:
+        # 实际搜索逻辑
+        return []
+
+    async def _fetch_weather(self, city: str) -> dict:
+        # 实际天气查询逻辑
+        return {}
+
+
+def create_plugin():
+    return SearchPlugin()
+```
+
+:::
+
+## Relationship with Legacy Action
+
+The `@Action` decorator is deprecated in SDK 2.0 and is internally converted into an `@Tool` declaration:
+
+- `action_parameters` → converted into the Tool `parameters` Schema (all parameter types are normalized to `string`)
+- `activation_type` / `activation_keywords` → kept as Tool `metadata`
+- Using `@Action` raises a `DeprecationWarning`
+
+New plugins should use `@Tool` directly to benefit from richer parameter type support and more standard Schema generation.
+
+## Verify and Troubleshoot
+
+**Verification** — have the LLM call the tool once in chat (a tool in the deferred pool must be found with `tool_search` first): the readable text you prepared appears in the Tool Result, arguments arrive at the handler as declared, and the return value is parsed — the whole Tool chain works.
+
+- **Arguments never reach the handler, or invocation raises `TypeError`** — each `ToolParameterInfo.name` must match a named parameter of the handler (declare `limit` if you list it, or keep `**kwargs` as a fallback), and types must line up with `ToolParamType`: `ARRAY` needs `items_schema`, `OBJECT` uses `properties` / `required_properties`. Otherwise the generated JSON Schema and the function signature disagree.
+- **The tool is registered but the model never sees it** — with no `visibility` set, `core_tool` defaults to `False`, so the tool goes into the deferred pool and the model must find it with `tool_search` before it appears in later turns; set `core_tool=True` (equivalent to `visibility="visible"` when `visibility` is not set) only for high-frequency, low-risk tools, since more core tools make model selection more expensive.
+- **The model gets no readable result** — for a `dict` return, the Host takes `content` (falling back to `message`) as the text for the LLM; with only custom fields such as `{"results": [...]}`, `content` is empty, the Tool Result carries no readable conclusion, and the model easily misjudges it. Put the conclusion text in `content` and keep structured data in your own fields.
+- **The tool is treated as failed** — `stop_after_execution` must be a boolean; returning `"true"` or `1` makes that invocation count as a failure, and only `true` on a successful result has any effect, since the field is ignored when `success` is `False`.
+- **Images never reach the model's context** — do not stuff base64 into `content`; return media through `content_items` (`type: "image"` with `data` or `uri`, plus a correct `mime_type`). Otherwise the model sees only a lump of plain text, or the item fails to parse because a field is invalid.

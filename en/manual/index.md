@@ -55,12 +55,31 @@ Once it's running, explore the sections below to shape MaiBot into what you want
 </div>
 
 <div class="nav-card">
-  <h3>🔌 Platform Adapters</h3>
+  <h3>🔌 Connect Platforms</h3>
   <p>Besides QQ, MaiBot can connect to email, iMessage, and more. See how each adapter is set up and maintained.</p>
   <a href="/en/manual/adapters/">Connect Platforms →</a>
 </div>
 
+<div class="nav-card">
+  <h3>🧩 Plugins</h3>
+  <p>Install new abilities from the built-in plugin market — games, drawing, weather, and the platform adapters themselves.</p>
+  <a href="/en/manual/plugins/">Install Plugins →</a>
 </div>
+
+<div class="nav-card">
+  <h3>🖥️ WebUI Console</h3>
+  <p>The full WebUI guide: configuration, adapters, commands, memory, data, and chat stats — all in your browser.</p>
+  <a href="/en/manual/webui/">Login & Settings →</a>
+</div>
+
+</div>
+
+## 💻 I'm a Developer
+
+Want to write plugins or adapters for MaiBot, or integrate it with your own program? The developer docs have a dedicated integration overview with six routes organized by what you want to do.
+
+- [Integration Overview](/en/develop/) — six integration routes, organized by audience and prerequisites
+- [Plugin Development Guide](/en/plugin/) — the most common route: add commands, tools, or change MaiBot's behavior
 
 ## 💬 Need Help?
 

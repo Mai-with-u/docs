@@ -6,7 +6,7 @@ title: 数据 & 记忆 API
 
 本篇覆盖 MaiBot WebUI 中与数据管理和长期记忆相关的所有 HTTP 端点。这包括 TO 配置文件读写、Prompt 模板编辑与版本化、人物/行为/表情等实体 CRUD、Amemorix 记忆图谱操作，以及异步数据导出导入。
 
-所有端点均需认证（除 `/health` 外），常见认证方式见 [WebUI HTTP API 入口](./index.md#认证模型三种方式)。
+所有端点均需认证（除 `/health` 外），常见认证方式见 [WebUI HTTP API 入口](./index.md#认证模型-三种方式)。
 
 ## 配置浏览与编辑
 
@@ -184,7 +184,7 @@ Memory 端点群是子目录最大的端点集合（共 173 个端点），覆�
 - **`router(prefix="/memory")`** — 主路由，路径以 `/api/webui/memory` 起头
 - **`compat_router(prefix="/api")`** — 兼容路由，路径以 `/api` 起头（不走 `/api/webui` 前缀）
 
-以下按场景精选 15 个高频端点。完整端点清单见 [`memory.py` 源码](https://github.com/MaiM-with-u/MaiBot/blob/main/src/webui/routers/memory.py)。
+以下按场景精选 15 个高频端点。完整端点清单见 [`memory.py` 源码](https://github.com/Mai-with-u/MaiBot/blob/main/src/webui/routers/memory.py)。
 
 ### 高频端点速览
 

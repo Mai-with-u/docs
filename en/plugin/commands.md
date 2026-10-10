@@ -279,3 +279,13 @@ def create_plugin():
 ```
 
 :::
+
+## Verify and Troubleshoot
+
+**Verification** — send the command's trigger word in a group (for example `/hello`): the bot replies with the `response` text your handler returned, then send an alias and it triggers too — regex matching, the handler, and the return value all work.
+
+- **Nothing happens when you send the command** — `pattern` is matched against the whole message: start it with `^`, end with `$` when you need an exact match, and separate arguments with `\s+` (for example `^/echo\s+(?P<text>.+)$`); one extra space breaks the match.
+- **The command fires on unrelated messages** — an unanchored pattern such as `pattern=r"/hello"` matches any message containing that substring; add `^` / `$` to narrow it.
+- **`matched_groups` is empty** — only `(?P<name>...)` named groups are exposed there; plain parentheses, or a typo in the group name, leave you with an empty dictionary.
+- **The command runs but the bot never replies** — the handler must return the `(success, response, weight)` triplet; returning nothing or a bare string fails to parse.
+- **The bot answers "no permission"** — the command is declared `permission="operator"`: add the user as a `platform:id` entry in `[plugin].permission`, or configure `allow_users` / `allow_chats` under `[plugin.command_permissions.<plugin-id>.<command-name>]`.

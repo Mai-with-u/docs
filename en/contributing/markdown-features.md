@@ -4,9 +4,9 @@ title: Markdown Features
 
 # Markdown Features
 
-Writer's note: This page documents **non-native VitePress** plugin features used on this site. These features require writers to use specific syntax in Markdown to trigger them. For VitePress-native features such as custom containers (`::: tip` / `::: warning`, etc.), code block line highlighting, and code snippet imports, please refer to the [VitePress official documentation](https://vitepress.dev/guide/markdown).
+Writer's note: This page covers the **non-native VitePress** plugin features used on this site; these features require you to write specific syntax in Markdown to trigger them. For VitePress-native features such as custom containers (`::: tip` / `::: warning`, etc.) and code block line highlighting, see the [VitePress official documentation](https://vitepress.dev/guide/markdown). Snippet import is also enabled on this site — see "Snippet Import" below.
 
-This page follows the [documentation writing conventions](https://github.com/MaiM-with-u/MaiBot/blob/main/docs/CONTRIBUTE.md): **content pages must not use Markdown tables**. Use lists or definition-style descriptions instead; index pages may use tables when appropriate.
+This page follows the hard rules in [Contributing to the Docs Site](./): **content pages must not use Markdown tables** — use definition lists or the `::: fields` container instead; index pages may use tables as needed.
 
 ## Mermaid Diagrams
 
@@ -40,7 +40,7 @@ flowchart TD
     E --> F
 ```
 
-> This plugin is actually used in 20+ files such as `zh/develop/architecture/message-pipeline.md`.
+> This plugin is actually used in the development docs covering the message pipeline, the database, and the runtime.
 
 ## Update Timeline
 
@@ -94,12 +94,12 @@ Embed `~iconify-id~` syntax inside code-group labels to explicitly specify icons
 ::: code-group
 
 ```bash [稳定版（推荐）~vscode-icons:file-type-git~]
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 
 ```bash [开发版（尝鲜）~vscode-icons:file-type-git~]
-git clone -b dev https://github.com/MaiM-with-u/MaiBot.git
+git clone -b dev https://github.com/Mai-with-u/MaiBot.git
 cd MaiBot
 ```
 
@@ -121,7 +121,7 @@ uv sync
 ::: code-group
 
 ```bash [stable ~vscode-icons:file-type-git~]
-git clone https://github.com/MaiM-with-u/MaiBot.git
+git clone https://github.com/Mai-with-u/MaiBot.git
 ```
 
 ```bash [uv install]
@@ -190,11 +190,138 @@ A `::: code-group` must contain one or more ` ``` ` fences, and **a code group m
 
 When translating into English, code-group structure, icon IDs, and code content must be **exactly the same** as the Chinese version (terminology may be translated; code, fields, and icons must not). Label text may be translated, but `~vscode-icons:<id>~` icons must be kept as is.
 
-## Optional Vue Components
+## Endpoint Card `::: endpoint`
 
-The following two Vue components are registered in the theme and can be used directly in Markdown as HTML tags. Component source code is in the `.vitepress/theme/components/` directory, registered via `app.component()` in `.vitepress/theme/index.ts`.
+Use it when writing API / protocol references. The card title **becomes a real `<h3>`**: it shows up in the "On this page" outline and gets an auto-generated anchor, derived from `method + path` (`POST /api/x` → `#post-api-x`).
 
-> No MD files currently use these components; enable as needed.
+**Usage example:**
+
+````markdown
+::: endpoint POST /api/webui/auth/verify
+Verifies the token and logs in; on success it writes a cookie.
+
+::: fields
+- **token** — `string`, required. The token to verify.
+:::
+:::
+````
+
+**Rendered effect:**
+
+::: endpoint POST /api/webui/auth/verify
+Verifies the token and logs in; on success it writes a cookie.
+
+::: fields
+- **token** — `string`, required. The token to verify.
+:::
+:::
+
+Rules:
+
+- Write the info string as `method path`. The method must be one of `GET` / `POST` / `PUT` / `PATCH` / `DELETE` / `OPTIONS` / `HEAD` / `WS`, and it is color-coded automatically;
+- Writing a single run of text also works (e.g. `::: endpoint Outbound Receipt`), which turns it into a plain section card;
+- **The card body can nest `::: fields`, `::: tip`, and `::: code-group`** — this site's custom containers support nesting, unlike VitePress-native containers;
+- Every card needs its own closing `:::`. If you leave one out, the build reports the exact line number.
+
+## Field List `::: fields`
+
+Use it for dense "name — description" lists such as API fields, parameters, and config options; it replaces the forbidden table. Inside the container you write an ordinary list, and each item just needs to start with `**name**`.
+
+**Usage example:**
+
+````markdown
+::: fields
+- **`stream_id`** — Chat stream ID, required.
+- **`count`** — Number of items to return, default `20`.
+:::
+````
+
+**Rendered effect:**
+
+::: fields
+- **`stream_id`** — Chat stream ID, required.
+- **`count`** — Number of items to return, default `20`.
+:::
+
+To mark an entry as "required / optional", use `<Badge>` directly in the item:
+
+::: fields
+- **`token`** <Badge type="danger" text="Required" /> — The token to verify.
+- **`remember`** <Badge type="tip" text="Optional" /> — Whether to extend the expiry, default `false`.
+:::
+
+## Numbered Steps `::: steps`
+
+Tutorial pages use it to wrap an ordered list, and the numbers render as circular badges. **Wrap a single `<ol>` only**; write the step bodies as regular Markdown.
+
+**Usage example:**
+
+````markdown
+::: steps
+1. Install dependencies.
+2. Edit the config.
+
+   ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+   [bot]
+   platform = "qq"
+   ```
+
+3. Start it.
+:::
+````
+
+**Rendered effect:**
+
+::: steps
+1. Install dependencies.
+2. Edit the config.
+
+   ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+   [bot]
+   platform = "qq"
+   ```
+
+3. Start it.
+:::
+
+## Snippet Import
+
+Use `<<<` to embed real files from the repository into the docs, so that example code and docs don't have to be maintained twice. `@/` means the **site root** (not the directory the current file lives in).
+
+**Usage example:**
+
+````markdown
+::: code-group
+
+<<< @/zh/examples/adapter-minimal/adapter.py#bridge [bridge section ~vscode-icons:file-type-python~]
+
+:::
+````
+
+Rules:
+
+- The title goes **last**: `<<< @/path/file.py{1,3-5} [title ~icon~]` (line numbers first, title second — reversing the order makes the title part of the filename);
+- `#region-name` imports only the fragment between `# region name` and `# endregion name` in the file;
+- `{1,3-5}` highlights line numbers;
+- A wrong file path fails the build, on purpose — it doubles as an existence check for example code.
+
+## Registered Vue Components
+
+The following Vue components are registered in the theme and can be used directly in Markdown as HTML tags. Component source code lives in the `.vitepress/theme/components/` directory, registered via `app.component()` in `.vitepress/theme/index.ts`.
+
+### IntegrationRoutes Integration Route Cards
+
+Integration route cards, meant for overview or landing pages: the copy switches between Chinese and English based on the current language, and the data (title, link, audience) is maintained in `.vitepress/theme/utils/integration-routes.ts`. No page uses it right now — enable it when you need it.
+
+- **`only`** (optional, default `''`) — Comma-separated route keys; only those routes are shown, e.g. `only="adapter,plugin"`
+
+````html
+<IntegrationRoutes />
+````
+
+**Rendered effect:**
+
+<IntegrationRoutes only="adapter,plugin,model" />
 
 ### xgplayer Video Player
 
@@ -238,9 +365,7 @@ allowfullscreen>
 ### Linkcard Link Card
 
 ::: tip Usage preference
-
-**Standalone/block-level external links should always use a `<Linkcard>` card** — e.g. adapter repositories, the plugin site, official docs, and community links. Inline links inside a sentence (e.g. "install following the official docs") may remain plain Markdown links. Cards are block-level, so don't embed one inside a sentence.
-
+**Standalone or block-level external links should always use a Linkcard** — e.g. adapter repositories, the plugin site, official docs, and community links. Only inline references inside a sentence (e.g. "install it following the official docs") may remain plain Markdown links. Cards are block-level, so don't put one inside a sentence.
 :::
 
 - **`url`** (required) — Link URL
@@ -249,10 +374,10 @@ allowfullscreen>
 - **`logo`** (optional, default `''`) — Left-side logo image URL
 
 ````html
-<Linkcard url="https://github.com/MaiM-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
+<Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
 ````
 
 **Rendered effect:**
 
-<Linkcard url="https://github.com/MaiM-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
+<Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
 

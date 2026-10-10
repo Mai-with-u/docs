@@ -14,7 +14,7 @@ Every model in `model_config.toml` accepts an `extra_params` field for passing p
 - **`body`** — merged into the request body
 - **Other plain keys** — passed as extra request-body fields (the OpenAI SDK's `extra_body`)
 
-When `client_type = "google"`, `extra_params` is not split by the rules above. Instead, the Gemini client filters the fields it supports and maps them to `GenerateContentConfig`.
+When `client_type = "gemini"`, `extra_params` is not split by the rules above. Instead, the Gemini client filters the fields it supports and maps them to `GenerateContentConfig`.
 
 ---
 
@@ -23,7 +23,7 @@ When `client_type = "google"`, `extra_params` is not split by the rules above. I
 Many large models support a "thinking mode" — deep reasoning before answering, improving response quality on complex questions. MaiBot supports two API families, each configured differently:
 
 - **OpenAI-compatible API** (`client_type = "openai"`): DeepSeek, OpenAI, Alibaba Cloud Bailian, etc.
-- **Gemini native API** (`client_type = "google"`): the Google Gemini family
+- **Gemini native API** (`client_type = "gemini"`): the Google Gemini family
 
 ### WebUI Thinking Switch Adapts to Provider Templates
 
@@ -425,7 +425,7 @@ extra_params = {reasoning = {effort = "high"}, tools = [{type = "web_search"}]}
 
 ### Gemini Native API
 
-When `client_type = "google"`, `extra_params` is not processed by the OpenAI `headers/query/body` rules. The Gemini client filters the fields it supports and maps them to `GenerateContentConfig`.
+When `client_type = "gemini"`, `extra_params` is not processed by the OpenAI `headers/query/body` rules. The Gemini client filters the fields it supports and maps them to `GenerateContentConfig`.
 
 #### Gemini 2.5 (thinking_budget)
 
@@ -439,7 +439,7 @@ name = "gemini-2.5-flash-think"
 model_identifier = "gemini-2.5-flash"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_budget = 4096, include_thoughts = true}}
 ```
 
@@ -449,7 +449,7 @@ name = "gemini-2.5-flash-nothink"
 model_identifier = "gemini-2.5-flash"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_budget = 0}}
 ```
 
@@ -459,7 +459,7 @@ name = "gemini-2.5-pro-think"
 model_identifier = "gemini-2.5-pro"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_budget = -1, include_thoughts = true}}
 ```
 
@@ -483,7 +483,7 @@ name = "gemini-3-flash-high"
 model_identifier = "gemini-3-flash"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_level = "high", include_thoughts = true}}
 ```
 
@@ -493,7 +493,7 @@ name = "gemini-3-flash-low"
 model_identifier = "gemini-3-flash"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_level = "low", include_thoughts = true}}
 ```
 

@@ -20,7 +20,7 @@ Each `[[api_providers]]` block defines an API provider. A single configuration f
 name = "deepseek"                          # [Required] API provider name, must be used in the api_provider field of models
 base_url = "https://api.deepseek.com/v1"   # [Required] BaseURL of the API provider
 api_key = "your-api-key"                   # [Required] API key. Not required if auth_type is none
-client_type = "openai"                     # [Optional] Client type: openai (default) / openai_responses / google
+client_type = "openai"                     # [Optional] Client type: openai (default) / openai_responses / gemini
 auth_type = "bearer"                       # [Optional] Auth type: bearer (default) / header / query / none
 auth_header_name = "Authorization"         # [Optional] Request header name used when auth_type is header
 auth_header_prefix = "Bearer"              # [Optional] Request header prefix used when auth_type is header, leave empty to send the raw key directly
@@ -43,7 +43,7 @@ retry_interval = 4                         # [Optional] Retry interval in second
 
 - **Required**: `name` (provider name), `base_url` (endpoint URL), `api_key` (key, except when `auth_type = "none"`)
 - **Authentication**: Default `bearer` works for most providers. Other options are `header` / `query` / `none`
-- **Client**: Default is `openai`. For Google Gemini use `"google"`, see [Model Extra Params](./model-extra-params.md#gemini-native-api)
+- **Client**: Default is `openai`. For Google Gemini use `"gemini"`, see [Model Extra Params](./model-extra-params.md#gemini-native-api)
 - **Responses API**: For providers supporting the OpenAI Responses protocol (e.g. DeepSeek v4 flash web search) use `"openai_responses"` (officially supported since 1.2.0), see [Model Extra Params](./model-extra-params.md#responses-api)
 - **Timeout & Retry**: `timeout` defaults to 120s and `retry_interval` to 4s. `max_retry` defaults to 3 and counts **total requests**, the first one included — so 3 means up to 2 more tries after a failure, and 0 or 1 means no retry
 - See comments above for other fields, all have reasonable default values
@@ -133,116 +133,116 @@ Maimai categorizes model calls into three roles: **Planner** is the strategic co
 
 ::: code-group
 
-```toml [replyer（智能模型） ~vscode-icons:file-type-toml~]
-# [必填] 回复器：将 Planner 收集的信息转为最终回复文本。追求语言质量和表达风格，推荐 pro 模型 + 思考模式。
+```toml [replyer (smart model) ~vscode-icons:file-type-toml~]
+# [Required] Replyer: converts the information gathered by the Planner into the final reply text. Prioritizes language quality and expression style; a pro model with thinking mode is recommended.
 [model_task_config.replyer]
-model_list = ["deepseek-v4-pro-think"]        # [必填] 模型名称列表
-max_tokens = 8192                             # [可选] 最大输出 token 数
-temperature = 1.0                             # [可选] 模型温度，0.3 保守 / 0.7 有创意 / 1.0 随机
-selection_strategy = "random"                 # [可选] 模型选择策略：balance / random / sequential
-hard_timeout = 240.0                          # [可选] 硬超时（秒）
+model_list = ["deepseek-v4-pro-think"]        # [Required] List of model names
+max_tokens = 8192                             # [Optional] Maximum output token count
+temperature = 1.0                             # [Optional] Model temperature: 0.3 conservative / 0.7 creative / 1.0 random
+selection_strategy = "random"                 # [Optional] Model selection strategy: balance / random / sequential
+hard_timeout = 240.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [planner（快模型） ~vscode-icons:file-type-toml~]
-# [必填] 规划器：战略核心——决定何时说话、回复谁、调用哪些工具（MCP/插件）。需较强推理和 tool 调用能力。
+```toml [planner (fast model) ~vscode-icons:file-type-toml~]
+# [Required] Planner: the strategic core — decides when to speak, whom to reply to, and which tools (MCP/plugins) to call. Needs strong reasoning and tool-calling ability.
 [model_task_config.planner]
-model_list = ["deepseek-v4-flash"]            # [必填] 模型名称列表
-max_tokens = 16384                            # [可选] 最大输出 token 数
-temperature = 0.7                             # [可选] 模型温度
-selection_strategy = "random"                 # [可选] 模型选择策略
-hard_timeout = 180.0                          # [可选] 硬超时（秒）
+model_list = ["deepseek-v4-flash"]            # [Required] List of model names
+max_tokens = 16384                            # [Optional] Maximum output token count
+temperature = 0.7                             # [Optional] Model temperature
+selection_strategy = "random"                 # [Optional] Model selection strategy
+hard_timeout = 180.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [utils（快模型） ~vscode-icons:file-type-toml~]
-# [必填] 组件模型：表情包分析、学习分析、取名、关系模块、情绪变化等。麦麦必须的模型。
+```toml [utils (fast model) ~vscode-icons:file-type-toml~]
+# [Required] Utility model: emoji analysis, learning analysis, naming, relationship module, emotion changes, etc. Mai cannot work without this model.
 [model_task_config.utils]
-model_list = ["deepseek-v4-flash"]            # [必填] 模型名称列表
-max_tokens = 8192                             # [可选] 最大输出 token 数
-temperature = 0.5                             # [可选] 模型温度
-selection_strategy = "random"                 # [可选] 模型选择策略
-hard_timeout = 120.0                          # [可选] 硬超时（秒）
+model_list = ["deepseek-v4-flash"]            # [Required] List of model names
+max_tokens = 8192                             # [Optional] Maximum output token count
+temperature = 0.5                             # [Optional] Model temperature
+selection_strategy = "random"                 # [Optional] Model selection strategy
+hard_timeout = 120.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [memory（长期记忆） ~vscode-icons:file-type-toml~]
-# [可选] 长期记忆：记忆总结、抽取、写回等高质量任务（A_Memorix 子系统）。
-# 默认 model_list 为空（不自动回退），未配置时调用方按需处理。
+```toml [memory (long-term memory) ~vscode-icons:file-type-toml~]
+# [Optional] Long-term memory: high-quality tasks such as memory summarization, extraction, and write-back (the A_Memorix subsystem).
+# model_list is empty by default (no automatic fallback); the caller handles it as needed when unconfigured.
 [model_task_config.memory]
-model_list = []                               # [可选] 模型名称列表
-max_tokens = 8192                             # [可选] 最大输出 token 数
-temperature = 0.3                             # [可选] 模型温度
-selection_strategy = "random"                 # [可选] 模型选择策略
-hard_timeout = 240.0                          # [可选] 硬超时（秒）
+model_list = []                               # [Optional] List of model names
+max_tokens = 8192                             # [Optional] Maximum output token count
+temperature = 0.3                             # [Optional] Model temperature
+selection_strategy = "random"                 # [Optional] Model selection strategy
+hard_timeout = 240.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [mid_memory（中期摘要） ~vscode-icons:file-type-toml~]
-# [可选] 中期摘要：上下文裁切时将历史聊天压缩为摘要。留空时自动回退到 planner。
+```toml [mid_memory (mid-term summary) ~vscode-icons:file-type-toml~]
+# [Optional] Mid-term summary: compresses chat history into a summary when the context is trimmed. Falls back to planner when empty.
 [model_task_config.mid_memory]
-model_list = []                               # [可选] 模型名称列表（→回退 planner）
-max_tokens = 8192                             # [可选] 最大输出 token 数
-temperature = 0.7                             # [可选] 模型温度
-selection_strategy = "random"                 # [可选] 模型选择策略
-hard_timeout = 180.0                          # [可选] 硬超时（秒）
+model_list = []                               # [Optional] List of model names (→ falls back to planner)
+max_tokens = 8192                             # [Optional] Maximum output token count
+temperature = 0.7                             # [Optional] Model temperature
+selection_strategy = "random"                 # [Optional] Model selection strategy
+hard_timeout = 180.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [learner（学习） ~vscode-icons:file-type-toml~]
-# [可选] 学习模型：表达方式学习和黑话学习。留空时自动回退到 utils。
+```toml [learner (learning) ~vscode-icons:file-type-toml~]
+# [Optional] Learning model: expression learning and jargon learning. Falls back to utils when empty.
 [model_task_config.learner]
-model_list = []                               # [可选] 模型名称列表（→回退 utils）
-max_tokens = 8192                             # [可选] 最大输出 token 数
-hard_timeout = 120.0                          # [可选] 硬超时（秒）
+model_list = []                               # [Optional] List of model names (→ falls back to utils)
+max_tokens = 8192                             # [Optional] Maximum output token count
+hard_timeout = 120.0                          # [Optional] Hard timeout (seconds)
 ```
 
 ```toml [fast_model (quick small tasks) ~vscode-icons:file-type-toml~]
 # [Optional] Fast model: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences. Choose a model that responds quickly. Falls back to utils when empty.
 [model_task_config.fast_model]
-model_list = []
-max_tokens = 8192
-temperature = 0.3
-selection_strategy = "balance"
-hard_timeout = 120.0
+model_list = []                               # [Optional] List of model names (→ falls back to utils)
+max_tokens = 8192                             # [Optional] Maximum output token count
+temperature = 0.3                             # [Optional] Model temperature
+selection_strategy = "balance"                # [Optional] Model selection strategy
+hard_timeout = 120.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [emoji（表情包选择） ~vscode-icons:file-type-toml~]
-# [可选] 表情包选择：从候选表情包中选出合适的一张发送。
-# 选择优先级：emoji 有模型→用 emoji，planner 全视觉→用 planner，否则→用 vlm
+```toml [emoji (emoji selection) ~vscode-icons:file-type-toml~]
+# [Optional] Emoji selection: picks a fitting emoji from the candidates and sends it.
+# Selection priority: emoji has a model → use emoji; planner is fully visual → use planner; otherwise → use vlm
 [model_task_config.emoji]
-model_list = []                               # [可选] 模型名称列表
-max_tokens = 8192                             # [可选] 最大输出 token 数
-hard_timeout = 120.0                          # [可选] 硬超时（秒）
+model_list = []                               # [Optional] List of model names
+max_tokens = 8192                             # [Optional] Maximum output token count
+hard_timeout = 120.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [vlm（看图） ~vscode-icons:file-type-toml~]
-# [强烈建议] 看图说话：理解图片内容。需 visual=true 的多模态模型。
+```toml [vlm (image understanding) ~vscode-icons:file-type-toml~]
+# [Strongly recommended] Image description: understands image content. Requires a multimodal model with visual=true.
 [model_task_config.vlm]
-model_list = ["qwen-vl"]                      # [必填] 模型名称列表，需 visual=true 的多模态模型
-max_tokens = 8192                             # [可选] 最大输出 token 数
-hard_timeout = 240.0                          # [可选] 硬超时（秒）
+model_list = ["qwen-vl"]                      # [Required] List of model names; requires a multimodal model with visual=true
+max_tokens = 8192                             # [Optional] Maximum output token count
+hard_timeout = 240.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [voice（语音识别） ~vscode-icons:file-type-toml~]
-# [可选] 语音识别：语音转文字。
+```toml [voice (speech recognition) ~vscode-icons:file-type-toml~]
+# [Optional] Speech recognition: speech to text.
 [model_task_config.voice]
-model_list = []                               # [可选] 模型名称列表
-max_tokens = 8192                             # [可选] 最大输出 token 数
-hard_timeout = 120.0                          # [可选] 硬超时（秒）
+model_list = []                               # [Optional] List of model names
+max_tokens = 8192                             # [Optional] Maximum output token count
+hard_timeout = 120.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [embedding（文本嵌入） ~vscode-icons:file-type-toml~]
-# [强烈建议] 嵌入模型：生成文本向量，用于长期记忆的语义搜索。
-# 推荐专门的嵌入模型（如 text-embedding-3-small）。未配置时记忆搜索不可用。
+```toml [embedding (text embedding) ~vscode-icons:file-type-toml~]
+# [Strongly recommended] Embedding model: generates text vectors for semantic search over long-term memory.
+# A dedicated embedding model is recommended (e.g. text-embedding-3-small). Memory search is unavailable when unconfigured.
 [model_task_config.embedding]
-model_list = ["text-embedding-3-small"]       # [必填] 模型名称列表，推荐专门的嵌入模型
-max_tokens = 4096                             # [可选] 最大输出 token 数
-hard_timeout = 60.0                           # [可选] 硬超时（秒）
+model_list = ["text-embedding-3-small"]       # [Required] List of model names; a dedicated embedding model is recommended
+max_tokens = 4096                             # [Optional] Maximum output token count
+hard_timeout = 60.0                           # [Optional] Hard timeout (seconds)
 ```
 
-```toml [image_embedding（图片嵌入） ~vscode-icons:file-type-toml~]
-# [可选] 图片嵌入模型：把图片编码成向量，用于图片记忆的以图搜图和相似召回。
-# 需要实现"图片输入到向量"协议的嵌入模型；留空时不启用图片嵌入，图片记忆降级为不可检索。
+```toml [image_embedding (image embedding) ~vscode-icons:file-type-toml~]
+# [Optional] Image embedding model: encodes images into vectors for image-based search and similarity recall in image memory.
+# Requires an embedding model that implements the "image input to vector" protocol; when empty, image embedding is disabled and image memory degrades to non-searchable.
 [model_task_config.image_embedding]
-model_list = []                               # [可选] 模型名称列表，需支持图片输入的嵌入模型
-max_tokens = 4096                             # [可选] 最大输出 token 数
-hard_timeout = 60.0                           # [可选] 硬超时（秒）
+model_list = []                               # [Optional] List of model names; requires an embedding model that supports image input
+max_tokens = 4096                             # [Optional] Maximum output token count
+hard_timeout = 60.0                           # [Optional] Hard timeout (seconds)
 ```
 
 :::

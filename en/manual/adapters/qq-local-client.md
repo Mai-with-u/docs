@@ -51,7 +51,7 @@ alias_names = []
 - **`platform`** — set to `"qq"`, the platform identifier for local-client adapters.
 - **`qq_account`** — the QQ number the client is logged in with (as a string); the two must match exactly.
 
-You can also set this in the WebUI: `Bot Settings → Basic → platform account`, pick platform `qq`, and enter the bot QQ number.
+You can also set this in the WebUI under **Adapter Settings**: click **平台账号** (Platform accounts) on the right of the "全局默认规则" (Global default rules) card at the top of the page, pick platform `qq`, and enter the bot QQ number.
 
 ## Configure the adapter connection
 
@@ -136,7 +136,7 @@ When one MaiBot connects to multiple client links, give each link a **different 
 
 The Unified QQ Connector **no longer ships built-in group / private-chat allow/deny lists**—inbound access is controlled uniformly by the host adapter policy: the adapter settings (allow/deny rules) in the WebUI or `config/adapter_policy.toml`, which **allows everything by default** (all group messages are accepted). To restrict the scope, switch the default to deny and only allow the group IDs or users you list.
 
-See [Adapter Management](../webui/adapter-management.md) for the visual entry; the full syntax of `config/adapter_policy.toml` is covered in the [Unified Adapter Access Policy](/en/develop/message-server-and-adapters#unified-adapter-access-policy).
+See [Adapter Management](../webui/adapter-management.md) for the visual entry; the full syntax of `config/adapter_policy.toml` is covered in the [Access Policy and Account Routing](/en/develop/adapters/policy).
 
 ::: tip Verify in a small scope first
 Add just one test group and one test user to the adapter policy, confirm sending and receiving work, then widen the scope. When troubleshooting "no response", this layer is the first place to look.

@@ -14,7 +14,7 @@ titleTemplate: :title · 模型高级参数
 - **`body`** — 合并到请求体
 - **其他普通键** — 作为请求体额外字段传入（OpenAI SDK 的 `extra_body`）
 
-当 `client_type = "google"` 时，`extra_params` 不按上述规则拆分，而是由 Gemini 客户端按自身支持的字段筛选和映射到 `GenerateContentConfig`。
+当 `client_type = "gemini"` 时，`extra_params` 不按上述规则拆分，而是由 Gemini 客户端按自身支持的字段筛选和映射到 `GenerateContentConfig`。
 
 ---
 
@@ -23,7 +23,7 @@ titleTemplate: :title · 模型高级参数
 很多大模型支持"思考模式"，让模型在回答前先进行深度推理，从而提升复杂问题的回答质量。MaiBot 支持两种 API 体系，配置方式不同：
 
 - **OpenAI 兼容 API**（`client_type = "openai"`）：DeepSeek、OpenAI、阿里云百炼等
-- **Gemini 原生 API**（`client_type = "google"`）：Google Gemini 系列
+- **Gemini 原生 API**（`client_type = "gemini"`）：Google Gemini 系列
 
 ### WebUI 思考开关按服务商模板适配
 
@@ -425,7 +425,7 @@ extra_params = {reasoning = {effort = "high"}, tools = [{type = "web_search"}]}
 
 ### Gemini 原生 API
 
-当 `client_type = "google"` 时，`extra_params` 不按 OpenAI 的 `headers/query/body` 规则处理，而是由 Gemini 客户端按自身支持的字段筛选和映射到 `GenerateContentConfig`。
+当 `client_type = "gemini"` 时，`extra_params` 不按 OpenAI 的 `headers/query/body` 规则处理，而是由 Gemini 客户端按自身支持的字段筛选和映射到 `GenerateContentConfig`。
 
 #### Gemini 2.5（thinking_budget）
 
@@ -439,7 +439,7 @@ name = "gemini-2.5-flash-think"
 model_identifier = "gemini-2.5-flash"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_budget = 4096, include_thoughts = true}}
 ```
 
@@ -449,7 +449,7 @@ name = "gemini-2.5-flash-nothink"
 model_identifier = "gemini-2.5-flash"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_budget = 0}}
 ```
 
@@ -459,7 +459,7 @@ name = "gemini-2.5-pro-think"
 model_identifier = "gemini-2.5-pro"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_budget = -1, include_thoughts = true}}
 ```
 
@@ -483,7 +483,7 @@ name = "gemini-3-flash-high"
 model_identifier = "gemini-3-flash"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_level = "high", include_thoughts = true}}
 ```
 
@@ -493,7 +493,7 @@ name = "gemini-3-flash-low"
 model_identifier = "gemini-3-flash"
 api_provider = "google-gemini"
 visual = true
-client_type = "google"
+client_type = "gemini"
 extra_params = {thinking_config = {thinking_level = "low", include_thoughts = true}}
 ```
 

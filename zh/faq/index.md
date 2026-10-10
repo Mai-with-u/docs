@@ -14,7 +14,7 @@ title: 常见问题
 
 **[一键包](./one-key.md)** — 安装位置、用户数据、实例迁移和连接检查。
 
-**[适配器连接](./adapters.md)** — NapCat、SnowLuma、聊天过滤和连接参数。
+**[适配器连接](./adapters.md)** — 统一 QQ 连接器、QQ 官方机器人与访问策略。
 
 **[聊天与回复](./chat-and-reply.md)** — 发言频率、自我回复、连续消息和回复分割。
 
@@ -25,6 +25,22 @@ title: 常见问题
 **[插件问题](./plugins.md)** — 插件启用、命令冲突、下载失败和故障定位。
 
 **[数据与迁移](./backup-and-migration.md)** — 备份范围、迁移步骤和恢复检查。
+
+## 错误排查
+
+按报错主题进入对应页面；日志里已有明确错误代码或关键词时，用总览页的「错误代码速查表」直接定位。
+
+**[错误排查总览](./error-troubleshooting.md)** — 错误代码速查表、常见错误关键词索引和排查流程图。
+
+**[启动与访问错误排查](./troubleshooting-startup.md)** — 配置文件、MCP、端口、WebUI 访问与登录、Git 操作。
+
+**[模型与规则错误排查](./troubleshooting-model.md)** — API Key、网络超时、正则表达式、关键词规则。
+
+**[运行与数据错误排查](./troubleshooting-runtime.md)** — 不回复消息、数据库、表情包、记忆、磁盘空间、数据异常。
+
+**[插件与适配器错误排查](./troubleshooting-plugins-adapters.md)** — 插件加载失败、适配器连接与重连。
+
+**[获取帮助](./getting-help.md)** — 提问前自查、Issue 信息清单、社区渠道和获取日志。
 
 ## 快速排查
 

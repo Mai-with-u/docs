@@ -55,7 +55,7 @@ alias_names = []
 - **`platform`** — set to `"qq"`, the platform identifier for local-client adapters.
 - **`qq_account`** — the QQ number NapCat is logged in with (as a string); the two must match exactly.
 
-You can also set this in the WebUI: `Bot Settings → Basic → platform account`, pick platform `qq`, and enter the bot QQ number.
+You can also set this in the WebUI under **Adapter Settings**: click **平台账号** (Platform accounts) on the right of the "全局默认规则" (Global default rules) card at the top of the page, pick platform `qq`, and enter the bot QQ number.
 
 ## Switch to the Unified QQ Connector
 

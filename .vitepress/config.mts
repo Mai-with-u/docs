@@ -9,6 +9,7 @@ import type { Token, Options } from 'markdown-it'
 import { nav as zhNav, sidebar as zhSidebar } from './sidebar/zh'
 import { nav as enNav, sidebar as enSidebar } from './sidebar/en'
 import { countWord, extractDescription } from './theme/utils/functions'
+import maiContainers from './markdown/containers'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -33,13 +34,13 @@ export default defineConfig({
     const rel = pageData.relativePath
       .replace(/(^|\/)index\.md$/, '$1')
       .replace(/\.md$/, '')
-    const image = 'https://docs.maimai.lol/title_img/mai2.png'
+    const image = 'https://docs.mai-mai.org/title_img/mai2.png'
     return [
       ['meta', { property: 'og:type', content: 'website' }],
       ['meta', { property: 'og:site_name', content: isEn ? 'MaiBot Docs' : 'MaiBot 文档中心' }],
       ['meta', { property: 'og:title', content: title }],
       ['meta', { property: 'og:description', content: description }],
-      ['meta', { property: 'og:url', content: 'https://docs.maimai.lol/' + rel }],
+      ['meta', { property: 'og:url', content: 'https://docs.mai-mai.org/' + rel }],
       ['meta', { property: 'og:image', content: image }],
       ['meta', { name: 'twitter:title', content: title }],
       ['meta', { name: 'twitter:description', content: description }],
@@ -47,7 +48,7 @@ export default defineConfig({
     ]
   },
   sitemap: {
-    hostname: 'https://docs.maimai.lol'
+    hostname: 'https://docs.mai-mai.org'
   },
   locales: {
     root: {
@@ -57,7 +58,7 @@ export default defineConfig({
       description: 'MaiBot 开发与使用指南',
       themeConfig: {
         editLink: {
-          pattern: "https://github.com/MaiM-with-u/docs/edit/main/:path",
+          pattern: "https://github.com/Mai-with-u/docs/edit/main/:path",
           text: "在 GitHub 上编辑此页"
         },
         lastUpdated: {
@@ -94,7 +95,7 @@ export default defineConfig({
       link: '/en/',
       themeConfig: {
         editLink: {
-          pattern: "https://github.com/MaiM-with-u/docs/edit/main/:path",
+          pattern: "https://github.com/Mai-with-u/docs/edit/main/:path",
           text: "Edit this page on GitHub"
         },
         lastUpdated: {
@@ -150,7 +151,7 @@ export default defineConfig({
       },
     },
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/MaiM-with-u/MaiBot' },
+      { icon: 'github', link: 'https://github.com/Mai-with-u/MaiBot' },
       { icon: 'x', link: 'https://x.com/MaiWithYou' },
       { icon: 'discord', link: 'https://discord.gg/UvgPVSVX' },
       {
@@ -162,11 +163,16 @@ export default defineConfig({
     ],
   },
   markdown: {
+    // 必须显式开启，VitePress 才会把标题收集进 pageData.headers；
+    // 否则右侧「本页目录」（outline）会永远是空的。
+    // 注意这里的 level 是「精确层级列表」（不是 themeConfig.outline 的区间语义）。
+    headers: { level: [2, 3, 4] },
     config(md) {
       md.use(MermaidMarkdown);
       md.use(InlineLinkPreviewElementTransform);
       md.use(groupIconMdPlugin);
       md.use(timeline);
+      md.use(maiContainers);
       md.renderer.rules.heading_close = (tokens: Token[], idx: number, options: Options, env: any, slf: any) => {
         let htmlResult = slf.renderToken(tokens, idx, options)
         if (tokens[idx].tag === 'h1' && !env.metadataRendered) {
@@ -188,7 +194,7 @@ export default defineConfig({
         },
       }),
       MermaidPlugin(),
-      llmstxt({ workDir: 'zh', ignoreFiles: ['index.md'], domain: 'https://docs.maimai.lol' }),
+      llmstxt({ workDir: 'zh', ignoreFiles: ['index.md'], domain: 'https://docs.mai-mai.org' }),
     ],
     optimizeDeps: {
       include: ['mermaid'],

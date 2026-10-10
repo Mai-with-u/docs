@@ -1,16 +1,16 @@
 ---
-title: 数据导入导出
+title: 数据与统计
 ---
 
-# 数据导入导出
+# 数据与统计
 
-MaiBot 在运行时持续产生消息、模型调用、工具执行和在线时长等数据。这些数据有三条消费路径：**实时仪表盘**通过 HTTP API 直接查询原始表、**小时粒度聚合**由后台 service 定期写入汇总表供 SQL 直读、**异步导出**通过 WebUI data-transfer 端点将文件打成 zip 包。三条路径各自独立，面向不同的运维场景。
+**把麦麦产生的数据接进你自己的分析管道，有三条路。** MaiBot 运行时持续产生消息、模型调用、工具执行与在线时长数据：**实时查询**用 HTTP 接口直接读原始表、**小时聚合**由后台 service 定期写汇总表供 SQL 直读、**异步导出**把文件打成 zip 包下载。三条路径互相独立，按场景选。
 
-本文假设你已读过 [数据库](./database.md)（了解表结构）和 [数据 & 记忆 API](./webui-api/data-and-memory-api.md)（了解 data-transfer 的用户侧 curl 写法）。下面从后端视角拆解每条路径的原理、数据可用性边界和典型运维命令。
+这一页从接入方视角说明每条路径怎么用、数据到什么时候才可用，以及典型的运维命令。接口的认证与调用方式见[程序化对接](./webui-api/)；导出导入的图形界面操作见[数据管理](/manual/webui/data-management)。
 
 ## 小时粒度聚合表
 
-MaiBot 维护四张以 `statistics_*` 前缀命名的小时桶聚合表，由一个独立的**增量聚合 service** 定期写入。这四张表与 [数据库](./database.md#22-张表总览) 的 ER 图中其余核心表独立，不参与 `session_id` 关联主线。
+MaiBot 维护四张以 `statistics_*` 前缀命名的小时桶聚合表，由一个独立的**增量聚合 service** 定期写入。这四张表与其余核心表相互独立，不参与 `session_id` 关联主线。
 
 **`statistics_message_hourly`** — 按 `(bucket_time, chat_id)` 唯一聚合每小时消息量。`bucket_time` 为整点时间，`latest_timestamp` 记录该桶内最新消息的真实时间戳。聊天类型区分 `group` 和 `private`。
 
@@ -81,44 +81,15 @@ ORDER BY day DESC, total_cost DESC;
 
 :::
 
-如果 MaiBot 正在运行，连接数据库文件时务必设置 WAL 模式和 `busy_timeout`，避免锁冲突。详见 [数据库 / 连接与会话](./database.md#连接与会话)。
+如果 MaiBot 正在运行，连接数据库文件时务必设置 WAL 模式和 `busy_timeout`，避免锁冲突。详见[数据管理](/manual/webui/data-management)。
 
 ### 途径二：Statistics HTTP Endpoint
 
-`statistics_service.py` 中的函数从原始表（`llm_usage`、`mai_messages`、`online_time`、`tool_records`）直接实时聚合，返回数据结构化的 JSON。WebUI 前端通过三个端点消费这些数据。
-
-**`GET /api/webui/statistics/dashboard?hours=24`** — 一次返回 `summary`、`model_stats`、`hourly_data`、`daily_data`、`recent_activity` 五组数据。内置 20 分钟本地缓存，后续请求在缓存有效期内不查库。
-
-**`GET /api/webui/statistics/summary?hours=24`** — 仅返回摘要：总请求数、总费用、总 token、在线时长、消息数、回复数、平均响应时间、每小时费用和每小时 token。
-
-**`GET /api/webui/statistics/models?hours=24`** — 仅返回 Top 10 模型统计：每模型的请求数、费用、token、平均响应时间。
-
-全部端点要求认证（Cookie 或 Bearer token）。以下是三组 curl 示例：
-
-::: code-group
-
-```bash [curl Dashboard ~vscode-icons:file-type-http~]
-curl -X GET "http://127.0.0.1:8001/api/webui/statistics/dashboard?hours=168" \
-  -H "Cookie: maibot_session=你的Token"
-```
-
-```bash [curl Summary ~vscode-icons:file-type-http~]
-curl -X GET "http://127.0.0.1:8001/api/webui/statistics/summary?hours=24" \
-  -H "Cookie: maibot_session=你的Token"
-```
-
-```bash [curl Model Stats ~vscode-icons:file-type-http~]
-curl -X GET "http://127.0.0.1:8001/api/webui/statistics/models?hours=720" \
-  -H "Cookie: maibot_session=你的Token"
-```
-
-:::
-
-`hours` 参数可传入 24（最近一天）、168（最近一周）、720（最近 30 天）等任意正整数。缓存按 `hours` 值分桶，不同参数独立缓存。
+`statistics_service.py` 中的函数从原始表（`llm_usage`、`mai_messages`、`online_time`、`tool_records`）直接实时聚合，返回结构化的 JSON，WebUI 仪表盘就是通过这套端点取数的。三个端点（dashboard / summary / models）的参数、缓存行为与 curl 示例见[实时通道与统计](./webui-api/realtime-and-stats.md#统计查询)，这里不再重复。
 
 ## Data-Transfer 导出导入：后端 Job 流程
 
-`data_transfer.py`（474 行）实现了一套完整的异步 job 系统。前端视角的 curl 操作见 [数据 & 记忆 API](./webui-api/data-and-memory-api.md#data-transfer-导出导入)，这里展开后端执行细节。
+`data_transfer.py`（474 行）实现了一套完整的异步 job 系统。前端视角的 curl 操作见 [数据 & 记忆 API](./webui-api/data-and-memory-api.md#data-transfer-异步导出-导入)，这里展开后端执行细节。
 
 ### Job 生命周期
 

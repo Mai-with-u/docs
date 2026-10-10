@@ -1,12 +1,12 @@
 ---
-title: WebUI HTTP API Entry
+title: Programmatic Access
 ---
 
-# WebUI HTTP API Entry
+# Programmatic Access
 
-This subdirectory covers the HTTP / WebSocket APIs exposed by the MaiBot WebUI backend, targeting deployment ops personnel and users who need scripted management. If you only use the WebUI panel through a browser, you don't need to read this content.
+**Use this HTTP / WebSocket API to read or control MaiBot from your own program.** Dashboards, monitoring and alerting, batch operations and automation scripts all go through it; if you only use the WebUI panel in a browser, you can skip this section.
 
-Before proceeding, start with this page. It explains the skeleton of the entire API: how the server runs, how you authenticate, which route groups exist, and where to jump for specific scenarios.
+This page explains the skeleton of the whole API: how the service starts, how you authenticate, which route groups exist, and which page to jump to for a given scenario. For the exhaustive endpoint list, use the interactive docs shipped with the running service (see below).
 
 ## FastAPI Backend Overview
 
@@ -111,7 +111,7 @@ The core is the `APIRouter(prefix="/api/webui")` created in `src/webui/routes.py
 - **`/config/*`** — Runtime config read/write (TOML format)
 - **`/person/*`** — Person info management
 - **`/model/*`** — Model list and connectivity verification
-- **`/plugin/*`** — Plugin lifecycle management
+- **`/plugins/*`** — Plugin lifecycle management (the actual paths are `/api/webui/plugins/*`)
 - **`/system/*`** — System control and data migration
 - **`/memory/*`** — Long-term memory graph
 - **`/emoji/*`** — Emoji/sticker management
@@ -119,7 +119,7 @@ The core is the `APIRouter(prefix="/api/webui")` created in `src/webui/routes.py
 - **`/statistics/*`** — Statistics
 - **`/avatar/*`** — Avatars
 - **`/ws-token`** — WebSocket temporary Token
-- WebSocket endpoints (`unified` unified channel, `logs` log stream, `plugin/progress` plugin progress)
+- WebSocket endpoint: `/api/webui/ws`, the unified channel. The log stream and plugin progress are **subscription domains** on it (`logs:main`, `plugin_progress:main`); the legacy standalone `/ws/logs` and `/ws/plugin-progress` endpoints are not mounted in 1.3.4.
 
 ### Compat Routers
 

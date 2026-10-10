@@ -1,0 +1,205 @@
+/**
+ * 接入文档专用排版块
+ *
+ * 由 .vitepress/markdown/containers.ts 提供，写法：
+ *   ::: endpoint POST /api/webui/auth/verify   → 接口卡片（标题进「本页目录」）
+ *   ::: fields                                → 字段 / 参数速查列表
+ *   ::: steps                                 → 编号步骤
+ *
+ * 颜色一律走主题变量，三种界面风格（默认 / 未来复古 / 千禧）通用。
+ */
+
+/* --------------------------------------------------------------------------
+ * 通用容器
+ * ------------------------------------------------------------------------ */
+.mb-block {
+  margin: 16px 0;
+}
+
+.mb-block > :first-child {
+  margin-top: 0;
+}
+
+.mb-block > :last-child {
+  margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+ * ::: endpoint —— 接口卡片
+ * ------------------------------------------------------------------------ */
+.mb-endpoint {
+  padding: 16px 20px;
+  margin: 8px 0 20px;
+  border: 1px solid var(--vp-c-divider);
+  border-left: 3px solid var(--mb-method-color, var(--vp-c-brand-1));
+  border-radius: 10px;
+  background: var(--vp-c-bg-soft);
+}
+
+.mb-endpoint-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 28px 0 0;
+  padding-top: 0 !important;
+  border-top: none !important;
+  font-size: 16px;
+  font-family: var(--vp-font-family-mono);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.mb-endpoint-title[data-mb-method]::before {
+  content: attr(data-mb-method);
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: var(--vp-font-family-base);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--mb-method-color, var(--vp-c-brand-1));
+  background: color-mix(in srgb, var(--mb-method-color, var(--vp-c-brand-1)) 14%, transparent);
+}
+
+/* 请求方法配色：同一套颜色在浅色 / 深色下都能读 */
+.mb-endpoint-get {
+  --mb-method-color: #16a34a;
+}
+.mb-endpoint-post {
+  --mb-method-color: #2563eb;
+}
+.mb-endpoint-put,
+.mb-endpoint-patch {
+  --mb-method-color: #d97706;
+}
+.mb-endpoint-delete {
+  --mb-method-color: #dc2626;
+}
+.mb-endpoint-ws,
+.mb-endpoint-options,
+.mb-endpoint-head {
+  --mb-method-color: #7c3aed;
+}
+
+.dark .mb-endpoint-get {
+  --mb-method-color: #4ade80;
+}
+.dark .mb-endpoint-post {
+  --mb-method-color: #60a5fa;
+}
+.dark .mb-endpoint-put,
+.dark .mb-endpoint-patch {
+  --mb-method-color: #fbbf24;
+}
+.dark .mb-endpoint-delete {
+  --mb-method-color: #f87171;
+}
+.dark .mb-endpoint-ws,
+.dark .mb-endpoint-options,
+.dark .mb-endpoint-head {
+  --mb-method-color: #a78bfa;
+}
+
+/* --------------------------------------------------------------------------
+ * ::: fields —— 字段速查（内容页禁用 Markdown 表格，用这个代替）
+ * ------------------------------------------------------------------------ */
+.mb-fields {
+  padding: 4px 0 4px 16px;
+  border-left: 3px solid var(--vp-c-divider);
+}
+
+.mb-fields > ul,
+.mb-fields > ol {
+  margin: 8px 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.mb-fields li {
+  position: relative;
+  margin: 6px 0;
+  padding-left: 0;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--vp-c-text-2);
+}
+
+/* 每条字段以 **名称** 开头，这里把它做成定宽高亮 */
+.mb-fields li > strong:first-child {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-default-soft);
+}
+
+.mb-fields li > code:first-child {
+  margin-right: 6px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-default-soft);
+}
+
+.mb-fields .mb-fields-note {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--vp-c-text-3);
+}
+
+/* --------------------------------------------------------------------------
+ * ::: steps —— 编号步骤
+ * ------------------------------------------------------------------------ */
+.mb-steps {
+  counter-reset: mb-step;
+}
+
+.mb-steps > ol {
+  margin: 8px 0;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: mb-step;
+}
+
+.mb-steps > ol > li {
+  position: relative;
+  margin: 10px 0;
+  padding: 2px 0 2px 44px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.mb-steps > ol > li::before {
+  counter-increment: mb-step;
+  content: counter(mb-step);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+
+.mb-steps > ol > li > :first-child {
+  margin-top: 0;
+}
+
+.mb-steps > ol > li > :last-child {
+  margin-bottom: 0;
+}
+
+/* 步骤内的代码块不要顶到编号上 */
+.mb-steps > ol > li > div[class*='language-'] {
+  margin: 8px 0;
+}

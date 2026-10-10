@@ -383,7 +383,8 @@ description: MaiBot 各版本的功能更新、修复与配置变更记录。
 - A_Memorix 记忆系统主线化：段落、实体、关系、来源、向量和图谱统一存储
 - WebUI/Dashboard 完成新界面体系升级：聊天、配置、插件、记忆等核心能力整合
 - 插件系统重构为独立 plugin_runtime，支持独立启停、重载、运行状态追踪
-- 开发版及更详细的更新日志请见 [GitHub Releases](https://github.com/MaiM-with-u/MaiBot/releases)。
+- 开发版及更详细的更新日志请见 [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases)。
+- 图文版完整说明见 [1.0.0 版本专题](./v1-0-0.md)
 :::
 
 ::: timeline 2026-01-11

@@ -73,7 +73,7 @@ nickname = "麦麦"
 
 :::
 
-You can also set this in the WebUI: `Bot Settings → Basics → plus button next to Platform Accounts → platform `imessage`, account `+10000000000`` (replace with your own project number).
+You can also set this in the WebUI under **Adapter Settings**: click **平台账号** (Platform accounts) on the right of the "全局默认规则" (Global default rules) card at the top of the page, expand **备用平台账号** (Fallback platform accounts), click the plus button and add a row with platform `imessage` and account `+10000000000`, then click **保存备用账号** (Save fallback accounts) (replace the number with your own project number).
 
 ## Verify and troubleshoot
 

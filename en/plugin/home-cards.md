@@ -89,3 +89,13 @@ The layout is stored locally in the browser and is not written to plugin config.
 ::: tip Need a full page instead of a card?
 Home cards only live on the WebUI home page. To give your plugin a full page (a top workspace or a sidebar entry), use [WebUI Pages](./webui-pages.md).
 :::
+
+## Verify and Troubleshoot
+
+**Verification** — reload the plugin and open the WebUI home page: the card appears with your `title` and its content blocks rendered; disable or unload the plugin and the card disappears from the home page candidates, which confirms registration and lifecycle cleanup.
+
+- **The card never appears** — check that the plugin is loaded and enabled first; cards are registered while the plugin loads, so a plugin that fails to start, or whose declaration fails to register, contributes no card and the Runner log records the error.
+- **The card renders empty** — each content block needs its own fields: `stat` requires `label` and `value`, `key_value` uses `entries` (not `items`), and `actions` uses an `actions` array.
+- **A button on the card does nothing** — `link_url` and `actions[].url` only allow internal paths (starting with `/`), `http(s)`, and `mailto`; Host and WebUI both validate them, so other schemes such as `javascript:` are dropped.
+- **The order differs from what you set** — `order` only sets the default position; once a user drags or hides cards in "Edit cards", the browser-local layout wins. Restore the card in edit mode to get the default back.
+- **HTML or inline events inside your Markdown do nothing** — that is the intended security boundary: HTML is treated as plain text and inline events never run, so express styling with Markdown instead.
