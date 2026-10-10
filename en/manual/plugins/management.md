@@ -83,6 +83,7 @@ To install a particular version (including one older than what you have now), op
 - Versions disabled in the dropdown are incompatible with your current MaiBot / SDK, and the reason follows in parentheses (e.g. "Requires MaiBot ≥ 1.4.0")
 - "· Recommended" is the newest stable version under the compatibility check and is selected by default
 - Switching versions backs up the old directory and keeps `config.toml` / `config_back/` / `data/`, but **does not roll back plugin data**
+- If the selected version affects other installed plugins' dependency requirements, it no longer blocks the install: a "plugin dependency reminder" will tell you which plugin may stop working (since 1.3.5)
 
 ### Lock a Version
 
@@ -141,6 +142,7 @@ Only fully restart MaiBot when the log explicitly reports that watching, loading
 ## FAQ
 
 **Q: Install failed?** Check network and the URL, and review error messages; for release installs, first check whether that version is compatible in the dropdown and whether dependencies are missing.
+**Q: A "plugin dependency reminder" popped up?** Another installed plugin's dependency requirement does not match this version. The install / update completes as usual, but the plugin named in the reminder may stop working; if it actually misbehaves, install a version that satisfies the requirement.
 **Q: "Update" says the version is locked?** You ticked "Lock this version" when installing. Open the detail page, select a version again, and untick the lock to restore automatic updates.
 **Q: Want to roll back to an older version but it says no automatic downgrade?** Automatic updates only move forward. Open the plugin detail page and manually select the older version under "Install version".
 **Q: "This plugin was installed from a release; update it through version selection"?** This plugin is managed by the version index and can no longer be `git pull`-ed; switch versions only via the detail page.

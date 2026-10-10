@@ -48,7 +48,7 @@ Install, update, and uninstall on the same plugin are mutually exclusive. If tha
 
 In branch-install mode, the server clones the repo in order, validates `_manifest.json` (checking five required fields: `manifest_version`, `id`, `name`, `version`, `author`), and upon success creates the plugin directory under `plugins/`.
 
-When `version` is given, the release-install path runs: shallow-clone by tag into a temporary directory, verify the commit and manifest match the index, dependencies are satisfied, and the switch does not break other installed plugins' version constraints on this plugin, then stop the plugin → preserve `config.toml` / `config_back/` / `data/` → write `.maibot-release.json` → atomically replace the directory (the old one is renamed into `.update_backups/`) → reload.
+When `version` is given, the release-install path runs: shallow-clone by tag into a temporary directory, verify the commit and manifest match the index and dependencies are satisfied; if the version affects other installed plugins' dependency requirements it no longer blocks the install and is instead reported in the response `warnings`, then stop the plugin → preserve `config.toml` / `config_back/` / `data/` → write `.maibot-release.json` → atomically replace the directory (the old one is renamed into `.update_backups/`) → reload.
 
 **Install examples:**
 
@@ -86,10 +86,11 @@ curl -X POST http://127.0.0.1:8001/api/webui/plugins/install \
 - **400 This plugin has no Release yet; only branch install is supported** — the index lists it in branch mode; install without `version`
 - **404 Plugin not yet in the version index** — the repository is not indexed officially
 - **409 Plugin already installed** / **409 Plugin target directory already exists** — the target location is not empty
-- **409 This version does not satisfy the dependency requirement of installed plugin X** — switching versions would break another plugin's dependency constraint
 - **409 The plugin has local code modifications; resolve them first** — the plugin directory carries local code changes
 - **409 The tag's current commit does not match the version index** / **409 The downloaded manifest does not match the version index** — the index and repository are out of sync
 - **502 Failed to fetch the plugin version index** — the official index could not be fetched; switch mirror source or retry later
+
+> Since 1.3.5, installation no longer fails because "this version does not satisfy the dependency requirement of installed plugin X": the operation completes as usual, and the response body carries an extra `warnings` array listing the affected plugins and version requirements (e.g. "installed plugin X requires Y version …, that plugin may stop working"). The WebUI shows it as a "plugin dependency reminder" popup.
 
 ### Install from ZIP
 
@@ -117,7 +118,7 @@ On success it returns `success`, `plugin_id`, and `message`. Common rejections:
 
 **`POST /api/webui/plugins/update`** — Update an installed plugin. The request body is the same as for install. The logic splits into three paths:
 
-- **Release install** (`version` is a concrete version or `latest`) — the same stop / replace / reload chain as install; the response `update_mode` is `release` and additionally returns `commit`, `pinned`, and `backup_path`
+- **Release install** (`version` is a concrete version or `latest`) — the same stop / replace / reload chain as install; the response `update_mode` is `release` and additionally returns `commit`, `pinned`, `backup_path`, and `warnings` (dependency-conflict reminders; may be an empty array)
 - **Git repository** — Directly `git pull` the new version, preserving local `config.toml` and `config_back/` directory; `update_mode` is `git_pull`
 - **Non-Git directory** — Re-clone and perform backup recovery; the `update_mode` field will be `reinstall_from_backup`
 

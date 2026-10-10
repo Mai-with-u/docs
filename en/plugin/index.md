@@ -237,7 +237,7 @@ def create_plugin():
 
 ### Component Decorators
 
-The SDK provides 8 component decorators, all imported from the top level of `maibot_sdk`:
+The SDK provides 9 component decorators, all imported from the top level of `maibot_sdk`:
 
 **`@Tool`** — LLM tool/function calling. Tools callable by the LLM, the most commonly used component type
 
@@ -254,6 +254,8 @@ The SDK provides 8 component decorators, all imported from the top level of `mai
 **`@HomeCard`** — WebUI home page card. Shows plugin status, entry points, or custom content on the home page
 
 **`@LLMProvider`** — LLM Provider. Declares new LLM model access points (client_type) to extend model services
+
+**`@ReplyExtension`** — Reply extension. Injects namespaced parameters into the reply tool and participates in reply generation (SDK 2.10.0+; see [Reply Extensions](./reply-extensions.md))
 
 **`@Action`** — Legacy plugin compatibility. Internally auto-converted to `@Tool`; new plugins should directly use `@Tool`
 
@@ -366,7 +368,7 @@ Both use the same communication protocol and component registration mechanism. T
 
 **Basics** — [Manifest System](./manifest.md): field definitions and validation rules for `_manifest.json` · [Lifecycle](./lifecycle.md): loading, unloading and config hot-reload · [Configuration Management](./config.md): declaring and using plugin config
 
-**Components** — [Tool Component](./tools.md): LLM-callable tools · [Command Component](./commands.md): slash commands · [Hook System](./hooks.md): intercept and rewrite messages · [Event Handlers](./event-handlers.md): listen to lifecycle events · [Message Gateway](./message-gateway.md): connect a new platform as a plugin · [API Components](./api-components.md): inter-plugin APIs · [LLMProvider Component](./llmprovider.md): integrate new model services · [Home Cards](./home-cards.md): WebUI home-page cards · [WebUI Pages](./webui-pages.md): declarative custom pages · [Action Component](./actions.md): the legacy `@Action` decorator
+**Components** — [Tool Component](./tools.md): LLM-callable tools · [Command Component](./commands.md): slash commands · [Hook System](./hooks.md): intercept and rewrite messages · [Event Handlers](./event-handlers.md): listen to lifecycle events · [Message Gateway](./message-gateway.md): connect a new platform as a plugin · [API Components](./api-components.md): inter-plugin APIs · [LLMProvider Component](./llmprovider.md): integrate new model services · [Reply Extensions](./reply-extensions.md): inject plugin parameters into the reply tool, add requirements before generation, or transform messages before sending · [Home Cards](./home-cards.md): WebUI home-page cards · [WebUI Pages](./webui-pages.md): declarative custom pages · [Action Component](./actions.md): the legacy `@Action` decorator
 
 **Going Deeper** — [Vibe Coding](./vibe-coding.md): AI-assisted plugin development · [API Reference](./api-reference.md): the complete Plugin SDK API · [Publish a Plugin](./submission.md): submit to the official plugin center
 

@@ -174,10 +174,10 @@ selection_strategy = "random"                 # [可选] 模型选择策略
 hard_timeout = 240.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [mid_memory（中期摘要） ~vscode-icons:file-type-toml~]
-# [可选] 中期摘要：上下文裁切时将历史聊天压缩为摘要。留空时自动回退到 planner。
+```toml [mid_memory（聊天回想） ~vscode-icons:file-type-toml~]
+# [可选] 聊天回想：上下文裁切时将历史聊天压缩为摘要。留空时自动回退到 fast_model，fast_model 也留空时回退到 utils。
 [model_task_config.mid_memory]
-model_list = []                               # [可选] 模型名称列表（→回退 planner）
+model_list = []                               # [可选] 模型名称列表（→回退 fast_model → utils）
 max_tokens = 8192                             # [可选] 最大输出 token 数
 temperature = 0.7                             # [可选] 模型温度
 selection_strategy = "random"                 # [可选] 模型选择策略
@@ -193,7 +193,7 @@ hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
 ```toml [fast_model（快速小任务） ~vscode-icons:file-type-toml~]
-# [可选] 快速模型：挑表达方式、给回复断句这类要马上出结果的小任务，选响应快的模型。留空时自动回退到 utils。
+# [可选] 快速模型：挑表达方式、给回复断句这类要马上出结果的小任务，选响应快的模型。留空时自动回退到 utils；聊天回想留空时也会回退到这里。
 [model_task_config.fast_model]
 model_list = []                               # [可选] 模型名称列表（→回退 utils）
 max_tokens = 8192                             # [可选] 最大输出 token 数
@@ -205,6 +205,7 @@ hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```toml [emoji（表情包选择） ~vscode-icons:file-type-toml~]
 # [可选] 表情包选择：从候选表情包中选出合适的一张发送。
 # 选择优先级：emoji 有模型→用 emoji，planner 全视觉→用 planner，否则→用 vlm
+# 替换旧表情的决策：优先用 emoji，未配置时用 planner
 [model_task_config.emoji]
 model_list = []                               # [可选] 模型名称列表
 max_tokens = 8192                             # [可选] 最大输出 token 数
@@ -278,14 +279,14 @@ hard_timeout = 60.0                           # [可选] 硬超时（秒）
 部分任务的 `model_list` 为空时，自动复用其他任务：
 
 ```
-         ┌──────────┐
-         │  planner │◄──── mid_memory（留空时回退）
-         └──────────┘
-              ▲
+         ┌────────────┐
+         │ fast_model │◄──── mid_memory（留空时回退）
+         └────────────┘
               │
+              │ 留空时回退
+              ▼
          ┌──────────┐
          │  utils   │◄──── learner（留空时回退）
-         │          │◄──── fast_model（留空时回退）
          └──────────┘
 
 memory · emoji · vlm · voice · embedding · image_embedding → 留空不自动回退，调用方会跳过或报错

@@ -48,7 +48,7 @@ curl -X GET http://127.0.0.1:8001/api/webui/plugins/installed \
 
 分支安装模式下，服务端会依次克隆仓库、校验 `_manifest.json`（检查 `manifest_version`、`id`、`name`、`version`、`author` 五个必填字段），成功后在 `plugins/` 目录下生成插件目录。
 
-指定 `version` 时走发布版本安装：按 Tag 浅克隆到临时目录，校验 commit 与 manifest 和索引一致、依赖满足、且不破坏其他已安装插件对该插件的版本约束，然后停止插件 → 保留 `config.toml` / `config_back/` / `data/` → 写入 `.maibot-release.json` → 原子替换目录（旧目录改名进 `.update_backups/`）→ 重新加载。
+指定 `version` 时走发布版本安装：按 Tag 浅克隆到临时目录，校验 commit 与 manifest 和索引一致、依赖满足；如果该版本会影响其他已安装插件的依赖要求，不再阻止安装，而是在响应 `warnings` 中提醒，然后停止插件 → 保留 `config.toml` / `config_back/` / `data/` → 写入 `.maibot-release.json` → 原子替换目录（旧目录改名进 `.update_backups/`）→ 重新加载。
 
 **安装示例：**
 
@@ -86,10 +86,11 @@ curl -X POST http://127.0.0.1:8001/api/webui/plugins/install \
 - **400 该插件尚未发布 Release，只支持分支安装** — 索引中该插件是分支模式，只能不传 `version` 安装
 - **404 插件尚未收录到版本索引** — 仓库没被官方索引收录
 - **409 插件已安装** / **409 插件目标目录已存在** — 目标位置非空
-- **409 该版本不满足已安装插件 X 的依赖要求** — 换版本会破坏其他插件的依赖约束
 - **409 插件存在本地代码修改，请先处理** — 插件目录里有本地代码改动
 - **409 Tag 当前指向的 commit 与版本索引不一致** / **409 下载的 manifest 与版本索引不一致** — 索引与仓库状态脱节
 - **502 获取插件版本索引失败** — 官方索引没拉下来，换镜像源或稍后重试
+
+> 自 1.3.5 起，安装不再因「该版本不满足其他已安装插件的依赖要求」而失败：操作照常完成，响应体多一个 `warnings` 数组，逐条列出受影响的插件与版本要求（如「已安装插件 X 要求 Y 版本 …，该插件可能无法运行」），WebUI 会以「插件依赖提醒」弹窗展示。
 
 ### 从 ZIP 安装
 
@@ -117,7 +118,7 @@ curl -X POST http://127.0.0.1:8001/api/webui/plugins/install \
 
 **`POST /api/webui/plugins/update`** — 更新已安装插件。请求体与安装一致。逻辑分三路：
 
-- **发布版本安装**（`version` 为具体版本或 `latest`）— 与安装相同的停止/替换/重载链路，响应 `update_mode` 为 `release`，并额外返回 `commit`、`pinned`、`backup_path`
+- **发布版本安装**（`version` 为具体版本或 `latest`）— 与安装相同的停止/替换/重载链路，响应 `update_mode` 为 `release`，并额外返回 `commit`、`pinned`、`backup_path` 与 `warnings`（依赖冲突提醒，可为空数组）
 - **Git 仓库** — 直接 `git pull` 拉取新版本，保留本地 `config.toml` 和 `config_back/` 目录，`update_mode` 为 `git_pull`
 - **非 Git 目录** — 重新克隆并做备份恢复，`update_mode` 为 `reinstall_from_backup`
 

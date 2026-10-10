@@ -188,6 +188,7 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
       { text: '消息网关', link: '/plugin/message-gateway' },
       { text: 'API 组件', link: '/plugin/api-components' },
       { text: 'LLMProvider', link: '/plugin/llmprovider' },
+      { text: '回复扩展', link: '/plugin/reply-extensions' },
       { text: '首页卡片', link: '/plugin/home-cards' },
       { text: 'WebUI 自定义页面', link: '/plugin/webui-pages' },
       { text: 'Action（旧版）', link: '/plugin/actions' },

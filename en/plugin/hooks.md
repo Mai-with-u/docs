@@ -302,6 +302,10 @@ async def preserve_selected_reply(self, **kwargs):
 
 If you need to rewrite the exact message list sent by the replyer, use `maisaka.replyer.before_model_request`. This Hook fires after the replyer has built `messages` for the currently selected model capability. Blocking handlers can return a new `messages` list; this is useful for inserting a synthetic first `user` message after `system`, experimenting with temporary prompts, or logging the final request body. The Hook only changes this temporary LLM request and does not write back to chat history or affect mid-term memory insertion.
 
+::: tip An easier alternative
+If you only want to inject parameters into a reply or rewrite reply content before sending (for example, turning text into voice), prefer the [Reply Extension](./reply-extensions.md) (since 1.3.5): no Planner Hook changes, and sending, history, and failure handling are managed by the main program.
+:::
+
 A common pattern is to first use `maisaka.planner.before_request` to add a parameter schema to the built-in `reply` tool so the planner can fill that parameter, then read `reply_tool_args` in `maisaka.replyer.before_request` to route the model:
 
 ::: code-group

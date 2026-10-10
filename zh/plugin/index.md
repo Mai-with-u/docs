@@ -237,7 +237,7 @@ def create_plugin():
 
 ### 组件装饰器
 
-SDK 提供 8 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
+SDK 提供 9 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
 
 **`@Tool`** — LLM 工具/函数调用，LLM 可调用的工具，最常用的组件类型
 
@@ -254,6 +254,8 @@ SDK 提供 8 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
 **`@HomeCard`** — WebUI 首页卡片，在首页展示插件状态、入口或自定义内容
 
 **`@LLMProvider`** — LLM Provider，声明新 LLM 模型接入点（client_type），扩展模型服务
+
+**`@ReplyExtension`** — 回复扩展，为 reply 工具注入命名空间参数并参与回复生成（SDK 2.10.0+，详见 [回复扩展](./reply-extensions.md)）
 
 **`@Action`** — 兼容旧插件，内部自动转换为 `@Tool`，新插件应直接使用 `@Tool`
 
@@ -366,7 +368,7 @@ MaiBot 维护两个独立的 Runner 子进程：
 
 **基础** — [Manifest 系统](./manifest.md)：`_manifest.json` 的完整字段定义与校验规则 · [生命周期](./lifecycle.md)：加载、卸载与配置热重载 · [配置管理](./config.md)：声明和使用插件配置
 
-**组件** — [Tool 组件](./tools.md)：LLM 可调用的工具 · [Command 组件](./commands.md)：斜杠命令 · [Hook 系统](./hooks.md)：拦截和改写消息 · [事件处理器](./event-handlers.md)：监听生命周期事件 · [消息网关](./message-gateway.md)：用插件接入新平台 · [API 组件](./api-components.md)：插件间接口 · [LLMProvider 组件](./llmprovider.md)：接入新模型服务 · [首页卡片](./home-cards.md)：WebUI 首页卡片 · [WebUI 页面](./webui-pages.md)：声明式自定义页面 · [Action 组件](./actions.md)：兼容旧系统的 @Action 装饰器
+**组件** — [Tool 组件](./tools.md)：LLM 可调用的工具 · [Command 组件](./commands.md)：斜杠命令 · [Hook 系统](./hooks.md)：拦截和改写消息 · [事件处理器](./event-handlers.md)：监听生命周期事件 · [消息网关](./message-gateway.md)：用插件接入新平台 · [API 组件](./api-components.md)：插件间接口 · [LLMProvider 组件](./llmprovider.md)：接入新模型服务 · [回复扩展](./reply-extensions.md)：给 reply 工具注入插件参数、生成前追加要求或发送前转换消息 · [首页卡片](./home-cards.md)：WebUI 首页卡片 · [WebUI 页面](./webui-pages.md)：声明式自定义页面 · [Action 组件](./actions.md)：兼容旧系统的 @Action 装饰器
 
 **深入** — [Vibe Coding](./vibe-coding.md)：用 AI 辅助写插件 · [API 参考](./api-reference.md)：完整的插件 SDK API · [发布插件](./submission.md)：提交到官方插件中心
 

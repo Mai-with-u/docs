@@ -177,6 +177,7 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Message Gateway', link: '/en/plugin/message-gateway' },
       { text: 'API Components', link: '/en/plugin/api-components' },
       { text: 'LLM Provider', link: '/en/plugin/llmprovider' },
+      { text: 'Reply Extensions', link: '/en/plugin/reply-extensions' },
       { text: 'Home Cards', link: '/en/plugin/home-cards' },
       { text: 'WebUI Custom Pages', link: '/en/plugin/webui-pages' },
       { text: 'Action (Legacy)', link: '/en/plugin/actions' },

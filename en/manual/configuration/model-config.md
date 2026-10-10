@@ -174,10 +174,10 @@ selection_strategy = "random"                 # [Optional] Model selection strat
 hard_timeout = 240.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [mid_memory (mid-term summary) ~vscode-icons:file-type-toml~]
-# [Optional] Mid-term summary: compresses chat history into a summary when the context is trimmed. Falls back to planner when empty.
+```toml [mid_memory (chat recall) ~vscode-icons:file-type-toml~]
+# [Optional] Chat recall: compresses clipped chat history into a summary. Falls back to fast_model when empty, and to utils when fast_model is also empty.
 [model_task_config.mid_memory]
-model_list = []                               # [Optional] List of model names (→ falls back to planner)
+model_list = []                               # [Optional] Model name list (→ falls back to fast_model → utils)
 max_tokens = 8192                             # [Optional] Maximum output token count
 temperature = 0.7                             # [Optional] Model temperature
 selection_strategy = "random"                 # [Optional] Model selection strategy
@@ -193,7 +193,7 @@ hard_timeout = 120.0                          # [Optional] Hard timeout (seconds
 ```
 
 ```toml [fast_model (quick small tasks) ~vscode-icons:file-type-toml~]
-# [Optional] Fast model: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences. Choose a model that responds quickly. Falls back to utils when empty.
+# [Optional] Fast model: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences. Choose a model that responds quickly. Falls back to utils when empty; chat recall also falls back here when empty.
 [model_task_config.fast_model]
 model_list = []                               # [Optional] List of model names (→ falls back to utils)
 max_tokens = 8192                             # [Optional] Maximum output token count
@@ -205,6 +205,7 @@ hard_timeout = 120.0                          # [Optional] Hard timeout (seconds
 ```toml [emoji (emoji selection) ~vscode-icons:file-type-toml~]
 # [Optional] Emoji selection: picks a fitting emoji from the candidates and sends it.
 # Selection priority: emoji has a model → use emoji; planner is fully visual → use planner; otherwise → use vlm
+# Replacing an old sticker: prefer the emoji task; use planner when unconfigured
 [model_task_config.emoji]
 model_list = []                               # [Optional] List of model names
 max_tokens = 8192                             # [Optional] Maximum output token count
@@ -274,14 +275,14 @@ This change resolves the deadlock where setting up custom or local LLM providers
 When `model_list` for some tasks is empty, other tasks are automatically reused:
 
 ```
-         ┌──────────┐
-         │  planner │◄──── mid_memory (falls back when empty)
-         └──────────┘
-              ▲
+         ┌────────────┐
+         │ fast_model │◄──── mid_memory (falls back when empty)
+         └────────────┘
               │
+              │ falls back when empty
+              ▼
          ┌──────────┐
          │  utils   │◄──── learner (falls back when empty)
-         │          │◄──── fast_model (falls back when empty)
          └──────────┘
 
 memory · emoji · vlm · voice · embedding · image_embedding → No automatic fallback when empty, caller will skip or throw an error

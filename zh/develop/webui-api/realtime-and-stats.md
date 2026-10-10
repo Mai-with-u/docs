@@ -40,7 +40,9 @@ WebSocket 连接通过一个可选的握手 Token 认证。连接时，服务端
 
 **`domain: "plugin_progress", topic: "main"`** — 插件进度。订阅后服务端立即推送一条 `plugin_progress/snapshot` 事件回放当前所有插件的进度状态
 
-**`domain: "maisaka_monitor", topic: "main"`** — MaiSaka 推理监控。订阅后服务端回放监控事件历史，可通过 `data.since_event_id` 和 `data.replay_limit`（范围 1-10000，默认 1000）控制回放范围。回放完成后还会推送一条 `maisaka_monitor/stage.snapshot` 事件展示各阶段当前状态
+**`domain: "plugin_runtime", topic: "main"`** — 插件运行状态变更通知（1.3.5 起）。插件注册、卸载及 Runner 进程状态变化时推送 `plugin_runtime/changed` 事件（不携带数据）；收到后重新拉取完整插件列表快照即可
+
+**`domain: "maisaka_monitor", topic: "main"`** — MaiSaka 推理监控。订阅后服务端先推送一条 `maisaka_monitor/planner.reset` 事件（重置 Planner 增量基准的标记），随后回放监控事件历史，可通过 `data.since_event_id` 和 `data.replay_limit`（范围 1-10000，默认 1000）控制回放范围。回放完成后还会推送一条 `maisaka_monitor/stage.snapshot` 事件展示各阶段当前状态。Planner 进度与结果事件按连接做增量下发：首次（或重连、重订阅后）为完整快照，之后以 `planner.delta` 只携带变化字段与追加的工具条目
 
 **`unsubscribe`** — 退订某个域的主题。需提供 `domain` 和 `topic` 字段
 
