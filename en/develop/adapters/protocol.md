@@ -209,13 +209,26 @@ Outbound routing finds "which driver to use" through three routing dimensions:
 - **`scope`** — the scope. Used to tell multiple connections under the same account (such as several client instances) apart.
 :::
 
-The adapter reports these three values through `additional_config`; several key spellings are accepted, so pick any one:
+Legacy WebSocket / `maim_message` adapters report the account and scope through `additional_config`; several key spellings are accepted, so pick any one:
 
 **Account** — `platform_io_account_id`, `account_id`, `self_id`, `bot_account`
 
 **Scope** — `platform_io_scope`, `route_scope`, `adapter_scope`, `connection_id`
 
 They can sit at the top level of the message, inside `message_info`, or inside `message_info.additional_config`.
+
+### Formal Message Ownership for Plugin Adapters
+
+Plugin gateways declare routes with `ctx.gateway.update_state(ready=True, platform=..., account_id=..., scope=...)`. Each message supplies a non-empty top-level `account_id` and optional `scope`. The Host checks that the message's `platform/account_id/scope` matches the receiving gateway declaration. Single-account adapters must also provide explicit message ownership.
+
+- **Gateway declaration** — Defines the bot identities being connected. Account discovery occurs only in ready-state declarations; ordinary messages cannot add accounts or change declarations.
+- **Message ownership** — Identifies the bot account handling the message, separately from its sender at `message_info.user_info.user_id`. Formal fields are preserved through internal messages, Hooks, chat sessions, message storage, and outbound messages.
+- **Multiple accounts** — Each gateway currently declares one route. A plugin can declare separate gateways and submit messages to the matching gateway.
+- **Empty scope** — Omit the message's `scope` or use `None`. Empty gateway scope strings are normalized to no scope. If a scope is declared, messages must provide the same value.
+
+Legacy aliases such as `additional_config.self_id` and `platform_io_account_id`, and legacy ownership in `route_metadata`, remain temporarily supported. Their use logs a WARNING that support will be removed in the next version. New adapters should use formal fields directly. When top-level `account_id` is present, legacy fields do not participate in selection or provide a fallback for empty formal fields.
+
+Legacy WebSocket / `maim_message` interfaces retain their compatibility format; it is not the development contract for new plugin gateways. See [Message Gateway](../../plugin/message-gateway.md#message-ownership) for complete dictionary examples and migration rules.
 
 ::: warning Don't take the `webui` platform name
 Platform IO implicitly registers `webui` as a built-in platform, and `bot_console` and `maisaka_cli` are reserved names as well. Give your adapter a name of its own, such as `telegram`.

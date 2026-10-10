@@ -213,6 +213,8 @@ class SendInterceptorPlugin(MaiBotPlugin):
 ### 聊天消息链
 
 - **`chat.receive.before_process`** — 入站消息执行 `SessionMessage.process()` 前 — 允许 abort ✅ · 允许改参 ✅
+
+  可用于图片识别后的上下文注释：消息字典 `raw_message` 中的图片/表情携带 `binary_data_base64`（素材可用时），转发内容在 `data[].content` 中递归展开。阻塞处理器可返回 `modified_kwargs={"message": updated_message}`，在对应图片后加入 `{"type":"text","data":"识别提示"}`。同步推理放入线程或独立进程，限制总耗时；超时或失败继续原消息。模型得分不是校准后的正确概率。此钩子本身不要求将聊天图片收集进训练库。
 - **`chat.receive.after_process`** — 入站消息轻量预处理完成后 — 允许 abort ✅ · 允许改参 ✅
 
 ### 命令执行链

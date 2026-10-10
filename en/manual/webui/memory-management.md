@@ -201,4 +201,3 @@ Memory data is stored in local directories by default. Generating summaries, pro
 
 - [A_Memorix Config](../configuration/amemorix-config.md) — memory system parameters, including [Image Memory](../configuration/amemorix-config.md#image-memory)
 - [Model Config](../configuration/model-config.md) — configure the `image_embedding` image embedding task
-- [Chat & Statistics](./chat-stats.md) — chat logs, stickers, and expression styles

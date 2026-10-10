@@ -704,6 +704,7 @@ html[data-theme-style='millennium'] .linkcard {
 
 html[data-theme-style='millennium'] .linkcard:hover {
   background: var(--mil-key-hover);
+  box-shadow: var(--mil-keycap);
   transform: none;
 }
 

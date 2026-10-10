@@ -201,4 +201,3 @@ MaiBot 会给每个用户建立「画像」：
 
 - [A_Memorix 配置](../configuration/amemorix-config.md) — 记忆系统参数，含[图片记忆](../configuration/amemorix-config.md#图片记忆)
 - [模型配置](../configuration/model-config.md) — 配置 `image_embedding` 图片嵌入任务
-- [聊天与统计](./chat-stats.md) — 聊天记录、表情包与表达方式

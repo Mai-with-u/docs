@@ -4,84 +4,101 @@ title: Quick Start
 
 # Quick Start
 
-Welcome to the MaiBot User Manual. MaiBot is an LLM-powered chatbot framework — through adapters it connects to platforms such as QQ, email, and iMessage, and chats, remembers, learns, and uses tools in group conversations like a real person. This manual walks you through installation, configuration, and platform connection from scratch, then helps you master every feature.
+Hello!
+
+MaiBot (Mai) is an LLM-powered chatbot framework. Through adapters, it connects to QQ, Telegram, email, iMessage, and other platforms. Like a person, it can chat, remember, learn, be curious, act cheeky, surprise you with what it says, and become your digital pet.
+
+This manual walks you through installation, configuration, and platform connection from scratch, then helps you master every feature.
 
 ::: tip System Requirements
-A computer with internet access (Windows 10+ / Linux / macOS), at least 2GB of free memory, and an LLM API key. The hardware bar is low — an ordinary home computer is enough.
-:::
+A computer with internet access (Windows 10+ / Linux / macOS), at least 2GB of free memory, and an LLM API key.
 
-## 🚀 Quick Start
+A willingness to ask people and AI for help and think things through.
 
-From zero to chatting takes just four steps, about 1–2 minutes each. Just follow the cards below.
+## Mai 101
+
+From zero to chatting takes just four steps.
 
 <div class="step-grid">
 
 <div class="step-card">
   <div class="step-head"><span class="step-no">1</span> <h3>Install MaiBot</h3></div>
-  <p>Windows users are recommended to use the <strong>one-click package</strong> — no command-line tools needed. Double-click to install; it automatically sets up the Python environment and launches a configuration wizard. Linux, macOS, and container options are also available.</p>
+  <p>Windows users are recommended to use the <strong>one-click package</strong> for a quick, complete setup.<br> Linux and macOS users can use Docker or launch directly in a Python environment.</p>
   <a class="step-more" href="/en/manual/deployment/windows">View install guide →</a>
 </div>
 
 <div class="step-card">
   <div class="step-head"><span class="step-no">2</span> <h3>Open the WebUI</h3></div>
-  <p>After startup, open <code>http://localhost:8001</code> in your browser and paste the login token printed in the terminal on first launch. The WebUI is MaiBot's graphical management interface — most configuration happens here.</p>
+  <p>After startup, open <code>http://localhost:8001</code> in your browser. The login password usually appears in the startup window.</p>
   <a class="step-more" href="/en/manual/webui/">Learn about the WebUI →</a>
 </div>
 
 <div class="step-card">
   <div class="step-head"><span class="step-no">3</span> <h3>Configure a Model</h3></div>
-  <p>In the WebUI's model settings, enter your API provider's base URL and key, then pick the model you want. You need at least one LLM model before MaiBot can speak.</p>
+  <p>Follow the setup guide to enter your API provider's base URL and key, then choose the models to use.</p>
   <a class="step-more" href="/en/manual/configuration/model-config">View model config →</a>
 </div>
 
 <div class="step-card">
   <div class="step-head"><span class="step-no">4</span> <h3>Connect a Chat Platform</h3></div>
-  <p>Taking QQ as the most common example: install SnowLuma or NapCat and enable its forward WebSocket, then install and enable the "Unified QQ Connector" from the plugin store in the WebUI — MaiBot can join your group chats.</p>
+  <p>For QQ, the most common example, use an adapter to connect to a QQ Official Bot or SnowLuma to receive messages.</p>
   <a class="step-more" href="/en/manual/adapters/qq-local-client">Connect to QQ →</a>
 </div>
 
 </div>
 
-## 📖 Going Further
+## Lesson Two
 
 Once it's running, explore the sections below to shape MaiBot into what you want.
 
 <div class="nav-grid">
 
 <div class="nav-card">
-  <h3>⚙️ Configuration</h3>
-  <p>Personality, nickname, chat style, memory toggles… every config file can be edited in the WebUI, or as TOML directly.</p>
+  <div class="step-head nav-head">
+    <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m9 3-.6 2.4-2.1 1.2L4 6l-2 3 1.8 1.8v2.4L2 15l2 3 2.3-.6 2.1 1.2L9 21h6l.6-2.4 2.1-1.2L20 18l2-3-1.8-1.8v-2.4L22 9l-2-3-2.3.6-2.1-1.2L15 3Z"/></svg></span>
+    <h3>Configuration</h3>
+  </div>
+  <p>Personality, nickname, chat style, memory toggles… learn what these settings mean and what they do.</p>
   <a href="/en/manual/configuration/">Configuration Overview →</a>
 </div>
 
 <div class="nav-card">
-  <h3>🔌 Connect Platforms</h3>
-  <p>Besides QQ, MaiBot can connect to email, iMessage, and more. See how each adapter is set up and maintained.</p>
+  <div class="step-head nav-head">
+    <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5m6-5v5M6 8h12v3a6 6 0 0 1-12 0V8Zm6 9v4"/></svg></span>
+    <h3>Connect Platforms</h3>
+  </div>
+  <p>Besides QQ, MaiBot can connect to Telegram, email, and iMessage. Explore the available adapters.</p>
   <a href="/en/manual/adapters/">Connect Platforms →</a>
 </div>
 
 <div class="nav-card">
-  <h3>🧩 Plugins</h3>
-  <p>Install new abilities from the built-in plugin market — games, drawing, weather, and the platform adapters themselves.</p>
+  <div class="step-head nav-head">
+    <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path transform="translate(0 2)" d="M4 4h5V3a3 3 0 0 1 6 0v1h5v5h-1a3 3 0 0 0 0 6h1v5h-5v-1a3 3 0 0 0-6 0v1H4v-5h1a3 3 0 0 0 0-6H4Z"/></svg></span>
+    <h3>Plugins</h3>
+  </div>
+  <p>Install new abilities from the plugin market — games, drawing, weather, and platform adapters.</p>
   <a href="/en/manual/plugins/">Install Plugins →</a>
 </div>
 
 <div class="nav-card">
-  <h3>🖥️ WebUI Console</h3>
-  <p>The full WebUI guide: configuration, adapters, commands, memory, data, and chat stats — all in your browser.</p>
+  <div class="step-head nav-head">
+    <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></span>
+    <h3>WebUI Console</h3>
+  </div>
+  <p>The full WebUI guide: configuration, adapters, commands, memory, data, and chat statistics.</p>
   <a href="/en/manual/webui/">Login & Settings →</a>
 </div>
 
 </div>
 
-## 💻 I'm a Developer
+## I'm a Developer
 
-Want to write plugins or adapters for MaiBot, or integrate it with your own program? The developer docs have a dedicated integration overview with six routes organized by what you want to do.
+Want to write plugins or adapters for MaiBot, or integrate it with your own program?
 
 - [Integration Overview](/en/develop/) — six integration routes, organized by audience and prerequisites
-- [Plugin Development Guide](/en/plugin/) — the most common route: add commands, tools, or change MaiBot's behavior
+- [Plugin Development Guide](/en/plugin/) — write plugins to extend MaiBot's behavior
 
-## 💬 Need Help?
+## Need Help?
 
 - Check the [FAQ](/en/faq/) first — most deployment, connection, and error questions already have answers.
 - Join the [MaiBot community](/en/about/community) — the QQ groups offer technical Q&A and friendly help.
@@ -157,7 +174,7 @@ Want to write plugins or adapters for MaiBot, or integrate it with your own prog
 /* Section navigation cards */
 .nav-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin: 24px 0;
 }
@@ -173,6 +190,19 @@ Want to write plugins or adapters for MaiBot, or integrate it with your own prog
   border-color: var(--vp-c-brand-2);
   box-shadow: 0 6px 20px var(--vp-c-brand-soft);
   transform: translateY(-2px);
+}
+
+.nav-card .nav-icon {
+  padding: 0;
+}
+
+.nav-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nav-card .nav-head h3 {
+  margin: 0;
 }
 
 .nav-card h3 {

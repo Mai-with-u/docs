@@ -4,7 +4,7 @@ title: API 参考
 
 # API 参考
 
-MaiBot 插件通过 `self.ctx`（`PluginContext`）访问 17 种能力代理。所有能力调用自动通过 RPC 转发到 Host 处理，SDK 会自动解包结果；`ctx.paths` 与 `ctx.logger` 是 Runner 注入的上下文辅助对象。
+MaiBot 插件通过 `self.ctx`（`PluginContext`）访问 18 种能力代理。所有能力调用自动通过 RPC 转发到 Host 处理，SDK 会自动解包结果；`ctx.paths` 与 `ctx.logger` 是 Runner 注入的上下文辅助对象。
 
 ::: code-group
 
@@ -27,6 +27,7 @@ self.ctx.render     # HTML 渲染
 self.ctx.knowledge  # 知识库搜索
 self.ctx.statistics # 本机统计
 self.ctx.maisaka    # Maisaka 上下文与主动任务
+self.ctx.webui      # WebUI 上传凭证领取
 
 # 上下文辅助对象
 self.ctx.paths      # 插件持久化与运行时目录
@@ -578,10 +579,12 @@ accepted = await self.ctx.gateway.route_message(
     message={
         "message_id": "msg-1",
         "platform": "qq",
+        "account_id": "10001",
+        "scope": "primary",
+        "timestamp": "1791504000.0",
         "message_info": {...},
         "raw_message": [],
     },
-    route_metadata={"self_id": "10001", "connection_id": "primary"},
     external_message_id="external-1",
     dedupe_key="dedupe-1",
 )
@@ -589,7 +592,9 @@ accepted = await self.ctx.gateway.route_message(
 
 :::
 
-详见 [消息网关](./message-gateway.md)。
+消息顶层 `platform/account_id/scope` 必须与网关就绪声明一致；`account_id` 为非空字符串，`scope` 没有值时可省略或填写 `None`。入站消息不登记新账号，也不会覆盖网关声明。旧扩展身份字段暂时兼容并打印下个版本移除的 WARNING。
+
+详见 [消息网关](./message-gateway.md#消息归属)。
 
 ## tool — 工具定义
 
@@ -726,6 +731,24 @@ Manifest 示例：
 ```
 
 :::
+
+## WebUI 上传领取
+
+`ctx.webui.claim_upload(upload_id)` 将宿主暂存的图片领取到本插件持久化数据目录的 `uploads/`，返回 `path`、`sha256` 和 `upload_id`。需要 SDK 2.11.0+、支持 `file_upload` 的宿主，以及 manifest 能力 `webui.claim_upload`。
+
+::: code-group
+
+```python [plugin.py ~vscode-icons:file-type-python~]
+from pathlib import Path
+
+claimed = await self.ctx.webui.claim_upload(upload_id)
+image_path = Path(claimed["path"])
+# 校验、保存或删除图片由插件负责；阻塞文件处理交给工作线程。
+```
+
+:::
+
+凭证所属插件必须匹配，一小时过期，只能领取一次。它来自登录保护的 WebUI 上传接口，不接受任意文件路径代替。文件内容不经普通 JSON/RPC 传递。完整页面声明及格式/尺寸限制见[WebUI 页面](./webui-pages.md#上传与交互能力)。
 
 ## paths — 运行时路径
 

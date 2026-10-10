@@ -92,7 +92,6 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Command Management', link: '/en/manual/webui/command-management' },
       { text: 'Viewing & Managing Memory', link: '/en/manual/webui/memory-management' },
       { text: 'Data Management', link: '/en/manual/webui/data-management' },
-      { text: 'Chat History & Stats', link: '/en/manual/webui/chat-stats' },
     ]
   },
 ]

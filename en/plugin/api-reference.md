@@ -4,7 +4,7 @@ title: API Reference
 
 # API Reference
 
-MaiBot plugins access 17 capability proxies through `self.ctx` (`PluginContext`). All capability calls are automatically forwarded to the Host over RPC, and the SDK unwraps the results for you; `ctx.paths` and `ctx.logger` are context helper objects injected by the Runner.
+MaiBot plugins access 18 capability proxies through `self.ctx` (`PluginContext`). All capability calls are automatically forwarded to the Host over RPC, and the SDK unwraps the results for you; `ctx.paths` and `ctx.logger` are context helper objects injected by the Runner.
 
 ::: code-group
 
@@ -27,6 +27,7 @@ self.ctx.render     # HTML rendering
 self.ctx.knowledge  # Knowledge base search
 self.ctx.statistics # Local statistics
 self.ctx.maisaka    # Maisaka context and proactive tasks
+self.ctx.webui      # Claim WebUI upload tokens
 
 # Context helper objects
 self.ctx.paths      # Plugin persistence and runtime directories
@@ -578,10 +579,12 @@ accepted = await self.ctx.gateway.route_message(
     message={
         "message_id": "msg-1",
         "platform": "qq",
+        "account_id": "10001",
+        "scope": "primary",
+        "timestamp": "1791504000.0",
         "message_info": {...},
         "raw_message": [],
     },
-    route_metadata={"self_id": "10001", "connection_id": "primary"},
     external_message_id="external-1",
     dedupe_key="dedupe-1",
 )
@@ -589,7 +592,9 @@ accepted = await self.ctx.gateway.route_message(
 
 :::
 
-See [Message Gateway](./message-gateway.md) for details.
+The message's top-level `platform/account_id/scope` must match the gateway's ready declaration. `account_id` must be a non-empty string; omit `scope` or use `None` when there is no scope. Inbound messages do not discover new accounts or override gateway declarations. Legacy identity fields are temporarily supported with a WARNING that support will be removed in the next version.
+
+See [Message Gateway](./message-gateway.md#message-ownership) for details.
 
 ## tool — Tool Definitions
 
@@ -726,6 +731,25 @@ Manifest example:
 ```
 
 :::
+
+## WebUI Upload Claims
+
+`ctx.webui.claim_upload(upload_id)` claims a host-staged image into the plugin's persistent `uploads/` directory. It returns `path`, `sha256`, and `upload_id`. Requires SDK 2.11.0+, a host supporting `file_upload`, and manifest capability `webui.claim_upload`.
+
+::: code-group
+
+```python [plugin.py ~vscode-icons:file-type-python~]
+from pathlib import Path
+
+claimed = await self.ctx.webui.claim_upload(upload_id)
+image_path = Path(claimed["path"])
+# The plugin handles validation, retention, or deletion.
+# Move blocking file work to a worker thread.
+```
+
+:::
+
+Tokens must belong to the claiming plugin, expire after one hour, and can be claimed only once. They originate from authenticated WebUI uploads; arbitrary paths are not substitutes. File contents do not travel through ordinary JSON/RPC. See [WebUI Pages](./webui-pages.md#upload-and-interaction-capabilities) for declarations and format/size limits.
 
 ## paths — Runtime Paths
 

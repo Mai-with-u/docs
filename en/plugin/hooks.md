@@ -213,6 +213,8 @@ The list follows what the current Host actually registers — 22 Hooks. The plug
 ### Chat Message Chain
 
 - **`chat.receive.before_process`** — Before the inbound message runs `SessionMessage.process()` — abort allowed ✅ · param changes allowed ✅
+
+  Use this hook to annotate image context: image/emoji entries in the message dictionary's `raw_message` carry `binary_data_base64` when media is available; forwarded content is nested under `data[].content`. A blocking handler can return `modified_kwargs={"message": updated_message}` and add `{"type":"text","data":"Recognition hint"}` after the corresponding image. Move synchronous inference to a thread or separate process and bound the total duration; continue the original message on timeout or failure. Model scores are not calibrated correctness probabilities. This hook does not require collecting chat images into a training dataset.
 - **`chat.receive.after_process`** — After the inbound message completes lightweight preprocessing — abort allowed ✅ · param changes allowed ✅
 
 ### Command Execution Chain

@@ -93,7 +93,7 @@ class MyPlugin(MaiBotPlugin):
 - **Entry ordering** — users can reorder entries or hide a whole plugin's entries in the "manage plugin pages" area at the bottom of the "Plugin Extensions" page (`/plugin-config`); that preference is stored only in the current browser and only affects display, not backend authorization
 
 ::: tip Two independent channels from "plugin configuration"
-`webui.json` only handles custom pages. It is **not a manifest field**, does not need to be added to `capabilities`, and its bound APIs do not need `public=True`. A plugin's `config.toml` and its auto-generated config form are still handled by the Plugin Configuration page; the two do not affect each other.
+`webui.json` only handles custom pages. It is **not a manifest field**, page declarations themselves do not need to be added to `capabilities`, and bound APIs do not need `public=True`. SDK operations such as claiming uploads still require their own manifest permissions. A plugin's `config.toml` and its auto-generated config form are still handled by the Plugin Configuration page; the two do not affect each other.
 :::
 
 The official example plugin `hello_world_plugin` ships two pages (a top `overview` and a sidebar `greeting`) as a minimal reference; see its `webui.json` for the complete declaration, with page paths like `/extensions/maibot-team.hello-world-plugin/overview`.
@@ -109,7 +109,7 @@ Each page declares the APIs it calls through `queries` (read-only) and `actions`
 - API names are the **short names of your own plugin's APIs**; `version` defaults to `"1"` when omitted and must match the version registered with `@API` exactly
 - `queries` run **in order** when the page opens and refreshes; after an `actions` call succeeds, queries run again to refresh the data
 - APIs must belong to the current plugin and be enabled; cross-plugin calls, dynamic APIs, and arbitrary request addresses are unsupported (`public=True` does not automatically expose an API to the WebUI)
-- Action parameters are taken from the current form fields according to `parameters`; optional fields left empty are not sent. Parameter types are `string` / `integer` / `number` / `boolean`, with optional `required`, `max_length` (up to 4000), `minimum`, `maximum`, and `choices`; there is **no implicit type conversion**, and undeclared parameters are rejected
+- Action parameters are taken from the current form fields according to `parameters`; optional fields left empty are not sent. Parameter types are `string` / `integer` / `number` / `boolean`, with optional `required`, `max_length` (default 4000, maximum 65536), `minimum`, `maximum`, and `choices`; there is **no implicit type conversion**, and undeclared parameters are rejected
 - **Dangerous actions must declare a `confirmation` message** (so must buttons with `variant: "danger"`), and the host shows a confirm dialog. Confirmation only prevents misclicks; it is not independent authorization or business validation
 
 ::: tip Keep queries read-only
@@ -142,6 +142,133 @@ A page is a component tree under `content`. All colors, spacing, fonts, dark mod
 - `chart` binds an array of objects, at most 2000 rows; `x` must be a string or number and `y` must be a number; `chart_type` is `line` / `bar`
 - `switch`'s `value` must be a boolean
 
+## Upload and interaction capabilities
+
+Declare top-level `required_capabilities` in `webui.json` when using uploads or new interaction controls. `file_upload` means file uploads are supported; `interactive_controls` means the newer controls are supported. These are compatibility checks, not permissions, and their names have no version suffix. Existing declarations may omit the field. Upgrade both the host and dashboard if a required capability is missing; updating the Python SDK alone does not add frontend controls.
+
+Claiming uploads requires SDK 2.11.0+ and the upload-enabled host introduced in the MaiBot 1.3.6 development version. Before SDK 2.11.0 is published, local development can point `MAIBOT_PLUGIN_SDK_PATH` to the SDK source. Separately declare `webui.claim_upload` in the plugin manifest's `capabilities`; this grants API access and is distinct from page compatibility.
+
+This page puts file selection and identity selection in one dialog. Files are sent only after clicking the upload button:
+
+::: code-group
+
+```json [webui.json ~vscode-icons:file-type-json~]
+{
+  "schema_version": 1,
+  "required_capabilities": [
+    "file_upload",
+    "interactive_controls"
+  ],
+  "pages": [
+    {
+      "id": "images",
+      "title": "Image library",
+      "actions": {
+        "add": {
+          "api": "add_image",
+          "parameters": {
+            "upload_id": {
+              "type": "string",
+              "required": true
+            },
+            "identity": {
+              "type": "string",
+              "required": true,
+              "choices": [
+                "self",
+                "other"
+              ]
+            }
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "button",
+          "label": "Upload images",
+          "detail": "upload"
+        },
+        {
+          "type": "dialog",
+          "label": "Upload images",
+          "children": [
+            {
+              "type": "select",
+              "name": "identity",
+              "label": "Image identity",
+              "value": "self",
+              "options": [
+                {
+                  "label": "Bot",
+                  "value": "self"
+                },
+                {
+                  "label": "Not Bot",
+                  "value": "other"
+                }
+              ],
+              "presentation": "buttons"
+            },
+            {
+              "type": "upload",
+              "label": "Choose images",
+              "action": "add",
+              "manual_upload": true,
+              "image_max_edge": 4000
+            }
+          ],
+          "name": "upload"
+        }
+      ]
+    }
+  ]
+}
+```
+
+```python [plugin.py ~vscode-icons:file-type-python~]
+from maibot_sdk import API, MaiBotPlugin
+
+
+class MyPlugin(MaiBotPlugin):
+    @API("add_image", version="1")
+    async def add_image(self, upload_id: str, identity: str):
+        claimed = await self.ctx.webui.claim_upload(upload_id)
+        # claimed["path"] is inside this plugin's data directory.
+        # Validate identity, deduplicate, and save labels here.
+        # Move blocking work to a worker thread.
+        return {"received": True, "identity": identity}
+```
+
+:::
+
+The host receives each file through an authenticated multipart endpoint. Ordinary JSON/RPC carries only `upload_id` and scalar arguments. The host stages files and issues plugin-owned tokens that expire after one hour and can be claimed only once, never by another plugin. After claiming a file, the plugin manages retention or deletion. The upload action must accept a required string `upload_id` and cannot declare `confirmation`; additional fields such as identity use ordinary parameter validation.
+
+Accepted formats are JPEG, PNG, and static WebP; animations and archives are rejected. The host enforces 20 MiB per file and 40 million decoded pixels. `image_max_edge: 4000` makes the browser proportionally shrink oversized images before upload; files over 20 MiB are compressed to JPEG, transparency is filled with white, and local originals are preserved. This edge limit is a component setting; the host still validates the actual uploaded file.
+
+**`upload`** — Multiple files, per-file progress and errors, with cancellation and retries for failed or unsent files. Retries use the original batch parameters. Closing the dialog cancels unfinished requests; files already received by the server remain saved. `manual_upload: true` enables drag-and-drop, previews, removal, and explicit start; arguments are frozen for the batch when it starts. Without this setting, selection starts uploading immediately. `submit_label` changes the start button's text.
+
+**Upload dialogs** — Compose an ordinary `button` with a top-level `dialog`. The button’s `detail` references the dialog’s `name`; place `select` and `upload` inside. A button must declare exactly one of `action` or `detail`.
+
+**`select.presentation`** — Defaults to `dropdown`; `buttons` displays the same `name`, `value`, and `options` as option buttons. For modal selection, put the select inside an ordinary dialog.
+
+**`progress`** — `value` is a finite number from 0 to 100 or a data reference; shows a percentage and progress bar.
+
+**Unavailable controls** — Inputs, buttons and uploads accept `disabled_when` using the same condition format as `when`. Matching conditions disable controls; buttons display `disabled_reason`. Use disabling to keep an unavailable action visible; `when` still controls visibility.
+
+**Upload messages** — A plugin may return a scalar string `message` for per-file feedback. The host does not interpret plugin-specific duplicate-image fields; selection counts use generic items.
+
+**`button.value`** — Binds dynamic button text; `label` remains required.
+
+**`image` / `gallery`** — `image` shows one image without layout controls; `gallery` shows a list. Previews use bounded JPEG/PNG/WebP base64 data URLs, not file paths, remote image URLs, or SVG. Each image is limited to 24000 characters in the frontend, and responses remain limited to 512 KiB.
+
+**`repeat` / `card`** — `repeat` binds an array and declares the current item with `name`; nested references use `scope: "item"`. `card` accepts `compact: true` for compact image/action cards.
+
+**`multi_select` / `checkbox`** — `multi_select` binds the current page's image rows, each with a string `id`, and names a selection group using `selection`. A repeated `checkbox` binds an image ID in that group. Controls select/deselect the current page or clear all selections. Selections persist across pages, are capped at 1000 items, and clear when leaving the page. An action's `arguments` can reference `{ "scope": "selection", "source": "batch", "field": "ids" }` for comma-separated IDs. The plugin must validate count, format, and existence. `clear_selection: "batch"` clears after success; failures preserve selection. Delete-all requires a plugin-wide operation, not just current-page IDs.
+
+**`dialog` / `collapsible` / `pagination`** — Details, expandable technical information, and pagination. Pagination `name` matches the query's page parameter; `value` binds an object containing `page` and `pages`.
+
+An action can return `{"navigate_page":"images","navigate_params":{"job_id":"task-id"}}` to open a declared page in the same plugin, useful for reports or misclassified images. Arbitrary URLs and cross-plugin navigation are rejected. `navigate_params` accepts only scalar parameters declared by the target page queries. These are stored in the current page URL rather than global plugin settings, so each browser tab keeps its own selection. Long tasks should immediately return an ID and run in the background. `poll_interval_seconds: 5` polls queries every 5 seconds (allowed 3–60, default 0 disables polling). Polling stops when leaving the page and skips busy operations; successful polling neither clears action errors nor disables action buttons. Starting an action cancels unfinished background queries to prevent old results from overwriting new data.
+
 ## Limits and lifecycle
 
 - `webui.json` may be at most 128 KiB, and the host registration payload at most 512 KiB; out-of-bounds paths and symlinked files are rejected
@@ -169,3 +296,8 @@ A page is a component tree under `content`. All colors, spacing, fonts, dark mod
 
 - Check that `action` points to an alias in this page's `actions` and that the parameters satisfy `parameters` types and ranges
 - Dangerous actions must declare `confirmation`, or the declaration fails to register
+
+**Uploads or new controls unsupported?**
+
+- Check `required_capabilities` uses `file_upload` / `interactive_controls`, and deploy matching host and frontend builds
+- Confirm the SDK supports `ctx.webui.claim_upload()` and the manifest declares `webui.claim_upload`; expired or already claimed tokens require uploading again

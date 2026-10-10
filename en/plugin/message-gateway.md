@@ -50,6 +50,24 @@ from maibot_sdk import MessageGateway
 - Gateways that are `route_type="receive"` or `"duplex"` and `ready=True` can inject inbound messages via `ctx.gateway.route_message()`
 - Plugins should report `ready=True` when the link is available, and report `ready=False` when disconnected or unloaded
 
+## Message Ownership
+
+The gateway declares its `platform/account_id/scope` with `update_state(ready=True)`. Messages select ownership through top-level fields. The Host checks that ownership matches the receiving gateway's declaration. Messages cannot discover new bot accounts or change gateway declarations.
+
+- **`message.platform`** — The platform name; it must match the gateway declaration.
+- **`message.account_id`** — A non-empty string identifying the bot account handling the message. It differs from the sender at `message_info.user_info.user_id`: inbound senders are users; outbound senders are usually the bot.
+- **`message.scope`** — An optional string identifying a connection, tenant, or subchannel. Omit it or use `None` when there is no scope. If the gateway declares a scope, the message must provide the same value.
+- **`message_info.additional_config`** — Platform-specific data, such as target OpenIDs and passive-reply credentials. New adapters should not put account or scope fields here.
+- **`route_metadata`** — Additional routing observation data, rather than an identity declaration. Put account and scope fields at the message's top level.
+
+Each gateway currently declares one route. Plugins handling multiple accounts should declare separate gateways and submit each message to its matching gateway. Internal messages, Hooks, chat sessions, message storage, and outbound messages preserve the formal ownership fields.
+
+::: warning Legacy Format Migration
+Legacy aliases such as `self_id`, `platform_io_account_id`, and `bot_account`, and ownership fields under `message_info`, `additional_config`, or `route_metadata`, remain temporarily supported. The Host logs a WARNING on the legacy path: this feature will be removed in the next version; migrate to top-level `account_id/scope` promptly.
+
+When top-level `account_id` is present, legacy fields do not participate in selection. Empty or invalid formal fields do not fall back. Ownership recovered from legacy fields must also match the gateway declaration.
+:::
+
 ## Complete Adapter Example
 
 Below is a complete example of a QQ platform adapter, implementing bidirectional message routing based on the NapCat protocol:
@@ -118,6 +136,9 @@ class NapCatGatewayPlugin(MaiBotPlugin):
             message={
                 "message_id": payload["message_id"],
                 "platform": "qq",
+                "account_id": "10001",
+                "scope": "primary",
+                "timestamp": str(payload["time"]),
                 "message_info": {
                     "user_info": {
                         "user_id": payload["user_id"],
@@ -126,10 +147,6 @@ class NapCatGatewayPlugin(MaiBotPlugin):
                     "additional_config": {},
                 },
                 "raw_message": payload["message"],
-            },
-            route_metadata={
-                "self_id": "10001",
-                "connection_id": "primary",
             },
             external_message_id=payload["message_id"],
             dedupe_key=payload["message_id"],
@@ -184,6 +201,7 @@ class WebhookReceiverPlugin(MaiBotPlugin):
             gateway_name="webhook_receiver",
             ready=True,
             platform="webhook",
+            account_id="webhook-bot",
             scope="default",
         )
 
@@ -214,6 +232,9 @@ class WebhookReceiverPlugin(MaiBotPlugin):
             message={
                 "message_id": payload["id"],
                 "platform": "webhook",
+                "account_id": "webhook-bot",
+                "scope": "default",
+                "timestamp": str(payload["time"]),
                 "message_info": {
                     "user_info": {
                         "user_id": payload.get("sender", "unknown"),
@@ -221,7 +242,7 @@ class WebhookReceiverPlugin(MaiBotPlugin):
                     },
                     "additional_config": {},
                 },
-                "raw_message": payload.get("content", ""),
+                "raw_message": [{"type": "text", "data": payload.get("content", "")}],
             },
         )
         if accepted:
@@ -313,5 +334,10 @@ stateDiagram-v2
 - **Injection raises a `RuntimeError` saying no receivable gateway is declared** — that gateway's `route_type` has no inbound direction: `"send"` only handles outbound traffic, so declare `"receive"` or `"duplex"` to inject inbound messages.
 - **A `RuntimeError` says the gateway is not ready and cannot inject external messages** — the Host accepts only gateways with `ready=True`: check when you report it, since `ready=True` must come after the link is actually usable, and reporting it before the connection is up gets the injection rejected; report `ready=False` when the link drops or the plugin unloads.
 - **The decorator itself fails with an unsupported route type** — `route_type` accepts only `"send"`, `"receive"`, and `"duplex"` (aliases `"recv"` and `"recive"`); a value such as `"both"` or `"in"` fails while the plugin module is imported.
-- **"inbound message is missing platform information"** — the Host falls back through `message["platform"]`, `route_metadata["platform"]`, the value reported by `update_state`, and the decorator's `platform`; when all four are empty it rejects the message. Pin the platform name in `@MessageGateway(platform=...)` or `update_state(platform=...)`.
 - **`route_message()` returns `False` instead of raising** — the inbound message was blocked by `config/adapter_policy.toml`: the matching platform / account entry is `block`, or it sets `disabled = true`. Allow that entry (or explicitly `allow` your test group); a missing file means everything is allowed.
+
+Declare the gateway ready, then inject a message with matching `platform/account_id/scope` and check that `route_message()` returns `True`. Change the message's `account_id` to an undeclared account: the Host should reject it without adding a discovered bot account.
+
+- **Legacy ownership WARNING** — Move account and scope to the message's top level and remove identity fields from `additional_config` and `route_metadata`. This compatibility path will be removed in the next version.
+- **Ownership not declared by the gateway** — Compare all three fields against `update_state()`, including scope. Do not update gateway identity from an ordinary inbound message.
+- **Missing explicit account_id** — Supply the gateway's declared bot account, rather than the sender ID or an empty string that relies on legacy fields.

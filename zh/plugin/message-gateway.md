@@ -50,6 +50,24 @@ from maibot_sdk import MessageGateway
 - `route_type="receive"` 或 `"duplex"` 且 `ready=True` 的网关可通过 `ctx.gateway.route_message()` 注入入站消息
 - 插件应在链路可用时上报 `ready=True`，在断开或卸载时上报 `ready=False`
 
+## 消息归属
+
+网关通过 `update_state(ready=True)` 声明接入的 `platform/account_id/scope`，消息通过顶层正式字段选择归属。Host 校验消息归属与所属网关声明一致；消息不能新增机器人账号，也不能改写网关声明。
+
+- **`message.platform`** — 平台名称，必须与网关声明一致。
+- **`message.account_id`** — 非空字符串，表示处理这条消息的机器人账号。它与发送者 `message_info.user_info.user_id` 分开：入站发送者是用户，出站发送者通常是机器人。
+- **`message.scope`** — 可选字符串，表示连接、租户或子通道。没有作用域时省略或填写 `None`；网关声明了作用域时，消息必须填写相同值。
+- **`message_info.additional_config`** — 平台专属扩展数据，例如目标 OpenID、被动回复凭据；新适配器不应在其中填写账号或作用域。
+- **`route_metadata`** — 额外路由观测信息，不用于声明机器人身份。账号和作用域应写在消息顶层。
+
+当前每个网关声明一条路由。一个插件接入多个账号时，分别声明多个网关，并把消息提交给匹配的网关。内部消息、Hook、聊天流、消息存储和出站消息保留正式归属字段。
+
+::: warning 旧格式迁移
+旧消息中的 `self_id`、`platform_io_account_id`、`bot_account` 等别名，以及 `message_info`、`additional_config`、`route_metadata` 中的归属字段暂时兼容。走旧路径时 Host 打印 WARNING：该特性将在下个版本移除，请及时迁移到消息顶层 `account_id/scope`。
+
+一旦提供顶层 `account_id`，旧字段不再参与选择；正式字段为空或类型错误时不会回退。旧格式恢复出的归属同样必须通过网关声明校验。
+:::
+
 ## 完整适配器示例
 
 以下是一个完整的 QQ 平台适配器示例，基于 NapCat 协议实现双向消息路由：
@@ -118,6 +136,9 @@ class NapCatGatewayPlugin(MaiBotPlugin):
             message={
                 "message_id": payload["message_id"],
                 "platform": "qq",
+                "account_id": "10001",
+                "scope": "primary",
+                "timestamp": str(payload["time"]),
                 "message_info": {
                     "user_info": {
                         "user_id": payload["user_id"],
@@ -126,10 +147,6 @@ class NapCatGatewayPlugin(MaiBotPlugin):
                     "additional_config": {},
                 },
                 "raw_message": payload["message"],
-            },
-            route_metadata={
-                "self_id": "10001",
-                "connection_id": "primary",
             },
             external_message_id=payload["message_id"],
             dedupe_key=payload["message_id"],
@@ -184,6 +201,7 @@ class WebhookReceiverPlugin(MaiBotPlugin):
             gateway_name="webhook_receiver",
             ready=True,
             platform="webhook",
+            account_id="webhook-bot",
             scope="default",
         )
 
@@ -214,6 +232,9 @@ class WebhookReceiverPlugin(MaiBotPlugin):
             message={
                 "message_id": payload["id"],
                 "platform": "webhook",
+                "account_id": "webhook-bot",
+                "scope": "default",
+                "timestamp": str(payload["time"]),
                 "message_info": {
                     "user_info": {
                         "user_id": payload.get("sender", "unknown"),
@@ -221,7 +242,7 @@ class WebhookReceiverPlugin(MaiBotPlugin):
                     },
                     "additional_config": {},
                 },
-                "raw_message": payload.get("content", ""),
+                "raw_message": [{"type": "text", "data": payload.get("content", "")}],
             },
         )
         if accepted:
@@ -313,5 +334,10 @@ stateDiagram-v2
 - **注入消息抛 `RuntimeError`，提示「未声明可接收的消息网关」** — 该网关的 `route_type` 不含入站方向：`"send"` 只能发出站消息，要注入入站消息得声明 `"receive"` 或 `"duplex"`。
 - **提示「消息网关 … 尚未就绪，不能注入外部消息」** — Host 只接受 `ready=True` 的网关：确认上报时机，`ready=True` 要在链路真正可用之后上报，连接尚未建立就上报会让注入被挡；断开或卸载时补一次 `ready=False`。
 - **装饰器一执行就报「不支持的消息网关路由类型」** — `route_type` 只认 `"send"`、`"receive"`、`"duplex"`（别名 `"recv"`、`"recive"`），写成 `"both"`、`"in"` 之类在插件导入阶段就失败。
-- **报「入站消息缺少平台信息」** — Host 依次取 `message["platform"]`、`route_metadata["platform"]`、`update_state` 上报值和装饰器 `platform`，四处都为空就拒收；至少在 `@MessageGateway(platform=...)` 或 `update_state(platform=...)` 里写死平台名。
 - **`route_message()` 返回 `False`（不是异常）** — 入站消息被 `config/adapter_policy.toml` 拦下了：命中的平台 / 账号条目是 `block`，或写了 `disabled = true`。放开该条目（或对测试群显式 `allow`）即可；文件不存在时等于全部放行。
+
+按示例声明网关就绪后，注入一条具有相同 `platform/account_id/scope` 的消息，确认 `route_message()` 返回 `True`。随后把消息的 `account_id` 改为未声明账号，确认 Host 拒绝消息，且平台账号列表没有新增记录。
+
+- **出现旧版归属格式 WARNING** — 把账号与作用域移到消息顶层，移除 `additional_config` 和 `route_metadata` 中的身份字段。该兼容路径将在下个版本移除。
+- **消息归属未由网关声明** — 对比消息和 `update_state()` 的三个字段；作用域也必须一致，不要通过入站消息反向修改网关身份。
+- **缺少明确的 account_id** — 填写网关已声明的机器人账号，不要填写发送者 ID 或将空字符串交给旧字段兜底。

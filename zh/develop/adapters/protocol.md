@@ -209,13 +209,26 @@ MaiBot 找不到对应消息时只记一条调试日志，不影响主流程。
 - **`scope`** — 作用域。同一账号下的多连接（如多个客户端实例）用它区分。
 :::
 
-这三个值适配器通过 `additional_config` 上报，键名有多个候选写法，任选其一：
+旧 WebSocket / `maim_message` 适配器通过 `additional_config` 上报账号和作用域，键名有多个候选写法，任选其一：
 
 **账号** — `platform_io_account_id`、`account_id`、`self_id`、`bot_account`
 
 **作用域** — `platform_io_scope`、`route_scope`、`adapter_scope`、`connection_id`
 
 它们可以放在消息顶层、`message_info` 里，或 `message_info.additional_config` 里。
+
+### 插件适配器的正式消息归属
+
+插件网关通过 `ctx.gateway.update_state(ready=True, platform=..., account_id=..., scope=...)` 声明路由。每条消息在顶层填写非空 `account_id` 和可选 `scope`，Host 校验消息的 `platform/account_id/scope` 与所属网关声明一致。单账号同样需要明确填写消息归属。
+
+- **网关声明** — 决定接入哪些机器人身份。账号发现只发生在网关就绪上报中，普通消息不会新增账号或改写网关声明。
+- **消息归属** — 决定这条消息由哪个机器人账号处理，与 `message_info.user_info.user_id` 表示的发送者分开。正式字段贯通内部消息、Hook、聊天流、消息存储和出站消息。
+- **多账号接入** — 当前每个网关声明一条路由，一个插件可分别声明多个网关，并将消息提交给匹配的网关。
+- **空作用域** — 消息 `scope` 可省略或填写 `None`；网关的空字符串会归一化为空作用域。若声明了作用域，消息必须填写相同值。
+
+旧消息中的 `additional_config.self_id`、`platform_io_account_id` 等归属别名，以及 `route_metadata` 中的旧归属格式暂时兼容，使用时打印 WARNING，提示下个版本移除。新适配器应直接填写正式字段；提供顶层 `account_id` 后，旧字段不再参与选择，也不会在正式字段为空时兜底。
+
+旧 WebSocket / `maim_message` 接口仍走其兼容消息格式，不应把该格式当作新插件网关的开发规范。完整字典示例与迁移规则见[消息网关](../../plugin/message-gateway.md#消息归属)。
 
 ::: warning 不要占用 `webui` 这个平台名
 `webui` 由 Platform IO 隐式注册为内置平台，`bot_console`、`maisaka_cli` 也是保留名。适配器用一个自己的名字，例如 `telegram`。

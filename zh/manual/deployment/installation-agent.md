@@ -54,7 +54,7 @@ uv run bot.py
 
 ## 接 QQ 的两条路线
 
-- **统一 QQ 连接器** — 在插件市场安装「统一 QQ 连接器」（仓库 `MaiBot-SnowLuma-Adapter`），再用 SnowLuma 或 NapCat 客户端登录机器人小号并开启正向 WebSocket。1.3.0 起原独立 SnowLuma / NapCat 适配器已合并进它，不要再装旧适配器；详细步骤见[统一 QQ 连接器](../adapters/qq-local-client.md)；
+- **SnowLuma QQ 连接器** — 仓库 `MaiBot-SnowLuma-Adapter`，再用 SnowLuma 或 NapCat 客户端登录机器人小号并开启正向 WebSocket。详细步骤见[SnowLuma QQ 连接器](../adapters/qq-local-client.md)；
 - **QQ 官方机器人** — 在 [QQ 开放平台](https://q.qq.com/)申请机器人，用 AppID + AppSecret 直连，不需要任何 QQ 客户端在线；详细步骤见 [QQ 官方机器人](../adapters/qq-official.md)。
 
 两条路线都要设置**放行范围**：适配器本身已不再带群聊 / 私聊黑白名单，入站放行统一由 MaiBot 的适配器策略控制，默认全部放行，入口是 WebUI「配置管理 → 适配器设置」（`/adapter-management`）或 `config/adapter_policy.toml`。想只服务指定群时，写入：
@@ -78,17 +78,9 @@ allow_ids = ["测试群号"]     # 只放行这些群
 
 **验证**：把提示词交给 AI 后，它给出的安装步骤里不再出现独立的 NapCat / SnowLuma 适配器；照着做完，在 WebUI 里能和麦麦对话，接了 QQ 的话在已放行的群里 @ 它或与官方机器人单聊，能收到一条回复。
 
-**AI 还在让你装 NapCat Adapter / SnowLuma Adapter？**
-
-- 那是 1.3.0 之前的老方案。让它改为安装「统一 QQ 连接器」，并按 https://docs.mai-mai.org/installation-agent.md 重新给步骤
-
 **提示 `uv: command not found`？**
 
 - 执行 `source $HOME/.local/bin/env` 刷新环境变量，或重新打开一个终端
-
-**启动后提示「模型列表不能为空」？**
-
-- 到 WebUI 的模型配置里添加至少一个 LLM 模型，保存后重启；写法见[模型配置](../configuration/model-config.md)
 
 **适配器连不上 QQ 客户端？**
 

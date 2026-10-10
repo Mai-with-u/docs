@@ -54,8 +54,7 @@ On first start, type **同意** (agree) in the terminal to accept the user agree
 
 ## Two Routes to QQ
 
-- **Unified QQ Connector** — install "Unified QQ Connector" from the Plugin Market (repository `MaiBot-SnowLuma-Adapter`), log in a bot alt account with a SnowLuma or NapCat client, and enable its forward WebSocket server. Since 1.3.0 the former standalone SnowLuma / NapCat adapters have been merged into it, so do not install the old adapters; see [Unified QQ Connector](../adapters/qq-local-client.md) for the full steps;
-- **QQ Official Bot** — apply for a bot on the [QQ Open Platform](https://q.qq.com/) and connect directly with AppID + AppSecret; no QQ client needs to be online. See [QQ Official Bot](../adapters/qq-official.md).
+- **SnowLuma QQ Connector** — repository `MaiBot-SnowLuma-Adapter`. Log in a bot alt account with a SnowLuma or NapCat client and enable its forward WebSocket server. See [SnowLuma QQ Connector](../adapters/qq-local-client.md) for the full steps;
 
 Both routes need an **allow scope**: adapters no longer ship built-in group / private-chat lists—inbound access is controlled by MaiBot's adapter policy, which allows everything by default. Configure it in the WebUI under "配置管理 → 适配器设置" (Adapter Settings, `/adapter-management`) or in `config/adapter_policy.toml`. To serve only specific groups, write:
 
@@ -78,17 +77,9 @@ See [Access Policy and Account Routing](/en/develop/adapters/policy) for all fie
 
 **Verify**: after handing the prompt to an AI, its installation steps no longer mention the standalone NapCat / SnowLuma adapters; once you follow them, you can chat with Mai in the WebUI, and if QQ is connected, @-mentioning Mai in an allowed group (or messaging the official bot) gets a reply.
 
-**The AI still tells you to install NapCat Adapter / SnowLuma Adapter?**
-
-- That is the pre-1.3.0 approach. Ask it to install the "Unified QQ Connector" instead and redo the steps following https://docs.mai-mai.org/installation-agent.md
-
 **`uv: command not found`?**
 
 - Run `source $HOME/.local/bin/env` to refresh the environment, or open a new terminal
-
-**"Model list cannot be empty" after startup?**
-
-- Add at least one LLM model in the WebUI model configuration, save, and restart; see [Model Configuration](../configuration/model-config.md)
 
 **The adapter cannot connect to the QQ client?**
 
