@@ -6,7 +6,7 @@ title: Plugin Lifecycle API
 
 This document covers the complete HTTP interface for plugin installation, updates, enable/disable toggling, config editing, runtime component queries, icon retrieval, statistics proxying, and progress tracking. It targets deployment ops personnel and scripted users. All endpoints are mounted under `/api/webui/plugins/` and require Cookie authentication (see [Authentication Model](./index.md#authentication-model-three-methods)).
 
-If you need to debug plugin Host/Runner communication protocols, circuit breaker logic, or process lifecycles, see [Plugin Lifecycle](/en/plugin/lifecycle). This page covers only API operations and does not go into runtime protocol details.
+If you need to debug plugin Host/Runner communication protocols, circuit breaker logic, or process lifecycles, see [Plugin Lifecycle](/en/plugin/lifecycle).
 
 ## 1. Installed Plugin Queries
 
@@ -262,7 +262,7 @@ Connect to the plugin-progress endpoint with a WebSocket client.
 
 ### Recommended: Unified WebSocket Channel
 
-All plugin progress events are pushed through the [Unified WebSocket Channel](./realtime-and-stats), with `domain` as `plugin_progress` and `topic` as `main`. This is the path the frontend WebUI actually uses; there's no need for a separate plugin-specific WebSocket connection.
+All plugin progress events are pushed through the [Unified WebSocket Channel](./realtime-and-stats), with `domain` as `plugin_progress` and `topic` as `main`.
 
 Authentication is done via [WebSocket Temporary Token](./index.md#_3-websocket-temporary-token). Place the temporary Token in the URL query parameter `?token=...` to establish the connection. After receiving pushes, each frame follows this format:
 

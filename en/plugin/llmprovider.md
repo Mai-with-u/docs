@@ -199,7 +199,7 @@ def create_plugin():
 - **`get_audio_transcriptions()`** · operation `audio_transcription` — Generate audio transcription (throws `NotImplementedError` by default).
 
 ::: tip
-`LLMProviderBase` is only a recommended base class and does not participate in registration. The actual registration entry is always the `@LLMProvider` decorator.
+Register providers with the `@LLMProvider` decorator; `LLMProviderBase` is an optional base class.
 :::
 
 ## Complete Example

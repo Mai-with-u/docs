@@ -4,7 +4,7 @@ title: Integration Overview
 
 # Integration Overview
 
-**If you want to build on MaiBot, start by picking the right route.** The six integration routes map to six kinds of "what you want MaiBot to do" — picking the wrong one is the most common detour. Each card states who it is for and what it requires; click through for the full guide.
+Choose an integration route for your use case:
 
 <IntegrationRoutes />
 

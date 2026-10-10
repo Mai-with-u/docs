@@ -199,7 +199,7 @@ def create_plugin():
 - **`get_audio_transcriptions()`** · operation `audio_transcription` — 生成音频转写（默认抛出 `NotImplementedError`）
 
 ::: tip
-`LLMProviderBase` 只是推荐基类，不参与注册。真正的注册入口始终是 `@LLMProvider` 装饰器。
+通过 `@LLMProvider` 装饰器注册 Provider；`LLMProviderBase` 为可选基类。
 :::
 
 ## 完整示例

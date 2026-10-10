@@ -523,7 +523,7 @@ Gemini 2.5 controls intensity indirectly by token count (`-1` = automatic), whil
 - **`body`** — fields inside it go into the request body along with other plain keys; it exists only to group entries by purpose in the config
 
 ::: warning Note
-`body` does not create a separate request channel. Fields inside `body` and **all plain keys** outside `headers`/`query` are merged and sent together in the request body.
+Fields inside `body` and **all plain keys** outside `headers`/`query` are merged and sent together in the request body.
 :::
 
 For example:

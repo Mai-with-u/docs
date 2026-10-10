@@ -13,7 +13,7 @@ All endpoints in this document are mounted under the `/api/webui` prefix.
 The MaiBot WebUI uses an HttpOnly Cookie to convey authentication credentials. The Cookie name is `maibot_session`. The full lifecycle:
 
 - **Write** — Call `POST /api/webui/auth/verify` with a valid Token. After server-side verification succeeds, the Cookie is issued in `Set-Cookie`, valid for 7 days, with attributes `HttpOnly; SameSite=Lax; Path=/`. In production or when `webui.secure_cookie = true`, the `Secure` flag is added (sent only over HTTPS).
-- **Invalidation** — Browser auto-clears after 7 days; server-side `POST /api/webui/auth/logout` clears immediately; calling `update` or `regenerate` to replace the Token also immediately invalidates the old Cookie (since the old Token is no longer valid).
+- **Invalidation** — Browser auto-clears after 7 days; server-side `POST /api/webui/auth/logout` clears immediately; calling `update` or `regenerate` to replace the Token also immediately invalidates the old Cookie.
 - **Renewal** — There is no built-in silent refresh mechanism. Once the Cookie expires, you must call `/auth/verify` again to log in. Long-running scripts should catch 401 responses and auto re-login.
 
 The Cookie is stored in the TokenManager config file in the same directory as `data/webui.json` and does not depend on any external database.

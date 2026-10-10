@@ -85,7 +85,7 @@ ORDER BY day DESC, total_cost DESC;
 
 ### 途径二：Statistics HTTP Endpoint
 
-`statistics_service.py` 中的函数从原始表（`llm_usage`、`mai_messages`、`online_time`、`tool_records`）直接实时聚合，返回结构化的 JSON，WebUI 仪表盘就是通过这套端点取数的。三个端点（dashboard / summary / models）的参数、缓存行为与 curl 示例见[实时通道与统计](./webui-api/realtime-and-stats.md#统计查询)，这里不再重复。
+`statistics_service.py` 中的函数从原始表（`llm_usage`、`mai_messages`、`online_time`、`tool_records`）直接实时聚合，返回结构化的 JSON，WebUI 仪表盘就是通过这套端点取数的。三个端点（dashboard / summary / models）的参数、缓存行为与 curl 示例见[实时通道与统计](./webui-api/realtime-and-stats.md#统计查询)。
 
 ## Data-Transfer 导出导入：后端 Job 流程
 

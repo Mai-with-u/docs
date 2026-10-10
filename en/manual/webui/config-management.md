@@ -4,7 +4,7 @@ title: Edit Configuration in Your Browser
 
 ## MaiBot Settings
 
-Open **麦麦设置** (MaiBot Settings). There are two tabs and an ellipsis menu at the top:
+**麦麦设置** (MaiBot Settings) provides the following configuration options:
 
 ![MaiBot settings](/images/webui/config-bot.webp)
 
@@ -20,7 +20,7 @@ The full form covers every section of `bot_config.toml`, including chat, memory,
 
 ### Pin Frequently Used Settings at the Top
 
-MaiBot Settings has many sections, all listed in the **dropdown** beside the page title. To pin a frequently used section, open the dropdown and click the pin beside it. It will appear to the right of the title.
+Use the pin in the section dropdown beside the page title to pin frequently used sections.
 
 ### Command Management
 
@@ -31,7 +31,6 @@ View all registered plugin commands and configure execution permissions; see [Co
 **共享组设置** (Shared Groups) in the ellipsis menu groups chat streams so they share expression styles, jargon, or long-term memory:
 
 - **Expression** groups write `expression_groups`, **jargon** groups write `jargon_groups`, and **memory** groups write `a_memorix.shared_memory_groups`
-- Create groups, add chats, remove individual chats, or delete entire groups
 - Enabling `a_memorix.global_memory_sharing_enabled` makes memory shared groups read-only
 
 ### Source File Editing
@@ -57,9 +56,8 @@ The Model Management page manages providers, models, and task assignments:
 
 Besides default input, output, and cache prices, models can use different prices for daily time periods:
 
-- Expand **分时价格** (Time-Based Pricing) when editing a model and click "添加时段" (Add Period)
-- Each row takes a **start time**, **end time** (`HH:MM`, server local time), and **input**, **output**, and **cache** prices (CNY per million tokens)
-- An end time earlier than the start crosses midnight; "次日" (Next Day) appears beside the end time
+- Set the start and end times (`HH:MM`, server local time) and input, output, and cache prices (CNY per million tokens) under **分时价格** (Time-Based Pricing) in the model editor
+- An end time earlier than the start crosses midnight
 - Periods include their start and exclude their end; unmatched times use default prices. Periods cannot overlap, and start and end cannot be equal
 
 ### Thinking Controls
@@ -74,21 +72,20 @@ Doubao and Qwen support a thinking budget. See [Model Extra Parameters](../confi
 
 ### Model Testing
 
-Click a model's lightning icon to test its availability with a test request. This does not measure its response speed in actual tasks: longer contexts and more complex tasks may take more time.
+Use a model's lightning icon to send a test request and check availability. Response time in actual tasks depends on context length and task complexity.
 
 ## Suggested Changes
 
 ### For Beginners
 
-- Start with the **bot nickname** and **personality** under "基础 → 身份与人格" (Basic → Identity & Personality) to give your bot character
-- Adjust **reply speed** — neither too fast nor too slow
-- Try different **personality settings** to make the bot more interesting
+- Set the bot nickname and personality under "基础 → 身份与人格" (Basic → Identity & Personality)
+- Adjust reply triggers to suit the conversation frequency; see [Bot Config](../configuration/bot-config.md#chat-behavior)
 
 ### Advanced Options
 
-- Configure **multiple AI models** for different tasks
-- Set **keyword replies** to make the bot smarter
-- Adjust **memory parameters** to remember more chat content
+- Assign different models to reply, vision, and other tasks under Task Assignment
+- Configure keyword reaction prompts; see [Bot Config](../configuration/bot-config.md#keyword-reactions)
+- Adjust [Memory Config](../configuration/amemorix-config.md) for specific retrieval, sharing, or resource-usage problems
 
 ## Related Docs
 

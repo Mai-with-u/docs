@@ -258,7 +258,7 @@ heuristic_memory_private_to_group_enabled = false  # Allow recalling private mem
 - A smaller `window_size` bases the "impression" on very little context and tends to pull in irrelevant memories; `max_chars` caps the injection size and truncates the rest
 
 ::: danger The privacy boundary of cross_chat
-`heuristic_memory_cross_chat_enabled = true` widens retrieval to global scope and **bypasses both the `[a_memorix.filter]` blacklist and the per-type retrieval filters**. Only one local safety net remains: the group→private and private→group directions are gated by `group_to_private` / `private_to_group` (both off by default), but **group↔group and private↔private pass through directly**. In other words, with cross_chat on, memories from other groups can be pulled into the current group at any time. Keep it off unless you explicitly accept this.
+`heuristic_memory_cross_chat_enabled = true` widens retrieval to global scope and **bypasses both the `[a_memorix.filter]` blacklist and the per-type retrieval filters**. Only one local safety net remains: the group→private and private→group directions are gated by `group_to_private` / `private_to_group` (both off by default), but **group↔group and private↔private pass through directly**. Keep it off unless you explicitly accept this.
 :::
 
 ### Natural-Language Memory Correction
@@ -634,7 +634,7 @@ min_results = 4       # Minimum retained results
 **Actual semantics** (counter-intuitive — read before tuning):
 
 - The dynamic threshold is computed from the score distribution of each batch: the median of three candidates — the `percentile` value, mean minus 1.5 standard deviations, and the score-gap point — **then clamped into `[min_threshold, max_threshold]`**
-- Raising `percentile` = stricter relative to the distribution; but the real hard boundary is `min_threshold` — however flat the distribution, anything below it is cut
+- Raising `percentile` increases the percentile threshold; results below `min_threshold` are always filtered
 - `max_threshold` caps the threshold, results scoring ≥ the cap always pass. It merely prevents an over-concentrated distribution from pushing the threshold high enough to kill everything
 - `min_results` is the safety net: if fewer than this many results survive filtering, the top N by score are forcibly kept. In other words a query always returns at least 4 results (given candidates), so it indirectly decides how much "noise is better than nothing" you tolerate
 

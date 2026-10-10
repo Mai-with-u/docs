@@ -85,7 +85,7 @@ If MaiBot is running, always set WAL mode and `busy_timeout` when connecting to 
 
 ### Method 2: Statistics HTTP Endpoint
 
-Functions in `statistics_service.py` aggregate directly from raw tables (`llm_usage`, `mai_messages`, `online_time`, `tool_records`) in real time, returning structured JSON — this is what the WebUI dashboard consumes. The three endpoints (dashboard / summary / models), their parameters, caching behavior and curl examples live in [Realtime Channel & Statistics](./webui-api/realtime-and-stats.md#statistics-queries) and are not repeated here.
+Functions in `statistics_service.py` aggregate directly from raw tables (`llm_usage`, `mai_messages`, `online_time`, `tool_records`) in real time, returning structured JSON — this is what the WebUI dashboard consumes. The three endpoints (dashboard / summary / models), their parameters, caching behavior and curl examples live in [Realtime Channel & Statistics](./webui-api/realtime-and-stats.md#statistics-queries).
 
 ## Data-Transfer Export/Import: Backend Job Flow
 

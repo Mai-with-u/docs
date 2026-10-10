@@ -8,11 +8,11 @@ Use the WebUI's **Data Management** page to download MaiBot's configuration, dat
 
 ## Export Data
 
-- The "导出数据" (Export Data) card on the left creates an archive. The default selection covers the most common configuration and data; click **开始导出** (Start Export)
-- Export runs as a background task. A progress area appears in the card after you start
-- "Start Export" is disabled while an export is running; only one export can run at a time
-- Export archives are stored in the system temporary directory and automatically cleaned up if they are not downloaded before expiration
-- Each download resets the retention period to 24 hours when it starts and when it finishes
+Choose the scope under "导出数据" (Export Data) and start the export. Configuration and data are selected by default.
+
+- Export runs in the background; only one export can run at a time
+- Archives are stored in the system temporary directory and cleaned up when they expire
+- Each download resets retention to 24 hours when it starts and finishes
 
 ::: tip Archive Filename
 Archives are named `maibot-data-<export-time>.zip`, for example `maibot-data-20260709-123456.zip`.
@@ -44,11 +44,7 @@ The archive always contains a top-level `manifest.json`. The rest consists of `c
 
 ## Import and Restore
 
-The "导入数据" (Import Data) card on the right restores an archive:
-
-1. Select a `.zip` archive using the file picker; only archives exported by this feature are accepted
-2. Choose the parts to restore: **configuration (`config`)** and **data (`data`)** are selected by default; **plugins (`plugins`)** and **logs (`logs`)** are optional. Select at least one part
-3. Click **开始导入** (Start Import)
+Under "导入数据" (Import Data), select a `.zip` archive exported by this feature, choose the restoration scope, and start the import. Configuration and data are selected by default; plugins and logs are optional. Select at least one part.
 
 ::: warning Import Overwrites Existing Files
 Back up your current data first (you can export another copy on this page) and confirm the versions match: `manifest.json` records the MaiBot version used for export. Restart MaiBot after importing, then verify that it runs correctly.

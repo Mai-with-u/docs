@@ -6,7 +6,7 @@ title: Install Plugins
 
 Plugins are like "Apps" you install for MaiBot, giving it more capabilities—games, drawing, music, weather queries, and **adapters that connect platforms like QQ, email, and voice calls**—almost everything is a plugin.
 
-You can install from the built-in **Plugin Market** with one click, or build your own. This page only covers "how to install and manage plugins as a user"; to write your own, start with [Plugin Integration](/en/develop/plugin) (what you can hook into, and the boundaries), then move on to the [Plugin Development Guide](/en/plugin/).
+Install plugins from the built-in **Plugin Market** or a Git repository. To develop plugins, see [Plugin Integration](/en/develop/plugin) and the [Plugin Development Guide](/en/plugin/).
 
 ## What is a Plugin
 
@@ -28,13 +28,11 @@ The "Only show current version" switch in the toolbar decides whether plugins in
 
 ### Install from the Plugin Market
 
-1. Open the WebUI and go to "Plugin Extensions".
-2. Switch to the "Plugin Market / Browse" tab.
-3. Search or filter for the plugin you want (e.g. `NapCat`).
-4. Click "Install".
-   - Plugins with a published Release in the official version index → the plugin detail page opens and asks you to **pick a version to install** (see the next section).
-   - Plugins maintained only on a branch → the install dialog opens; pick a branch and install directly.
-5. Newly installed plugins are **disabled by default**—remember to enable them (see [Manage Plugins](./management)).
+Find a plugin under "Plugin Extensions → Plugin Market / Browse" and install it:
+
+- For plugins with published releases in the official version index, select a release version
+- For plugins maintained only on a branch, select a branch
+- Installed plugins are disabled by default; enable them under [Manage Plugins](./management)
 
 ::: tip Can't find it in the market?
 The Plugin Market is indexed from GitHub repositories. If it's not there, use the Git URL method below to install any public repository.
@@ -53,9 +51,6 @@ Each entry in the version dropdown carries a suffix describing its state:
 
 To install a specific version (including one older than the recommendation), select it in the dropdown and click "Install selected version". Untick "Lock this version after install to block automatic updates" whenever you want to change that behavior.
 
-::: tip Just want the newest compatible version?
-Leave the dropdown on the "Recommended" entry — that is equivalent to auto-updating to the newest compatible stable release.
-:::
 
 ::: warning Manual downgrade only
 Automatic updates only move forward. If the recommended version is older than what you have installed, the auto-update answers "Already on the newest compatible version; automatic update will not downgrade or reinstall" — to downgrade or roll back, you must select that version manually on the plugin detail page.
@@ -122,7 +117,7 @@ Regardless of method, once a plugin is written to `plugins/`:
 - A file watcher detects the new plugin and generates `config.toml` from the plugin's `config_model`;
 - Plugins whose `enabled` defaults to `false` **must be enabled manually** to run.
 
-So "install succeeded" ≠ "already running". Next, go to [Manage Plugins](./management) to enable and configure it.
+Go to [Manage Plugins](./management) to enable and configure it.
 
 ::: warning Security reminder
 Only install plugins from trusted sources. Before installing, check the repository's README, update time, and Issues, and review the permissions the plugin requests. Third-party plugins are maintained by their respective authors; the MaiBot team does not guarantee their compatibility or safety.

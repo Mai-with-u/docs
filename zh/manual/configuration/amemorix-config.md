@@ -258,7 +258,7 @@ heuristic_memory_private_to_group_enabled = false  # 群聊中是否允许拉起
 - `window_size` 调小会让"印象"基于很少的上下文，容易拉出无关记忆；`max_chars` 控制注入体积，超过部分直接截断
 
 ::: danger cross_chat 的隐私边界
-`heuristic_memory_cross_chat_enabled = true` 会把检索范围扩大到全局，并且**绕过 `[a_memorix.filter]` 黑名单和检索结果过滤**。之后只剩一层本地兜底：群→私、私→群两个方向分别由 `group_to_private` / `private_to_group` 控制（默认都关），但**群↔群、私聊↔私聊之间直接放行**。也就是说开了 cross_chat，别的群的记忆随时可能被拉进当前群。除非你明确接受这一点，否则保持关闭。
+`heuristic_memory_cross_chat_enabled = true` 会把检索范围扩大到全局，并且**绕过 `[a_memorix.filter]` 黑名单和检索结果过滤**。之后只剩一层本地兜底：群→私、私→群两个方向分别由 `group_to_private` / `private_to_group` 控制（默认都关），但**群↔群、私聊↔私聊之间直接放行**。除非你明确接受这一点，否则保持关闭。
 :::
 
 ### 自然语言记忆修正
@@ -634,7 +634,7 @@ min_results = 4       # 最小保留条数
 **实际语义**（与直觉有出入，调之前务必读完）：
 
 - 动态阈值由本批次结果的分数分布算出：`percentile` 百分位值、均值减 1.5 倍标准差、分数跳变点三者取中位，**再被夹到 `[min_threshold, max_threshold]` 区间**
-- 调大 `percentile` = 分布上更严格；但真正的硬边界是 `min_threshold`——分布再平，低于它的结果也一定被砍
+- 调大 `percentile` 会提高百分位阈值；分数低于 `min_threshold` 的结果始终被过滤
 - `max_threshold` 限制阈值的上限，分数 ≥ 上限的结果必然保留。它只是防止分布太集中时阈值高到全灭
 - `min_results` 是兜底：过滤后不足此数时按分数降序强行保留前 N 条。即无论如何查询都会返回至少 4 条（前提是有候选），所以它间接决定了"宁可噪声也不空手"的程度
 

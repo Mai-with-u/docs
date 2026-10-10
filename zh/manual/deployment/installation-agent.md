@@ -57,7 +57,7 @@ uv run bot.py
 - **SnowLuma QQ 连接器** — 仓库 `MaiBot-SnowLuma-Adapter`，再用 SnowLuma 或 NapCat 客户端登录机器人小号并开启正向 WebSocket。详细步骤见[SnowLuma QQ 连接器](../adapters/qq-local-client.md)；
 - **QQ 官方机器人** — 在 [QQ 开放平台](https://q.qq.com/)申请机器人，用 AppID + AppSecret 直连，不需要任何 QQ 客户端在线；详细步骤见 [QQ 官方机器人](../adapters/qq-official.md)。
 
-两条路线都要设置**放行范围**：适配器本身已不再带群聊 / 私聊黑白名单，入站放行统一由 MaiBot 的适配器策略控制，默认全部放行，入口是 WebUI「配置管理 → 适配器设置」（`/adapter-management`）或 `config/adapter_policy.toml`。想只服务指定群时，写入：
+两条路线都要设置**放行范围**：入站放行由 MaiBot 的适配器策略控制，默认全部放行，入口是 WebUI「配置管理 → 适配器设置」（`/adapter-management`）或 `config/adapter_policy.toml`。想只服务指定群时，写入：
 
 ::: code-group
 

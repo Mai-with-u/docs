@@ -26,24 +26,23 @@ Adapters can **auto-discover and report their own ID**, no need to fill it in th
 The **group / private chat access policy** (who an adapter is allowed to serve) has two entry points in the WebUI:
 
 - **The "全局默认规则" (Global default rules) card at the top of the Adapter Management page** — sets the default action (**接收消息** / Receive messages or **不接收** / Don't receive) for group and private chats when no specific rule matches.
+- **The "黑白名单规则" (Allow/Deny Rules) tab in adapter plugin settings** — available for plugins with `plugin_type = adapter`; configures per-instance `allow_ids` and `deny_ids`
 
 ### Allow/Deny Rules Panel
 
-The "黑白名单规则" panel opens after selecting an adapter:
+Select an adapter to configure group and private chat lists:
 
-- **Mode hint** — a line under each list states the current mode, e.g. "黑名单模式：接收所有群聊消息，只需在『不接收消息的聊天ID』中添加要屏蔽的群号" (Blacklist mode: receive all group messages, just add the groups to block under "Chat IDs that don't receive messages") or the whitelist equivalent
-- **Inactive lists are dimmed** — when the default is "接收所有消息" (Receive all messages) the "接收消息的聊天ID" (Chat IDs that receive messages) block is dimmed and its input is disabled while empty; when the default is "默认不接收消息" (Don't receive messages by default) the "不接收消息的聊天ID" block is dimmed the same way, so you never fill in a list that has no effect
-- **Account switch notice** — rules are keyed by account ID. After signing in with a different account an alert explains that the current account will get its own new rules while the historical accounts' rules stay in the configuration but no longer apply
+- When messages are accepted by default, fill in the chat IDs to block; when rejected by default, fill in the chat IDs to allow
+- Rules are stored by account ID. Switching accounts uses the new account’s rules while retaining the original account’s rules in the configuration
 
 ### Policy Groups
 
-Rules for the same adapter can now be saved as **multiple policy groups** and switched per scenario (for example, one set each for "daily / testing / maintenance"):
+Rules for the same adapter can be saved as **multiple policy groups** and switched per scenario (for example, one set each for "daily / testing / maintenance"):
 
-- **Switching groups** — the dropdown on the toolbar shows the active group; switching saves and takes effect immediately, and the draft you are editing is written into its group first so nothing is lost
-- **New group** — click "+" to create a group: it inherits the global settings by default with empty lists, and its name must not duplicate an existing group; switch to it from the dropdown after creating it
-- **Copy current group** — click "copy" to create a new group with all the rules of the current one; you stay on the current group after creating it
-- **Manage groups** — click "manage" to open the group list and delete groups you no longer need; **the active group cannot be deleted** — switch to another group first
-- **Default group** — rules from before the upgrade are kept as a group named "默认分组" (Default group), so there is nothing to reconfigure
+- **Switch groups** — saves and takes effect immediately; the current draft is saved to its original group first
+- **New group** — inherits global settings with empty lists and requires a unique name; switch to it manually after creation
+- **Copy current group** — copies all rules and leaves the original group active
+- **Delete groups** — switch away from the active group before deleting it
 
 ## Related Docs
 

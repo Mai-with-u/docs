@@ -13,7 +13,7 @@ title: 认证与配置
 MaiBot WebUI 用 HttpOnly Cookie 传递认证凭据，Cookie 名为 `maibot_session`。整个生命周期如下：
 
 - **写入** — 调 `POST /api/webui/auth/verify` 传入有效 Token，服务端验证通过后在 `Set-Cookie` 中下发 Cookie，有效期 7 天，属性 `HttpOnly; SameSite=Lax; Path=/`。生产环境或配置 `webui.secure_cookie = true` 时会额外带 `Secure` 标志（仅 HTTPS 下发送）。
-- **失效** — 7 天后浏览器自动清除；服务端调用 `POST /api/webui/auth/logout` 立即清除；调 `update` 或 `regenerate` 更换 Token 后旧 Cookie 也立即失效（因为旧 Token 不再有效）。
+- **失效** — 7 天后浏览器自动清除；服务端调用 `POST /api/webui/auth/logout` 立即清除；调 `update` 或 `regenerate` 更换 Token 后旧 Cookie 也立即失效。
 - **续期** — 没有内置的 silent refresh 机制。Cookie 到期后只能重新调 `/auth/verify` 登录。长期运行的脚本应捕获 401 响应并自动重登。
 
 Cookie 存在 `data/webui.json` 同级目录下的 TokenManager 配置文件中，不依赖任何外部数据库。

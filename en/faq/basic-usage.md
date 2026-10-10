@@ -18,7 +18,7 @@ See [Model Configuration](../manual/configuration/model-config.md). Avoid relyin
 
 ## Can one MaiBot serve multiple chats?
 
-Yes. Which groups and private chats are accepted is decided centrally by the **MaiBot main program's adapter policy**—adapter plugins no longer ship built-in lists, and everything is allowed by default. There are two entry points:
+Yes. Which groups and private chats are accepted is decided centrally by the **MaiBot main program's adapter policy**; everything is allowed by default. There are two entry points:
 
 - **WebUI** — **Adapter Settings** under the "Configuration" group in the sidebar (`/adapter-management`): the "Global default rules" card at the top sets the default action for group and private chats, and selecting an adapter opens an **Allow/deny rules** tab where you list the group / user IDs to receive or block (edits autosave);
 - **Config file** — `config/adapter_policy.toml`: put fallback rules in `[defaults.group]` / `[defaults.private]` and per-instance `allow_ids` / `deny_ids` under `[[adapters]]` entries.
@@ -32,7 +32,7 @@ Platform support is provided by adapters. QQ has two routes:
 - **Local client login** — install the **Unified QQ Connector** (plugin name `MaiBot-SnowLuma-Adapter`) and log in your own QQ account; one plugin supports both SnowLuma and NapCat clients;
 - **Open platform bot** — install the **QQ Official Bot** adapter and apply for an AppID + AppSecret on the QQ Open Platform; no QQ client login is required.
 
-Email, QQ Voice Call, iMessage, and other community adapters are available as well. Since 1.3.0 the former standalone SnowLuma and NapCat adapters have merged into the Unified QQ Connector, and the standalone NapCat adapter is archived; actual capabilities depend on the installed adapter version. See [Connect Platforms](../manual/adapters/index.md) for selection and installation.
+Email, QQ Voice Call, iMessage, and other community adapters are available as well. Actual capabilities depend on the installed adapter version. See [Connect Platforms](../manual/adapters/index.md) for selection and installation.
 
 ## What should I do before first use?
 

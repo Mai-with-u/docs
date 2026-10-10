@@ -4,7 +4,7 @@ title: View and Manage Memory
 
 # View and Manage Memory
 
-MaiBot stores what it learns from chats in long-term memory, just like human memory. The **长期记忆** (Long-term Memory) page (`/resource/knowledge-base`) under the "麦麦资源管理" (MaiBot Resource Management) sidebar group centralizes memory management: query, import, correct, delete, and tune — all in one place.
+MaiBot stores what it learns from chats in long-term memory. The **长期记忆** (Long-term Memory) page (`/resource/knowledge-base`) under the "麦麦资源管理" (MaiBot Resource Management) sidebar group centralizes memory management: query, import, correct, delete, and tune — all in one place.
 
 ![Long-term memory](/images/webui/knowledge-base.webp)
 
@@ -33,11 +33,7 @@ Memory query is further split into the "文字记录" (Text records) and "人物
 
 ## Knowledge Graph
 
-The graph shows relations between concepts like a mind map, with the entry in the top-right "更多操作 → 打开图谱" (More actions → Open graph) menu; `tab=graph` in old links also opens it directly:
-
-- Each node is a concept (e.g. "Genshin")
-- Edges represent relations (e.g. "Genshin-game")
-- Click a node for details
+The knowledge graph uses nodes for concepts and edges for relations. Open it through "更多操作 → 打开图谱" (More actions → Open graph); `tab=graph` in existing links is still supported.
 
 The standalone **长期记忆图谱** (Long-term Memory Graph) page (`/resource/knowledge-graph`) provides full-screen visualization:
 
@@ -75,10 +71,7 @@ The **导入导出** (Import & export) tab lets you teach MaiBot new knowledge m
 
 ![Import memory](/images/webui/knowledge-import.webp)
 
-1. Choose an import kind: **资料导入** (material import: text, file, or folder), LPMM OpenIE, or LPMM conversion
-2. Paste text or upload files
-3. Optionally set common and advanced parameters in the "导入参数" (Import parameters) dialog
-4. Start the import; the task list shows progress in real time
+Import methods include material import (text, files, or folders), LPMM OpenIE, and LPMM conversion. Common and advanced options are available under "导入参数" (Import parameters).
 
 **Memory bundles (`.amembundle`)** are used to migrate or share memories between one MaiBot and another:
 
@@ -122,19 +115,9 @@ Feedback and rollback records can be viewed in **记忆检修** (Memory inspecti
 
 ## Person Profiles
 
-MaiBot builds a "profile" for every user:
-
-- Personality traits (outgoing, introverted, etc.)
-- Interests and hobbies (games, anime, etc.)
-- Chatting habits (sticker usage, speaking style, etc.)
-
-In the **人物画像** (Person profiles) tab or the **人物信息管理** (Person Info Management) page (`/resource/person`) you can:
+Person profiles record personality traits, interests, and chatting habits. View and correct descriptions or add notes in the **人物画像** (Person profiles) tab or **人物信息管理** (Person Info Management) page (`/resource/person`).
 
 ![Person info management](/images/webui/person.webp)
-
-- View profiles
-- Correct inaccurate descriptions
-- Add notes for friends
 
 ## Retrieval Tuning
 
@@ -150,20 +133,6 @@ If MaiBot's memory is poor, run a tuning task to optimize retrieval (**记忆检
 **记忆检修 → 状态维护** (Memory inspection → State maintenance) provides runtime checks, auto-save, vector rebuild, paragraph vector backfill, image asset reconciliation, and operation records. View the current runtime state under "更多操作 → 查看记忆状态" (More actions → View memory status).
 
 ![State maintenance](/images/webui/knowledge-maintenance.webp)
-
-## Usage Recommendations
-
-### Daily Maintenance
-
-- Review memory regularly and delete useless content
-- Correct errors as soon as they are found
-- Manually reinforce important information
-
-### Improve Effectiveness
-
-- Teach the bot domain knowledge to make it smarter
-- Refine person profiles for more considerate conversations
-- Set memory capacity appropriately to balance performance and effect
 
 ## Verification & Troubleshooting
 
@@ -182,7 +151,7 @@ If MaiBot's memory is poor, run a tuning task to optimize retrieval (**记忆检
 **Images not searchable or stuck at "等待构建" (Pending build)?**
 
 - Confirm `[model_task_config.image_embedding]` in `model_config.toml` has an embedding model that supports image input configured
-- Check the failure reason and retry counts under "图片记忆 → 任务诊断" (Image memory → Task diagnostics); when the model is unavailable the page says so explicitly instead of faking a wait
+- Check the failure reason and retry counts under "图片记忆 → 任务诊断" (Image memory → Task diagnostics); the page reports the corresponding error when the model is unavailable
 
 **How long are memories kept?**
 

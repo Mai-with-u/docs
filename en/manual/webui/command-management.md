@@ -10,12 +10,7 @@ MaiBot provides **unified management** for plugin commands: view all registered 
 
 ## View All Commands
 
-Command management lists all currently registered plugin commands at runtime:
-
-- **Command name** and trigger pattern
-- **Owning plugin** and description
-- **Authorization flag** — commands marked as "operator" level require extra authorization to execute
-- **Disabled flag** — disabled commands show a "已停用" (Disabled) badge next to the existing "受保护 / 公开" (Protected / Public) badge
+The list shows registered command names, trigger patterns, and owning plugins. Operator-level commands require authorization; disabled commands cannot run.
 
 ## Command Authorization
 
@@ -26,6 +21,7 @@ A command can require **operator permission** (`operator` level). Once a command
 
 ::: tip Permission evaluation order
 A command that matches no allow rule cannot be executed by ordinary users.
+:::
 
 ## Configuration File
 

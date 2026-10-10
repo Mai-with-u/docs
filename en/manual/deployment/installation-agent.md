@@ -56,7 +56,7 @@ On first start, type **同意** (agree) in the terminal to accept the user agree
 
 - **SnowLuma QQ Connector** — repository `MaiBot-SnowLuma-Adapter`. Log in a bot alt account with a SnowLuma or NapCat client and enable its forward WebSocket server. See [SnowLuma QQ Connector](../adapters/qq-local-client.md) for the full steps;
 
-Both routes need an **allow scope**: adapters no longer ship built-in group / private-chat lists—inbound access is controlled by MaiBot's adapter policy, which allows everything by default. Configure it in the WebUI under "配置管理 → 适配器设置" (Adapter Settings, `/adapter-management`) or in `config/adapter_policy.toml`. To serve only specific groups, write:
+Both routes need an **allow scope**: inbound access is controlled by MaiBot's adapter policy, which allows everything by default. Configure it in the WebUI under "配置管理 → 适配器设置" (Adapter Settings, `/adapter-management`) or in `config/adapter_policy.toml`. To serve only specific groups, write:
 
 ::: code-group
 

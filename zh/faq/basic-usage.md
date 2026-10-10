@@ -24,7 +24,7 @@ MaiBot 本身是开源软件，不收取软件使用费。实际运行通常需�
 
 ## 一个 MaiBot 可以服务多个群聊吗？
 
-可以。**能接入哪些群聊和私聊由 MaiBot 主程序的适配器策略统一决定**，适配器插件本身不再带内置名单，默认全部放行。策略有两个入口：
+可以。**能接入哪些群聊和私聊由 MaiBot 主程序的适配器策略统一决定**，默认全部放行。策略有两个入口：
 
 - **WebUI** — 侧边栏「配置管理」→ **适配器设置**（`/adapter-management`）：页面顶部「全局默认规则」卡片设置群聊 / 私聊的默认动作，选中某个适配器后在「黑白名单规则」页签里填要接收或屏蔽的群号 / 用户 ID，改完自动保存；
 - **配置文件** — `config/adapter_policy.toml`：`[defaults.group]` / `[defaults.private]` 写兜底规则，`[[adapters]]` 条目按适配器实例写 `allow_ids` / `deny_ids`。
@@ -38,7 +38,7 @@ MaiBot 本身是开源软件，不收取软件使用费。实际运行通常需�
 - **本地客户端登录** — 装**统一 QQ 连接器**（插件名 `MaiBot-SnowLuma-Adapter`），用你自己的 QQ 号登录，一个插件同时支持 SnowLuma 与 NapCat 两类客户端；
 - **开放平台机器人** — 装 **QQ 官方机器人**适配器，去 QQ 开放平台申请 AppID + AppSecret，不需要登录 QQ 客户端。
 
-此外还有邮件、QQ 语音通话、iMessage 等社区适配器。1.3.0 起原独立的 SnowLuma 适配器与 NapCat 适配器已合并为统一 QQ 连接器，独立 NapCat 适配器已归档，实际可用能力以对应适配器版本为准。选型与安装见[接入平台](../manual/adapters/index.md)。
+此外还有邮件、QQ 语音通话、iMessage 等社区适配器。实际可用能力以对应适配器版本为准。选型与安装见[接入平台](../manual/adapters/index.md)。
 
 ## 第一次使用需要注意什么？
 

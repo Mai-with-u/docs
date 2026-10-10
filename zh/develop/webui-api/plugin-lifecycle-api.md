@@ -6,7 +6,7 @@ title: 插件生命周期 API
 
 本文档覆盖插件安装、更新、启用/禁用、配置编辑、运行时组件查询、图标获取、统计代理以及进度跟踪的完整 HTTP 接口。面向部署运维和脚本化使用者，所有端点挂在 `/api/webui/plugins/` 下，均需 Cookie 认证（参考 [认证模型](./index.md#认证模型-三种方式)）。
 
-如果你要调试插件的 Host/Runner 通信协议、熔断逻辑或进程生命周期，请转 [插件生命周期](/plugin/lifecycle)。本文只讲 API 操作，不涉及运行时协议细节。
+如果你要调试插件的 Host/Runner 通信协议、熔断逻辑或进程生命周期，请转 [插件生命周期](/plugin/lifecycle)。
 
 ## 1. 已安装插件查询
 
@@ -262,7 +262,7 @@ curl -X GET http://127.0.0.1:8001/api/webui/plugins/runtime/plugins/example-plug
 
 ### 推荐方式：统一 WebSocket 频道
 
-所有插件进度事件通过 [统一 WebSocket 通道](./realtime-and-stats) 推送，domain 为 `plugin_progress`，topic 为 `main`。这是前端 WebUI 实际使用的路径，无需单独连接插件专用 WebSocket。
+所有插件进度事件通过 [统一 WebSocket 通道](./realtime-and-stats) 推送，domain 为 `plugin_progress`，topic 为 `main`。
 
 鉴权通过 WebSocket 临时 Token（参考 [认证模型](./index.md#_3-websocket-临时-token)），将临时 Token 放在 URL 查询参数 `?token=...` 中即可建立连接。收到推送后每帧格式为：
 

@@ -4,7 +4,7 @@ title: Manage Plugins
 
 # Manage Plugins
 
-Installing is only the first step. After a plugin is written, you enable, configure, update, or uninstall it in the WebUI's "Plugin Extensions". This page explains these operations and the runtime timing behind them.
+Enable, configure, update, and uninstall installed plugins under "Plugin Extensions" in the WebUI.
 
 ## View Plugins
 
@@ -22,13 +22,13 @@ Edit API keys, trigger words, and feature switches in the plugin settings. Savin
 
 ## Custom Pages
 
-Once a plugin ships a `webui.json`, it can bring its own page entries — no Node install, no changes to the main program:
+Plugins with a `webui.json` can provide custom pages:
 
 - **Sidebar entries** — shown in the workspace sidebar under "Plugin Extensions"; the entry label and icon come from the plugin itself
 - **Top workspace entries** — a plugin can also declare its own top-level workspace. When one plugin has several workspace pages, the first is the default and the rest collapse into "More Plugin Workspaces"
 - **Page addresses** — of the form `/extensions/{plugin_id}/{page_id}`; a plugin cannot define custom routes or override built-in entries
 
-**Reorder or hide**: open the "Plugin Extensions" page (sidebar → "Integration → Plugin Extensions", at `/plugin-config`). At the bottom of the page is the "Manage Plugin Pages" area, where you drag to reorder or hide a plugin's entries entirely. These preferences live only in your current browser and affect display only. Clearing the cache or switching browsers restores the defaults.
+**Reorder or hide**: adjust entries under "Plugin Extensions → Manage Plugin Pages". Preferences are stored in the current browser; switching browsers or clearing the cache restores the defaults.
 
 **Changes not taking effect?** Editing `webui.json` requires a **plugin reload** to take effect. After reloading, the browser reflects entries within at most 30 seconds, or refresh manually.
 
@@ -36,12 +36,9 @@ For the full field reference, component types, limits, and troubleshooting, see 
 
 ## Install from a ZIP
 
-When all you have is a plugin archive (sent by a friend, packed by yourself, or not yet listed in the market), you do not need to unpack it into `plugins/` by hand:
+Upload a `.zip` archive through "Plugin Extensions → More actions → Install plugin from ZIP".
 
-1. Open the "插件扩展" (Plugin Extensions) page and click the "更多操作" (More actions) button in the top-right corner;
-2. Choose "从 ZIP 安装插件" (Install plugin from ZIP) and select your `.zip` file;
-3. Click "安装插件" (Install plugin) and wait for the "安装成功" (Installed) notice;
-4. **No MaiBot restart is needed**: the file watcher detects the new plugin and generates `config.toml` from its `config_model`; plugins whose `enabled` defaults to `false` just need to be enabled manually in the list. Only when the log explicitly reports a watching or loading failure should you fall back to "重启麦麦" (Restart MaiBot) in the same menu.
+After installation, the file watcher detects the plugin and generates `config.toml` from `config_model`. Plugins whose `enabled` defaults to `false` need manual enabling; normal installation requires no MaiBot restart.
 
 The archive must meet these rules or it is rejected:
 
@@ -56,11 +53,7 @@ A ZIP install skips the plugin market listing. MaiBot only checks that the archi
 
 ## Update Plugins
 
-When the page reports a new version:
-
-1. Click "Update";
-2. Wait for download and install;
-3. Source changes trigger a plugin Supervisor restart and reload.
+Click "Update" to download and install a compatible version. Source changes restart the plugin Supervisor and reload the plugin.
 
 "Update" runs an **automatic update**: it moves to the newest stable version compatible with your MaiBot and SDK. It only moves forward — it never auto-downgrades and never overrides a version you locked.
 
@@ -90,8 +83,7 @@ Plugins installed through "Install from Git" remain ordinary branch plugins — 
 
 ## Uninstall Plugins
 
-1. Click "Uninstall" and confirm;
-2. The plugin files are deleted.
+After you confirm uninstalling, the plugin stops before its files are deleted.
 
 ⚠️ Before uninstalling, confirm whether the plugin stores user data in its own directory—that data may be lost after uninstall. For release-installed plugins, uninstalling also removes the `.maibot-release.json` receipt.
 
@@ -118,16 +110,6 @@ flowchart LR
 ::: warning Restart is only a fallback
 Only fully restart MaiBot when the log explicitly reports that watching, loading, unloading, or a config callback failed. Normal plugin management should not require restarting the core.
 :::
-
-## Tips
-
-**Conflicts** — only enable the plugins you need when functions overlap; contact the author for updates if necessary.
-
-**Performance** — too many plugins may affect performance; uninstall unused ones promptly.
-
-**Security** — only install from trusted sources, review permission requirements, update regularly.
-
-**Versions** — keep compatible plugins on the "Recommended" version; when only an older version works for now, lock that version on the detail page so automatic updates cannot push it away.
 
 ## FAQ
 
