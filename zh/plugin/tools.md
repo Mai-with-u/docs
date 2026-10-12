@@ -24,6 +24,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
     brief_description: str = "",                            # 简要描述，优先级高于 description
     detailed_description: str = "",                         # 详细描述，可包含参数说明等
     parameters: list[ToolParameterInfo] | dict | None = None,  # 参数定义
+    platforms: str | list[str] | None = None,                # 平台作用域
     **metadata,                                             # 额外元数据
 )
 ```
@@ -43,6 +44,36 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 - `description`：关于工具的描述，包括使用方法，使用情景，注意事项。当 `brief_description` 为空时，`description` 会作为回退描述。
 - `brief_description`：给主程序或小模型快速判断"这个工具是做什么的"的简要描述
 - `detailed_description`：描述参数、必填项、可选项和调用约束的详细描述
+
+## 平台作用域
+
+每个 Tool 可独立声明 `platforms`，Host 按当前聊天平台过滤工具展示、搜索结果和执行权限。
+
+- **单个平台** — 字符串，例如 `"telegram"`。
+- **多个平台** — 字符串列表，例如 `["qq", "telegram"]`。
+- **不限平台** — 省略字段，或设置为 `None`、`[]`。
+
+平台标识去除首尾空白、转为小写并去重。空名称、非字符串元素或其他类型会报错。平台限制与 `chat_scope`、`allowed_session` 共同生效；执行受限工具必须有匹配的平台上下文。此字段是组件声明，不进入工具参数 Schema，LLM 不能通过调用参数修改作用域。
+
+Host 必须支持平台作用域过滤，旧 Host 会忽略此字段。依赖平台权限的操作，插件也应校验宿主注入的 `platform`。
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+@Tool("telegram_tool", platforms="telegram")
+async def telegram_tool(self, **kwargs):
+    ...
+
+@Tool("shared_tool", platforms=["qq", "telegram"])
+async def shared_tool(self, **kwargs):
+    ...
+
+@Tool("general_tool")
+async def general_tool(self, **kwargs):
+    ...
+```
+
+:::
 
 ## 参数定义
 

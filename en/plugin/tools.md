@@ -24,6 +24,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
     brief_description: str = "",                            # 简要描述，优先级高于 description
     detailed_description: str = "",                         # 详细描述，可包含参数说明等
     parameters: list[ToolParameterInfo] | dict | None = None,  # 参数定义
+    platforms: str | list[str] | None = None,                # 平台作用域
     **metadata,                                             # 额外元数据
 )
 ```
@@ -43,6 +44,36 @@ Description field conventions:
 - `description`: Description of the tool, including usage methods, scenarios, and notes. When `brief_description` is empty, `description` serves as the fallback description.
 - `brief_description`: A brief description used by the main program or small models to quickly determine "what this tool does".
 - `detailed_description`: A detailed description of parameters, required items, optional items, and invocation constraints.
+
+## Platform Scope
+
+Each Tool can declare its own `platforms`. The Host filters tool visibility, search results, and execution by the current chat platform.
+
+- **One platform** — A string such as `"telegram"`.
+- **Multiple platforms** — A list such as `["qq", "telegram"]`.
+- **All platforms** — Omit the field, or use `None` or `[]`.
+
+Identifiers are trimmed, lowercased, and deduplicated. Empty identifiers, non-string elements, and other types raise an error. Restrictions combine with `chat_scope` and `allowed_session`; executing a restricted tool requires a matching platform context. This is component metadata excluded from the tool parameter Schema, so the LLM cannot change it through invocation arguments.
+
+The Host must support platform filtering; older Hosts ignore this field. Plugins should also validate the Host-injected `platform` for operations that depend on platform permissions.
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+@Tool("telegram_tool", platforms="telegram")
+async def telegram_tool(self, **kwargs):
+    ...
+
+@Tool("shared_tool", platforms=["qq", "telegram"])
+async def shared_tool(self, **kwargs):
+    ...
+
+@Tool("general_tool")
+async def general_tool(self, **kwargs):
+    ...
+```
+
+:::
 
 ## Parameter Definition
 
