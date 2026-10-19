@@ -157,7 +157,7 @@ title: Manifest
 不兼容时的处理并不相同：
 
 - **Host 超范围** — 当前 Host 高于 `max_version` 但主次版本与声明上界相同时，插件**仍会加载**，只记一条 warning（补丁级容忍）；其余情况记为 error，插件被阻止加载
-- **SDK 超范围** — 无论高低，一律记为 error，插件被阻止加载
+- **SDK 超范围** — 无论高低都只记一条 warning，插件**仍会加载**。安装、更新和 Runner 连接都不会因 SDK 区间被阻止；实际兼容性由运行期表现决定
 
 ::: danger 不要把 max_version 锁死在小版本
 `max_version` 写成一个具体的小版本（例如 `1.2.3`）意味着麦麦一发新版本你的插件就被挡住。官方内置插件的做法是把上界放到 `999.999.999`、只认真约束 `min_version`，让"新版本是否还能跑"交给实际测试决定；不想约束下界时 `min_version` 写 `0.0.0`。
@@ -291,7 +291,7 @@ Manifest 校验器（`ManifestValidator`）采用 Pydantic 严格模式，主要
 
 - **Host 高于 `max_version` 但主次版本相同** — warning，插件照常加载（补丁级容忍）
 - **Host 其余情况超出区间** — error，插件被阻止加载
-- **SDK 超出区间** — error，插件被阻止加载，无容忍档
+- **SDK 超出区间** — warning，插件照常加载；日志会写明声明的 SDK 区间与当前 SDK 版本
 
 握手阶段 Host 对 Runner 自身 SDK 版本的检查（固定区间 `[1.0.0, 2.99.99]`）独立于上面两档，既不由 manifest 声明，也不受「强制插件兼容」影响。
 
@@ -320,6 +320,6 @@ python -m json.tool _manifest.json
 
 - **报「extra fields not permitted」** — 校验器是 Pydantic 严格模式，不允许出现未声明的字段：自定义注释字段、临时字段都要删掉。
 - **报 ID / 版本 / 作者字段格式错误** — `id` 必须匹配 `^[a-z0-9]+(?:[.-][a-z0-9]+)+$`（全小写、至少一个 `.` 或 `-`），`version` 与两个区间的上下界必须是严格三段式 `X.Y.Z`，`author` 必须是 `{ name, url }` 且 `url` 以 `http://` 或 `https://` 开头。
-- **插件被阻止加载且日志提示版本不兼容** — Host 超出区间除「主次版本相同」记 warning 外都是 error，SDK 超出区间一律 error；把 `max_version` 改成 `999.999.999`、只认真约束 `min_version`，临时排查可开「强制插件兼容」，但它需要重启 MaiBot 且只跳过版本区间。
+- **插件被阻止加载且日志提示版本不兼容** — Host 超出区间除「主次版本相同」记 warning 外都是 error；SDK 超出区间只记 warning，不会阻止加载。把 Host 的 `max_version` 改成 `999.999.999`、只认真约束 `min_version`；临时排查可开「强制插件兼容」，但它需要重启 MaiBot 且只跳过版本区间。
 - **`display.icon` 的本地图标不显示或被拒** — `type="local"` 的 `value` 必须是插件目录内的相对路径，后缀为 `.png`/`.jpg`/`.jpeg`/`.webp`/`.svg`；在线 URL 一律不允许，绝对路径、`..` 和符号链接也会被拒，加载失败会退回 `fallback`。
 - **日志提示依赖或 `llm_providers` 冲突** — 不能依赖自身、重复声明同一依赖或形成循环依赖；`client_type` 要与 `@LLMProvider` 声明完全一致，两个插件声明同一个 `client_type` 时双方都会被禁止加载。

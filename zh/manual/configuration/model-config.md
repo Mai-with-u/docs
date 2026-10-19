@@ -125,6 +125,67 @@ cache_price_in = 0.0
 - 时段内的 `cache_price_in` 同样遵循"0 表示缓存命中免费"
 
 
+## 联网服务
+
+让 Planner 具备搜索网页和读取网页的能力。联网服务与 LLM 模型分开定义：先定义服务，再在功能分配里选中；只定义服务不会开放工具。
+
+::: code-group
+
+```toml [DeepSeek ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000                  # 单次返回的内容预览字数，完整内容用 read_tool_result 读取
+
+[web.services.deepseek]
+adapter = "deepseek"                  # 服务协议：deepseek / tavily / stepsearch_mcp
+api_key = "sk-..."                    # DeepSeek API 密钥
+# base_url = "https://api.deepseek.com"  # 留空使用官方地址，也可填 OpenAI 兼容的 /v1 地址
+timeout = 60                          # 单次调用总时限（秒）
+
+[model_task_config.web_search]
+model_list = ["deepseek"]             # 选中一个 web.services 名称；留空 = 不开放联网工具
+```
+
+```toml [Tavily ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.tavily]
+adapter = "tavily"
+api_key = "tvly-..."                  # Tavily API 密钥
+search_depth = "basic"                # 搜索深度：basic / advanced / fast / ultra-fast
+extract_depth = "basic"               # 网页提取深度：basic / advanced
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["tavily"]
+```
+
+```toml [StepSearch MCP ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.stepsearch]
+adapter = "stepsearch_mcp"
+server_ref = "stepsearch"             # bot_config.toml 中 mcp.servers 的名称，地址与密钥在这里留空
+category = ""                         # 搜索类别：留空 / programming / research / gov / business
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["stepsearch"]
+```
+
+:::
+
+**要点：**
+
+- **启用方式** — 只有 `model_task_config.web_search.model_list` 选中服务后才会注册 `web_search` / `web_fetch` 工具；留空时联网工具完全关闭
+- **服务数量** — `model_list` 只能选一个服务；需要切换服务时改这里即可，不用删掉其他定义
+- **StepSearch MCP** — 连接地址和鉴权由 `bot_config.toml` 的 `[mcp.servers]` 管理，`web.services` 里只写 `server_ref`，不要再填 `api_key` 或 `base_url`
+- **长网页** — 单次只把 `preview_chars` 范围内的内容交给模型，完整结果可通过 `read_tool_result` 读取；开启「超长工具结果整理」时也会用到它
+- **搜索参数** — `web_search` 只接受 `query` 与 `max_results`（1~20，默认 5）；`web_fetch` 只接受 `url`
+- **与模型原生联网的区别** — 这里配置的是交给 Planner 的**统一工具**，任何模型都能用；模型自带的原生联网搜索（如 DeepSeek Responses 的 `web_search`）属于模型参数，见[模型额外参数](./model-extra-params.md#responses-api)
+
+
 ## 任务配置
 
 根据任务特点给每个任务分配不同模型，实现最优表现和效率。

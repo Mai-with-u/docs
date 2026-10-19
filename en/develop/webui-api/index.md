@@ -119,7 +119,7 @@ The core is the `APIRouter(prefix="/api/webui")` created in `src/webui/routes.py
 - **`/statistics/*`** — Statistics
 - **`/avatar/*`** — Avatars
 - **`/ws-token`** — WebSocket temporary Token
-- WebSocket endpoint: `/api/webui/ws`, the unified channel. The log stream and plugin progress are **subscription domains** on it (`logs:main`, `plugin_progress:main`); the legacy standalone `/ws/logs` and `/ws/plugin-progress` endpoints are not mounted in 1.3.4.
+- WebSocket endpoint: `/api/webui/ws`, the unified channel. The log stream and plugin progress are **subscription domains** on it (`logs:main`, `plugin_progress:main`); the legacy standalone `/ws/logs` and `/ws/plugin-progress` endpoints are not mounted.
 
 ### Compat Routers
 

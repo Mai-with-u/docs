@@ -38,6 +38,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 - **`detailed_description`** `str` — Detailed description, which can include parameter usage instructions, notes, etc. The SDK automatically merges the parameter Schema to generate a complete description.
 - **`parameters`** `list | dict | None` — Tool parameter definitions, supporting two formats (see below).
 - **`core_tool`** `bool` — Optional, passed through `**metadata`, defaults to `False`. With `True` the tool enters the core tool list and is directly visible to the LLM on every turn (equivalent to `visibility="visible"` when `visibility` is not set explicitly); with the default `False` it goes into the deferred pool and only appears in later turns after the model discovers it through tool search. More core tools mean a higher model selection cost, so reserve `True` for high-frequency, low-risk tools.
+- **`platforms`** `str | list[str]` — Optional, passed through `**metadata`. Limits the tool to the listed platforms, for example `"qq"` or `["qq", "telegram"]`. Omitted, `None`, or `[]` means no platform restriction. The tool is filtered out on other platforms and checked again against the current platform before invocation.
 
 Description field conventions:
 - `description`: Description of the tool, including usage methods, scenarios, and notes. When `brief_description` is empty, `description` serves as the fallback description.

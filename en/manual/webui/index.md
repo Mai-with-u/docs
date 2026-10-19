@@ -55,6 +55,15 @@ allowed_ips = "127.0.0.1"     # IP allowlist (comma-separated)
 
 ![About page](/images/webui/settings-about.webp)
 
+## Updating MaiBot
+
+**Settings → About** checks for and installs main-program updates. When a new version is found, an update card appears in the top-right corner of the top bar, with the version and pending commits:
+
+- **Git deployment** — syncs code and dependencies, then restarts; a dependency sync failure rolls back automatically
+- **Package install** — updates the program from PyPI or the selected mirror; configuration, data, and plugins in the instance directory are untouched
+
+See [Package Install and Updates](../deployment/update.md) for details and troubleshooting.
+
 ## Forgot Your Password?
 
 If you can still sign in, change or regenerate the Token in the "Security" tab of **WebUI Settings** (`/settings`, opened from the gear on the right of the top bar):

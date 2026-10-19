@@ -38,6 +38,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 - **`detailed_description`** `str` — 详细描述，可包含参数使用说明、注意事项等。SDK 会自动合并参数 Schema 生成完整描述
 - **`parameters`** `list | dict | None` — 工具参数定义，支持两种格式（见下文）
 - **`core_tool`** `bool` — 可选，通过 `**metadata` 传入，默认 `False`。设为 `True` 时工具进入核心工具列表，LLM 每轮直接可见（未显式设置 `visibility` 时等价于 `visibility="visible"`）；默认的 `False` 会进入 deferred 池，需要模型先用工具搜索发现它，才会出现在后续轮次。核心工具越多、模型选择成本越高，只给高频低风险的工具设 `True`
+- **`platforms`** `str | list[str]` — 可选，通过 `**metadata` 传入。限定工具只在指定平台出现，例如 `"qq"` 或 `["qq", "telegram"]`；省略、`None` 或 `[]` 表示不限平台。工具在其他平台会被过滤，调用前还会按当前平台再校验一次
 
 描述字段约定：
 - `description`：关于工具的描述，包括使用方法，使用情景，注意事项。当 `brief_description` 为空时，`description` 会作为回退描述。

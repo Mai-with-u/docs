@@ -205,7 +205,6 @@ multiple_probability = 0  # [进阶] 每次回复按此概率临时注入一条�
 enable_reply_at = true           # 允许麦麦在回复开头 @ 人；要不要 @ 由模型看聊天内容决定
 max_context_size = 40            # 群聊回复参考最近多少条消息；越大越懂上下文，也更耗 token
 max_private_context_size = 60    # 私聊参考的最近消息数量
-enable_context_optimization = true  # 压缩部分上下文减少模型消耗；一般建议开启
 mid_term_memory = true           # 聊天回想：主动召回最近聊天发生的事情
 mid_term_memory_lenth = 10       # 最多保留多少条聊天回想；0 = 不保留
 ```
@@ -222,6 +221,7 @@ mid_term_memory_lenth = 10       # 最多保留多少条聊天回想；0 = 不�
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_timing]
+message_debounce_mode = "natural"          # 消息防抖：off 关闭 / fast 快速 / natural 自然 / steady 沉稳
 talk_value = 1                             # 群聊发言频率：0~1，越小越安静
 private_talk_value = 1                     # 私聊发言频率：同上
 mentioned_bot_reply = false                # 消息提到麦麦名字时更容易回复
@@ -266,6 +266,15 @@ value = 1.0
 - **全局兜底** — `platform` 与 `item_id` 都留空，未命中任何具体规则时使用
 - **全局通配** — 两个字段都填 `"*"`，匹配任意平台和聊天；在 WebUI 编辑时可直接选「全局通配」或「默认兜底」模式
 
+**消息防抖** — `message_debounce_mode` 把一批消息先收齐再送进 Planner，四档规则固定：
+
+- **`off`（关闭）** — 沿用原有等待逻辑，包括被新消息打断后的短暂等待
+- **`fast`（快速）** — 安静 1 秒、活跃 3 秒；同一人续发 1 秒、换人 0.5 秒，更容易漏接分段补充
+- **`natural`（自然，默认）** — 安静 2 秒、活跃 5 秒；同一人续发 2 秒、换人 0.5 秒
+- **`steady`（沉稳）** — 安静 4 秒、活跃 7 秒；同一人续发 4 秒、换人 2 秒，给补充消息留更多时间，但没有补充时也更慢
+
+一批指合并后一起送入判断的消息。上一条有效消息距今超过 30 秒（或没有历史）算安静，否则算活跃；续发与换人只和紧邻的上一条消息比较。裸图开启的新批次至少等 4 秒，批次内纯表情包不能延长等待；整批从第一条实际收到起最多等 8 秒，被 @ 或提及后最多等 1 秒。换档位从下一条有效消息起生效，选择关闭会结束正在进行的固定规则等待。
+
 **怎么触发思考** — `reply_trigger_mode` 决定新消息何时进入 Planner：
 
 - **`frequency`（频率触发，默认）** — 按新消息数量决定是否思考，配合 `talk_value` / `talk_value_rules` 控制频率
@@ -277,7 +286,8 @@ value = 1.0
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_style]
-enable_reply_quote = true  # [进阶] 回复时是否引用相关消息
+group_quote_frequency = "occasionally"    # 群聊引用频率："never" 不引用 / "occasionally" 偶尔 / "often" 经常
+private_quote_frequency = "occasionally"  # 私聊引用频率：同上
 ```
 
 ```toml [群聊/私聊提示词 ~vscode-icons:file-type-toml~]
@@ -296,6 +306,8 @@ private_chat_prompts = """
 ```
 
 :::
+
+**引用频率** — 群聊与私聊分别设置，`never` 不引用、`occasionally` 偶尔引用（默认）、`often` 经常引用，「经常」的引用概率是「偶尔」的两倍。群聊按固定规律随机决定；私聊还会结合用户连发条数、发言间隔和回复目标位置判断。
 
 `chat_prompts` 给指定群聊或私聊追加额外要求，有特殊群规或语气要求时再加；`platform`、`item_id`、`prompt` 缺一不可，否则整条无效：
 
@@ -319,11 +331,14 @@ prompt = "这个群里说话要更简短。"
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [experimental]
-enable_behavior_learning = false  # 从聊天中学习「什么时候该怎么回应」的经验
+planner_message_steering = false  # 快速反应模式：思考/输出/等待期间收到新消息立即接入并重新推理
+planner_optimized_prompt = false  # 优化 Planner 提示词：用第二人称描述麦麦自己，并精简任务说明
+planner_stop_tool = false         # 优化工具使用：给 Planner 提供无参数的 stop() 工具
+planner_subagent = false          # 子代理任务派发：给 Planner 提供 subagent 工具
+advanced_sub_agent = false        # 高级子代理：子代理后台运行，结论作为新消息送回（需先开启上一项）
+tool_result_condense = false      # 超长工具结果整理：超过阈值的工具结果先整理成结论再写入上下文
+tool_result_condense_threshold = 3000  # [进阶] 触发整理的字符数，最低 500
 replyer_retro_prompt = false      # 按旧版（0.12.x）方式组织 Replyer 提示词，全部指令集中在一份模板里
-emotion_trait = "neutral"         # 实验性情绪特点："rational_calm" / "neutral" / "sentimental"
-behavior_learning_list = [{ platform = "", item_id = "", type = "group", use = true, learn = true }]
-behavior_groups = []              # 多个聊天共享学到的行为经验
 
 focus_mode = false                # 同一时间只专注一个聊天流，适合直播/高强度场景
 focus_on_private = false          # Focus 是否也作用于私聊
@@ -341,6 +356,16 @@ reaction_style = "lively"         # 短反应风格："reserved" / "natural" / "
 :::
 
 **丰富回复** — 回复可直接携带图片；回复时 @ 人由 [`[chat].enable_reply_at`](#上下文与回想) 控制，回复中的表情由 [`[emoji].use_new_send_logic`](#表情包) 控制。
+
+**快速反应模式** — 开启 `planner_message_steering` 后，Planner 强制使用流式请求；思考、输出或 `wait` 等待期间收到新消息会立即中断当前轮并重新请求，不再等静默窗口，也不限制连续打断次数。被打断的思考与输出会保留在历史里，方便回看。
+
+**子代理** — `planner_subagent = true` 给 Planner 提供 `subagent` 工具：把自包含的查询或整理任务交给子代理，子代理在独立上下文里多轮调用被授权的工具，只把结论交还。开启 `advanced_sub_agent = true` 后子代理转到后台，派发后立刻返回任务 ID，麦麦可以继续聊天；子代理结束时结论作为一条新消息送回并唤醒 Planner，同时提供 `subagent_status`（查看任务）和 `subagent_stop`（终止任务）。
+
+**超长工具结果整理** — `tool_result_condense = true` 时，工具结果达到 `tool_result_condense_threshold` 字符（默认 3000，最低 500）会先交给子代理按 Planner 当前意图整理成结论，再写入上下文，减少后续每轮的上下文占用；代价是多一次模型请求。
+
+**优化提示词与工具** — `planner_optimized_prompt = true` 让 Planner 用第二人称描述麦麦自己，并精简任务说明；`planner_stop_tool = true` 提供一个无参数的 `stop()` 工具，调用后结束本轮思考并等待新消息。
+
+**学习规则不在实验段** — 表达方式与黑话的学习范围由 `[expression].learning_list` / `[jargon].learning_list` 配置，详见[学习系统](#学习系统)；旧的 `[experimental]` 学习字段已移除。
 
 **复古回复提示词** — `replyer_retro_prompt = true` 时按旧版（0.12.x）方式组织 Replyer 提示词：全部回复指令集中在一份完整模板里，整段作为一条 `user` 消息发送，历史对话渲染成纯文本填入模板占位符，不再发送图片 Item。群聊、"简短回复"、私聊和"私聊且回复麦麦自己"各用一套模板（`retro_replyer`、`retro_replyer_light`、`retro_private_replyer`、`retro_private_replyer_self`），它们在 **Prompt 管理**里以"高级"折叠展示，可以编辑和创建自定义版本。改动热重载生效。
 

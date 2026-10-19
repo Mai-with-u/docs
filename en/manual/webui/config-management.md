@@ -2,6 +2,8 @@
 title: Edit Configuration in Your Browser
 ---
 
+# Edit Configuration in Your Browser
+
 ## MaiBot Settings
 
 **麦麦设置** (MaiBot Settings) provides the following configuration options:
