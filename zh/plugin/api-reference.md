@@ -434,11 +434,21 @@ await self.ctx.maisaka.context.append(
     visible_text="用户刚刚完成了一个插件任务",
     source_kind="plugin:calendar",
 )
+
+# 读取上下文里的图片
+image = await self.ctx.maisaka.context.resolve_image(
+    stream_id=stream["stream_id"],
+    source_id="m123",   # 消息 ID、工具媒体索引或模型看到的短消息编号
+    index=0,            # 该消息里的第几张图片，从 0 开始
+)
+# image["binary_data_base64"] 是 Base64 图片数据，image["binary_hash"] 是图片哈希
 ```
 
 :::
 
 `maisaka.proactive.trigger()` 把 `intent` 写入 Maisaka 内部上下文并唤醒 Planner，让 Maisaka 基于人格、记忆、当前上下文和可用工具自行决定是否回复以及如何表达。目标聊天流必须已经存在。
+
+`maisaka.context.resolve_image()` 只读取该聊天流**现有**上下文中的图片，不会新建会话或跨聊天流查询。成功时返回包含 `binary_data_base64` 与 `binary_hash` 的图片对象；消息不存在、序号越界、图片数据不可读或超过插件 RPC 单帧上限时会报错。目标聊天流必须已在运行时有实例。
 
 ## person — 用户信息
 
@@ -749,7 +759,7 @@ Manifest 示例：
 
 ## WebUI 上传领取
 
-`ctx.webui.claim_upload(upload_id)` 将宿主暂存的图片领取到本插件持久化数据目录的 `uploads/`，返回 `path`、`sha256` 和 `upload_id`。需要 SDK 2.11.0+、支持 `file_upload` 的宿主，以及 manifest 能力 `webui.claim_upload`。
+`ctx.webui.claim_upload(upload_id)` 将宿主暂存的图片领取到本插件持久化数据目录的 `uploads/`，返回 `path`、`sha256` 和 `upload_id`。需要 SDK 2.11.0+、支持 `image_upload` 能力的宿主，以及 manifest 能力 `webui.claim_upload`。
 
 ::: code-group
 

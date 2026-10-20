@@ -35,7 +35,7 @@ Find a plugin under "Plugin Extensions → Plugin Market / Browse" and install i
 - Installed plugins are disabled by default; enable them under [Manage Plugins](./management)
 
 ::: tip Can't find it in the market?
-The Plugin Market is indexed from GitHub repositories. If it's not there, use the Git URL method below to install any public repository.
+The Plugin Market is indexed from plugin repositories, and the information source can be switched to official MaiBot, CNB, or GitHub in the market settings. If it's not there, use the Git URL method below to install any public repository.
 :::
 
 ### Choose Which Version to Install

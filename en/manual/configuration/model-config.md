@@ -125,6 +125,67 @@ cache_price_in = 0.0
 - `cache_price_in` inside a slot follows the same "0 means cache hits are free" rule
 
 
+## Web Services
+
+Give the Planner web search and page-reading tools. Web services are defined separately from LLM models: define a service first, then select it in task assignment. Defining a service alone does not expose any tools.
+
+::: code-group
+
+```toml [DeepSeek ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000                  # Preview characters returned per call; read the full result with read_tool_result
+
+[web.services.deepseek]
+adapter = "deepseek"                  # Protocol: deepseek / tavily / stepsearch_mcp
+api_key = "sk-..."                    # DeepSeek API key
+# base_url = "https://api.deepseek.com"  # Empty uses the official URL; an OpenAI-compatible /v1 URL also works
+timeout = 60                          # Total time limit per call (seconds)
+
+[model_task_config.web_search]
+model_list = ["deepseek"]             # One web.services name; empty = no web tools
+```
+
+```toml [Tavily ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.tavily]
+adapter = "tavily"
+api_key = "tvly-..."                  # Tavily API key
+search_depth = "basic"                # Search depth: basic / advanced / fast / ultra-fast
+extract_depth = "basic"               # Page extraction depth: basic / advanced
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["tavily"]
+```
+
+```toml [StepSearch MCP ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.stepsearch]
+adapter = "stepsearch_mcp"
+server_ref = "stepsearch"             # Name of an mcp.servers entry in bot_config.toml; leave URL and key empty here
+category = ""                         # Search category: empty / programming / research / gov / business
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["stepsearch"]
+```
+
+:::
+
+**Key points:**
+
+- **Enabling** — the `web_search` / `web_fetch` tools are registered only when `model_task_config.web_search.model_list` selects a service; leaving it empty disables web tools entirely
+- **One service** — `model_list` accepts a single service. To switch services, change this value; other definitions can stay
+- **StepSearch MCP** — the endpoint and credentials live in `[mcp.servers]` in `bot_config.toml`; `web.services` only needs `server_ref` and must not set `api_key` or `base_url`
+- **Long pages** — only `preview_chars` characters are handed to the model per call; the full result is available through `read_tool_result`, which is also used by long-tool-result condensing
+- **Search arguments** — `web_search` accepts only `query` and `max_results` (1–20, default 5); `web_fetch` accepts only `url`
+- **Versus native model search** — this section configures **unified tools** given to the Planner, usable by any model. Native provider search (such as DeepSeek Responses `web_search`) is a model parameter; see [Model Extra Parameters](./model-extra-params.md#responses-api)
+
+
 ## Task Configuration
 
 Assign different models to each task based on task characteristics to achieve optimal performance and efficiency.

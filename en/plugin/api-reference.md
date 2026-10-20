@@ -434,11 +434,21 @@ await self.ctx.maisaka.context.append(
     visible_text="The user has just completed a plugin task",
     source_kind="plugin:calendar",
 )
+
+# Read an image from the context
+image = await self.ctx.maisaka.context.resolve_image(
+    stream_id=stream["stream_id"],
+    source_id="m123",   # Message ID, tool media index, or the short message number the model sees
+    index=0,            # Which image in that message, starting at 0
+)
+# image["binary_data_base64"] is Base64 image data; image["binary_hash"] is the image hash
 ```
 
 :::
 
 `maisaka.proactive.trigger()` writes `intent` into Maisaka's internal context and wakes the Planner, letting Maisaka decide on its own — based on personality, memory, current context, and available tools — whether to reply and how to phrase it. The target chat stream must already exist.
+
+`maisaka.context.resolve_image()` reads images from the **existing** context of that chat stream only; it does not create a session or query another chat stream. On success it returns an image object with `binary_data_base64` and `binary_hash`. It raises an error when the message does not exist, the index is out of range, the image data is unreadable, or the image exceeds the plugin RPC frame limit. The target chat stream must already have a runtime instance.
 
 ## person — User Information
 
@@ -749,7 +759,7 @@ Manifest example:
 
 ## WebUI Upload Claims
 
-`ctx.webui.claim_upload(upload_id)` claims a host-staged image into the plugin's persistent `uploads/` directory. It returns `path`, `sha256`, and `upload_id`. Requires SDK 2.11.0+, a host supporting `file_upload`, and manifest capability `webui.claim_upload`.
+`ctx.webui.claim_upload(upload_id)` claims a host-staged image into the plugin's persistent `uploads/` directory. It returns `path`, `sha256`, and `upload_id`. Requires SDK 2.11.0+, a host supporting the `image_upload` capability, and manifest capability `webui.claim_upload`.
 
 ::: code-group
 

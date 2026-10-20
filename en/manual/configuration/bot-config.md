@@ -205,7 +205,6 @@ multiple_probability = 0  # [Advanced] Chance to temporarily inject one alternat
 enable_reply_at = true           # Let Mai @-mention people at the start of a reply; the model decides when
 max_context_size = 40            # How many recent messages a group reply considers; more context costs more tokens
 max_private_context_size = 60    # Recent messages considered for private replies
-enable_context_optimization = true  # Compress part of the context to reduce model usage; recommended
 mid_term_memory = true           # Chat recall: proactively recalls what happened in recent chat
 mid_term_memory_lenth = 10       # How many recall entries to keep; 0 = keep none
 ```
@@ -222,6 +221,7 @@ Keep the field name `mid_term_memory_lenth` exactly as written; changing its spe
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_timing]
+message_debounce_mode = "natural"          # Message debouncing: off / fast / natural / steady
 talk_value = 1                             # Group talk frequency: 0~1, lower is quieter
 private_talk_value = 1                     # Private talk frequency: same scale
 mentioned_bot_reply = false                # Reply more easily when a message mentions Mai's name
@@ -266,6 +266,15 @@ value = 1.0
 - **Global fallback** — leave both `platform` and `item_id` empty; used when no specific rule matches
 - **Global wildcard** — set both to `"*"` to match any platform and any chat; in the WebUI you can pick the "global wildcard" or "fallback" mode directly
 
+**Message debouncing** — `message_debounce_mode` collects a batch of messages before sending it to the Planner. The four modes use fixed rules:
+
+- **`off`** — keeps the original wait logic, including the short wait after a new message interrupts processing
+- **`fast`** — quiet 1 s, active 3 s; same sender continuing 1 s, different sender 0.5 s. Misses split follow-ups more easily
+- **`natural` (default)** — quiet 2 s, active 5 s; same sender continuing 2 s, different sender 0.5 s
+- **`steady`** — quiet 4 s, active 7 s; same sender continuing 4 s, different sender 2 s. Gives follow-ups more time, but also waits longer when none arrive
+
+A batch is the messages merged and sent to the Planner together. If the previous effective message is more than 30 seconds old (or there is no history), the chat is quiet; otherwise it is active. Continuation and sender changes compare only with the immediately previous message. A batch opened by a bare image waits at least 4 seconds, and stickers inside a batch cannot extend the wait. Each batch waits at most 8 seconds from the first message actually received, or at most 1 second after an @ mention or name mention. A mode change applies from the next effective message; choosing Off ends an in-progress fixed-rule wait.
+
 **How thinking is triggered** — `reply_trigger_mode` decides when new messages enter the Planner:
 
 - **`frequency` (default)** — decides whether to think based on the number of new messages, with `talk_value` / `talk_value_rules` controlling the rate
@@ -277,7 +286,8 @@ value = 1.0
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_style]
-enable_reply_quote = true  # [Advanced] Whether replies may quote related messages
+group_quote_frequency = "occasionally"    # Group quote frequency: "never" / "occasionally" / "often"
+private_quote_frequency = "occasionally"  # Private quote frequency: same values
 ```
 
 ```toml [Group/private prompts ~vscode-icons:file-type-toml~]
@@ -296,6 +306,8 @@ private_chat_prompts = """
 ```
 
 :::
+
+**Quote frequency** — group and private chats are configured separately: `never`, `occasionally` (default), or `often`. "Often" quotes twice as frequently as "occasionally". Group chats decide by a fixed random rule; private chats also consider how many messages the user sent in a row, the interval between them, and the position of the reply target.
 
 `chat_prompts` appends extra requirements to a specific group or private chat — add one only when you have special group rules or tone requirements; `platform`, `item_id`, and `prompt` are all required or the whole entry is invalid:
 
@@ -319,11 +331,14 @@ The whole section is advanced; everything is off by default — opt in per featu
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [experimental]
-enable_behavior_learning = false  # Learn "how to respond when" experience from chat
+planner_message_steering = false  # Quick reaction mode: new messages during thinking/output/wait immediately join and restart reasoning
+planner_optimized_prompt = false  # Optimized Planner prompt: describe Mai in the second person and trim task instructions
+planner_stop_tool = false         # Optimize tool usage: give the Planner a no-argument stop() tool
+planner_subagent = false          # Sub-agent delegation: give the Planner the subagent tool
+advanced_sub_agent = false        # Advanced sub-agents: run in the background and return the conclusion as a new message (requires the previous option)
+tool_result_condense = false      # Condense long tool results into a conclusion before writing them to context
+tool_result_condense_threshold = 3000  # [Advanced] Character count that triggers condensing; minimum 500
 replyer_retro_prompt = false      # Organize the Replyer prompt the legacy (0.12.x) way, with all instructions in a single template
-emotion_trait = "neutral"         # Experimental emotion trait: "rational_calm" / "neutral" / "sentimental"
-behavior_learning_list = [{ platform = "", item_id = "", type = "group", use = true, learn = true }]
-behavior_groups = []              # Multiple chats share learned behavior experience
 
 focus_mode = false                # Focus on a single chat stream at a time; good for livestreams
 focus_on_private = false          # Whether Focus also applies to private chats
@@ -341,6 +356,16 @@ reaction_style = "lively"         # "reserved" / "natural" / "lively"
 :::
 
 **Rich replies** — Replies can include images. @-mentions follow [`[chat].enable_reply_at`](#context-and-recall), and stickers follow [`[emoji].use_new_send_logic`](#emoji-stickers).
+
+**Quick reaction mode** — with `planner_message_steering` enabled, the Planner is forced to use streaming requests. A new message arriving during thinking, output, or a `wait` immediately interrupts the current round and starts another request; it no longer waits for a quiet window and does not limit consecutive interruptions. Interrupted thinking and output remain in history for review.
+
+**Sub-agents** — `planner_subagent = true` gives the Planner a `subagent` tool: a self-contained research or summarization task runs in its own context, may call authorized tools over multiple rounds, and returns only its conclusion. With `advanced_sub_agent = true`, sub-agents run in the background: dispatch returns a task ID immediately and Mai can keep chatting; when the sub-agent finishes, its conclusion returns as a new message that wakes the Planner. `subagent_status` lists tasks and `subagent_stop` terminates one.
+
+**Condensing long tool results** — with `tool_result_condense = true`, a tool result reaching `tool_result_condense_threshold` characters (default 3000, minimum 500) is first condensed by a sub-agent according to the Planner's current intent, then written to context. This reduces context usage in later rounds at the cost of one extra model request.
+
+**Optimized prompt and tools** — `planner_optimized_prompt = true` describes Mai in the second person and trims task instructions; `planner_stop_tool = true` provides a no-argument `stop()` tool that ends the current round and waits for new messages.
+
+**Learning rules are not in this section** — expression and jargon learning scopes are configured in `[expression].learning_list` / `[jargon].learning_list`; see [Learning Systems](#learning-systems). The old `[experimental]` learning fields have been removed.
 
 **Retro reply prompt** — with `replyer_retro_prompt = true`, the Replyer prompt is organized the legacy (0.12.x) way: all reply instructions live in a single complete template sent as one `user` message, and the dialogue history is rendered as plain text into template placeholders instead of being sent as image Items. Group chat, "short reply", private chat, and "private chat replying to Mai herself" each use their own template (`retro_replyer`, `retro_replyer_light`, `retro_private_replyer`, `retro_private_replyer_self`); they appear under **Prompt Management** collapsed as "advanced" and can be edited or given custom versions. Changes hot-reload.
 

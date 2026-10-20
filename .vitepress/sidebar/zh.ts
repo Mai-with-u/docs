@@ -59,6 +59,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Linux 部署', link: '/manual/deployment/linux' },
       { text: 'Docker 部署', link: '/manual/deployment/docker' },
       { text: 'AI 助手安装', link: '/manual/deployment/installation-agent' },
+      { text: '程序包安装与更新', link: '/manual/deployment/update' },
     ]
   },
   {

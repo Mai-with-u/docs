@@ -48,6 +48,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Linux Deployment', link: '/en/manual/deployment/linux' },
       { text: 'Docker Deployment', link: '/en/manual/deployment/docker' },
       { text: 'AI-Assisted Install', link: '/en/manual/deployment/installation-agent' },
+      { text: 'Package Install & Updates', link: '/en/manual/deployment/update' },
     ]
   },
   {

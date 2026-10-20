@@ -25,13 +25,14 @@ from maibot_sdk import ReplyExtension
     timeout_ms: int = 60000,                    # 单次调用超时（毫秒）
     chat_scope: str = "all",                    # all / group / private
     allowed_session: list[str] | None = None,   # 限定生效的聊天流
+    platforms: str | list[str] | None = None,   # 限定生效的平台，如 "qq" / ["qq", "telegram"]；省略 = 不限
     enabled: bool = True,
 )
 ```
 
 :::
 
-`parameters` 支持 `ToolParameterInfo` 列表、属性字典或完整 object JSON Schema；主程序会校验类型、必填项、枚举和默认值。`chat_scope` / `allowed_session` 与组件启用开关沿用通用组件机制。
+`parameters` 支持 `ToolParameterInfo` 列表、属性字典或完整 object JSON Schema；主程序会校验类型、必填项、枚举和默认值。`chat_scope` / `allowed_session` / `platforms` 与组件启用开关沿用通用组件机制。
 
 ## 平台作用域
 

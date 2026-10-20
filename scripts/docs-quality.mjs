@@ -166,7 +166,10 @@ const en = mdFiles('en')
       let target = null
       if (pathPart.startsWith('/')) {
         const r = pathPart.replace(/\.md$/, '')
-        const cand = [join(ROOT, 'zh', r + '.md'), join(ROOT, 'zh', r, 'index.md')]
+        // en 页面用 /en/... 绝对链接；按前缀选语言目录，不能一律去 zh 下找。
+        const lang = r.startsWith('/en/') ? 'en' : 'zh'
+        const rest = r.replace(/^\/(zh|en)\//, '/')
+        const cand = [join(ROOT, lang, rest + '.md'), join(ROOT, lang, rest, 'index.md')]
         target = cand.find((c) => existsSync(c)) || null
       } else if (pathPart.endsWith('.md')) target = resolve(dirname(p), pathPart)
       else if (pathPart) {

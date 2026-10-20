@@ -156,7 +156,7 @@ Both share the same structure, declaring a closed interval:
 The two failure modes are not symmetric:
 
 - **Host out of range** — if the current Host is above `max_version` but shares its major and minor version, the plugin **still loads** with a warning only (patch-level tolerance); every other mismatch is recorded as an error and the plugin is blocked
-- **SDK out of range** — always recorded as an error regardless of direction, and the plugin is blocked
+- **SDK out of range** — recorded as a warning regardless of direction, and the plugin **still loads**. Installation, updates, and Runner connections are not blocked by the SDK range; actual compatibility is decided by runtime behavior
 
 ::: danger Do not pin max_version to a patch release
 Writing `max_version` as a concrete patch release (for example `1.2.3`) means your plugin stops loading as soon as MaiBot ships a new version. The official built-in plugins set the upper bound to `999.999.999` and constrain only `min_version` seriously, letting real testing decide whether a new version still works; write `0.0.0` when you do not want a lower bound.
@@ -288,7 +288,7 @@ Both `host_application` and `sdk` are judged by the same validation entry point,
 
 - **Host above `max_version` with the same major.minor** — warning; the plugin loads normally (patch-level tolerance)
 - **Host out of range in any other case** — error; the plugin is blocked from loading
-- **SDK out of range** — error; the plugin is blocked, with no tolerance tier
+- **SDK out of range** — warning; the plugin loads normally, and the log records the declared SDK range and the current SDK version
 
 The handshake-time check of the Runner's own SDK version (fixed range `[1.0.0, 2.99.99]`) is independent of the two tiers above: it is not declared by the manifest and is not affected by "Force Plugin Compatibility".
 
@@ -317,6 +317,6 @@ python -m json.tool _manifest.json
 
 - **`extra fields not permitted`** — the validator runs Pydantic in strict mode and rejects any field outside the declared structure: remove custom comment or scratch fields.
 - **Format errors on `id`, `version`, or `author`** — `id` must match `^[a-z0-9]+(?:[.-][a-z0-9]+)+$` (lowercase, at least one `.` or `-`), `version` and both range bounds must be strict `X.Y.Z`, and `author` must be a `{ name, url }` object whose `url` starts with `http://` or `https://`.
-- **The plugin is blocked as version-incompatible** — a Host mismatch is an error unless major and minor match (patch-level tolerance), and an SDK mismatch is always an error; set `max_version` to `999.999.999` and constrain `min_version` seriously, or enable "Force plugin compatibility" for triage — it needs a MaiBot restart and skips version ranges only.
+- **The plugin is blocked as version-incompatible** — a Host mismatch is an error unless major and minor match (patch-level tolerance); an SDK mismatch only logs a warning and does not block loading. Set the Host `max_version` to `999.999.999` and constrain `min_version` seriously, or enable "Force plugin compatibility" for triage — it needs a MaiBot restart and skips version ranges only.
 - **A local `display.icon` does not render or is rejected** — with `type="local"`, `value` must be a relative path inside the plugin directory ending in `.png`, `.jpg`, `.jpeg`, `.webp`, or `.svg`; online URLs are never allowed, and absolute paths, `..`, and symbolic links are refused. A failed load falls back to `fallback`.
 - **The log reports a dependency or `llm_providers` conflict** — no self-dependency, duplicate declaration, or circular dependency, and each `client_type` must match its `@LLMProvider` declaration exactly; when two plugins declare the same `client_type`, both are blocked.
