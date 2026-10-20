@@ -128,7 +128,7 @@ QQ 官方平台的 OpenID 与真实 QQ 号不互通。为了让消息以真实 Q
 
 ## 头像接口（开发者）
 
-提供公开 API `adapter.avatar.get`（版本 `1`），与统一 QQ 连接器使用相同的头像协议。参数为 `platform`、`target_id`、`target_type`（`user` 或 `group`，默认 `user`），并接受宿主传入的 `account_id` 和 `scope`。
+提供公开 API `adapter.avatar.get`（版本 `1`），与统一 QQ 连接器使用相同的[头像协议](/develop/adapters/avatar-api)。参数为 `platform`、`target_id`、`target_type`（`user` 或 `group`，默认 `user`），并接受宿主传入的 `account_id` 和 `scope`。
 
 - 数字 QQ 号、群号返回头像 URL 和 `expires_in = 86400`，图片由宿主统一下载、缓存；
 - OpenID 已通过 `/assign_id` 或 `/assign_group_id` 绑定真实数字 ID 时，使用绑定值查询头像；

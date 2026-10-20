@@ -120,11 +120,34 @@ curl -X GET "http://127.0.0.1:8001/api/webui/person/list?page=1&page_size=20&is_
 
 :::
 
-### avatar — 头像缓存
+### 头像 {#avatar-api}
 
-**`prefix="/avatar"`** — 唯一的 GET 端点，提供带缓存的 WebUI 头像代理。
+**`prefix="/avatar"`** — 远程头像由 Host 统一头像服务按 Platform IO 路由调用适配器的 `adapter.avatar.get`，下载校验后返回缓存图片。接口需要 WebUI 登录认证。
 
-- **`GET /api/webui/avatar`** — 按 `platform` + `user_id` 或 `group_id` 获取头像。缓存 24h，支持 `qq`/`napcat`/`qqguild` 平台自动从 QQ 头像服务器下载。
+::: endpoint GET /api/webui/avatar
+读取用户或群头像。
+
+::: fields
+- **`platform`** — 必填，目标所属平台。
+- **`user_id` / `group_id`** — 必须且只能指定一个非空 ID，分别查询用户或群头像。
+- **`account_id` / `scope`** — 可选，默认空字符串；同平台多账号或多连接时用于选择适配器路由。
+- **`force_refresh`** — 可选，默认 `false`；传 `true` 跳过 Host 现有缓存并刷新。
+:::
+
+成功返回 200 和图片文件。目标参数不合法返回 400；远程结果为 `unsupported` / `missing` 时返回 404，JSON 的 `detail.status` 为对应状态，由界面显示默认头像；路由、适配器调用、协议校验或下载失败返回 502，`detail` 包含错误信息。
+
+图片上限 5 MB，支持 JPG、PNG、WebP、GIF、BMP。Host 按适配器的 `expires_in` 缓存，省略时为 86400 秒，最多 24 小时；`unsupported` / `missing` 缓存 5 分钟。错误不缓存，失败时不返回过期图片。
+
+成功图片的浏览器缓存最多 5 分钟，且不超过 Host 剩余有效期；强制刷新成功响应使用 `private, no-store`。`unsupported` / `missing` 的 404 响应使用 `private, max-age=300`，包括强制刷新请求。已打开页面不会自动重载头像，过期在下一次图片请求时生效。
+
+`platform=webui` 读取持久化的本地上传头像，不应用远程过期规则，响应使用 `private, no-cache`；未上传时返回 404 和文字错误信息。
+:::
+
+::: endpoint PUT /api/webui/avatar/webui-user
+以 `multipart/form-data` 上传本地 WebUI 用户头像：`user_id` 和 `file` 必填，`user_id` 必须为 `webui_` 开头且后续只含字母、数字、下划线或连字符。图片上限和格式同上；成功返回 `success` 和带版本参数的 `avatar_url`。
+:::
+
+完整适配器协议、缓存键、存储位置与并发刷新规则见[头像接口](/develop/adapters/avatar-api)。
 
 ### behavior — 行为学习图谱
 

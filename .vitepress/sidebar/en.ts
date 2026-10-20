@@ -43,6 +43,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     collapsed: false,
     items: [
       { text: 'Quick Start', link: '/en/manual/' },
+      { text: 'Install with uv', link: '/en/manual/deployment/uv-tool' },
       { text: 'Windows Deployment', link: '/en/manual/deployment/windows' },
       { text: 'Linux Deployment', link: '/en/manual/deployment/linux' },
       { text: 'Docker Deployment', link: '/en/manual/deployment/docker' },
@@ -112,6 +113,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
     items: [
       { text: 'Adapter Overview', link: '/en/develop/adapters/' },
       { text: 'Message Protocol', link: '/en/develop/adapters/protocol' },
+      { text: 'Avatar API', link: '/en/develop/adapters/avatar-api' },
       { text: 'Writing an Adapter', link: '/en/develop/adapters/build' },
       { text: 'Access Policy', link: '/en/develop/adapters/policy' },
       { text: 'Troubleshooting', link: '/en/develop/adapters/debugging' },

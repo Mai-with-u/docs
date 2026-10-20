@@ -4,7 +4,7 @@ title: AI 助手安装
 
 # AI 助手安装
 
-**把一份提示词交给 AI 助手，让它替你完成 MaiBot 的克隆、安装、配置和启动。** 你只需要回答几个问题，必要时在 WebUI 里点几下；想先弄清每一步在做什么，可以对照 [Windows 部署](./windows) 或 [Linux 部署](./linux)。
+**把一份提示词交给 AI 助手，让它替你完成 MaiBot 的安装、配置和启动。** 默认使用 [uv 安装](./uv-tool)正式版；需要修改代码时，可以选择 [Windows 源码部署](./windows)或[Linux 源码部署](./linux)。
 
 ## 把提示词发给 AI
 
@@ -25,8 +25,8 @@ title: AI 助手安装
 ## AI 会带你走的流程
 
 1. **问清两件事** — 你的操作系统，以及要不要接 QQ。接 QQ 有两条路线：**统一 QQ 连接器**（登录自己的 QQ 号，推荐）或 **QQ 官方机器人**（AppID + AppSecret，不用登录任何客户端）；
-2. **检查环境** — 内存与磁盘可用空间都要 ≥ 2 GB，缺少 Git、Python 3.12+ 或 uv 会先帮你装好；
-3. **克隆并启动** — 拉取 [MaiBot 仓库](https://github.com/Mai-with-u/MaiBot)，用 uv 安装依赖，再启动主程序；
+2. **检查环境** — 内存与磁盘可用空间都要 ≥ 2 GB，安装 uv；工具安装使用 Python 3.13，由 uv 下载，源码部署或手动下载插件时再准备 Git；
+3. **安装并启动** — 从 PyPI 安装 MaiBot，初始化实例目录，配置模型，再启动主程序；
 4. **接入 QQ**（可选）— 按所选路线安装适配器、填连接信息、设置放行范围；
 5. **验证** — 在 WebUI 或 QQ 里发一条消息，确认麦麦能回复。
 
@@ -34,18 +34,21 @@ AI 执行的安装与启动命令，和部署文档里是同一套：
 
 ::: code-group
 
-```bash [安装依赖 ~vscode-icons:file-type-python~]
-git clone https://github.com/Mai-with-u/MaiBot.git
-cd MaiBot
-uv sync
+```bash [安装和初始化 ~vscode-icons:file-type-python~]
+uv tool install --python 3.13 maibot
+mkdir my-maibot
+cd my-maibot
+maibot init
 ```
 
 :::
 
+启动前在实例的 `config/model_config.toml` 中填写模型配置，字段说明见[模型配置](/manual/configuration/model-config)。
+
 ::: code-group
 
 ```bash [启动 MaiBot ~vscode-icons:file-type-shell~]
-uv run bot.py
+maibot run
 ```
 
 :::

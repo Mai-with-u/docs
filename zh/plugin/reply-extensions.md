@@ -20,6 +20,7 @@ from maibot_sdk import ReplyExtension
     description: str = "",                      # 给 Planner 看的说明：什么时候启用
     parameters: dict | list[ToolParameterInfo], # 参数声明，写法与 Tool 相同
     *,
+    platforms: str | list[str] | None = None,   # 平台作用域
     priority: int = 0,                          # 多个扩展的处理顺序，从小到大
     timeout_ms: int = 60000,                    # 单次调用超时（毫秒）
     chat_scope: str = "all",                    # all / group / private
@@ -31,6 +32,38 @@ from maibot_sdk import ReplyExtension
 :::
 
 `parameters` 支持 `ToolParameterInfo` 列表、属性字典或完整 object JSON Schema；主程序会校验类型、必填项、枚举和默认值。`chat_scope` / `allowed_session` 与组件启用开关沿用通用组件机制。
+
+## 平台作用域
+
+`platforms` 限定扩展适用的聊天平台，写法与 [Tool 组件](./tools.md#平台作用域) 相同。使用此参数需要 `maibot-plugin-sdk>=2.14.0`，并同步部署支持回复扩展平台过滤的主程序；旧 Host 会忽略这项限制。
+
+- **单个平台** — 字符串，例如 `"qq"`。
+- **多个平台** — 字符串列表，例如 `["qq", "telegram"]`。
+- **不限平台** — 省略字段，或设置为 `None`、`[]`。
+
+平台名称会去除首尾空白、转为小写并去重；空名称、非字符串元素或其他类型会报错。`platforms` 与 `chat_scope`、`allowed_session` 共同生效，所有限制都匹配时扩展才能参与回复。
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+from maibot_sdk import ReplyExtension
+
+@ReplyExtension(
+    "forward_images",
+    description="将图片整理为 QQ 合并转发消息",
+    parameters={"caption": {"type": "string", "default": ""}},
+    platforms="qq",
+)
+async def reply_forward_images(self, *, phase, parameters, text, messages, **context):
+    # 按 prepare / before_send 协议准备和转换本次回复。
+    return {}
+```
+
+:::
+
+Host 只在匹配平台的 `reply.plugin_options` Schema 中暴露扩展；手动提交不匹配平台的扩展也会在调用前被拒绝，发送前会再次检查。受限扩展需要有效且匹配的平台上下文，无聊天上下文的管理清单仍展示全部扩展。
+
+`platforms` 属于组件声明，不进入扩展参数 Schema，模型无法通过 `plugin_options` 修改它。处理器可从 `chat["platform"]` 获取当前平台。
 
 ## 参数如何出现在 reply 工具里
 
@@ -153,7 +186,7 @@ def create_plugin():
 
 **reply 里看不到我的参数？**
 
-- 确认插件已启用，且 `chat_scope` / `allowed_session` 与当前会话匹配
+- 确认插件已启用，且 `platforms` / `chat_scope` / `allowed_session` 与当前会话匹配
 - 停用或卸载后参数会立刻从声明中移除，重新启用并重载即可恢复
 
 **回复没发出去？**

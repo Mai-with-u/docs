@@ -24,8 +24,8 @@ MaiBot（麦麦）是一个基于大语言模型的聊天机器人框架——�
 
 <div class="step-card">
   <div class="step-head"><span class="step-no">1</span> <h3>安装 MaiBot</h3></div>
-  <p>Windows 用户推荐使用<strong>一键包</strong>一站式快速部署。<br> Linux、macOS 可以使用Docker或用Python环境直接启动。</p>
-  <a class="step-more" href="/manual/deployment/windows">查看安装教程 →</a>
+  <p>Windows、Linux、macOS 都可以用 <strong>uv</strong> 安装主程序和 WebUI。<br>也可以选择一键包、源码部署或 Docker。</p>
+  <a class="step-more" href="/manual/deployment/uv-tool">使用 uv 安装 →</a>
 </div>
 
 <div class="step-card">

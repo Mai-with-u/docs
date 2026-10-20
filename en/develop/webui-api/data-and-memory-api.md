@@ -120,11 +120,34 @@ curl -X GET "http://127.0.0.1:8001/api/webui/person/list?page=1&page_size=20&is_
 
 :::
 
-### avatar — Avatar Cache
+### Avatars {#avatar-api}
 
-**`prefix="/avatar"`** — A single GET endpoint providing a cached WebUI avatar proxy.
+**`prefix="/avatar"`** — For remote avatars, the Host's shared avatar service calls the adapter's `adapter.avatar.get` through Platform IO routing, downloads and validates the image, and returns the cached file. These endpoints require WebUI login authentication.
 
-- **`GET /api/webui/avatar`** — Get avatar by `platform` + `user_id` or `group_id`. Cached for 24h; the `qq`/`napcat`/`qqguild` platforms support auto-download from QQ avatar servers.
+::: endpoint GET /api/webui/avatar
+Read a user or group avatar.
+
+::: fields
+- **`platform`** — Required. The target's platform.
+- **`user_id` / `group_id`** — Supply exactly one non-empty ID to query a user or group avatar, respectively.
+- **`account_id` / `scope`** — Optional, defaulting to empty strings. Select the adapter route when a platform has multiple accounts or connections.
+- **`force_refresh`** — Optional, defaults to `false`. Set to `true` to skip the existing Host cache and refresh.
+:::
+
+Success returns 200 and an image file. Invalid target parameters return 400. Remote `unsupported` / `missing` results return 404 with the corresponding status in JSON `detail.status`, and the UI displays a default avatar. Routing, adapter invocation, protocol validation, or download failures return 502 with error information in `detail`.
+
+Images are limited to 5 MB, with JPG, PNG, WebP, GIF, and BMP supported. The Host caches them for the adapter's `expires_in`, defaulting to 86400 seconds when omitted and capped at 24 hours. `unsupported` / `missing` are cached for 5 minutes. Errors are not cached, and failures do not return expired images.
+
+Successful images are cached in the browser for at most 5 minutes, capped by the remaining Host cache lifetime. Successful forced refresh responses use `private, no-store`. The 404 responses for `unsupported` / `missing` use `private, max-age=300`, including forced refresh requests. Open pages do not reload avatars automatically; expiry takes effect on the next image request.
+
+`platform=webui` reads a persistent, locally uploaded avatar, exempt from remote expiry rules, with `private, no-cache`. If none has been uploaded, it returns 404 with a text error detail.
+:::
+
+::: endpoint PUT /api/webui/avatar/webui-user
+Upload a local WebUI user avatar as `multipart/form-data`. Both `user_id` and `file` are required. `user_id` must start with `webui_`, followed by one or more letters, digits, underscores, or hyphens. The image size and format limits above apply. Success returns `success` and an `avatar_url` containing a version parameter.
+:::
+
+See [Avatar API](/en/develop/adapters/avatar-api) for the full adapter protocol, cache keys, storage location, and concurrent refresh rules.
 
 ### behavior — Behavior Learning Graph
 

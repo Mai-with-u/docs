@@ -8,7 +8,7 @@
 
 EULA 全文：https://docs.mai-mai.org/about/EULA
 
-本指南对应 MaiBot 1.3.4，步骤同样适用于 1.3.x。
+默认从 PyPI 安装 MaiBot 正式版，创建独立实例目录。部署细节：https://docs.mai-mai.org/manual/deployment/uv-tool
 
 ## Step 0: 询问用户
 
@@ -24,6 +24,8 @@ EULA 全文：https://docs.mai-mai.org/about/EULA
    - 方案 C：需要先到 QQ 开放平台（https://q.qq.com/）完成开发者入驻、创建机器人并取得 AppID 与 AppSecret；想用群聊时，还需群主把该机器人的「机器人可获取的群聊消息范围」设为「获取群内全部消息」
 4. 提醒用户：运行本程序即表示同意 EULA（https://docs.mai-mai.org/about/EULA）
 
+默认使用 uv 工具安装。用户要修改主程序代码或指定开发分支时，改用源码部署：https://docs.mai-mai.org/manual/deployment/windows 或 https://docs.mai-mai.org/manual/deployment/linux。后续启动与更新命令也要使用所选部署方式。
+
 ## Step 1: 检查系统要求
 
 检查用户系统是否满足最低要求。如果不满足，明确告知用户并建议换用其他部署方式。
@@ -35,29 +37,33 @@ EULA 全文：https://docs.mai-mai.org/about/EULA
 
 逐项检查以下依赖是否已安装。如果缺失，**询问用户后直接帮用户安装**，根据用户的操作系统选择合适的安装方式。
 
-- **Git** — 用于下载 MaiBot 源码和插件
-- **Python 3.12+** — MaiBot 运行环境，要求 >=3.12
-  - Windows 安装时务必提醒勾选"Add Python to PATH"
-- **uv**（推荐）— Python 包管理器，自动管理虚拟环境。安装后需重新加载 PATH。
+- **uv** — 安装主程序、Python 和依赖。安装后需重新加载 PATH；官方安装指南：https://docs.astral.sh/uv/getting-started/installation/
+- **Python 3.13** — 工具安装通过 `--python 3.13` 指定，缺少时由 uv 下载；主程序要求 Python 3.12+
+- **Git** — 源码部署或手动克隆插件时需要
 
 ## Step 3: 下载并安装 MaiBot
 
 ```bash
-git clone https://github.com/Mai-with-u/MaiBot.git
-cd MaiBot
-uv sync
+uv tool install --python 3.13 maibot
+mkdir my-maibot
+cd my-maibot
+maibot init
 ```
+
+记录 `my-maibot` 的绝对路径，后续配置、插件安装、启动和备份都在这个实例目录进行。`maibot init` 保留已有配置，只生成缺失的文件。命令找不到时执行 `uv tool update-shell` 并重新打开终端。
+
+启动前使用用户提供的模型配置填写 `config/model_config.toml`，服务商、API Key、模型标识和任务分配必须对应，不输出或提交 API Key。配置说明：https://docs.mai-mai.org/manual/configuration/model-config
 
 ## Step 4: 启动 MaiBot
 
 ```bash
-uv run bot.py
+maibot run
 ```
 
 首次启动注意事项：
 
 - 终端会提示 EULA 确认，输入「同意」即可
-- 自动生成默认配置文件到 `config/` 目录，包括 `config/bot_config.toml` 和 `config/model_config.toml`
+- `maibot init` 已生成 `config/bot_config.toml` 和 `config/model_config.toml`；数据和日志分别保存到实例目录的 `data/`、`logs/`
 - WebUI 默认在 http://127.0.0.1:8001/ 启动；首次启动终端会打印 WebUI 登录 Token（也保存在 `data/webui.json`），复制后在浏览器登录页粘贴
 - 引导用户在 WebUI 中完成首次配置。最少需要一个 LLM 模型
 - Bot 配置指南：https://docs.mai-mai.org/manual/configuration/bot-config
@@ -68,8 +74,12 @@ uv run bot.py
 ```bash
 export EULA_AGREE=<终端显示的hash>
 export PRIVACY_AGREE=<终端显示的hash>
-uv run bot.py
+maibot run
 ```
+
+Windows 后台运行没有交互控制台时，在实例 `config/bot_config.toml` 的 `[debug]` 部分设置 `enable_console_input = false`。多个实例分别设置空闲的 `webui.port` 和 `maim_message.ws_server_port`，不要占用已有服务的端口。
+
+升级工具安装版前停止所有共用该工具环境的实例、备份实例目录，执行 `uv tool upgrade maibot`，再从原实例目录执行 `maibot run`。源码部署及 OneKey 保留各自的更新流程。复用旧数据前停止原实例并备份，安装版可以通过 `maibot run --directory "原实例绝对路径"` 使用原来的配置和数据，不同时运行两个程序读写同一目录。
 
 ## Step 5: 接入 QQ（如果选择了方案 B 或 C）
 
@@ -90,7 +100,7 @@ uv run bot.py
    - 这里装的是 QQ 客户端本身，不是 MaiBot 的适配器；**不要**再去安装 `MaiBot-Napcat-Adapter` 等独立适配器
 2. 安装统一 QQ 连接器（二选一）：
    - 推荐：WebUI → 插件扩展 → 插件市场，搜索「统一 QQ 连接器」→ 安装
-   - 手动方式（在 MaiBot 项目根目录执行）：`git clone https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter.git plugins/MaiBot-SnowLuma-Adapter`
+   - 手动方式（在 MaiBot 实例目录执行）：`git clone https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter.git plugins/MaiBot-SnowLuma-Adapter`
 3. 启用插件：WebUI → 插件扩展 → 找到 `MaiBot-SnowLuma-Adapter` → 点击启用（等价于把 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 里的 `[plugin] enabled` 设为 `true`）
 4. 配置连接：编辑 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 的 `[client]` 节，与客户端设置保持一致：
 
@@ -120,7 +130,7 @@ qq_account = "机器人QQ号"
 1. 申请机器人：打开 QQ 开放平台 https://q.qq.com/ 完成开发者入驻并创建机器人，在控制台取得 **AppID** 与 **AppSecret**，并开通群聊 / 单聊能力
 2. 安装适配器（二选一）：
    - 推荐：WebUI → 插件扩展 → 插件市场，搜索「QQ 官方机器人适配器」→ 安装
-   - 手动方式（在 MaiBot 项目根目录执行）：`git clone https://github.com/Mai-with-u/MaiBot-QQ-Adapter.git plugins/qq_official_adapter`
+   - 手动方式（在 MaiBot 实例目录执行）：`git clone https://github.com/Mai-with-u/MaiBot-QQ-Adapter.git plugins/qq_official_adapter`
 3. 启用插件并填写连接信息：在 WebUI 的插件设置里填，或编辑 `plugins/qq_official_adapter/config.toml`：
 
 ```toml

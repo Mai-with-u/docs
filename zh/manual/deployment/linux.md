@@ -4,7 +4,7 @@ title: Linux 部署
 
 # Linux 部署
 
-在 Linux 上跑 MaiBot 最直接的方式就是源码部署。macOS 用户也可以跟着做。如果你不想折腾 Python 环境，也可以直接用 [Docker 部署](./docker)；想省事的话，还可以把[安装提示词](./installation-agent)交给 AI 助手，让它照着替你装。
+在 Linux 和 macOS 上，可以通过 [uv 安装](./uv-tool)直接安装主程序和 WebUI。下面介绍适合修改代码的源码部署，也可以选择 [Docker 部署](./docker)，或把[安装提示词](./installation-agent)交给 AI 助手。
 
 ## 准备环境
 

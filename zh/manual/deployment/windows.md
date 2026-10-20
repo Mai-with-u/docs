@@ -4,6 +4,8 @@ title: Windows 部署
 
 # Windows 部署
 
+想通过命令行安装主程序和 WebUI，可以使用 [uv 安装](./uv-tool)。下面介绍一键包和源码部署。
+
 ## 系统要求
 
 Windows 10 及以上版本，至少 2GB 可用内存。

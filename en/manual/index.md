@@ -23,8 +23,8 @@ From zero to chatting takes just four steps.
 
 <div class="step-card">
   <div class="step-head"><span class="step-no">1</span> <h3>Install MaiBot</h3></div>
-  <p>Windows users are recommended to use the <strong>one-click package</strong> for a quick, complete setup.<br> Linux and macOS users can use Docker or launch directly in a Python environment.</p>
-  <a class="step-more" href="/en/manual/deployment/windows">View install guide →</a>
+  <p>Install MaiBot and its WebUI with <strong>uv</strong> on Windows, Linux, or macOS.<br>OneKey, source deployment, and Docker are also available.</p>
+  <a class="step-more" href="/en/manual/deployment/uv-tool">Install with uv →</a>
 </div>
 
 <div class="step-card">

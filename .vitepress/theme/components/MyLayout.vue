@@ -8,7 +8,8 @@ import {
 } from '@nolebase/vitepress-plugin-enhanced-readabilities/client'
 import ThemeStyleSwitch from './ThemeStyleSwitch.vue'
 
-const { isDark } = useData()
+const { isDark, lang } = useData()
+const downloadText = () => (lang.value.startsWith('en') ? 'Download One-Click Package' : '下载一键包')
 
 const enableTransitions = () =>
   'startViewTransition' in document &&
@@ -47,6 +48,16 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 
 <template>
   <DefaultTheme.Layout>
+    <template #home-hero-actions-after>
+      <div class="hero-download">
+        <a
+          class="VPButton brand hero-download-btn"
+          href="https://cnb.cool/Mai-with-u/MaiBotOneKey/-/releases"
+          target="_blank"
+          rel="noreferrer"
+        >⬇ {{ downloadText() }}</a>
+      </div>
+    </template>
     <template #nav-bar-content-after>
       <ThemeStyleSwitch />
       <NolebaseEnhancedReadabilitiesMenu />
@@ -92,5 +103,19 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
   .VPNavBar .content-body > .VPNavBarHamburger {
     order: 1;
   }
+}
+</style>
+
+<style>
+.hero-download {
+  margin-top: 28px;
+}
+.hero-download-btn {
+  display: inline-block;
+  padding: 0 40px;
+  line-height: 52px;
+  font-size: 17px;
+  border-radius: 24px;
+  text-decoration: none;
 }
 </style>

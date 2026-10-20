@@ -4,6 +4,8 @@ title: Windows Deployment
 
 # Windows Deployment
 
+For a command-line installation of MaiBot and its WebUI, use [Install with uv](./uv-tool). This page covers OneKey and source deployment.
+
 ## System Requirements
 
 Windows 10 or later, at least 2GB of available memory.

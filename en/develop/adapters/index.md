@@ -110,6 +110,7 @@ Installing and configuring these adapters is a usage topic, covered in [Connect 
 ## Next Steps
 
 - See what the messages look like → [Message Protocol Reference](./protocol.md)
+- Provide user and group avatars → [Avatar API](/en/develop/adapters/avatar-api)
 - Write a minimal working adapter → [Writing an Adapter](./build.md)
 - Control who may use it and how multiple accounts are routed → [Access Policy and Account Routing](./policy.md)
 - Can't connect, can't receive, can't send → [Adapter Debugging](./debugging.md)

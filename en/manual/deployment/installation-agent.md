@@ -4,7 +4,7 @@ title: AI-Assisted Install
 
 # AI-Assisted Install
 
-**Hand one prompt to an AI assistant and let it clone, install, configure, and start MaiBot for you.** You only answer a few questions and click a couple of things in the WebUI when asked; if you want to see what each step does first, follow along with [Windows Deployment](./windows) or [Linux Deployment](./linux).
+**Hand one prompt to an AI assistant and let it install, configure, and start MaiBot for you.** It uses [Install with uv](./uv-tool) for the stable package by default. For changes to the code, choose [Windows source deployment](./windows) or [Linux source deployment](./linux).
 
 ## Give the Prompt to an AI
 
@@ -25,8 +25,8 @@ The prompt itself is a plain-text guide hosted on the documentation site (curren
 ## What the AI Will Walk You Through
 
 1. **Ask two things** — your operating system, and whether you want QQ connected. There are two QQ routes: the **Unified QQ Connector** (log in your own QQ account, recommended) or the **QQ Official Bot** (AppID + AppSecret, no client login needed);
-2. **Check the environment** — at least 2 GB of RAM and 2 GB of free disk space; Git, Python 3.12+, and uv are installed first if missing;
-3. **Clone and start** — pull the [MaiBot repository](https://github.com/Mai-with-u/MaiBot), install dependencies with uv, then start the program;
+2. **Check the environment** — at least 2 GB of RAM and 2 GB of free disk space. Install uv, which downloads Python 3.13 for the tool installation. Prepare Git for source deployment or manual plugin downloads;
+3. **Install and start** — install MaiBot from PyPI, initialize an instance directory, configure models, and start the application;
 4. **Connect QQ** (optional) — install the adapter for the chosen route, fill in the connection details, and set the allow scope;
 5. **Verify** — send a message in the WebUI or on QQ and confirm Mai can reply.
 
@@ -34,18 +34,21 @@ The install and start commands are the same ones used in the deployment docs:
 
 ::: code-group
 
-```bash [Install dependencies ~vscode-icons:file-type-python~]
-git clone https://github.com/Mai-with-u/MaiBot.git
-cd MaiBot
-uv sync
+```bash [Install and initialize ~vscode-icons:file-type-python~]
+uv tool install --python 3.13 maibot
+mkdir my-maibot
+cd my-maibot
+maibot init
 ```
 
 :::
 
+Before starting, fill in the instance's `config/model_config.toml`. See [Model Config](/en/manual/configuration/model-config) for the fields.
+
 ::: code-group
 
 ```bash [Start MaiBot ~vscode-icons:file-type-shell~]
-uv run bot.py
+maibot run
 ```
 
 :::

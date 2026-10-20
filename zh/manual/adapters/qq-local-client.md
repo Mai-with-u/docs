@@ -183,7 +183,7 @@ member = await self.ctx.api.call(
 :::
 
 - **两套前缀** — `adapter.napcat.*` 与 `adapter.snowluma.*` 调用行为完全相同；前缀不会切换客户端类型，实际能力仍取决于当前连接的客户端。`await self.ctx.api.list()` 可查看已注册的两组名称。
-- **头像接口** — 公开 API `adapter.avatar.get`（版本 1）查询用户 / 群头像，返回 `status` / `url` / `expires_in`，供宿主统一下载、缓存；遇到 QQ 官方机器人 OpenID 时返回 `unsupported`。
+- **头像接口** — 公开 API `adapter.avatar.get`（版本 1）查询用户 / 群头像，返回 `status` / `url` / `expires_in`，供宿主统一下载、缓存；遇到 QQ 官方机器人 OpenID 时返回 `unsupported`。完整协议见[头像接口](/develop/adapters/avatar-api)。
 - **QZone API** — 两个前缀下均仅 SnowLuma 画像支持，napcat 下调用会显式报错。
 
 ## 验证与排错

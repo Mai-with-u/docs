@@ -4,7 +4,7 @@ title: Linux Deployment
 
 # Linux Deployment
 
-The most direct way to run MaiBot on Linux is source deployment. macOS users can follow along too. If you'd rather not deal with Python environments, you can also use [Docker Deployment](./docker); or hand the [installation prompt](./installation-agent) to an AI assistant and let it do the work for you.
+On Linux and macOS, [Install with uv](./uv-tool) installs MaiBot and its WebUI directly. This page covers source deployment for working on the code. You can also use [Docker Deployment](./docker) or hand the [installation prompt](./installation-agent) to an AI assistant.
 
 ## Prepare the Environment
 

@@ -128,7 +128,7 @@ When tool settings are absent or `allowed_groups` is empty, the tools are enable
 
 ## Avatar API (for developers)
 
-Provides the public API `adapter.avatar.get` (version `1`), using the same avatar protocol as the Unified QQ Connector. Parameters are `platform`, `target_id`, and `target_type` (`user` or `group`, defaulting to `user`), and it accepts `account_id` and `scope` passed by the host.
+Provides the public API `adapter.avatar.get` (version `1`), using the same [avatar protocol](/en/develop/adapters/avatar-api) as the Unified QQ Connector. Parameters are `platform`, `target_id`, and `target_type` (`user` or `group`, defaulting to `user`), and it accepts `account_id` and `scope` passed by the host.
 
 - Numeric QQ numbers and group numbers return an avatar URL and `expires_in = 86400`; images are downloaded and cached by the host uniformly;
 - When an OpenID has been bound to a real numeric ID via `/assign_id` or `/assign_group_id`, the bound value is used to look up the avatar;

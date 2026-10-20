@@ -183,7 +183,7 @@ member = await self.ctx.api.call(
 :::
 
 - **Two prefixes** — `adapter.napcat.*` and `adapter.snowluma.*` behave identically; a prefix does not switch the client type—the actual capabilities still depend on the currently connected client. `await self.ctx.api.list()` shows both registered namespaces.
-- **Avatar API** — the public API `adapter.avatar.get` (version 1) queries user / group avatars and returns `status` / `url` / `expires_in` for the host to download and cache uniformly; it returns `unsupported` for QQ official bot OpenIDs.
+- **Avatar API** — the public API `adapter.avatar.get` (version 1) queries user / group avatars and returns `status` / `url` / `expires_in` for the host to download and cache uniformly; it returns `unsupported` for QQ official bot OpenIDs. See [Avatar API](/en/develop/adapters/avatar-api) for the full protocol.
 - **QZone APIs** — supported only on the snowluma profile under both prefixes; calling them on napcat raises an explicit error.
 
 ## Verify and troubleshoot

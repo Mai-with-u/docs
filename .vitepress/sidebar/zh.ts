@@ -54,6 +54,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     collapsed: false,
     items: [
       { text: '快速上手', link: '/manual/' },
+      { text: 'uv 安装', link: '/manual/deployment/uv-tool' },
       { text: 'Windows 部署', link: '/manual/deployment/windows' },
       { text: 'Linux 部署', link: '/manual/deployment/linux' },
       { text: 'Docker 部署', link: '/manual/deployment/docker' },
@@ -123,6 +124,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
     items: [
       { text: '适配器概览', link: '/develop/adapters/' },
       { text: '消息协议', link: '/develop/adapters/protocol' },
+      { text: '头像接口', link: '/develop/adapters/avatar-api' },
       { text: '编写适配器', link: '/develop/adapters/build' },
       { text: '访问策略', link: '/develop/adapters/policy' },
       { text: '排错', link: '/develop/adapters/debugging' },
