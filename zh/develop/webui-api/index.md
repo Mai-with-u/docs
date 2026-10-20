@@ -119,7 +119,7 @@ curl -X GET http://127.0.0.1:8001/api/webui/ws-token \
 - **`/statistics/*`** — 统计数据
 - **`/avatar/*`** — 头像
 - **`/ws-token`** — WebSocket 临时 Token
-- WebSocket 端点：`/api/webui/ws` 统一通道。日志流与插件进度都是它的**订阅域**（`logs:main`、`plugin_progress:main`）；1.3.4 里遗留的 `/ws/logs`、`/ws/plugin-progress` 两个独立端点并未挂载。
+- WebSocket 端点：`/api/webui/ws` 统一通道。日志流与插件进度都是它的**订阅域**（`logs:main`、`plugin_progress:main`）；旧版遗留的 `/ws/logs`、`/ws/plugin-progress` 两个独立端点并未挂载。
 
 ### 兼容路由（Compat Routers）
 

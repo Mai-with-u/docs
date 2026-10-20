@@ -4,9 +4,14 @@ title: WebUI Pages
 
 # WebUI Pages
 
-A plugin can place a `webui.json` in its own directory to **declare** custom pages for the WebUI — a top workspace or a sidebar entry. The host renders the page, so you do not need to install Node, build a frontend, or modify the main program; edit `webui.json` and reload the plugin to take effect.
+A plugin can place a `webui.json` in its own directory to **declare** custom pages for the WebUI — a top workspace or a sidebar entry. You do not need to install Node, build a frontend, or modify the main program; edit `webui.json` and reload the plugin to take effect.
 
-The mechanism only describes "what to show and which API to bind". A page can call **only your own** plugin APIs; it cannot inject HTML / JS / CSS or request arbitrary addresses.
+Pages come in two forms:
+
+- **`declarative` (default)** — describe the page with a `content` component tree; the host renders it and adapts to every UI style and light/dark theme
+- **`custom`** — put an HTML file in the plugin directory and point `entry` at it; it runs in an isolated sandbox and calls this plugin's APIs through `window.maibot`
+
+Both forms can call **only your own** plugin APIs; they cannot request arbitrary addresses or call another plugin.
 
 ## Minimal working example
 
@@ -16,7 +21,7 @@ The mechanism only describes "what to show and which API to bind". A page can ca
 
 ```json [webui.json ~vscode-icons:file-type-json~]
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "workspace_title": "Message Stats",
   "pages": [
     {
@@ -59,6 +64,10 @@ The mechanism only describes "what to show and which API to bind". A page can ca
 }
 ```
 
+:::
+
+::: tip Protocol version
+`webui.json` must use `"schema_version": 2`. Legacy `1` declarations are rejected, and the reason is written to the plugin log.
 :::
 
 The APIs a page binds are registered statically with the SDK `@API` decorator on your `MaiBotPlugin` subclass:
@@ -144,9 +153,16 @@ A page is a component tree under `content`. All colors, spacing, fonts, dark mod
 
 ## Upload and interaction capabilities
 
-Declare top-level `required_capabilities` in `webui.json` when using uploads or new interaction controls. `file_upload` means file uploads are supported; `interactive_controls` means the newer controls are supported. These check frontend feature compatibility; SDK permissions are declared in the manifest’s `capabilities`. Capability names have no version suffix. Existing declarations may omit the field. Upgrade both the host and dashboard if a required capability is missing; updating the Python SDK alone does not add frontend controls.
+Declare the frontend capabilities a page needs in top-level `required_capabilities`:
 
-Claiming uploads requires SDK 2.11.0+ and the upload-enabled host introduced in the MaiBot 1.3.6 development version. Before SDK 2.11.0 is published, local development can point `MAIBOT_PLUGIN_SDK_PATH` to the SDK source. Separately declare `webui.claim_upload` in the plugin manifest's `capabilities`; this grants API access and is distinct from page compatibility.
+- **`declarative_basic`** — basic component pages
+- **`custom_pages`** — custom HTML pages
+- **`image_upload`** — image uploads
+- **`structured_arguments`** — structured API arguments such as arrays and objects
+
+This field only checks frontend compatibility; SDK permissions are still declared in the manifest's `capabilities`. Names have no version suffix. If the host does not support a declared capability, the plugin page shows a compatibility error; upgrade both the host and dashboard — updating the Python SDK alone does not add frontend features.
+
+Claiming uploads requires SDK 2.11.0+ and an upload-enabled host (MaiBot 1.3.6+). Separately declare `webui.claim_upload` in the plugin manifest's `capabilities`; this grants API access and is distinct from page compatibility.
 
 This page puts file selection and identity selection in one dialog. Files are sent only after clicking the upload button:
 
@@ -154,10 +170,10 @@ This page puts file selection and identity selection in one dialog. Files are se
 
 ```json [webui.json ~vscode-icons:file-type-json~]
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "required_capabilities": [
-    "file_upload",
-    "interactive_controls"
+    "declarative_basic",
+    "image_upload"
   ],
   "pages": [
     {
@@ -269,12 +285,96 @@ Accepted formats are JPEG, PNG, and static WebP; animations and archives are rej
 
 An action can return `{"navigate_page":"images","navigate_params":{"job_id":"task-id"}}` to open a declared page in the same plugin, useful for reports or misclassified images. Arbitrary URLs and cross-plugin navigation are rejected. `navigate_params` accepts only scalar parameters declared by the target page queries. These are stored in the current page URL rather than global plugin settings, so each browser tab keeps its own selection. Long tasks should immediately return an ID and run in the background. `poll_interval_seconds: 5` polls queries every 5 seconds (allowed 3–60, default 0 disables polling). Polling stops when leaving the page and skips busy operations; successful polling neither clears action errors nor disables action buttons. Starting an action cancels unfinished background queries to prevent old results from overwriting new data.
 
+## Custom HTML pages
+
+Use `mode: "custom"` when you need a fully custom layout, a chart library, or complex interaction. The HTML file lives in the plugin directory and `entry` points at its relative path; the host reads it and runs it in an isolated iframe, injecting the theme, language, and fonts.
+
+### Declaration
+
+::: code-group
+
+```json [webui.json ~vscode-icons:file-type-json~]
+{
+  "schema_version": 2,
+  "required_capabilities": ["custom_pages"],
+  "workspace_title": "Gallery",
+  "pages": [
+    {
+      "id": "gallery",
+      "title": "Gallery",
+      "mode": "custom",
+      "placement": "workspace",
+      "icon": "database",
+      "entry": "pages/gallery.html",
+      "layout": "document",
+      "queries": {
+        "summary": { "api": "summary", "version": "1" }
+      },
+      "actions": {
+        "save_limit": {
+          "api": "save_limit",
+          "version": "1",
+          "parameters": {
+            "limit": { "type": "integer", "required": true, "minimum": 1, "maximum": 1000 }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+:::
+
+- **`entry`** — a relative `.html` path inside the plugin directory; symlinks and paths escaping the plugin are rejected. Each page may be at most 2 MiB, and all custom pages together at most 8 MiB. The HTML must be a file; it cannot be inlined into `webui.json`
+- **`layout`** — `document` lets the iframe height follow the content (good for long pages); `viewport` fills the window and lets the page handle its own scrolling
+- **`queries` / `actions`** — the same API bindings as component pages. Parameters may be `array` / `object`, but that requires `required_capabilities: ["structured_arguments"]`
+- **`uploads`** — keys are upload aliases; values look like `{ "action": "add_image", "image_max_edge": 4000 }`. The action must accept a required string `upload_id`, exactly like component-page uploads
+
+### Calling plugin APIs
+
+Inside the HTML, call declared queries, actions, and uploads through `window.maibot`:
+
+::: code-group
+
+```html [pages/gallery.html ~vscode-icons:file-type-html~]
+<!doctype html>
+<html>
+  <body>
+    <h2>Gallery</h2>
+    <p id="summary">Loading…</p>
+    <button id="save">Set the limit to 500</button>
+
+    <script>
+      (async () => {
+        const data = await window.maibot.query("summary");
+        document.getElementById("summary").textContent = `${data.count} images`;
+
+        document.getElementById("save").onclick = async () => {
+          await window.maibot.action("save_limit", { limit: 500 });
+        };
+      })();
+    </script>
+  </body>
+</html>
+```
+
+:::
+
+- **`await maibot.ready`** — resolves after the handshake; then use `maibot.context` (`theme`, `language`, `dashboardStyle`) and `maibot.page`
+- **`maibot.query(name, args)` / `maibot.action(name, args)`** — call a query or action declared on this page and return its result. At most two requests run at once, and a normal request times out after 60 seconds
+- **`maibot.upload(name, file, args, options)`** — upload to a declared alias; `options.onProgress(percent)` reports 0–100 and `options.signal` cancels. Uploads time out after 150 seconds
+- **`maibot.navigate(pageId, state)`** — switch to another page of the same plugin with up to 4 KiB of scalar parameters; cross-plugin navigation is rejected
+- **Theme changes** — listen for the `maibot:context` event and read the new context from `event.detail`; the host also maintains the `dark` class and theme styles
+
+The page runs in a strict sandbox: `connect-src 'none'` blocks `fetch` / XHR / WebSocket access to external addresses, and forms, nested iframes, workers, remote scripts, and remote images are all blocked. Inline scripts, inline styles, and `data:` / `blob:` images are allowed. Bundle chart libraries and icons inside the plugin; do not reference a CDN.
+
 ## Limits and lifecycle
 
-- `webui.json` may be at most 128 KiB, and the host registration payload at most 512 KiB; out-of-bounds paths and symlinked files are rejected
-- At most 20 pages per plugin; at most 200 components, 8 nesting levels, 10 queries, and 20 actions per page
-- At most 30 scalar parameters per binding; at most two in-flight WebUI requests per plugin, so a page's `queries` run **in order** and the page data is replaced with the new snapshot only when all of them succeed
-- API calls time out after 10 seconds, and responses may be at most 512 KiB, 12 levels deep, and 20000 elements. **A timeout does not mean the write did not happen**; implement idempotency in your own API if you need it
+- `webui.json` must use `schema_version: 2`, may be at most 128 KiB, and the host registration payload at most 512 KiB; out-of-bounds paths and symlinked files are rejected
+- At most 20 pages per plugin. Component pages allow at most 200 components, 8 nesting levels, 10 queries, and 20 actions per page; a custom page's HTML may be at most 2 MiB, and all custom pages together at most 8 MiB
+- At most 30 parameters per binding; at most two in-flight WebUI requests per plugin, so a page's `queries` run **in order** and the page data is replaced with the new snapshot only when all of them succeed
+- API calls time out after 10 seconds, and responses may be at most 512 KiB, 12 levels deep, and 20000 elements. **A timeout does not mean the write did not happen**; implement idempotency in your own API if you need it. Custom-page bridge requests have their own 60-second timeout (150 seconds for uploads)
 - If a declaration is invalid or references an unregistered API, that plugin's registration fails for this load and the reason is logged; plugins without `webui.json` are unaffected
 - Pages and entries go offline when the plugin is uninstalled or disabled; browser navigation updates within 30 seconds, or refresh manually
 
@@ -299,5 +399,11 @@ An action can return `{"navigate_page":"images","navigate_params":{"job_id":"tas
 
 **Uploads or new controls unsupported?**
 
-- Check `required_capabilities` uses `file_upload` / `interactive_controls`, and deploy matching host and frontend builds
+- Check `required_capabilities` uses `declarative_basic` / `custom_pages` / `image_upload` / `structured_arguments`, and deploy matching host and frontend builds
 - Confirm the SDK supports `ctx.webui.claim_upload()` and the manifest declares `webui.claim_upload`; expired or already claimed tokens require uploading again
+
+**Custom page does not open?**
+
+- Check that `entry` is a relative `.html` path inside the plugin directory, that the file exists, and that no path component is a symlink
+- Check that `required_capabilities` includes `custom_pages`; add `image_upload` for uploads and `structured_arguments` for array/object parameters
+- Network requests from the page are blocked by the sandbox; route them through `maibot.query()` / `maibot.action()` instead

@@ -18,6 +18,8 @@ You can also join a QQ group and get it from the group files — see [Community 
 
 If you'd rather not babysit every step, hand the [installation prompt](./installation-agent) to an AI assistant and let it follow the source deployment flow for you.
 
+If you do not want to maintain a Git checkout, or want one-click updates from the WebUI, use [package install and updates](./update.md).
+
 ::: tip
 If you run into issues, check the [FAQ](/en/faq/) first — most common situations are covered there.
 :::
@@ -96,3 +98,15 @@ Copy the Token from the log and paste it into the browser login page to access W
 Once in WebUI, follow the configuration wizard to set up models and connect platforms.
 
 For detailed steps on configuring models and connecting to QQ, see [Model Configuration](/en/manual/configuration/model-config) and [Adapters](/en/manual/adapters/).
+
+## Verification and Troubleshooting
+
+**Verify** — after startup the terminal prints the WebUI address and login Token; open `http://localhost:8001`, log in, and send a line in the terminal to get a reply.
+
+**`uv: command not found`** — reopen PowerShell, or add `%USERPROFILE%\.local\bin` to PATH as the uv installer suggests.
+
+**Python is older than 3.12** — install a newer Python and run `uv sync` again.
+
+**Dependency installation fails** — check network access and disk space, then retry. On slow networks, configure a PyPI mirror for uv.
+
+**WebUI does not open** — confirm `[webui].enabled = true`, port 8001 is free, and Windows Firewall allows it when accessing remotely.

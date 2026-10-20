@@ -24,13 +24,14 @@ from maibot_sdk import ReplyExtension
     timeout_ms: int = 60000,                    # Per-call timeout (milliseconds)
     chat_scope: str = "all",                    # all / group / private
     allowed_session: list[str] | None = None,   # Restrict to specific chat streams
+    platforms: str | list[str] | None = None,   # Restrict to platforms, e.g. "qq" / ["qq", "telegram"]; omitted = all
     enabled: bool = True,
 )
 ```
 
 :::
 
-`parameters` accepts a list of `ToolParameterInfo`, a property dict, or a full object JSON Schema; the main program validates types, required fields, enums, and defaults. `chat_scope` / `allowed_session` and the component enable switch follow the common component mechanism.
+`parameters` accepts a list of `ToolParameterInfo`, a property dict, or a full object JSON Schema; the main program validates types, required fields, enums, and defaults. `chat_scope` / `allowed_session` / `platforms` and the component enable switch follow the common component mechanism.
 
 ## How the Parameters Appear in the reply Tool
 

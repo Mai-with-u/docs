@@ -4,9 +4,14 @@ title: WebUI 页面
 
 # WebUI 页面
 
-插件可以在自己的目录里放一个 `webui.json`，向 WebUI **声明**自定义页面——顶部工作区或侧边栏入口。页面由宿主统一渲染，你不需要安装 Node、打包前端或改动主程序；改完 `webui.json` 重载插件即可生效。
+插件可以在自己的目录里放一个 `webui.json`，向 WebUI **声明**自定义页面——顶部工作区或侧边栏入口。你不需要安装 Node、打包前端或改动主程序；改完 `webui.json` 重载插件即可生效。
 
-这套机制只描述「显示什么、绑定哪个 API」，页面只能调用**你自己的**插件 API，不能注入 HTML / JS / CSS，也不能请求任意地址。
+页面有两种写法：
+
+- **`declarative`（默认）** — 用 `content` 组件树描述页面，宿主统一渲染，自动适配所有界面风格与明暗主题
+- **`custom`** — 在插件目录里放一个 HTML 文件，用 `entry` 指向它；页面在隔离沙箱中运行，通过 `window.maibot` 调用本插件 API
+
+两种页面都只能调用**你自己的**插件 API，不能请求任意地址，也不能跨插件调用。
 
 ## 最小可用示例
 
@@ -16,7 +21,7 @@ title: WebUI 页面
 
 ```json [webui.json ~vscode-icons:file-type-json~]
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "workspace_title": "消息统计",
   "pages": [
     {
@@ -59,6 +64,10 @@ title: WebUI 页面
 }
 ```
 
+:::
+
+::: tip 协议版本
+`webui.json` 的 `schema_version` 必须写 `2`。旧版 `1` 声明会被拒绝，注册失败原因会写在插件日志里。
 :::
 
 页面绑定的 API 用 SDK 的 `@API` 装饰器静态注册，放在你的 `MaiBotPlugin` 子类里：
@@ -144,9 +153,16 @@ class MyPlugin(MaiBotPlugin):
 
 ## 上传与交互能力
 
-使用上传或新版交互组件时，在 `webui.json` 顶层声明 `required_capabilities`。`file_upload` 表示支持文件上传，`interactive_controls` 表示支持新版交互；该字段用于检查前端功能兼容性；SDK 接口权限仍由 manifest 的 `capabilities` 声明。名称不带版本后缀。旧声明可省略此字段；缺少所需能力时，升级宿主及其 dashboard，仅升级 Python SDK 不会增加前端组件。
+在 `webui.json` 顶层用 `required_capabilities` 声明页面需要的前端能力：
 
-上传领取需要 SDK 2.11.0+ 和本次支持上传的宿主（MaiBot 1.3.6 开发版）。SDK 2.11.0 尚未发布时，本地开发可用 `MAIBOT_PLUGIN_SDK_PATH` 指向 SDK 源码。插件在 `_manifest.json` 的 `capabilities` 中另外声明 `webui.claim_upload`，这是调用领取接口的权限，与页面兼容标识分开。
+- **`declarative_basic`** — 基础组件页
+- **`custom_pages`** — HTML 自定义页面
+- **`image_upload`** — 图片上传
+- **`structured_arguments`** — 数组 / 对象等结构化 API 参数
+
+该字段只检查前端功能兼容性；SDK 接口权限仍由 manifest 的 `capabilities` 声明。名称不带版本后缀。声明了当前宿主不支持的能力时，该插件页面会显示兼容性错误；升级宿主及其 dashboard 即可，仅升级 Python SDK 不会增加前端组件。
+
+上传领取需要 SDK 2.11.0+ 和支持上传的宿主（MaiBot 1.3.6+）。插件在 `_manifest.json` 的 `capabilities` 中另外声明 `webui.claim_upload`，这是调用领取接口的权限，与页面兼容标识分开。
 
 下面的页面将文件选择和身份选择放在同一弹窗，点击“开始上传”后才发送文件：
 
@@ -154,10 +170,10 @@ class MyPlugin(MaiBotPlugin):
 
 ```json [webui.json ~vscode-icons:file-type-json~]
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "required_capabilities": [
-    "file_upload",
-    "interactive_controls"
+    "declarative_basic",
+    "image_upload"
   ],
   "pages": [
     {
@@ -268,12 +284,96 @@ class MyPlugin(MaiBotPlugin):
 
 action返回 `{"navigate_page":"images","navigate_params":{"job_id":"任务编号"}}` 可打开同一插件已声明的页面，适用于报告和错判列表；不接受任意URL或跨插件跳转。`navigate_params` 仅接受目标页面查询已声明的标量参数，保存在当前页面URL，不写插件全局设置；多个标签页各自保存选择。长任务应立即返回编号，在后台执行。页面设置 `poll_interval_seconds: 5` 后每5秒查询进度（允许3至60秒，默认0关闭），离开页面停止，操作时跳过；轮询成功不会清除操作失败提示，也不禁用操作按钮；开始操作会取消未完成的后台查询，避免旧结果覆盖新数据。
 
+## HTML 自定义页面
+
+需要完全自定义布局、引入图表库或实现复杂交互时，用 `mode: "custom"`。HTML 文件放在插件目录内，`entry` 写相对路径；宿主读取文件并在隔离 iframe 中运行，主题、语言和字体由宿主注入。
+
+### 声明方式
+
+::: code-group
+
+```json [webui.json ~vscode-icons:file-type-json~]
+{
+  "schema_version": 2,
+  "required_capabilities": ["custom_pages"],
+  "workspace_title": "图库",
+  "pages": [
+    {
+      "id": "gallery",
+      "title": "图库",
+      "mode": "custom",
+      "placement": "workspace",
+      "icon": "database",
+      "entry": "pages/gallery.html",
+      "layout": "document",
+      "queries": {
+        "summary": { "api": "summary", "version": "1" }
+      },
+      "actions": {
+        "save_limit": {
+          "api": "save_limit",
+          "version": "1",
+          "parameters": {
+            "limit": { "type": "integer", "required": true, "minimum": 1, "maximum": 1000 }
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+:::
+
+- **`entry`** — 插件目录内的相对 `.html` 路径，不能是符号链接或跳出插件目录；单页最多 2 MiB，全部自定义页面合计最多 8 MiB。HTML 必须放在文件里，不能内联到 `webui.json`
+- **`layout`** — `document` 让 iframe 高度跟随内容（适合长页面）；`viewport` 填满窗口，由页面自己处理滚动
+- **`queries` / `actions`** — 与组件页相同的 API 绑定；参数支持 `array` / `object`，但必须声明 `required_capabilities: ["structured_arguments"]`
+- **`uploads`** — 键名是上传别名，值形如 `{ "action": "add_image", "image_max_edge": 4000 }`；对应 action 必须接收必填字符串 `upload_id`，用法与组件页上传一致
+
+### 调用插件 API
+
+HTML 里通过 `window.maibot` 调用声明过的查询、操作和上传：
+
+::: code-group
+
+```html [pages/gallery.html ~vscode-icons:file-type-html~]
+<!doctype html>
+<html>
+  <body>
+    <h2>图库</h2>
+    <p id="summary">加载中…</p>
+    <button id="save">把上限设为 500</button>
+
+    <script>
+      (async () => {
+        const data = await window.maibot.query("summary");
+        document.getElementById("summary").textContent = `共 ${data.count} 张图片`;
+
+        document.getElementById("save").onclick = async () => {
+          await window.maibot.action("save_limit", { limit: 500 });
+        };
+      })();
+    </script>
+  </body>
+</html>
+```
+
+:::
+
+- **`await maibot.ready`** — 页面与宿主握手完成；之后可以使用 `maibot.context`（`theme`、`language`、`dashboardStyle`）和 `maibot.page`
+- **`maibot.query(name, args)` / `maibot.action(name, args)`** — 调用本页声明的查询或操作，返回 API 结果；同时最多两个请求，普通请求 60 秒超时
+- **`maibot.upload(name, file, args, options)`** — 上传到声明过的上传别名；`options.onProgress(percent)` 接收 0~100 进度，`options.signal` 可取消；上传 150 秒超时
+- **`maibot.navigate(pageId, state)`** — 切到同一插件的另一个页面，可带最多 4 KiB 的标量参数；不接受跨插件跳转
+- **主题变化** — 监听 `maibot:context` 事件，在 `event.detail` 里读取新主题；宿主也会自动维护 `dark` class 和主题样式
+
+页面运行在严格沙箱里：`connect-src 'none'` 禁止 `fetch` / XHR / WebSocket 访问外部地址，表单、嵌套 iframe、Worker、远程脚本和远程图片都被禁止；内联脚本、内联样式、`data:` / `blob:` 图片可用。需要图标或图表库时，把依赖一起放进插件目录，不要引用 CDN。
+
 ## 限制与生命周期
 
-- 声明文件 `webui.json` 最大 128 KiB，Host 注册载荷最大 512 KiB；不接受越界路径或符号链接文件
-- 每个插件最多 20 个页面；每页最多 200 个组件、8 层嵌套、10 个查询、20 个操作
-- 每个绑定最多 30 个标量参数；每个插件最多两个进行中的 WebUI 请求，因此一页的 `queries` 会**顺序执行**，全部成功后才用新快照替换页面数据
-- API 调用超时 10 秒，响应最大 512 KiB、12 层嵌套、20000 个元素。**超时不代表写操作没有生效**，需要幂等请在自己的 API 里实现
+- 声明文件 `webui.json` 必须使用 `schema_version: 2`，最大 128 KiB，Host 注册载荷最大 512 KiB；不接受越界路径或符号链接文件
+- 每个插件最多 20 个页面；组件页每页最多 200 个组件、8 层嵌套、10 个查询、20 个操作；自定义页单页 HTML 最大 2 MiB，全部自定义页合计最大 8 MiB
+- 每个绑定最多 30 个参数；每个插件最多两个进行中的 WebUI 请求，因此一页的 `queries` 会**顺序执行**，全部成功后才用新快照替换页面数据
+- API 调用超时 10 秒，响应最大 512 KiB、12 层嵌套、20000 个元素。**超时不代表写操作没有生效**，需要幂等请在自己的 API 里实现；自定义页的 bridge 请求另有 60 秒（上传 150 秒）超时
 - 声明无效或引用了未注册的 API 时，该插件本次注册失败并在日志里说明原因；没有 `webui.json` 的插件不受影响
 - 页面与入口随插件卸载或禁用同步下线；浏览器导航最多 30 秒更新，也可以手动刷新
 
@@ -298,5 +398,11 @@ action返回 `{"navigate_page":"images","navigate_params":{"job_id":"任务编�
 
 **上传或新组件不支持？**
 
-- 核对 `required_capabilities` 使用 `file_upload` / `interactive_controls`，并部署匹配的宿主与前端构建
+- 核对 `required_capabilities` 使用的是 `declarative_basic` / `custom_pages` / `image_upload` / `structured_arguments`，并部署匹配的宿主与前端构建
 - 上传领取确认 SDK 支持 `ctx.webui.claim_upload()`，manifest 已声明 `webui.claim_upload`；过期或已领取的凭证需重新上传
+
+**自定义页面打不开？**
+
+- 检查 `entry` 是否是插件目录内的相对 `.html` 路径、文件是否存在、是否包含符号链接
+- 检查 `required_capabilities` 是否包含 `custom_pages`；有上传时加 `image_upload`，有数组/对象参数时加 `structured_arguments`
+- 页面里发起的网络请求会被沙箱拦截，改由 `maibot.query()` / `maibot.action()` 走插件 API

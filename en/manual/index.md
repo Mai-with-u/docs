@@ -14,6 +14,7 @@ This manual walks you through installation, configuration, and platform connecti
 A computer with internet access (Windows 10+ / Linux / macOS), at least 2GB of free memory, and an LLM API key.
 
 A willingness to ask people and AI for help and think things through.
+:::
 
 ## Mai 101
 

@@ -5,6 +5,121 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 # Changelog
 
+::: timeline 2026-10-19
+### Main program [1.3.11]
+* Message debouncing now has four fixed modes — Off, Fast, Natural, and Steady — with Natural as the default. Quiet and active chats, the same sender continuing, and a different sender each use their own wait time; a batch waits at most 8 seconds, and an @ mention or name mention enters processing within 1 second.
+* Fixed model task statistics failing to write and query with newer SQLModel versions.
+
+### WebUI [1.9.5]
+* The Identity & Persona page adds a backup reply-style button next to the reply style, for editing the style used during random switching.
+:::
+
+::: timeline 2026-10-19
+### Main program [1.3.10]
+* Added unified web tools: define a service under `[web]` in `model_config.toml` to give the Planner search and page-reading tools, with support for DeepSeek, Tavily, and StepSearch MCP.
+* Smarter reply quoting: group and private chats use different rules, and the quote frequency is configurable.
+* Sticker images sent to the Planner and the regular Replyer are compressed to reduce multimodal request size.
+* Fixed group replies being treated as private chats when the group name was empty, and send failures caused by a missing target ID.
+* Reasoning logs are split: the terminal thinking box and saved reasoning records are controlled independently, and terminal reasoning is off by default.
+* Faster sticker-system startup; expression-vector initialization moved to a worker thread so it no longer blocks the main program and plugin loading.
+* Fixed a corrupted expression-learning review file blocking learning; jargon learning no longer picks up unrelated attributes.
+* Self-update supports the CNB source.
+* The experimental "Use stop() tool" switch is now "Optimize tool usage" with unchanged behavior; the "retry after lost reply reminder" option is removed.
+
+### Plugins [1.3.10]
+* Fixed the plugin market treating an empty installable-version list as a data error.
+* An SDK version outside the declared range now only produces a warning, so the plugin can still load, install, update, and connect to its Runner.
+* Plugin market settings open in an in-page dialog; the information source (official, CNB, or GitHub) and download source (CNB, GitHub, or custom) are selected independently.
+
+### WebUI [1.9.4]
+* The top bar shows an update card when a new version is available.
+* Unified many WebUI components and styles to remove duplicates.
+* The sticker page now matches the jargon and expression page layout; plugin market cards are restyled.
+* Image and sticker caches share browsing, preview, and cleanup controls; the duplicate entry in Settings is removed.
+* Task assignment shows recent call information for each selected model.
+* Removed extra horizontal separators between persona, behavior, and expression fields.
+* Chat routing exempts the WebUI and local console; improved the first-run onboarding flow.
+:::
+
+::: timeline 2026-10-15
+### Main program [1.3.9]
+* Fixed automatic sticker scanning and updates stopping when the registered count exactly reached the limit with full-capacity replacement enabled.
+* Self-update supports Python package installations.
+* Prompt loading reuses parsed shared metadata to reduce startup work; plugin prompt loading now runs on a worker thread so it cannot block the main loop and time out the plugin handshake.
+* When a vision Planner is paired with a text-only Replyer, image descriptions are refreshed before generating the reply.
+
+### Plugins [1.3.9]
+* Reply extensions gain a `platforms` scope declaration with the same rules as Tools: parameters are filtered by the current chat platform and validated before execution, and can be combined with chat type and session scope.
+
+### WebUI
+* The learning page unifies expression and jargon entries; jargon can be browsed by chat, sharing group, or all chats, and the chat list is sorted by recent messages.
+* Long-term memory unifies text records and person profiles under "Memory Query", with switchable query types and continuous detail viewing.
+* The plugin market opens details from the whole card and preserves the browsing position; lists distinguish installed and updatable plugins, and Release plugins can be installed at a selected version.
+* Plugin extensions are fully accessible on mobile, with switching between multiple pages of the same plugin.
+* Settings, models, stickers, plugins, and data management support full-page scrolling on mobile; reasoning details expand with content, statistics details expand, and distribution charts show two per row.
+* Security settings manage random and custom Tokens in one place, and logout moves to the security page.
+:::
+
+::: timeline 2026-10-14
+### Main program [1.3.8]
+* Retro replies compress images in multimodal input: the newest three images are capped at 640 px on the long edge and older images at 128 px, scaled proportionally without enlarging small images.
+* Fixed the Planner not restoring its running state after a proactive task entered wait, which left the chat stream waiting and unable to respond to new messages after a model error.
+* Self-update (experimental): Git deployments can check for and install updates from WebUI Settings → About, with automatic rollback when dependency sync fails.
+* Package installation (experimental): `maibot init` creates a standalone instance and `maibot run` starts it.
+
+### WebUI [1.9.2]
+* Fixed production mode forcing secure cookies, which prevented login from persisting over HTTP after `secure_cookie` was disabled.
+* Improved the long-term memory page layout and interaction.
+* Fixed several mobile scrolling compatibility issues.
+:::
+
+::: timeline 2026-10-13
+### Main program [1.3.7]
+* A chat stream filtered out by the adapter allow/deny list is now unregistered immediately, so it no longer processes messages.
+* Improved the reliability of LLM-based sentence splitting.
+
+### Experimental features
+* Added an "Optimized Planner prompt" switch that describes the bot in the second person and trims task instructions.
+* Added the `subagent` tool so the bot can delegate self-contained research tasks; with "Advanced sub-agents" enabled they run in the background, the bot can keep chatting, and the result returns as a new message that wakes the Planner. `subagent_status` and `subagent_stop` are also provided.
+* Oversized tool results are condensed into conclusions based on the Planner's current intent, reducing later context usage.
+* Fixed "Attention drift" having no effect; removed the "Emotion trait" option.
+
+### Plugins [1.3.7]
+* Each Tool can declare a `platforms` scope: one platform, several platforms, or all platforms.
+* Setting the plugin runtime's maximum restart count to 0 disables automatic restarts while keeping the explicitly configured value.
+
+### WebUI [1.9.1]
+* Reworked mobile interaction and improved onboarding.
+* Narrowed the chat-stream sidebar in Mai Chat and reduced side padding in the Millennium style.
+* Improved the flow for adding models and configuring embedding models.
+* Plugin market details show the plugin ID with select-to-copy and wrapping for long IDs.
+* Mai Observation adds an expandable sub-agent sidebar for the current chat stream's task list, per-round tool calls, and conclusions, with links from tool cards to the task.
+* Fixed old data preventing Mai Observation from connecting; log file reads moved to a background thread so they no longer block other WebUI requests.
+:::
+
+::: timeline 2026-10-11
+### Main program [1.3.6]
+* Long-term memory vector rebuilds support resuming from the last checkpoint and retrying failed items; the model configuration page shows sync and rebuild progress.
+* Fixed emoji emotion tags leaking into reply text.
+* Added the plugin API `maisaka.context.resolve_image`, which reads chat images from the current context and resolves them by tool media index or short message number.
+* Plugin updates can be cancelled; leaving the page stops the download, while an already-started version replacement finishes cleanly.
+* Added the experimental Planner "Quick reaction mode": new messages received during thinking, output, or wait immediately join the round and trigger another reasoning pass; interrupted thinking and output remain visible in history.
+* High-frequency word learning ignores platform notices and the bot's own messages, counts raw user text, merges duplicate terms, and corrects message coverage counts.
+* The Docker image no longer bundles the NapCat adapter.
+* Fixed delayed image sending when descriptions are long, and sentence-splitting calls still running with reply splitting disabled.
+* Long-term memory fixes: mixed vectors when switching models during a rebuild, and mismatches after switching candidate models.
+* Person facts fixes: facts disagreeing with evidence, incorrect confidence handling, mislabelled legacy migrations, and missing historical evidence.
+* Text embedding requests slow down automatically when rate-limited; the model configuration page supports Bailian business-space domains and the Bailian thinking switch.
+* Message routing supports `account_id` / `scope` ownership fields and receives messages using the bot identity declared by the gateway.
+* Reasoning records use less memory at startup with many history entries; image-only messages no longer display as "empty message".
+* Fixed adapter rules for chat streams displaying and editing across platforms, model edits lost when switching pages quickly, provider renames deleting related models and task assignments, and enabled MCP services showing as disabled.
+
+### WebUI [1.9.0]
+* The plugin market shows 7-day and 30-day download and like trend rankings, marks recently published or updated plugins, and reduces ranking and recommendation churn.
+* Plugin WebUI supports preset declarative pages and custom HTML pages, plugin API calls, page navigation, and image uploads; it adapts to every UI style and light/dark theme, and workspace order is adjustable.
+* Mai Observation improves the thinking flow, wait countdown, context trimming, and learning details, supports hovering over tool execution status, reduces scroll jitter, and fixes missed message updates on refresh, reconnect, and history replay.
+:::
+
 ::: timeline 2026-10-07
 ### Main program [1.3.5]
 * Fixed the bot being wrongly reported as the recipient when a reply quotes the bot's own message.

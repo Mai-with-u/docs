@@ -6,6 +6,8 @@ title: Linux 部署
 
 在 Linux 上跑 MaiBot 最直接的方式就是源码部署。macOS 用户也可以跟着做。如果你不想折腾 Python 环境，也可以直接用 [Docker 部署](./docker)；想省事的话，还可以把[安装提示词](./installation-agent)交给 AI 助手，让它照着替你装。
 
+不想维护 Git 仓库、或者想从 WebUI 一键更新主程序，用[程序包安装与更新](./update.md)。
+
 ## 准备环境
 
 MaiBot 需要 [Python](https://www.python.org/downloads/) 3.12、[Git](https://git-scm.com/downloads)，以及至少 2GB 可用内存。
@@ -123,3 +125,15 @@ http://本机IP:8001
 进入 WebUI 后，跟随配置向导完成模型配置和平台连接即可。
 
 配置模型和连接 QQ 的详细步骤，参考 [模型配置](/manual/configuration/model-config) 和 [适配器](/manual/adapters/)。
+
+## 验证与排错
+
+**验证** — 启动后终端打印 WebUI 地址与登录 Token；浏览器打开 `http://localhost:8001` 能登录，并在终端输入一句话能得到回复。
+
+**`uv: command not found`** — 运行 `source $HOME/.local/bin/env`，或重新打开一个终端。
+
+**Python 版本低于 3.12** — 用 pyenv 或发行版的新版包升级 Python，再执行 `uv sync`。
+
+**依赖安装失败** — 检查网络与磁盘空间后重试；国内网络可以给 uv 配置 PyPI 镜像。
+
+**WebUI 打不开** — 确认 `[webui].enabled = true`、8001 端口未被占用；远程访问时在防火墙放行该端口。

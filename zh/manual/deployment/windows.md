@@ -18,6 +18,8 @@ Windows 10 及以上版本，至少 2GB 可用内存。
 
 不想自己盯每一步的话，也可以把[安装提示词](./installation-agent)交给 AI 助手，让它照着源码部署流程代劳。
 
+不想维护 Git 仓库、或者想从 WebUI 一键更新主程序，用[程序包安装与更新](./update.md)。
+
 ::: tip
 遇到问题可以先看看[常见问题](/faq/)，大部分常见情况都有覆盖。
 :::
@@ -96,3 +98,15 @@ http://localhost:8001
 进入 WebUI 后，跟随配置向导完成模型配置和平台连接即可。
 
 配置模型和连接 QQ 的详细步骤，参考 [模型配置](/manual/configuration/model-config) 和 [适配器](/manual/adapters/)。
+
+## 验证与排错
+
+**验证** — 启动后终端打印 WebUI 地址与登录 Token；浏览器打开 `http://localhost:8001` 能登录，并在终端输入一句话能得到回复。
+
+**`uv: command not found`** — 重新打开 PowerShell，或按 uv 安装脚本的提示把 `%USERPROFILE%\.local\bin` 加入 PATH。
+
+**Python 版本低于 3.12** — 安装新版 Python 后重新执行 `uv sync`。
+
+**依赖安装失败** — 检查网络与磁盘空间后重试；国内网络可以给 uv 配置 PyPI 镜像。
+
+**WebUI 打不开** — 确认 `[webui].enabled = true`、8001 端口未被占用；远程访问时在 Windows 防火墙放行该端口。

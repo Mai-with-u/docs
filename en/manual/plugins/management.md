@@ -59,6 +59,17 @@ Click "Update" to download and install a compatible version. Source changes rest
 
 The same plugin cannot run install / update / uninstall at the same time; different plugins can be processed in parallel.
 
+Click "Cancel" during a download to stop it; leaving the page also cancels automatically. A version replacement that has already started finishes cleanly so the plugin is not left half-installed.
+
+### Plugin Market Sources
+
+Plugin market settings open in an in-page dialog, with separate information and download sources:
+
+- **Information source** — official MaiBot, CNB, or GitHub; decides where the plugin index and version metadata come from
+- **Download source** — CNB, GitHub, or a custom source; decides where installation packages are downloaded from. Prefer CNB when GitHub is slow
+
+A custom download source requires an HTTPS prefix. The two sources are independent: you can read the official index while downloading from CNB.
+
 ### Install a Specific Version / Downgrade
 
 To install a particular version (including one older than what you have now), open the plugin's **detail page** from the market or plugin extensions and install after selecting a version in the "Install version" card:
