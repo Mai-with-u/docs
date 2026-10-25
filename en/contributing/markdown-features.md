@@ -371,7 +371,7 @@ allowfullscreen>
 - **`url`** (required) — Link URL
 - **`title`** (required) — Card title
 - **`description`** (required) — Card description
-- **`logo`** (optional, default `''`) — Left-side logo image URL
+- **`logo`** (optional, default `''`) — Logo image URL or built-in icon name (supports `github`, `x`, `discord`, `telegram`, `bilibili`; automatically matches domain or falls back to site favicon when unspecified)
 
 ````html
 <Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />

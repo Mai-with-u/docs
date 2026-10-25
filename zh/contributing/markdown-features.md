@@ -371,7 +371,7 @@ allowfullscreen>
 - **`url`** (必填) — 链接地址
 - **`title`** (必填) — 卡片标题
 - **`description`** (必填) — 卡片描述
-- **`logo`** (可选, 默认 `''`) — 左侧 logo 图片地址
+- **`logo`** (可选, 默认 `''`) — 图标地址或内置图标名（支持 `github`、`x`、`discord`、`telegram`、`bilibili`；未指定时自动根据链接域名匹配或回退为站点图标）
 
 ````html
 <Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
