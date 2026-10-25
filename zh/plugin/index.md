@@ -128,12 +128,12 @@ plugins/
     "repository": "https://github.com/developer/my-plugin"
   },
   "host_application": {
-    "min_version": "1.0.0",
-    "max_version": "1.99.99"
+    "min_version": "1.3.0",
+    "max_version": "1.3.99"
   },
   "sdk": {
     "min_version": "1.0.0",
-    "max_version": "2.99.99"
+    "max_version": "2.9.99"
   },
   "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": {

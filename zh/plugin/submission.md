@@ -95,7 +95,7 @@ flowchart TD
 - [ ] `id` 稳定唯一，无空格、无路径字符
 - [ ] 所有版本号都是三段式（`x.y.z`）
 - [ ] 每个 Git Release 的 Tag 与 manifest `version` 一致，且 `id` 未改动（否则该版本进不了市场）
-- [ ] `host_application` / `sdk` 的上界不要锁死在小版本（例如写到 `999.999.999`），只认真约束 `min_version`
+- [ ] `host_application` / `sdk` 的上界写成已测试过的最高「主.次」版本加 `.99`（如 `1.3.99`），不要写 `1.99.99`、`999.999.999` 这类无对应真实版本的上限
 - [ ] `author` 是 `{ name, url }` 对象
 - [ ] `urls.repository` 是公开 HTTPS 地址，无 `.git` 后缀
 - [ ] `capabilities` 只声明实际需要的能力
@@ -127,4 +127,4 @@ python -c "import json; print(json.load(open('_manifest.json'))['version'])"
 - **版本进了 `rejected_releases`，市场里显示「有 N 个发布版本未通过校验」** — Tag（`1.4.2` 或 `v1.4.2`）对应的 manifest `version` 必须是纯三段式 `1.4.2`，`id` 不能改名，`manifest_version` 保持 `2`，且该 Tag 的 commit 里必须能读到 `_manifest.json`；修好后重新打 Tag 并创建 Release。
 - **CI 提示读不到 `_manifest.json`** — 插件仓库必须是公开的 GitHub 仓库，`urls.repository` 要填公开 HTTPS 地址且不带 `.git` 后缀，manifest 必须放在仓库根目录。
 - **`LICENSE` 相关校验失败** — 根目录要有 `LICENSE`，许可证类型与 `_manifest.json` 的 `license` 字段一致，并确认 `plugin.py` 里有 `create_plugin()` 工厂函数。
-- **审核通过、市场能搜到，但装上后加载失败** — 多半是没在真实 MaiBot 里验证过，或 `host_application` / `sdk` 上界被锁死在小版本而挡住；上界改成 `999.999.999`、只认真约束 `min_version`，再在本地重载插件复验一次（含 `webui.json` 页面）。
+- **审核通过、市场能搜到，但装上后加载失败** — 多半是没在真实 MaiBot 里验证过，或 `host_application` / `sdk` 上界低于用户的麦麦版本而挡住；在新版本上测试通过后，把上界提到该版本的「主.次」加 `.99`，再在本地重载插件复验一次（含 `webui.json` 页面）。

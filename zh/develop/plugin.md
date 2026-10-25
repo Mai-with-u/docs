@@ -51,8 +51,8 @@ title: 插件接入
   "author": { "name": "you", "url": "https://github.com/you" },
   "license": "MIT",
   "urls": { "repository": "https://github.com/you/hello" },
-  "host_application": { "min_version": "1.3.0", "max_version": "1.99.99" },
-  "sdk": { "min_version": "2.0.0", "max_version": "2.99.99" },
+  "host_application": { "min_version": "1.3.0", "max_version": "1.3.99" },
+  "sdk": { "min_version": "2.0.0", "max_version": "2.9.99" },
   "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": { "default_locale": "zh-CN" }
 }
@@ -126,9 +126,11 @@ Hook 是覆盖面最广的一类：22 个命名钩子分布在聊天、发送服
 插件能否装进当前麦麦，由 manifest 里两个区间决定：
 
 ::: fields
-- **`host_application`** — 宿主版本区间。低于下限直接拒绝；高于上限但主次版本相同则放行并告警。
-- **`sdk`** — 插件 SDK 版本区间，不满足一律拒绝。当前配套的 SDK 是 `maibot-plugin-sdk` 2.9 系列。
+- **`host_application`** — 宿主版本区间。低于下限直接拒绝；高于上限但主次版本相同则放行并告警，其余情况拒绝。
+- **`sdk`** — 插件 SDK 版本区间，不在区间内只告警，插件仍会加载。当前配套的 SDK 是 `maibot-plugin-sdk` 2.9 系列。
 :::
+
+`max_version` 写已测试过的最高「主.次」版本加 `.99`，例如 `1.3.99`；不要写 `1.99.99`、`999.999.999` 这类没有对应真实版本的上限。
 
 调试期可以用 `debug.force_plugin_compatibility` 临时跳过校验，但那是兜底手段——强行加载一个真的不兼容的插件，会在运行期报错。
 

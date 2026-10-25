@@ -95,7 +95,7 @@ Go through this list before submitting:
 - [ ] `id` is stable and unique — no spaces, no path characters
 - [ ] All versions are three-part (`x.y.z`)
 - [ ] Every Git Release tag matches the manifest `version`, and `id` has not changed (otherwise that version never reaches the market)
-- [ ] `host_application` / `sdk` upper bounds are not pinned to a patch release (for example write `999.999.999`) — constrain `min_version` seriously instead
+- [ ] `host_application` / `sdk` upper bounds are the highest tested major.minor plus `.99` (for example `1.3.99`), never `1.99.99`, `999.999.999`, or another bound with no real version behind it
 - [ ] `author` is a `{ name, url }` object
 - [ ] `urls.repository` is a public HTTPS URL without a `.git` suffix
 - [ ] `capabilities` declares only what the plugin actually needs
@@ -127,4 +127,4 @@ python -c "import json; print(json.load(open('_manifest.json'))['version'])"
 - **A version lands in `rejected_releases` and the market shows "N release versions failed validation"** — the tag (`1.4.2` or `v1.4.2`) must correspond to a plain three-part `1.4.2` in the manifest, `id` must not change, `manifest_version` stays `2`, and `_manifest.json` must be readable from that tag's commit; then tag and create the Release again.
 - **CI says it cannot read `_manifest.json`** — the plugin repository must be public on GitHub, `urls.repository` must be a public HTTPS URL without a `.git` suffix, and the manifest must sit in the repository root.
 - **`LICENSE` validation fails** — the root directory needs a `LICENSE` whose type matches the `license` field in `_manifest.json`, and `plugin.py` must expose the `create_plugin()` factory.
-- **Approved and searchable, but the installed plugin fails to load** — usually it was never verified against a real MaiBot, or its `host_application` / `sdk` upper bound is pinned to a patch release; set the upper bound to `999.999.999`, constrain `min_version` seriously, and reload it locally once more (including any `webui.json` pages).
+- **Approved and searchable, but the installed plugin fails to load** — usually it was never verified against a real MaiBot, or its `host_application` / `sdk` upper bound is below the user's MaiBot version; after testing on the new version, raise the upper bound to that version's major.minor plus `.99`, and reload it locally once more (including any `webui.json` pages).

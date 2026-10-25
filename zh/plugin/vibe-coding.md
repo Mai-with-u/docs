@@ -52,7 +52,7 @@ plugins/my-plugin/
 - `id` 使用小写反向域名或作者前缀，例如 `com.example.my-plugin`。
 - `version` 使用严格三段式语义版本，例如 `1.0.0`。
 - `author.url`、`urls.repository` 等 URL 必须以 `http://` 或 `https://` 开头。
-- `host_application` 和 `sdk` 都要声明 `min_version` 与 `max_version`。
+- `host_application` 和 `sdk` 都要声明 `min_version` 与 `max_version`，上限写已测试过的最高「主.次」版本加 `.99`（如 `1.3.99`）。
 - Python 包依赖写入 `dependencies`，类型为 `python_package`。
 - 插件间依赖写入 `dependencies`，类型为 `plugin`。
 - `capabilities` 只声明确实需要的能力。
@@ -77,12 +77,12 @@ plugins/my-plugin/
     "repository": "https://github.com/developer/my-plugin"
   },
   "host_application": {
-    "min_version": "1.0.0",
-    "max_version": "1.99.99"
+    "min_version": "1.3.0",
+    "max_version": "1.3.99"
   },
   "sdk": {
     "min_version": "2.5.1",
-    "max_version": "2.99.99"
+    "max_version": "2.9.99"
   },
   "dependencies": [],
   "capabilities": ["send.text", "send.emoji", "config.get"],

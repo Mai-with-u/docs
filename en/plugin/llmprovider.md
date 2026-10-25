@@ -227,11 +227,11 @@ Below is a complete minimum viable plugin, including the manifest declaration an
   },
   "host_application": {
     "min_version": "1.3.0",
-    "max_version": "1.99.99"
+    "max_version": "1.3.99"
   },
   "sdk": {
     "min_version": "2.0.0",
-    "max_version": "2.99.99"
+    "max_version": "2.9.99"
   },
   "capabilities": [],
   "llm_providers": [

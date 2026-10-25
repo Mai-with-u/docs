@@ -52,7 +52,7 @@ plugins/my-plugin/
 - `id` uses lowercase reverse domains or author prefixes, e.g., `com.example.my-plugin`.
 - `version` uses strict three-part semantic versioning, e.g., `1.0.0`.
 - URLs `author.url` and `urls.repository` must start with `http://` or `https://`.
-- `host_application` and `sdk` must both declare `min_version` and `max_version`.
+- `host_application` and `sdk` must both declare `min_version` and `max_version`; set the upper bound to the highest tested major.minor plus `.99` (for example `1.3.99`).
 - Python package dependencies are written in `dependencies`, with type `python_package`.
 - Inter-plugin dependencies are written in `dependencies`, type `plugin`.
 - `capabilities` only declares strictly necessary capabilities.
@@ -77,12 +77,12 @@ plugins/my-plugin/
     "repository": "https://github.com/developer/my-plugin"
   },
   "host_application": {
-    "min_version": "1.0.0",
-    "max_version": "1.99.99"
+    "min_version": "1.3.0",
+    "max_version": "1.3.99"
   },
   "sdk": {
     "min_version": "2.5.1",
-    "max_version": "2.99.99"
+    "max_version": "2.9.99"
   },
   "dependencies": [],
   "capabilities": ["send.text", "send.emoji", "config.get"],

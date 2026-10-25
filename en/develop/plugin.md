@@ -51,8 +51,8 @@ A working plugin is just two files. This one registers a command and a tool, and
   "author": { "name": "you", "url": "https://github.com/you" },
   "license": "MIT",
   "urls": { "repository": "https://github.com/you/hello" },
-  "host_application": { "min_version": "1.3.0", "max_version": "1.99.99" },
-  "sdk": { "min_version": "2.0.0", "max_version": "2.99.99" },
+  "host_application": { "min_version": "1.3.0", "max_version": "1.3.99" },
+  "sdk": { "min_version": "2.0.0", "max_version": "2.9.99" },
   "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": { "default_locale": "zh-CN" }
 }
@@ -126,9 +126,11 @@ Understanding the boundaries saves a lot of debugging:
 Whether a plugin can be installed into the current MaiBot is decided by two ranges in the manifest:
 
 ::: fields
-- **`host_application`** — host version range. Below the lower bound it is rejected outright; above the upper bound with the same major and minor version it is allowed with a warning.
-- **`sdk`** — plugin SDK version range; anything outside it is always rejected. The SDK that matches the current release is the `maibot-plugin-sdk` 2.9 series.
+- **`host_application`** — host version range. Below the lower bound it is rejected outright; above the upper bound with the same major and minor version it is allowed with a warning; every other mismatch is rejected.
+- **`sdk`** — plugin SDK version range; outside it only logs a warning and the plugin still loads. The SDK that matches the current release is the `maibot-plugin-sdk` 2.9 series.
 :::
+
+Set `max_version` to the highest tested major.minor plus `.99`, for example `1.3.99`; never `1.99.99`, `999.999.999`, or another bound with no real version behind it.
 
 During debugging you can temporarily skip validation with `debug.force_plugin_compatibility`, but that is a fallback—forcing a genuinely incompatible plugin to load will fail at runtime.
 
