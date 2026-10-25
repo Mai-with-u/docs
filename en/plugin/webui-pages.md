@@ -2,6 +2,8 @@
 title: WebUI Pages
 ---
 
+# WebUI Pages
+
 Add `webui.json` to your plugin directory to expose data and actions in the WebUI. Use predefined components for simple pages and write HTML/CSS/JS for complex interfaces. Both modes call static `@API` methods owned by the plugin.
 
 This page describes the in-development `schema_version: 2` protocol and requires matching host and dashboard builds. Updating the Python SDK alone does not update the page protocol. A plugin can mix both modes:

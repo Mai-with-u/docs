@@ -47,7 +47,7 @@ enabled = true                  # 确保规则启用
 # config/bot_config.toml
 [chat.reply_timing]
 talk_value = 1                  # 群聊发言意愿（0-1），越小越安静；默认 1
-private_talk_value = 1          # 私聊发言意愿（0-1），默认 1
+private_reply_paused = false    # 私聊暂停回复：确认不是 true
 ```
 
 :::

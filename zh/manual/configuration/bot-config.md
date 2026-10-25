@@ -67,10 +67,10 @@ multiple_probability = 0  # 按概率随机换成上面的备用风格；0 = 不
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_timing]
-talk_value = 1.0            # 群聊发言频率：越小越安静，0.3~0.5 明显话少
-private_talk_value = 1.0    # 私聊发言频率：同上
-inevitable_at_reply = true  # 被 @ 时尽量回复
-mentioned_bot_reply = false # 消息提到麦麦名字时是否更容易回复
+talk_value = 1.0             # 群聊发言频率：越小越安静，0.3~0.5 明显话少
+private_reply_paused = false # 暂停所有私聊回复：true = 私聊只收消息不回复
+inevitable_at_reply = true   # 被 @ 时尽量回复
+mentioned_bot_reply = false  # 消息提到麦麦名字时是否更容易回复
 ```
 
 :::
@@ -205,15 +205,12 @@ multiple_probability = 0  # [进阶] 每次回复按此概率临时注入一条�
 enable_reply_at = true           # 允许麦麦在回复开头 @ 人；要不要 @ 由模型看聊天内容决定
 max_context_size = 40            # 群聊回复参考最近多少条消息；越大越懂上下文，也更耗 token
 max_private_context_size = 60    # 私聊参考的最近消息数量
-mid_term_memory = true           # 聊天回想：主动召回最近聊天发生的事情
-mid_term_memory_lenth = 10       # 最多保留多少条聊天回想；0 = 不保留
+context_compaction_summary_max_chars = 6000  # [进阶] 滚动状态摘要的最大字符数（1000~8000），由 utils 模型生成
 ```
 
 :::
 
-::: tip 字段名 lenth 是历史拼写
-字段名为 `mid_term_memory_lenth`，请保留这个拼写；修改后会被视为未知字段。
-:::
+上下文快满时，麦麦会用 utils 模型把更早的对话压成一段滚动状态摘要，始终随 Planner 上下文发送；`context_compaction_summary_max_chars` 控制摘要长度。聊天回想与长期记忆由 A_Memorix 负责，见 [A_Memorix 配置](./amemorix-config.md)。
 
 #### 什么时候发言
 
@@ -222,13 +219,12 @@ mid_term_memory_lenth = 10       # 最多保留多少条聊天回想；0 = 不�
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_timing]
 message_debounce_mode = "natural"          # 消息防抖：off 关闭 / fast 快速 / natural 自然 / steady 沉稳
+planner_message_steering = false           # 快速反应模式：思考/输出/等待期间收到新消息立即接入并重新推理
 talk_value = 1                             # 群聊发言频率：0~1，越小越安静
-private_talk_value = 1                     # 私聊发言频率：同上
+private_reply_paused = false               # 暂停所有私聊回复：true = 私聊只收消息并维护历史，不进入思考
+private_reply_pause_rules = []             # 按平台与用户单独覆盖全局私聊暂停设置
 mentioned_bot_reply = false                # 消息提到麦麦名字时更容易回复
 inevitable_at_reply = true                 # 被 @ 时尽量回复
-reply_trigger_mode = "frequency"           # 新消息何时进入 Planner："frequency" 频率触发 / "dynamic" 动态触发
-planner_interrupt_max_consecutive_count = 0  # [进阶] 思考时来了新消息最多重新思考几次；0 = 不限制
-max_consecutive_wait_count = 3             # Planner 最多连续调用 wait 几次，达到后拒绝继续等待
 no_action_backoff_base_seconds = 15        # 连续决定不回复后，下次检查前先等多久（秒）
 no_action_backoff_cap_seconds = 300        # [进阶] 退避等待的上限（秒）
 no_action_backoff_start_count = 2          # [进阶] 连续几次不回复后开始放慢检查
@@ -275,10 +271,20 @@ value = 1.0
 
 一批指合并后一起送入判断的消息。上一条有效消息距今超过 30 秒（或没有历史）算安静，否则算活跃；续发与换人只和紧邻的上一条消息比较。裸图开启的新批次至少等 4 秒，批次内纯表情包不能延长等待；整批从第一条实际收到起最多等 8 秒，被 @ 或提及后最多等 1 秒。换档位从下一条有效消息起生效，选择关闭会结束正在进行的固定规则等待。
 
-**怎么触发思考** — `reply_trigger_mode` 决定新消息何时进入 Planner：
+**私聊暂停** — `private_reply_paused = true` 后所有私聊只接收消息并维护历史，不进入思考；`private_reply_pause_rules` 按平台和用户单独覆盖全局设置，也可以在 WebUI 的聊天流设置中切换或恢复跟随全局：
 
-- **`frequency`（频率触发，默认）** — 按新消息数量决定是否思考，配合 `talk_value` / `talk_value_rules` 控制频率
-- **`dynamic`（动态触发）** — 估计每批消息的回复可能性，再用 1 小时滑动窗口把实际回复次数拉回"预计回复数 × 频率"的目标，并保留空闲退避。**只在群聊生效，私聊不设门控**；通过 `talk_value`、`talk_value_rules`、`mentioned_bot_reply` / `inevitable_at_reply` 与 `no_action_backoff_*` 调节
+::: code-group
+
+```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+[[chat.reply_timing.private_reply_pause_rules]]
+platform = "qq"
+item_id = "123456"
+paused = true   # true = 暂停这个私聊；false = 该私聊保持回复，覆盖全局暂停
+```
+
+:::
+
+**快速反应模式** — 开启 `planner_message_steering` 后，Planner 强制使用流式请求；思考、输出或 `wait` 等待期间收到新消息会立即中断当前轮并重新请求，不再等静默窗口，也不限制连续打断次数。被打断的思考与输出会保留在历史里，方便回看。
 
 #### 如何发言
 
@@ -323,6 +329,26 @@ prompt = "这个群里说话要更简短。"
 
 :::
 
+#### 能力
+
+`[capabilities]` 集中提供思考与工具使用的增强设置，默认全部关闭：
+
+::: code-group
+
+```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+[capabilities]
+planner_subagent = false               # 子代理任务派发：给 Planner 提供 subagent 工具
+advanced_sub_agent = false             # 高级子代理：子代理后台运行，结论作为新消息送回（需先开启上一项）
+tool_result_condense = false           # 超长工具结果整理：超过阈值的工具结果先整理成结论再写入上下文
+tool_result_condense_threshold = 3000  # [进阶] 触发整理的字符数，最低 500
+```
+
+:::
+
+**子代理** — `planner_subagent = true` 给 Planner 提供 `subagent` 工具：把自包含的查询或整理任务交给子代理，子代理在独立上下文里多轮调用被授权的工具，只把结论交还。开启 `advanced_sub_agent = true` 后子代理转到后台，派发后立刻返回任务 ID，麦麦可以继续聊天；子代理结束时结论作为一条新消息送回并唤醒 Planner，同时提供 `subagent_status`（查看任务）和 `subagent_stop`（终止任务）。
+
+**超长工具结果整理** — `tool_result_condense = true` 时，工具结果达到 `tool_result_condense_threshold` 字符（默认 3000，最低 500）会先交给子代理按 Planner 当前意图整理成结论，再写入上下文，减少后续每轮的上下文占用；代价是多一次模型请求。
+
 #### 实验性功能
 
 整段属于进阶设置，默认全部关闭，想尝鲜再逐项打开。
@@ -331,20 +357,12 @@ prompt = "这个群里说话要更简短。"
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [experimental]
-planner_message_steering = false  # 快速反应模式：思考/输出/等待期间收到新消息立即接入并重新推理
-planner_optimized_prompt = false  # 优化 Planner 提示词：用第二人称描述麦麦自己，并精简任务说明
-planner_stop_tool = false         # 优化工具使用：给 Planner 提供无参数的 stop() 工具
-planner_subagent = false          # 子代理任务派发：给 Planner 提供 subagent 工具
-advanced_sub_agent = false        # 高级子代理：子代理后台运行，结论作为新消息送回（需先开启上一项）
-tool_result_condense = false      # 超长工具结果整理：超过阈值的工具结果先整理成结论再写入上下文
-tool_result_condense_threshold = 3000  # [进阶] 触发整理的字符数，最低 500
-replyer_retro_prompt = false      # 按旧版（0.12.x）方式组织 Replyer 提示词，全部指令集中在一份模板里
+passive_replyer = false   # 被动回复：Planner 不调用工具而输出正文时，将正文作为指导启动一次回复
 
-focus_mode = false                # 同一时间只专注一个聊天流，适合直播/高强度场景
-focus_on_private = false          # Focus 是否也作用于私聊
-focus_chat_whitelist = []         # Focus 白名单；留空 = 所有符合开关的聊天都可进入
-focus_groups = []                 # Focus 共享组：同组共享 Focus，不同组互不抢占
-focus_cool_time = 120             # 当前聊天多久没继续后允许被其他聊天唤醒（秒）
+focus_mode = false        # Focus：同组聊天共享一个持续思考的 Planner
+focus_on_private = false  # Focus 是否也作用于私聊
+focus_chat_whitelist = [] # Focus 白名单；留空 = 所有符合开关的聊天都可进入
+focus_groups = []         # Focus 共享组：同组共享 Planner 与完整上下文，不同组互不抢占
 
 [experimental.attention_drift]
 enabled = false                   # 注意力漂移：更容易被新话题、梗、反差点吸引
@@ -357,17 +375,11 @@ reaction_style = "lively"         # 短反应风格："reserved" / "natural" / "
 
 **丰富回复** — 回复可直接携带图片；回复时 @ 人由 [`[chat].enable_reply_at`](#上下文与回想) 控制，回复中的表情由 [`[emoji].use_new_send_logic`](#表情包) 控制。
 
-**快速反应模式** — 开启 `planner_message_steering` 后，Planner 强制使用流式请求；思考、输出或 `wait` 等待期间收到新消息会立即中断当前轮并重新请求，不再等静默窗口，也不限制连续打断次数。被打断的思考与输出会保留在历史里，方便回看。
+**被动回复** — `passive_replyer = true` 时，Planner 不调用工具而直接输出正文的话，正文会作为指导启动一次回复；附件与插件参数通过 `set_reply_options` 提前设置。关闭时使用原有 `reply` 工具。切换从下一轮思考生效，Focus 不受影响。
 
-**子代理** — `planner_subagent = true` 给 Planner 提供 `subagent` 工具：把自包含的查询或整理任务交给子代理，子代理在独立上下文里多轮调用被授权的工具，只把结论交还。开启 `advanced_sub_agent = true` 后子代理转到后台，派发后立刻返回任务 ID，麦麦可以继续聊天；子代理结束时结论作为一条新消息送回并唤醒 Planner，同时提供 `subagent_status`（查看任务）和 `subagent_stop`（终止任务）。
-
-**超长工具结果整理** — `tool_result_condense = true` 时，工具结果达到 `tool_result_condense_threshold` 字符（默认 3000，最低 500）会先交给子代理按 Planner 当前意图整理成结论，再写入上下文，减少后续每轮的上下文占用；代价是多一次模型请求。
-
-**优化提示词与工具** — `planner_optimized_prompt = true` 让 Planner 用第二人称描述麦麦自己，并精简任务说明；`planner_stop_tool = true` 提供一个无参数的 `stop()` 工具，调用后结束本轮思考并等待新消息。
+**Focus** — `focus_mode = true` 让同组聊天共享一个持续思考的 Planner：全部消息共同进入上下文，工具通过 `session_id` 指定处理目标，跨会话协作、统一等待，被 @ 时提前唤醒。`focus_groups` 把聊天分成共享组，不同组互不抢占，未匹配的聊天各自成组；`focus_chat_whitelist` 限定哪些聊天进入 Focus，留空表示所有符合聊天类型开关的聊天都可进入。
 
 **学习规则不在实验段** — 表达方式与黑话的学习范围由 `[expression].learning_list` / `[jargon].learning_list` 配置，详见[学习系统](#学习系统)；旧的 `[experimental]` 学习字段已移除。
-
-**复古回复提示词** — `replyer_retro_prompt = true` 时按旧版（0.12.x）方式组织 Replyer 提示词：全部回复指令集中在一份完整模板里，整段作为一条 `user` 消息发送，历史对话渲染成纯文本填入模板占位符，不再发送图片 Item。群聊、"简短回复"、私聊和"私聊且回复麦麦自己"各用一套模板（`retro_replyer`、`retro_replyer_light`、`retro_private_replyer`、`retro_private_replyer_self`），它们在 **Prompt 管理**里以"高级"折叠展示，可以编辑和创建自定义版本。改动热重载生效。
 
 #### 消息接收
 
@@ -416,7 +428,7 @@ reaction = "对方在问早，简短回应即可"
 [expression]
 expression_checked_only = false       # 仅使用人工精选过的表达；关闭时未精选的表达也会被使用
 expression_self_reflect = true        # 写入前先让 AI 审核，减少学到奇怪内容
-use_vector_expression = true          # 使用向量表达：表达意图 + 嵌入召回，效果更好（需嵌入模型）；关闭则随手抽取
+use_vector_expression = false         # 表达选择档位：false 快速（默认） / true 精细（需嵌入模型）
 expression_vector_index_path = "data/expression_selection/expression_vector_index.json"  # [进阶]
 expression_vector_candidate_pool_size = 50  # [进阶] 向量召回后交给 LLM 选择的候选数，硬上限 50
 max_expression_learner = 3            # [进阶] 同时运行的学习任务数
@@ -428,7 +440,7 @@ expression_groups = []                # 多个聊天共享学到的表达
 
 **要点：**
 
-- **`use_vector_expression`** — 默认开启，改用表达意图 + 嵌入模型精细召回，效果显著更好；关闭时退回随手抽取的候选。
+- **`use_vector_expression`** — 表达选择分两档：`false` 快速（默认），加权随机抽取表达直接注入，不额外调用模型；`true` 精细，用表达意图与嵌入召回，再由 LLM 按语境筛选，需配置嵌入模型。复古回复不使用表达选择。
 - **`expression_checked_only`** — 默认 `false`，即未经人工精选的表达也会参与；如果你只想让麦麦使用你审核过的表达，改为 `true`
 - **`learning_list`** — 每条规则管一个范围，`use` 控制是否使用已学内容，`learn` 控制是否继续学习，`type` 可选 `"group"` / `"private"`。范围有三种写法，越具体的越优先：
   - **指定聊天** — 填 `item_id`（群号或 QQ 号），`platform` 可填可不填
@@ -463,6 +475,7 @@ jargon_groups = []  # 多个聊天共享学到的黑话
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [visual]
+image_quality = "normal"               # 图片画质："normal" 普通（最长边 512）/ "high" 超清（最长边 1024）
 max_image_num = 64                     # [进阶] 一次多模态请求最多带多少张图
 wait_image_recognize_max_time = 32     # 等识图完成的最长秒数；0 = 不等待
 handle_oversized_images = true         # 收到过大图片时自动压缩或丢弃
@@ -477,6 +490,8 @@ no_file_result_retention_days = 30  # 图片删掉后识别结果再保留多久
 ```
 
 :::
+
+**图片画质** — `image_quality` 控制聊天普通图片发给规划和回复模型时的画质：普通最长边 512 像素，超清 1024 像素，保留更多细节也更耗用量。等比例缩小、小图不放大，不影响原图和表情包。
 
 #### 表情包
 
@@ -643,6 +658,29 @@ enable = true  # 是否启用 MCP 工具接入能力
 改 `[mcp]` 段保存后，MaiBot 会用新配置重建 MCP 连接，不需要重启；重建结果与启动时一样打印在日志里。少数不在重载判定范围内的字段（如 `elicitation` 整节、`sampling.include_context_support`）仍需重启才生效，详见 [MCP 配置](./mcp-config.md)。
 :::
 
+#### Agent 连接
+
+`[agent]` 启动一个与普通聊天并行运行的外接 Agent（实验性），通过 ACP 协议连接 dsh、dsh Desktop 或其他 ACP 程序；模型与凭据使用外部 Agent 自身配置。开启 `computer_tools` 后，Agent 还能操作沙盒桌面：聊天里可以图文传话，任务重启后继续，WebUI 提供桌面画面、运行记录和人工接管。
+
+::: code-group
+
+```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+[agent]
+enabled = false         # 启用外接 Agent 接口
+connection = "dsh"      # "dsh" dsh CLI / "dsh_desktop" dsh Desktop / "custom" 自定义 ACP
+acp_command = "dsh"     # 外部 Agent 可执行程序；Windows 可填 dsh.cmd
+acp_cwd = ""            # 外部进程的主机工作目录；留空使用 data/agent/workspace
+computer_tools = false  # 提供沙盒桌面工具与 WebUI 接管界面
+networking = true       # 允许沙盒联网；下次启动沙盒时生效
+desktop_manifest = ""   # [进阶] dsh Desktop 桥接文件；留空读取 ~/.dsh/maibot-desktop.json
+```
+
+:::
+
+- **dsh CLI / dsh Desktop** — dsh CLI 自动以 `--profile acp` 启动；dsh Desktop 连接正在运行的桌面应用，需先在 Desktop 安装 dsh-maibot-bridge 插件，同一会话在两侧显示
+- **自定义 ACP** — `connection = "custom"` 时用 `acp_args` 逐项传参、`acp_env` 追加环境变量、`acp_model` 指定模型选项；`acp_timeout` 控制握手与关停等待
+- **沙盒桌面** — `computer_tools = true` 提供沙盒桌面工具与 WebUI 接管界面；人工接管期间不执行 Agent 输入。沙盒内存、启动超时、截图最长边等进阶参数见 WebUI 中的对应设置
+
 #### 插件管理
 
 ::: code-group
@@ -712,7 +750,10 @@ log_cleanup_days = 30           # 主日志超过多少天后清理
 
 llm_request_snapshot_limit = 128      # 失败模型请求快照最多保留多少份
 maisaka_prompt_preview_limit = 256    # 每个聊天最多保留多少组 Prompt 预览
-maisaka_reply_effect_limit = 256      # 每个聊天最多保留多少条回复效果记录
+
+memory_diagnostics_enabled = true             # [进阶] 独立内存诊断日志；最多四个 5 MiB 文件，重启生效
+memory_diagnostics_deep_enabled = false       # [进阶] tracemalloc 分配位置对比（每十分钟）；有额外开销，重启生效
+memory_diagnostics_interval_seconds = 60.0    # [进阶] 轻量内存诊断采集间隔（秒，至少 10），重启生效
 
 event_loop_watchdog_enabled = false        # [进阶] 记录事件循环卡顿，用于排查界面/主循环卡顿
 event_loop_watchdog_warn_seconds = 0.5     # [进阶] 事件循环唤醒延迟超过该秒数时记录一条警告日志
@@ -733,7 +774,8 @@ library_log_levels = { aiohttp = "WARNING", PIL = "WARNING" }  # [进阶] 单独
 [debug]
 enable_console_input = true           # 在交互式终端中启用本地消息和指令输入（默认开启）
 show_maisaka_thinking = true          # 在日志或界面中显示麦麦的思考过程
-enable_reply_effect_tracking = false  # 记录回复效果评分，观察回复质量
+save_maisaka_reasoning = true         # 保存 Planner、工具调用及聊天回想的完整推理记录，供 WebUI 查看
+replyer_retro_prompt = false          # 按旧版（0.12.x）方式组织 Replyer 提示词，全部指令集中在一份模板里
 force_plugin_compatibility = false    # 跳过插件声明的 Host/SDK 版本校验直接加载；开启后需重启生效
 keep_prompt_preview_json_base64 = false  # [进阶] Prompt 预览保留图片 base64；便于复现但占空间
 record_tool_structured_content = false   # [进阶] 保存工具返回的结构化内容；增加数据库体积
@@ -747,6 +789,7 @@ enable_llm_cache_stats = false           # [进阶] 记录模型 prompt cache �
 - **终端输入** — `enable_console_input` 默认开启：在交互式终端里可以直接输入普通消息，或用 `/clear`、`/pm`、`/offline`、`/online`、`/help` 等指令管理聊天和适配器，输入 `exit()` 关闭。非交互终端（systemd、nohup、`docker run` 不带 `-it`）只会多打一条 warning，不影响运行；改动需重启
 - **强制插件兼容** — `force_plugin_compatibility = true` 会跳过插件 manifest 声明的 Host/SDK 版本区间校验直接加载，**仅作临时兜底**，可能加载实际不兼容的插件；它只记一条 warning，且不影响插件市场的版本兼容性判断。开启后需重启
 - **`/clear` 指令** — `/clear` 是默认可用的内置命令；如需禁用，用 `[plugin].disabled_commands = ["core.clear"]`
+- **复古回复提示词** — `replyer_retro_prompt = true` 时按旧版（0.12.x）方式组织 Replyer 提示词：全部回复指令集中在一份完整模板里，整段作为一条 `user` 消息发送，历史对话渲染成纯文本填入模板占位符，不再发送图片 Item。群聊、"简短回复"、私聊和"私聊且回复麦麦自己"各用一套模板（`retro_replyer`、`retro_replyer_light`、`retro_private_replyer`、`retro_private_replyer_self`），它们在 **Prompt 管理**里以"高级"折叠展示，可以编辑和创建自定义版本。改动热重载生效
 
 #### 遥测
 
@@ -811,7 +854,7 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 
 **麦麦刷屏话痨** — 调低 `talk_value`（如 0.3）；`response_splitter.max_sentence_num` 和 `max_split_num` 限制单次回复条数；注意 `emoji_send_num` 只是发送候选数，调小它不会减少发言频率。
 
-**手动加的字段被删掉** — 配置文件由程序自动升级，不存在或拼写错误的字段（如把 `mid_term_memory_lenth` 改成 `length`）会在下次启动时被清理回默认值。先启动一次让程序生成/升级文件，再在生成的字段上改值。
+**手动加的字段被删掉** — 配置文件由程序自动升级，不存在或拼写错误的字段（如把 `max_context_size` 拼成 `max_context_len`）会在下次启动时被清理回默认值。先启动一次让程序生成/升级文件，再在生成的字段上改值。
 
 **人设改了感觉没变化** — 人设只影响新生成的回复，已发出的消息不会变。确认日志出现重载成功后，连续观察几轮对话；想让风格偶尔突变，试试 `multiple_reply_style` + `multiple_probability`。
 

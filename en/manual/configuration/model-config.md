@@ -136,7 +136,7 @@ Give the Planner web search and page-reading tools. Web services are defined sep
 preview_chars = 4000                  # Preview characters returned per call; read the full result with read_tool_result
 
 [web.services.deepseek]
-adapter = "deepseek"                  # Protocol: deepseek / tavily / stepsearch_mcp
+adapter = "deepseek"                  # Protocol: deepseek / tavily / stepsearch_mcp / anysearch / exa / firecrawl
 api_key = "sk-..."                    # DeepSeek API key
 # base_url = "https://api.deepseek.com"  # Empty uses the official URL; an OpenAI-compatible /v1 URL also works
 timeout = 60                          # Total time limit per call (seconds)
@@ -174,12 +174,55 @@ timeout = 60
 model_list = ["stepsearch"]
 ```
 
+```toml [AnySearch ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.anysearch]
+adapter = "anysearch"
+api_key = "..."                       # AnySearch API key
+# base_url = "https://api.anysearch.com"  # Empty uses the official URL
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["anysearch"]
+```
+
+```toml [Exa ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.exa]
+adapter = "exa"
+api_key = "..."                       # Exa API key
+# base_url = "https://api.exa.ai"     # Empty uses the official URL
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["exa"]
+```
+
+```toml [Firecrawl ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.firecrawl]
+adapter = "firecrawl"
+api_key = "fc-..."                    # Firecrawl API key
+# base_url = "https://api.firecrawl.dev"  # Empty uses the official URL
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["firecrawl"]
+```
+
 :::
 
 **Key points:**
 
 - **Enabling** — the `web_search` / `web_fetch` tools are registered only when `model_task_config.web_search.model_list` selects a service; leaving it empty disables web tools entirely
 - **One service** — `model_list` accepts a single service. To switch services, change this value; other definitions can stay
+- **AnySearch / Exa / Firecrawl** — all three need only an `api_key`; leave `base_url` empty for the official URL, or point it at a proxy or self-hosted service
 - **StepSearch MCP** — the endpoint and credentials live in `[mcp.servers]` in `bot_config.toml`; `web.services` only needs `server_ref` and must not set `api_key` or `base_url`
 - **Long pages** — only `preview_chars` characters are handed to the model per call; the full result is available through `read_tool_result`, which is also used by long-tool-result condensing
 - **Search arguments** — `web_search` accepts only `query` and `max_results` (1–20, default 5); `web_fetch` accepts only `url`
