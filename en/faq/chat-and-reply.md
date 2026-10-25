@@ -4,36 +4,33 @@ title: Chat and Replies
 
 # Chat and Replies
 
-## What is the difference between frequency and dynamic trigger?
+## How does MaiBot decide whether to reply?
 
-`[chat.reply_timing].reply_trigger_mode` decides when new messages enter the Planner:
+New messages first go through debouncing, then the Planner decides whether to respond. The reply tendency is mainly tuned by the frequency settings `talk_value` and `talk_value_rules`: Mai tries to reply when @-mentioned and replies more easily when named. After several consecutive no-reply decisions, the check pace automatically slows down via `no_action_backoff_*`.
 
-- **`frequency` (default)** — decides whether to think based on the number of new messages; simple and predictable
-- **`dynamic`** — estimates the reply likelihood of each message batch, then uses a one-hour sliding window to pull the actual reply count back to the configured target. It **only applies to group chats; private chats are not gated**
-
-After switching modes, observe for a while before deciding whether to fine-tune `talk_value`.
+After changing the frequency, observe for a while before fine-tuning further.
 
 ## How do I make MaiBot speak more or less often?
 
-Adjust group or private-chat frequency, then check dynamic frequency rules. When dynamic rules are enabled, a matching rule may override the base value. Personality and group prompts can also affect the Planner's decision to speak.
+Adjust group or private-chat frequency, then check the per-chat and per-time rules (`talk_value_rules`). When rules are enabled, a matching rule may override the base value. Personality and group prompts can also affect the Planner's decision to speak.
 
 Make small changes and observe the result.
 
 ## Why does the bot reply to its own messages?
 
-Check whether the adapter feeds outgoing bot messages back into MaiBot and whether the configured bot account is correct. Then inspect plugin conflicts, message filtering, and dynamic frequency rules.
+Check whether the adapter feeds outgoing bot messages back into MaiBot and whether the configured bot account is correct. Then inspect plugin conflicts, message filtering, and frequency rules.
 
 If the message path is correct but the Planner still chooses repeated replies, adjust frequency or test another Planner model. The symptom alone does not prove a model-quality issue.
 
 ## Why is only the first of several consecutive messages handled?
 
-Whether a new message restarts Planner reasoning depends on the trigger mode and consecutive-interrupt limit. Model latency, tool calls, and context size also affect responsiveness.
+First check whether the messages were merged into one batch by debouncing; model latency, tool calls, and context size also slow down a single turn.
 
-Review `planner_interrupt_max_consecutive_count`, but do not copy a fixed value blindly. More permissive interruption improves responsiveness but can increase model calls and context use.
+To let new messages arriving during thinking, output, or waiting join immediately and restart reasoning, enable quick reaction mode (`[chat.reply_timing].planner_message_steering`).
 
 ## Why are replies slow?
 
-Use logs to identify whether time is spent on model requests, tools, image recognition, adapter delivery, or Planner waiting. Then inspect network latency, model speed, context length, and unnecessary plugins. Also review interruption settings if new messages wait for the previous turn to finish.
+Use logs to identify whether time is spent on model requests, tools, image recognition, adapter delivery, or Planner waiting. Then inspect network latency, model speed, context length, and unnecessary plugins. If new messages always wait for the previous turn to finish, enable quick reaction mode (`planner_message_steering`) so they join immediately.
 
 ## Why does a reply become a very short fallback phrase?
 

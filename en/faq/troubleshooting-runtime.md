@@ -47,7 +47,7 @@ enabled = true                  # Make sure the rule is enabled
 # config/bot_config.toml
 [chat.reply_timing]
 talk_value = 1                  # Group talk willingness (0-1); lower is quieter. Default 1
-private_talk_value = 1          # Private chat talk willingness (0-1). Default 1
+private_reply_paused = false    # Private replies paused: make sure this is not true
 ```
 
 :::
