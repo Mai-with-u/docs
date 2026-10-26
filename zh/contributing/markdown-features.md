@@ -371,7 +371,7 @@ allowfullscreen>
 - **`url`** (必填) — 链接地址
 - **`title`** (必填) — 卡片标题
 - **`description`** (必填) — 卡片描述
-- **`logo`** (可选, 默认 `''`) — 图标地址或内置图标名（支持 `github`、`x`、`discord`、`telegram`、`bilibili`；未指定时自动根据链接域名匹配或回退为站点图标）
+- **`logo`** (可选, 默认 `''`) — 图标图片地址，也可填域名指定本地图标；留空时按链接域名自动匹配（子域名自动回退主域名），匹配不到回退站点 favicon
 
 ````html
 <Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
@@ -380,4 +380,6 @@ allowfullscreen>
 **效果预览：**
 
 <Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
+
+**新增图标：** 把以域名命名的 SVG 放进 `.vitepress/theme/icons/`（如 `github.com.svg`），组件构建时自动发现，不用改组件代码。
 

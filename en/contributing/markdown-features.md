@@ -371,7 +371,7 @@ allowfullscreen>
 - **`url`** (required) — Link URL
 - **`title`** (required) — Card title
 - **`description`** (required) — Card description
-- **`logo`** (optional, default `''`) — Logo image URL or built-in icon name (supports `github`, `x`, `discord`, `telegram`, `bilibili`; automatically matches domain or falls back to site favicon when unspecified)
+- **`logo`** (optional, default `''`) — Logo image URL or a local icon domain; when unspecified, matches a local vector icon by link domain (subdomains fall back to the main domain), then falls back to the site favicon
 
 ````html
 <Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
@@ -380,4 +380,6 @@ allowfullscreen>
 **Rendered effect:**
 
 <Linkcard url="https://github.com/Mai-with-u/MaiBot" title="MaiBot" description="一个智能 QQ 群聊天机器人" logo="/title_img/mai.png" />
+
+**Adding icons:** put a domain-named SVG in `.vitepress/theme/icons/` (e.g. `github.com.svg`); the component discovers it at build time, no component code changes needed.
 
