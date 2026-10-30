@@ -28,7 +28,7 @@ title: 关于本文档
 - [Mermaid](https://mermaid.js.org/) — 通过 `vitepress-plugin-mermaid` 支持流程图、时序图等
 - [vitepress-plugin-group-icons](https://vp.yuy1n.io/features.html) — 为代码组标签自动显示语言图标
 - [vitepress-markdown-timeline](https://github.com/LittleFox94/vitepress-markdown-timeline) — 支持时间线
-- Linkcard — 自定义链接卡片组件（已注册为全局组件 `<Linkcard>`，没指定 logo 时会自动显示链接图标）
+- Linkcard — 自定义链接卡片组件（已注册为全局组件 `<Linkcard>`，没指定 logo 时按链接域名自动匹配本地矢量图标，匹配不到回退站点 favicon）
 - [xgplayer](https://h5player.bytedance.com/) — 视频播放器组件
 - [vitepress-plugin-llms](https://github.com/AnYiEE/vitepress-plugin-llms) — 生成 llms.txt / llms-full.txt
 - [@nolebase/vitepress-plugin-enhanced-readabilities](https://nolebase.ayaka.io/pages/zh-CN/integrations/vitepress-plugin-enhanced-readabilities/) — 增强阅读体验

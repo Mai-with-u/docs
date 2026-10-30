@@ -29,7 +29,7 @@ Beyond the two main files, these topics have their own pages:
 
 MaiBot watches both files for changes. Whether a restart is required depends on whether the setting controls runtime behavior or how a service starts.
 
-**Applies automatically after saving** — Bot profile, personality, chat policy, reply frequency, model providers, models, task assignments, the `[experimental]` retro reply prompt (`replyer_retro_prompt`), and `[response_splitter].mode` are hot-reloaded. Model changes apply to subsequent requests. Modules with reload callbacks, including A_Memorix and emoji maintenance, also receive the update.
+**Applies automatically after saving** — Bot profile, personality, chat policy, reply frequency, model providers, models, task assignments, the `[debug]` retro reply prompt (`replyer_retro_prompt`), and `[response_splitter].mode` are hot-reloaded. Model changes apply to subsequent requests. Modules with reload callbacks, including A_Memorix and emoji maintenance, also receive the update.
 
 **Hot-reloaded by the plugin runtime** — A plugin's own `config.toml` has a separate lifecycle. The runtime watches it and calls the plugin configuration-update hook. Enabling, disabling, installing, uninstalling, and source updates normally do not require restarting all of MaiBot.
 

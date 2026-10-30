@@ -86,11 +86,18 @@ function scan(p) {
   return out
 }
 
+/** 与 VitePress 渲染行为一致：标题带 {#id} 时真实 id 就是该 id，否则为标题文本的 slug */
+const headingId = (raw) => {
+  const text = raw.replace(/\r$/, '').replace(/`/g, '').trim()
+  const custom = text.match(/\{#([\w-]+)\}$/)
+  return custom ? custom[1] : slugify(text)
+}
+
 const idsOf = (p) => {
   const set = new Set()
   for (const l of lines(p)) {
-    const m = l.match(/^#{1,6}\s+(.*)$/)
-    if (m) set.add(slugify(m[1].replace(/`/g, '').trim()))
+    const m = l.replace(/\r$/, '').match(/^#{1,6}\s+(.*)$/)
+    if (m) set.add(headingId(m[1]))
   }
   return set
 }
@@ -442,9 +449,9 @@ if (haveMaiBot) {
   for (const p of [...zh, ...en]) {
     const seen = new Map()
     for (const l of lines(p)) {
-      const m = l.match(/^#{1,6}\s+(.*)$/)
+      const m = l.replace(/\r$/, '').match(/^#{1,6}\s+(.*)$/)
       if (!m) continue
-      const s = slugify(m[1].replace(/`/g, '').trim())
+      const s = headingId(m[1])
       seen.set(s, (seen.get(s) || 0) + 1)
     }
     const dup = [...seen.entries()].filter(([, n]) => n > 1)

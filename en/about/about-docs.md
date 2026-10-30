@@ -28,7 +28,7 @@ Technologies and plugins used by this documentation site:
 - [Mermaid](https://mermaid.js.org/) — Flowcharts, sequence diagrams, etc. via `vitepress-plugin-mermaid`
 - [vitepress-plugin-group-icons](https://vp.yuy1n.io/features.html) — Language icons for code group tabs
 - [vitepress-markdown-timeline](https://github.com/LittleFox94/vitepress-markdown-timeline) — Timelines support
-- Linkcard — Custom link card component (registered globally as `<Linkcard>`; automatically shows link favicon when logo is unspecified)
+- Linkcard — Custom link card component (registered globally as `<Linkcard>`; matches a local vector icon by link domain when logo is unspecified, falling back to the site favicon if none matches)
 - [xgplayer](https://h5player.bytedance.com/) — Video player component
 - [vitepress-plugin-llms](https://github.com/AnYiEE/vitepress-plugin-llms) — Generates llms.txt / llms-full.txt
 - [@nolebase/vitepress-plugin-enhanced-readabilities](https://nolebase.ayaka.io/pages/zh-CN/integrations/vitepress-plugin-enhanced-readabilities/) — Enhanced reading experience

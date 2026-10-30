@@ -774,7 +774,7 @@ image_path = Path(claimed["path"])
 
 :::
 
-Tokens must belong to the claiming plugin, expire after one hour, and can be claimed only once. They originate from authenticated WebUI uploads; arbitrary paths are not substitutes. File contents do not travel through ordinary JSON/RPC. See [WebUI Pages](./webui-pages.md#upload-and-interaction-capabilities) for declarations and format/size limits.
+Tokens must belong to the claiming plugin, expire after one hour, and can be claimed only once. They originate from authenticated WebUI uploads; arbitrary paths are not substitutes. File contents do not travel through ordinary JSON/RPC. See [WebUI Pages](./webui-pages.md#image-uploads) for declarations and format/size limits.
 
 ## paths — Runtime Paths
 

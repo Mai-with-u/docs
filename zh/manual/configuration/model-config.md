@@ -136,7 +136,7 @@ cache_price_in = 0.0
 preview_chars = 4000                  # 单次返回的内容预览字数，完整内容用 read_tool_result 读取
 
 [web.services.deepseek]
-adapter = "deepseek"                  # 服务协议：deepseek / tavily / stepsearch_mcp
+adapter = "deepseek"                  # 服务协议：deepseek / tavily / stepsearch_mcp / anysearch / exa / firecrawl
 api_key = "sk-..."                    # DeepSeek API 密钥
 # base_url = "https://api.deepseek.com"  # 留空使用官方地址，也可填 OpenAI 兼容的 /v1 地址
 timeout = 60                          # 单次调用总时限（秒）
@@ -174,12 +174,55 @@ timeout = 60
 model_list = ["stepsearch"]
 ```
 
+```toml [AnySearch ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.anysearch]
+adapter = "anysearch"
+api_key = "..."                       # AnySearch API 密钥
+# base_url = "https://api.anysearch.com"  # 留空使用官方地址
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["anysearch"]
+```
+
+```toml [Exa ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.exa]
+adapter = "exa"
+api_key = "..."                       # Exa API 密钥
+# base_url = "https://api.exa.ai"     # 留空使用官方地址
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["exa"]
+```
+
+```toml [Firecrawl ~vscode-icons:file-type-toml~]
+[web]
+preview_chars = 4000
+
+[web.services.firecrawl]
+adapter = "firecrawl"
+api_key = "fc-..."                    # Firecrawl API 密钥
+# base_url = "https://api.firecrawl.dev"  # 留空使用官方地址
+timeout = 60
+
+[model_task_config.web_search]
+model_list = ["firecrawl"]
+```
+
 :::
 
 **要点：**
 
 - **启用方式** — 只有 `model_task_config.web_search.model_list` 选中服务后才会注册 `web_search` / `web_fetch` 工具；留空时联网工具完全关闭
 - **服务数量** — `model_list` 只能选一个服务；需要切换服务时改这里即可，不用删掉其他定义
+- **AnySearch / Exa / Firecrawl** — 都只需 `api_key`，`base_url` 留空用官方地址、可指向代理或自建服务
 - **StepSearch MCP** — 连接地址和鉴权由 `bot_config.toml` 的 `[mcp.servers]` 管理，`web.services` 里只写 `server_ref`，不要再填 `api_key` 或 `base_url`
 - **长网页** — 单次只把 `preview_chars` 范围内的内容交给模型，完整结果可通过 `read_tool_result` 读取；开启「超长工具结果整理」时也会用到它
 - **搜索参数** — `web_search` 只接受 `query` 与 `max_results`（1~20，默认 5）；`web_fetch` 只接受 `url`
