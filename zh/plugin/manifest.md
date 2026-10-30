@@ -82,20 +82,23 @@ title: Manifest
 
 ### plugin_type 插件类型
 
-`plugin_type` 用于声明插件的主要角色，供 WebUI 展示、筛选和默认图标选择使用。该字段为可选字段，不需要升级 `manifest_version`；缺省时按 `extension` 处理。
+`plugin_type` 表示插件的主要类别，供 WebUI 展示和筛选。字段可省略；缺省或填写 `extension` 时显示为“无类别”，不列入分类筛选。请选择最能代表插件主要功能的一项。
 
-可选值：
+- `adapter` — 适配器：接入聊天平台或消息协议
+- `tool` — 工具：命令、查询和模型可调用工具
+- `provider` — 服务提供方：LLM、TTS、API 等能力提供方
+- `management` — 管理：群管理、权限和后台管理
+- `data` — 数据与知识：统计、记忆、知识库和数据处理
+- `media` — 媒体：图片、语音、视频和表情处理
+- `game` — 游戏娱乐：游戏、娱乐和互动
+- `integration` — 外部集成：外部平台、搜索服务和 Webhook
+- `other` — 其他：无法归入已有类别的插件
+- `chat` — 聊天：对话、回复和聊天行为增强
+- `creative` — 创作：绘画、写作和内容生成
+- `automation` — 自动化：定时任务、自动执行和工作流
+- `deskpet` — 桌宠：桌面宠物及相关交互
 
-- `adapter` — 消息平台或协议适配器
-- `tool` — 工具、命令或模型可调用能力
-- `provider` — LLM、TTS、API 等服务提供方
-- `management` — 管理、权限、群管或后台类插件
-- `data` — 统计、记忆、知识库、导入导出等数据类插件
-- `media` — 图片、语音、视频、表情等媒体处理
-- `game` — 游戏或娱乐互动
-- `integration` — 外部平台、搜索、Webhook 等集成
-- `extension` — 通用扩展
-- `other` — 其他
+兼容旧值：`knowledge` 显示为数据与知识，`entertainment` 显示为游戏娱乐，`search` 显示为外部集成；其他未知值显示为其他。Host 目前接受字符串，不强制校验上述枚举。`adapter` 还用于适配器 Runner 分组。
 
 ### display 展示元信息
 

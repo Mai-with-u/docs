@@ -81,20 +81,23 @@ Below is a complete Manifest example:
 
 ### plugin_type Plugin Type
 
-`plugin_type` is used to declare the primary role of the plugin, for WebUI display, filtering, and default icon selection. This field is optional and does not require upgrading `manifest_version`; if omitted, it defaults to `extension`.
+`plugin_type` declares the plugin's primary category for WebUI display and filtering. It is optional; an omitted value or `extension` displays as “Uncategorized” and is excluded from category filters. Choose the category that best describes the main function.
 
-Possible values:
+- `adapter` — Adapters for chat platforms and protocols
+- `tool` — Commands, queries, and model-callable tools
+- `provider` — LLM, TTS, API, and other service providers
+- `management` — Group, permission, and administration management
+- `data` — Data and knowledge, including statistics, memory, and knowledge bases
+- `media` — Image, audio, video, and emoji processing
+- `game` — Games, entertainment, and interaction
+- `integration` — External platforms, search services, and webhooks
+- `other` — Plugins that do not fit another category
+- `chat` — Conversation and reply behavior
+- `creative` — Drawing, writing, and content generation
+- `automation` — Scheduled tasks and automated workflows
+- `deskpet` — Desktop pets and related interaction
 
-- `adapter` — Message platform or protocol adapter
-- `tool` — Tools, commands, or model-callable capabilities
-- `provider` — LLM, TTS, API, or other service providers
-- `management` — Management, permissions, group administration, or backend plugins
-- `data` — Statistics, memory, knowledge base, import/export, and other data-related plugins
-- `media` — Image, voice, video, emoji, and other media processing
-- `game` — Games or entertainment interactions
-- `integration` — External platforms, search, Webhooks, and other integrations
-- `extension` — General extensions
-- `other` — Other
+For legacy values, `knowledge` maps to data, `entertainment` to game, and `search` to integration; other unknown values display as other. The Host currently accepts strings without enforcing this list. `adapter` also controls adapter Runner grouping.
 
 ### display Display Metadata
 

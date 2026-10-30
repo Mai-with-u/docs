@@ -6,9 +6,9 @@
 
 **重要：运行本程序即表示用户同意《MaiBot 最终用户许可协议》（EULA）**
 
-EULA 全文：https://docs.mai-mai.org/about/EULA
+EULA 全文：https://docs.maibot.chat/about/EULA
 
-默认从 PyPI 安装 MaiBot 正式版，创建独立实例目录。部署细节：https://docs.mai-mai.org/manual/deployment/uv-tool
+默认从 PyPI 安装 MaiBot 正式版，创建独立实例目录。部署细节：https://docs.maibot.chat/manual/deployment/uv-tool
 
 ## Step 0: 询问用户
 
@@ -22,9 +22,9 @@ EULA 全文：https://docs.mai-mai.org/about/EULA
 3. 提前说明所选方案的前提：
    - 方案 B：需要先部署一个 QQ 客户端（SnowLuma 或 NapCat）并登录机器人小号、开启正向 WebSocket 服务器；搭建 QQ 机器人有被风控或封禁的风险，务必提醒用户使用小号
    - 方案 C：需要先到 QQ 开放平台（https://q.qq.com/）完成开发者入驻、创建机器人并取得 AppID 与 AppSecret；想用群聊时，还需群主把该机器人的「机器人可获取的群聊消息范围」设为「获取群内全部消息」
-4. 提醒用户：运行本程序即表示同意 EULA（https://docs.mai-mai.org/about/EULA）
+4. 提醒用户：运行本程序即表示同意 EULA（https://docs.maibot.chat/about/EULA）
 
-默认使用 uv 工具安装。用户要修改主程序代码或指定开发分支时，改用源码部署：https://docs.mai-mai.org/manual/deployment/windows 或 https://docs.mai-mai.org/manual/deployment/linux。后续启动与更新命令也要使用所选部署方式。
+默认使用 uv 工具安装。用户要修改主程序代码或指定开发分支时，改用源码部署：https://docs.maibot.chat/manual/deployment/windows 或 https://docs.maibot.chat/manual/deployment/linux。后续启动与更新命令也要使用所选部署方式。
 
 ## Step 1: 检查系统要求
 
@@ -52,7 +52,7 @@ maibot init
 
 记录 `my-maibot` 的绝对路径，后续配置、插件安装、启动和备份都在这个实例目录进行。`maibot init` 保留已有配置，只生成缺失的文件。命令找不到时执行 `uv tool update-shell` 并重新打开终端。
 
-启动前使用用户提供的模型配置填写 `config/model_config.toml`，服务商、API Key、模型标识和任务分配必须对应，不输出或提交 API Key。配置说明：https://docs.mai-mai.org/manual/configuration/model-config
+启动前使用用户提供的模型配置填写 `config/model_config.toml`，服务商、API Key、模型标识和任务分配必须对应，不输出或提交 API Key。配置说明：https://docs.maibot.chat/manual/configuration/model-config
 
 ## Step 4: 启动 MaiBot
 
@@ -66,8 +66,8 @@ maibot run
 - `maibot init` 已生成 `config/bot_config.toml` 和 `config/model_config.toml`；数据和日志分别保存到实例目录的 `data/`、`logs/`
 - WebUI 默认在 http://127.0.0.1:8001/ 启动；首次启动终端会打印 WebUI 登录 Token（也保存在 `data/webui.json`），复制后在浏览器登录页粘贴
 - 引导用户在 WebUI 中完成首次配置。最少需要一个 LLM 模型
-- Bot 配置指南：https://docs.mai-mai.org/manual/configuration/bot-config
-- 模型配置指南：https://docs.mai-mai.org/manual/configuration/model-config
+- Bot 配置指南：https://docs.maibot.chat/manual/configuration/bot-config
+- 模型配置指南：https://docs.maibot.chat/manual/configuration/model-config
 
 非交互环境（CI / Docker 等）无法手动输入确认时，在启动前设置环境变量跳过 EULA 提示：
 
@@ -123,7 +123,7 @@ qq_account = "机器人QQ号"
 6. 启动顺序：先启动 QQ 客户端并确认登录成功 → 再启动 MaiBot
 7. 验证连接：MaiBot 日志出现适配器连接成功信息，并自动判定客户端类型
 
-详细说明：https://docs.mai-mai.org/manual/adapters/qq-local-client
+详细说明：https://docs.maibot.chat/manual/adapters/qq-local-client
 
 ### 方案 C：MaiBot + QQ 官方机器人适配器
 
@@ -145,14 +145,14 @@ app_secret = "与 AppID 配对的 AppSecret"
 4. 群聊设置：如果用群聊，需由**群主**在 QQ 群设置里把该机器人的「可获取的群聊消息范围」设为「获取群内全部消息」
 5. 验证：在群里 @机器人 发送一条纯文本，或由测试用户发起单聊，麦麦能回复即成功
 
-详细说明：https://docs.mai-mai.org/manual/adapters/qq-official
+详细说明：https://docs.maibot.chat/manual/adapters/qq-official
 
 ### 放行范围（两条路线都要做）
 
 1.3.0 起适配器**不再带内置的群聊 / 私聊黑白名单**，入站放行统一由 MaiBot 的适配器策略控制，默认**全部放行**。设置入口有两个：
 
 - WebUI → 配置管理 → 适配器设置（`/adapter-management`）的「全局默认规则」与「黑白名单规则」
-- 配置文件 `config/adapter_policy.toml`（文件不存在等于全部放行），完整写法见 https://docs.mai-mai.org/develop/adapters/policy
+- 配置文件 `config/adapter_policy.toml`（文件不存在等于全部放行），完整写法见 https://docs.maibot.chat/develop/adapters/policy
 
 想只服务指定群时，写入：
 
@@ -180,7 +180,7 @@ allow_ids = ["测试群号"]     # 只放行这些群
 
 - `uv` 命令找不到 — 重新打开终端，或执行 `source $HOME/.local/bin/env`
 - Python 版本不是 3.12+ — 确认 `python --version` 或 `python3 --version`，可能需要使用 `python3.12` 命令
-- 启动后"模型列表不能为空" — 需要在 WebUI 配置至少一个模型：https://docs.mai-mai.org/manual/configuration/model-config
+- 启动后"模型列表不能为空" — 需要在 WebUI 配置至少一个模型：https://docs.maibot.chat/manual/configuration/model-config
 - 非交互环境无法输入"同意" — 设置环境变量 `EULA_AGREE=<终端显示的hash>` 和 `PRIVACY_AGREE=<终端显示的hash>` 后重新启动
 - 找不到 WebUI 登录 Token — 在启动日志里搜索 `Token`，或直接查看 `data/webui.json`
 - 提示词里的旧方案不适用 — 1.3.0 起没有独立的 NapCat / SnowLuma 适配器，统一用「统一 QQ 连接器」，旧配置加载时会自动迁移

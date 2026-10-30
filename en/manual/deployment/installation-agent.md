@@ -14,7 +14,7 @@ Copy the sentence below into the AI assistant you already use (Claude, GPT, Gemi
 
 > Please help me install MaiBot, following the guide here:
 >
-> https://docs.mai-mai.org/installation-agent.md
+> https://docs.maibot.chat/installation-agent.md
 
 :::
 

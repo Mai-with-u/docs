@@ -60,6 +60,20 @@ pnpm docs:preview
 node scripts/docs-quality.mjs
 ```
 
+## Cloudflare 自动部署
+
+文档站发布到 `https://docs.maibot.chat`，对应 Worker 名称为 `maibot-docs`。仓库根目录的 `wrangler.json` 指定静态资源目录 `.vitepress/dist`、自定义域名和 404 页面处理方式。
+
+在 Cloudflare 的 **Workers & Pages → maibot-docs → Settings → Builds → Connect** 中连接 `Mai-with-u/docs`，按以下配置启用自动发布：
+
+- 生产分支：`main`
+- 根目录：`/`
+- 构建命令：`pnpm docs:build`
+- 部署命令：`npx wrangler deploy`
+- 构建环境变量：`NODE_VERSION=24`、`PNPM_VERSION=10.30.3`
+
+连接完成且这些配置提交到 `main` 后，后续推送会自动构建并发布。`.node-version` 和 `package.json` 的 `packageManager` 同时记录构建工具版本。访问首页及任意文档内页确认发布结果；构建或部署失败时，在 Worker 的构建历史中查看日志。
+
 ## 贡献
 
 提 PR 前请先读 [AGENTS.md](./AGENTS.md) 与 [文档站协作规范](./zh/contributing/index.md)。下面几条硬规则会被 review 与 CI 检查：

@@ -50,7 +50,7 @@ title: 获取帮助
 : 确认是 Bug 或功能建议，请在 [GitHub Issues](https://github.com/Mai-with-u/docs/issues) 提交。提交前记得先搜索，避免重复
 
 **`📖 官方文档站`**
-: 最新最全的文档请访问 [MaiBot 文档站](https://docs.mai-mai.org/)
+: 最新最全的文档请访问 [MaiBot 文档站](https://docs.maibot.chat/)
 
 **`💬 GitHub Discussions`**
 : 功能讨论、技术提问可访问 [GitHub Discussions](https://github.com/Mai-with-u/docs/discussions) 参与社区讨论

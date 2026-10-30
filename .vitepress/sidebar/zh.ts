@@ -206,22 +206,7 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
   },
 ]
 
-const contributingSidebar: DefaultTheme.SidebarItem[] = [
-  {
-    text: '文档站',
-    items: [
-      { text: '参与文档站', link: '/contributing/' },
-      { text: '风格指南', link: '/contributing/style-guide' },
-      { text: '写作特性', link: '/contributing/markdown-features' },
-    ]
-  },
-]
-
-export const sidebar: DefaultTheme.Sidebar = {
-  '/develop/': developSidebar,
-  '/plugin/': pluginSidebar,
-  '/contributing/': contributingSidebar,
-  '/about/': [
+const aboutSidebar: DefaultTheme.SidebarItem[] = [
     {
       text: '项目与社区',
       collapsed: false,
@@ -249,7 +234,13 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: '隐私条款', link: '/about/PRIVACY' },
       ]
     },
-  ],
+]
+
+export const sidebar: DefaultTheme.Sidebar = {
+  '/develop/': developSidebar,
+  '/plugin/': pluginSidebar,
+  '/contributing/': aboutSidebar,
+  '/about/': aboutSidebar,
   '/faq/': [
     {
       text: '常见问题',

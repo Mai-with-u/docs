@@ -195,22 +195,7 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
   },
 ]
 
-const contributingSidebar: DefaultTheme.SidebarItem[] = [
-  {
-    text: 'Docs Site',
-    items: [
-      { text: 'Contribute to Docs', link: '/en/contributing/' },
-      { text: 'Style Guide', link: '/en/contributing/style-guide' },
-      { text: 'Markdown Features', link: '/en/contributing/markdown-features' },
-    ]
-  },
-]
-
-export const sidebar: DefaultTheme.Sidebar = {
-  '/en/develop/': developSidebar,
-  '/en/plugin/': pluginSidebar,
-  '/en/contributing/': contributingSidebar,
-  '/en/about/': [
+const aboutSidebar: DefaultTheme.SidebarItem[] = [
     {
       text: 'Project & Community',
       collapsed: false,
@@ -238,7 +223,13 @@ export const sidebar: DefaultTheme.Sidebar = {
         { text: 'Privacy Policy', link: '/en/about/PRIVACY' },
       ]
     },
-  ],
+]
+
+export const sidebar: DefaultTheme.Sidebar = {
+  '/en/develop/': developSidebar,
+  '/en/plugin/': pluginSidebar,
+  '/en/contributing/': aboutSidebar,
+  '/en/about/': aboutSidebar,
   '/en/changelog/': [
     {
       text: 'Changelog',

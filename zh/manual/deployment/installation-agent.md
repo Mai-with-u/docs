@@ -14,7 +14,7 @@ title: AI 助手安装
 
 > 请帮我安装 MaiBot，按照这里的指南操作：
 >
-> https://docs.mai-mai.org/installation-agent.md
+> https://docs.maibot.chat/installation-agent.md
 
 :::
 

@@ -50,7 +50,7 @@ When submitting an Issue on GitHub, please be sure to include the following info
 : If you've confirmed it's a bug or feature suggestion, please submit at [GitHub Issues](https://github.com/Mai-with-u/docs/issues). Remember to search first to avoid duplicates
 
 **`📖 Official Documentation Site`**
-: For the latest and most comprehensive documentation, visit [MaiBot Documentation Site](https://docs.mai-mai.org/)
+: For the latest and most comprehensive documentation, visit [MaiBot Documentation Site](https://docs.maibot.chat/)
 
 **`💬 GitHub Discussions`**
 : For feature discussions and technical questions, visit [GitHub Discussions](https://github.com/Mai-with-u/docs/discussions) to join the community conversation

@@ -34,13 +34,13 @@ export default defineConfig({
     const rel = pageData.relativePath
       .replace(/(^|\/)index\.md$/, '$1')
       .replace(/\.md$/, '')
-    const image = 'https://docs.mai-mai.org/title_img/mai2.png'
+    const image = 'https://docs.maibot.chat/title_img/mai2.png'
     return [
       ['meta', { property: 'og:type', content: 'website' }],
       ['meta', { property: 'og:site_name', content: isEn ? 'MaiBot Docs' : 'MaiBot 文档中心' }],
       ['meta', { property: 'og:title', content: title }],
       ['meta', { property: 'og:description', content: description }],
-      ['meta', { property: 'og:url', content: 'https://docs.mai-mai.org/' + rel }],
+      ['meta', { property: 'og:url', content: 'https://docs.maibot.chat/' + rel }],
       ['meta', { property: 'og:image', content: image }],
       ['meta', { name: 'twitter:title', content: title }],
       ['meta', { name: 'twitter:description', content: description }],
@@ -48,7 +48,7 @@ export default defineConfig({
     ]
   },
   sitemap: {
-    hostname: 'https://docs.mai-mai.org'
+    hostname: 'https://docs.maibot.chat'
   },
   locales: {
     root: {
@@ -194,7 +194,7 @@ export default defineConfig({
         },
       }),
       MermaidPlugin(),
-      llmstxt({ workDir: 'zh', ignoreFiles: ['index.md'], domain: 'https://docs.mai-mai.org' }),
+      llmstxt({ workDir: 'zh', ignoreFiles: ['index.md'], domain: 'https://docs.maibot.chat' }),
     ],
     optimizeDeps: {
       include: ['mermaid'],
