@@ -12,26 +12,26 @@ title: 程序化对接
 
 WebUI 的后端是一个 FastAPI 应用，随 MaiBot 主进程一起启动。默认行为：
 
-- **监听端口** — `8001`（WebUIConfig.port）
-- **绑定地址** — `127.0.0.1` 和 `::1`（WebUIConfig.host）
+- **监听端口** — `8001`（HTTPConfig.port）
+- **绑定地址** — `127.0.0.1` 和 `::1`（HTTPConfig.host）
 - **运行模式** — `production`（WebUIConfig.mode），开发时可切 `development`
 
 ::: warning 安全警告
-默认绑定回环地址，只能本机访问。**切勿将 host 改为 `0.0.0.0` 直接暴露在公网上**，WebUI 没有内置 TLS 终止和 WAF。如果必须远程访问，请通过反向代理（Nginx / Caddy）接入，并在 `webui.trusted_proxies` 中配置代理 IP。
+默认绑定回环地址，只能本机访问。**切勿将 `[http] host` 改为 `0.0.0.0` 直接暴露在公网上**，WebUI 没有内置 TLS 终止和 WAF。如果必须远程访问，请通过反向代理（Nginx / Caddy）接入，并在 `webui.trusted_proxies` 中配置代理 IP。
 :::
 
 关键配置项一览：
 
 - **`webui.enabled`** — `true` 启动 WebUI，`false` 完全禁用
-- **`webui.host`** — 监听地址列表，可同时绑 IPv4 和 IPv6
-- **`webui.port`** — 监听端口，默认 `8001`
+- **`http.host`** — 监听地址列表，可同时绑 IPv4 和 IPv6
+- **`http.port`** — 监听端口，默认 `8001`
 - **`webui.allowed_ips`** — IP 白名单，逗号分隔
 - **`webui.secure_cookie`** — 是否只在 HTTPS 下发送登录 Cookie
 - **`webui.anti_crawler_mode`** — 防爬虫级别，默认 `basic`
 - **`webui.trusted_proxies`** — 反向代理 IP 列表
 - **`webui.trust_xff`** — 是否信任 `X-Forwarded-For` 头
 
-这些字段定义在 `src/config/official_configs.py` 的 `WebUIConfig` 类中，全部可通过 [WebUI 配置界面](/manual/webui/) 或 [`/api/config/raw`](#兼容路由-compat-routers) 读写。
+监听配置定义在 `src/common/http_service/config.py` 的 `HTTPConfig` 类中，全部可通过 [WebUI 配置界面](/manual/webui/) 或 [`/api/config/raw`](#兼容路由-compat-routers) 读写。
 
 ## 认证模型：三种方式
 

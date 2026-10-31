@@ -33,7 +33,7 @@ MaiBot watches both files for changes. Whether a restart is required depends on 
 
 **Hot-reloaded by the plugin runtime** — A plugin's own `config.toml` has a separate lifecycle. The runtime watches it and calls the plugin configuration-update hook. Enabling, disabling, installing, uninstalling, and source updates normally do not require restarting all of MaiBot.
 
-**Requires a full MaiBot restart** — `[webui]` and `[maim_message]` listen addresses and ports, `[plugin_runtime]` binding and IPC settings, the `[log]` event-loop watchdog (`event_loop_watchdog_*`), and `[debug].force_plugin_compatibility` are established at startup and are not rebound by a file reload.
+**Requires a full MaiBot restart** — `[http]` and `[maim_message]` listen addresses and ports, `[plugin_runtime]` binding and IPC settings, the `[log]` event-loop watchdog (`event_loop_watchdog_*`), and `[debug].force_plugin_compatibility` are established at startup and are not rebound by a file reload.
 
 ::: tip How to tell
 Check the log after saving: a successful config-reload message means the new value took over; for listen addresses, MCP connections, and other startup-only settings, restart MaiBot.
@@ -57,6 +57,6 @@ For the full WebUI feature set, see [Login and Settings](/en/manual/webui/).
 
 **Change had no effect** — Compare with "Does It Take Effect Immediately" above: listen addresses, ports, and MCP connections need a restart; for everything else check the log for a reload message.
 
-**WebUI does not open** — Make sure `[webui] enabled = true` in `bot_config.toml`; check whether `host` is bound to `127.0.0.1` only (change the bind or use port forwarding on remote servers); verify the port is not occupied or blocked by a firewall.
+**WebUI does not open** — Make sure `[webui] enabled = true` in `bot_config.toml`; check whether `[http] host` is bound to `127.0.0.1` only (change the bind or use port forwarding on remote servers); verify the port is not occupied or blocked by a firewall.
 
 **Mai misbehaves after an edit** — Run a syntax self-check first: `python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb'))"` — the reported line number points at the problem; invalid field values are named directly in the startup log.

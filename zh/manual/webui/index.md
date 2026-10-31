@@ -37,15 +37,17 @@ MaiBot 启动后访问 `http://localhost:8001` 即可访问 WebUI
 
 ## Webui设置
 
-在 `bot_config.toml` 里可以更改 WebUI 自身的一些基础设置：
+在 `bot_config.toml` 里可以更改 WebUI 自身的一些基础设置。监听地址与端口在 `[http]` 段，由 WebUI 和文件传输共用：
 
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
+[http]
+host = ["127.0.0.1", "::1"]  # 监听地址列表；远程访问改为 ["0.0.0.0", "::"]
+port = 8001                   # WebUI 与文件传输共用的端口
+
 [webui]
 enabled = true                # 是否启用 WebUI
-host = ["127.0.0.1", "::1"]  # 绑定地址列表
-port = 8001                   # 端口号
 mode = "production"           # 运行模式：development(开发) 或 production(生产)
 webui_style = 2               # 界面风格：0 原版 / 1 未来复古 / 2 千禧
 anti_crawler_mode = "basic"   # 防爬虫模式：false / strict / loose / basic
@@ -53,6 +55,8 @@ allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 ```
 
 :::
+
+改完 `[http]` 必须重启 MaiBot 才生效。
 
 
 ![关于页](/images/webui/settings-about.webp)

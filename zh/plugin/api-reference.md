@@ -4,7 +4,7 @@ title: API 参考
 
 # API 参考
 
-MaiBot 插件通过 `self.ctx`（`PluginContext`）访问 18 种能力代理。所有能力调用自动通过 RPC 转发到 Host 处理，SDK 会自动解包结果；`ctx.paths` 与 `ctx.logger` 是 Runner 注入的上下文辅助对象。
+MaiBot 插件通过 `self.ctx`（`PluginContext`）访问 23 种能力代理。所有能力调用自动通过 RPC 转发到 Host 处理，SDK 会自动解包结果；`ctx.paths` 与 `ctx.logger` 是 Runner 注入的上下文辅助对象。
 
 ::: code-group
 
@@ -28,6 +28,11 @@ self.ctx.knowledge  # 知识库搜索
 self.ctx.statistics # 本机统计
 self.ctx.maisaka    # Maisaka 上下文与主动任务
 self.ctx.webui      # WebUI 上传凭证领取
+self.ctx.files      # 文件收发与读取
+self.ctx.web        # 联网搜索与网页读取
+self.ctx.internal_chat  # 内部聊天（桌宠与网页共用会话）
+self.ctx.personality    # 全局人设查询与切换
+self.ctx.desktop_pet    # 桌宠控制、动画与扩展按钮
 
 # 上下文辅助对象
 self.ctx.paths      # 插件持久化与运行时目录
@@ -756,6 +761,101 @@ Manifest 示例：
 ```
 
 :::
+
+## internal_chat — 内部聊天
+
+网页聊天室与桌宠共用同一条主人会话：平台为 `internal`、用户为 `owner`。插件通过这组能力识别这条会话并代主人发言。需要 SDK 2.17.0+。
+
+- `await internal_chat.identity()` — 返回 `{platform, user_id}`，用于识别这条聊天流及麦麦发给主人的消息
+- `await internal_chat.send(text)` — 以主人身份投递一句话（1～2000 字符）；消息记录插件来源，不具备受保护命令权限，可能触发麦麦回复并进入聊天历史
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+identity = await self.ctx.internal_chat.identity()
+if identity["platform"] == "internal":
+    await self.ctx.internal_chat.send("把待办整理一下")
+```
+
+:::
+
+Manifest 能力：`internal_chat.identity`、`internal_chat.send`。
+
+## personality — 人设 {#personality}
+
+读取全局人设库并按名称切换，作用于所有会话。需要 SDK 2.20.0+；旧版 SDK 可用 `ctx.call_capability(...)` 调用同名 Host 能力。
+
+- `await personality.list()` — 返回 `{"profiles": [人设对象, ...]}`
+- `await personality.get_current()` — 返回当前人设对象；未入库时 `name` 为空字符串
+- `await personality.switch(name)` — 按名称精确切换，返回 `{"changed": bool, "current": 人设对象}`；切换保留当前编辑并热重载，尚未入库的当前人设自动以「切换前人设」留档
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+available = await self.ctx.personality.list()
+current = await self.ctx.personality.get_current()
+result = await self.ctx.personality.switch("温柔的麦麦")
+```
+
+:::
+
+人设对象含 `name`、`personality`、`behavior_style`、`reply_style`、`group_chat_prompt`、`private_chat_prompts`、`multiple_reply_style`、`multiple_probability`。切换到当前名称返回 `changed: false`；未知人设、缺授权或热重载失败都会抛出能力调用异常。Manifest 能力：`personality.list`、`personality.get_current`、`personality.switch`。
+
+## desktop_pet — 桌宠
+
+控制内置桌宠并在扩展菜单里提供按钮。需要 SDK 2.17.0+（控制）、2.18.0+（动画）、2.21+（按钮）；旧版 SDK 可用 `ctx.call_capability(...)`。所有方法都要求 manifest 声明同名 `desktop_pet.*` 能力。
+
+- `await desktop_pet.status()` — 返回 `enabled`、`supported`、`running`、`ready`、`visible`、`error`
+- `await desktop_pet.show()` / `hide()` — 显示或隐藏窗口；隐藏不退出进程，`show()` 不会绕过用户的启用开关
+- `await desktop_pet.say(text)` — 显示 1～2000 字符气泡提示；不进入聊天记录、不触发模型调用
+- `await desktop_pet.set_thinking(active)` — 开启或结束思考动画
+- `await desktop_pet.refresh_buttons()` — 请求刷新扩展按钮状态
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+state = await self.ctx.desktop_pet.status()
+if state["ready"]:
+    await self.ctx.desktop_pet.show()
+    await self.ctx.desktop_pet.say("待办已经整理好了")
+```
+
+:::
+
+动画接口（SDK 2.18.0+）：`get_skin()`、`list_animations()`、`play_animation(name, repeat=1)`、`play_event(event)`、`stop_animation(playback_id)`、`animation_status(playback_id)`。回执表示窗口确认开始播放；同一插件的新动作替换旧动作，一次调用最多 30 秒。
+
+扩展按钮（SDK 2.21+）：在插件类上声明 `desktop_pet_buttons` 列表（`DesktopPetButton` 或字典，最多 10 个），并实现 `get_desktop_pet_button_states()` 与 `on_desktop_pet_button_click(button_id)` 两个异步方法；回调限时 8 秒。桌宠侧的对应事件见 [Hook 清单](./hooks.md)。
+
+## files — 文件
+
+在宿主派发的工具调用期间读写当前聊天的附件。需要 SDK 2.17.0+，manifest 声明对应的 `files.*` 能力；文件作用域来自真实聊天授权，不能靠提交 `session_id` 选择聊天，定时任务与无聊天上下文的调用会被拒绝。
+
+- `await files.list(offset=0)` — 列出当前聊天的文件
+- `await files.read_text(file_ref, offset=0, limit=12000, encoding="utf-8-sig")` — 分页读取文本
+- `await files.download(file_ref)` — 返回文件信息与下载 URL，独占创建本地目标文件并校验大小和哈希
+- `await files.upload(name, mime_type)` — 申请上传票据，本地读取后流式上传
+- `await files.send(file_ref)` — 把文件发送到当前聊天；返回 `sent` 或 `unknown`，`unknown` 表示未取得确定回执，需核对聊天，不自动重发
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+items = await self.ctx.files.list()
+if items:
+    text = await self.ctx.files.read_text(items[0]["file_ref"])
+```
+
+:::
+
+存储、配额与部署细节见[文件功能](/manual/files)。
+
+## web — 联网
+
+复用统一联网服务的配置与参数校验，为插件提供搜索与网页读取。需要 Host 支持并在 manifest 声明 `web.search` / `web.fetch`；旧版 SDK 用 `ctx.call_capability("web.search", ...)` 调用，返回原始 `{success, result}`。
+
+- `web.search` — 联网搜索，参数与统一联网服务的 `web_search` 工具一致
+- `web.fetch` — 网页读取，参数与 `web_fetch` 工具一致
+
+结果为完整结构化数据并附 `service` 与 `retrieved_at`；超过 500000 字符的传输上限会直接报错，请缩小查询范围。联网服务的配置见[模型配置](/manual/configuration/model-config)。
 
 ## WebUI 上传领取
 
