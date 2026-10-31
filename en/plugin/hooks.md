@@ -204,10 +204,10 @@ class SendInterceptorPlugin(MaiBotPlugin):
 
 ## Built-in Hook List
 
-The following are all the Hook points registered in the Host runtime center table — 22 in total. Each Hook notes whether abort (terminating the call chain) and parameter modification (changing the kwargs received by subsequent handlers) are allowed.
+The following are all the Hook points registered in the Host runtime center table — 29 in total. Each Hook notes whether abort (terminating the call chain) and parameter modification (changing the kwargs received by subsequent handlers) are allowed.
 
 ::: warning The list follows what the Host actually registers
-The list follows what the current Host actually registers — 22 Hooks. The plugin SDK documentation additionally lists 3 Hooks that are not registered yet (`emoji.register.after_build_emotion`, `jargon.query.before_search`, `jargon.query.after_search`) — **subscribing to them fails plugin registration**, so treat the list below as authoritative.
+The list follows what the current Host actually registers — 29 Hooks. The plugin SDK documentation additionally lists 3 Hooks that are not registered yet (`emoji.register.after_build_emotion`, `jargon.query.before_search`, `jargon.query.after_search`) — **subscribing to them fails plugin registration**, so treat the list below as authoritative.
 :::
 
 ### Chat Message Chain
@@ -366,6 +366,20 @@ async def replace_expression_selection(self, **kwargs):
 ```
 
 :::
+
+### Desktop Pet Chain
+
+Desktop pet hooks are all observation-only: no abort, no parameter changes; handlers run concurrently with a default 5-second timeout.
+
+- **`desktop_pet.ready`** — the pet window is ready
+- **`desktop_pet.closed`** — a ready window exits; `reason` is `stopped` or `unexpected`
+- **`desktop_pet.clicked`** — the user single-clicks the pet body
+- **`desktop_pet.drag_started`** — first actual movement past the drag threshold; `gesture_id`, `offset_x`, `offset_y`, `scale`
+- **`desktop_pet.drag_ended`** — the drag ends or is cancelled; `gesture_id` matches the start event for pairing
+- **`desktop_pet.visibility_changed`** — visibility changed; `visible` (boolean)
+- **`desktop_pet.skin_changed`** — a skin switch succeeded; `skin_id`
+
+`closed` does not fire when a window exits before ever becoming ready; a single click never triggers the drag hooks. Plugins may call the pet's bubble and animation capabilities inside these hooks — a busy animation returns an error.
 
 ## Host Validation Rules
 

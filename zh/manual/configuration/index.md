@@ -33,7 +33,7 @@ MaiBot 会监听这两个文件的变化。是否需要重启，取决于该设�
 
 **由插件运行时热重载** — 插件自己的 `config.toml` 有独立生命周期。运行时会监听它并调用插件配置更新钩子。启用、禁用、安装、卸载和源码更新一般不需要重启整个 MaiBot。
 
-**需要完全重启 MaiBot** — `[webui]` 与 `[maim_message]` 的监听地址和端口、`[plugin_runtime]` 的绑定与 IPC 设置、`[log]` 的事件循环看门狗（`event_loop_watchdog_*`）、`[debug].force_plugin_compatibility` 在启动时建立，文件重载不会重新绑定。
+**需要完全重启 MaiBot** — `[http]` 与 `[maim_message]` 的监听地址和端口、`[plugin_runtime]` 的绑定与 IPC 设置、`[log]` 的事件循环看门狗（`event_loop_watchdog_*`）、`[debug].force_plugin_compatibility` 在启动时建立，文件重载不会重新绑定。
 
 ::: tip 如何判断
 保存后看日志：出现配置重载成功的信息说明新值已生效；改了监听地址、MCP 连接这类启动期设置，重启 MaiBot。
@@ -57,6 +57,6 @@ WebUI 的完整功能见 [登录与设置](../webui/)。
 
 **改了配置没反应** — 对照上面的「改了会立即生效吗」：监听地址、端口、MCP 连接需要重启；其他改动看日志有没有重载成功的信息。
 
-**WebUI 打不开** — 确认 `bot_config.toml` 的 `[webui] enabled = true`；检查 `host` 是否只绑定了 `127.0.0.1`（远程服务器访问时改绑或用端口转发）；端口是否被占用或被防火墙拦截。
+**WebUI 打不开** — 确认 `bot_config.toml` 的 `[webui] enabled = true`；检查 `[http] host` 是否只绑定了 `127.0.0.1`（远程服务器访问时改绑或用端口转发）；端口是否被占用或被防火墙拦截。
 
 **改完文件麦麦行为异常** — 先做语法自检：`python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb'))"`，报错行号即问题所在；字段值非法时启动日志会直接点名问题字段。

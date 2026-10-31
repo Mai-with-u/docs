@@ -261,7 +261,7 @@ SDK 提供 9 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
 
 ### 能力代理
 
-通过 `self.ctx` 访问 17 种能力代理，所有调用自动通过 RPC 转发到 Host：
+通过 `self.ctx` 访问 23 种能力代理，所有调用自动通过 RPC 转发到 Host：
 
 ::: code-group
 
@@ -289,6 +289,12 @@ self.ctx.knowledge    # LPMM 知识库搜索
 self.ctx.statistics   # 本机统计与计费数据读取
 self.ctx.tool         # LLM 工具定义查询
 self.ctx.maisaka      # Maisaka 上下文追加与主动任务
+self.ctx.webui        # WebUI 上传凭证领取
+self.ctx.files        # 文件收发与读取
+self.ctx.web          # 联网搜索与网页读取
+self.ctx.internal_chat  # 内部聊天（桌宠与网页共用会话）
+self.ctx.personality    # 全局人设查询与切换
+self.ctx.desktop_pet    # 桌宠控制、动画与扩展按钮
 ```
 
 :::

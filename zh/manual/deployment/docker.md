@@ -72,7 +72,7 @@ services:
       - TZ=Asia/Shanghai               # 时区，影响日志与统计时间
       - EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656    # 用户协议同意标识，勿改
       - PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 # 隐私条款同意标识，勿改
-      - WEBUI_HOST=0.0.0.0             # 容器内必须监听 0.0.0.0，否则宿主机访问不到
+      - HTTP_HOST=0.0.0.0              # 容器内必须监听 0.0.0.0，否则宿主机访问不到；旧名 WEBUI_HOST 仍兼容
     ports:
       - "18001:8001"                   # 宿主机 18001 → 容器 8001；宿主机端口冲突时改左边
     volumes:
@@ -109,7 +109,7 @@ docker compose up -d
 - **WebUI** — 18001（映射到容器内 8001）
 
 ::: warning
-WebUI 的 `host` 默认值是 `127.0.0.1`，在 Docker 容器内这意味着只有容器自身能访问。Docker 部署时务必将 `host` 改为 `0.0.0.0`。
+`[http] host` 的默认值是 `127.0.0.1`，在 Docker 容器内这意味着只有容器自身能访问。Docker 部署时务必用 `HTTP_HOST=0.0.0.0` 放开监听。
 :::
 
 ::: tip
@@ -139,7 +139,7 @@ docker run -d \
   -e TZ=Asia/Shanghai \
   -e EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656 \
   -e PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 \
-  -e WEBUI_HOST=0.0.0.0 \
+  -e HTTP_HOST=0.0.0.0 \
   -v ./docker-config/mmc:/MaiMBot/config \
   -v ./data/MaiMBot:/MaiMBot/data \
   -v ./data/MaiMBot/plugins:/MaiMBot/plugins \
@@ -185,7 +185,7 @@ docker run -d \
   -e TZ=Asia/Shanghai \
   -e EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656 \
   -e PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 \
-  -e WEBUI_HOST=0.0.0.0 \
+  -e HTTP_HOST=0.0.0.0 \
   -v ./docker-config/mmc:/MaiMBot/config \
   -v ./data/MaiMBot:/MaiMBot/data \
   -v ./data/MaiMBot/plugins:/MaiMBot/plugins \
@@ -247,7 +247,7 @@ docker compose logs core
 
 **外部访问不到 WebUI？**
 
-- 确认容器环境变量 `WEBUI_HOST=0.0.0.0`
+- 确认容器环境变量 `HTTP_HOST=0.0.0.0`（旧的 `WEBUI_HOST` 也兼容）
 - 云服务器还要在安全组 / 防火墙放行 `18001` 端口
 
 **找不到登录 Token？**

@@ -85,6 +85,15 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
+    text: 'Capabilities & Appearance',
+    collapsed: true,
+    items: [
+      { text: 'Personality Library & Import', link: '/en/manual/personality' },
+      { text: 'File Feature', link: '/en/manual/files' },
+      { text: 'Desktop Pet', link: '/en/manual/desktop-pet' },
+    ]
+  },
+  {
     text: 'WebUI Console',
     collapsed: true,
     items: [
@@ -138,6 +147,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Data & Memory', link: '/en/develop/webui-api/data-and-memory-api' },
       { text: 'Plugin Management', link: '/en/develop/webui-api/plugin-lifecycle-api' },
       { text: 'Realtime Channel & Statistics', link: '/en/develop/webui-api/realtime-and-stats' },
+      { text: 'External Agent Connections', link: '/en/develop/agent-connections' },
     ]
   },
   {

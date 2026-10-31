@@ -131,7 +131,6 @@ Sampling 允许 MCP 服务端**反过来请求 MaiBot 调用大模型**来完成
 [mcp.client.sampling]
 enable = true
 task_name = "planner"
-include_context_support = false
 tool_support = true
 ```
 
@@ -139,7 +138,6 @@ tool_support = true
 
 - **`enable`** — 是否启用 Sampling 能力声明。默认关闭
 - **`task_name`** — 执行 Sampling 请求时使用的主程序模型任务名。默认 `"planner"`
-- **`include_context_support`** — 是否声明支持 `includeContext` 非 `none` 语义。默认关闭
 - **`tool_support`** — 是否声明支持在 Sampling 中继续使用工具。默认关闭
 
 ::: warning ⚠️ Sampling 会消耗 Tokens

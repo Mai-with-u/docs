@@ -124,7 +124,7 @@ If WebUI's default port `8001` is occupied:
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 # config/bot_config.toml
-[webui]
+[http]
 port = 8002             # Change to 8002 or another available port
 ```
 

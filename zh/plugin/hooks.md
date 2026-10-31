@@ -204,10 +204,10 @@ class SendInterceptorPlugin(MaiBotPlugin):
 
 ## 内置 Hook 清单
 
-以下是 Host 运行时中心表注册的全部 Hook 点，共 22 个。每个 Hook 注明是否允许 abort（中止调用链）和是否允许改参（修改后续处理器接收的 kwargs）。
+以下是 Host 运行时中心表注册的全部 Hook 点，共 29 个。每个 Hook 注明是否允许 abort（中止调用链）和是否允许改参（修改后续处理器接收的 kwargs）。
 
 ::: warning 清单以 Host 实际注册的为准
-清单以当前 Host 实际注册的为准，共 22 个。插件 SDK 的文档里另列有 3 个尚未注册的 Hook（`emoji.register.after_build_emotion`、`jargon.query.before_search`、`jargon.query.after_search`）——**订阅它们会导致插件注册失败**，请以下表为准。
+清单以当前 Host 实际注册的为准，共 29 个。插件 SDK 的文档里另列有 3 个尚未注册的 Hook（`emoji.register.after_build_emotion`、`jargon.query.before_search`、`jargon.query.after_search`）——**订阅它们会导致插件注册失败**，请以下表为准。
 :::
 
 ### 聊天消息链
@@ -366,6 +366,21 @@ async def replace_expression_selection(self, **kwargs):
 ```
 
 :::
+
+### 桌宠链
+
+桌宠 Hook 全部是观察型：不允许 abort、不允许改参，处理器并发运行，默认超时 5 秒。
+
+- **`desktop_pet.ready`** — 桌宠窗口就绪
+- **`desktop_pet.closed`** — 已就绪的窗口退出；参数 `reason` 取 `stopped` 或 `unexpected`
+- **`desktop_pet.clicked`** — 用户单击桌宠本体
+- **`desktop_pet.drag_started`** — 超过拖动阈值后首次实际移动；参数 `gesture_id`、`offset_x`、`offset_y`、`scale`
+- **`desktop_pet.drag_ended`** — 结束或取消拖动；参数 `gesture_id` 与开始时相同，可用于配对
+- **`desktop_pet.visibility_changed`** — 显示或隐藏状态改变；参数 `visible`（布尔值）
+- **`desktop_pet.skin_changed`** — 皮肤切换成功；参数 `skin_id`
+
+窗口未曾就绪便退出时不触发 `closed`；单击不会触发拖动 Hook。插件可在 Hook 中调用桌宠气泡与动画能力，动画被占用时会返回忙碌错误。
+
 
 ## Host 校验规则
 
