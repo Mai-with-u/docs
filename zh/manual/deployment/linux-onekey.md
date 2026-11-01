@@ -4,7 +4,7 @@ title: 实验性：桌面环境下一键包部署
 
 # 实验性：桌面环境下一键包部署
 
-在 Linux 桌面上点几下就能跑起 MaiBot：一键包（MaiBot OneKey Linux）是一个图形界面的部署工具，从安装主程序、配置模型到连接 QQ 全程不用敲命令，装完后的日常启停、更新和日志也都在这一个窗口里完成。
+在 Linux 桌面环境上点几下就能跑起 MaiBot：一键包（MaiBot OneKey Linux）是一个图形界面的部署工具，从安装主程序、配置模型到连接 QQ 全程不用敲命令，装完后的日常启停、更新和日志也都在这一个窗口里完成。
 
 ::: warning 实验性
 一键包由社区维护（[MaiBotOneKey](https://github.com/Mai-with-u/MaiBotOneKey) 的 Linux 移植，非官方发行），已在 Ubuntu 22.04+ / Debian 12+（x86_64）实测跑通全流程。其他环境可能遇到没覆盖到的问题，欢迎到[仓库 Issues](https://github.com/Schaled/MaiBot-OneKey-Linux/issues) 反馈。
@@ -17,7 +17,6 @@ title: 实验性：桌面环境下一键包部署
 - **自动安装 MaiBot** — 首次启动从 PyPI 安装最新正式版，之后可在包内切换版本或回滚。
 - **SnowLuma 协议端按需下载** — 首次使用时自动下载，sha256 校验，优先走 GitHub 加速代理，失败兜底官方源。
 - **进程托管** — 服务启停、健康检查、崩溃自愈，附带内嵌终端与内嵌 WebUI。
-- **同源 Windows 一键包** — 与官方 Windows 版同一套编排核心，用过 Windows 一键包的话上手零成本。
 :::
 
 <Linkcard url="https://github.com/Schaled/MaiBot-OneKey-Linux" title="MaiBot-OneKey-Linux" description="MaiBot OneKey 的 Linux 移植，源码与发布说明" logo="/title_img/mai.png" />
@@ -31,7 +30,7 @@ title: 实验性：桌面环境下一键包部署
 ## 准备环境
 
 - **系统** — x86_64，glibc ≥ 2.35：Ubuntu 22.04+ / Debian 12+ 实测定级，未提供 arm64 构建。
-- **桌面环境** — 有图形界面即可；KDE（X11）完成过实机验收，GNOME 等其他桌面未逐一验证。
+- **桌面环境** — 有图形界面即可。
 - **Git** — 一键包不自带，缺失时用系统包管理器装一个。
 - **资源** — 至少 2GB 可用内存与 2GB 可用磁盘；首次启动需联网下载 MaiBot 和协议端。
 
@@ -116,8 +115,6 @@ git --version
 ::: fields
 - **架构** — 仅 x86_64，未提供 arm64 构建。
 - **NapCat** — Linux 上仅 Docker 路线（需要 Docker 权限），默认的 SnowLuma 不受影响。
-- **自动更新** — 启动器未配置更新源，升级需手动下载新版替换。
-- **真机登录** — QQ 扫码登录与消息收发未经过自动验收，出问题请到仓库反馈。
 :::
 
 ## 验证与排错
