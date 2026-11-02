@@ -130,7 +130,6 @@ Sampling allows the MCP server to **request MaiBot to call a large language mode
 [mcp.client.sampling]
 enable = true
 task_name = "planner"
-include_context_support = false
 tool_support = true
 ```
 
@@ -138,7 +137,6 @@ tool_support = true
 
 - **`enable`** — Whether to enable the Sampling capability declaration. Default: disabled
 - **`task_name`** — The main program model task name used when executing Sampling requests. Default: `"planner"`
-- **`include_context_support`** — Whether to declare support for `includeContext` semantics other than `none`. Default: disabled
 - **`tool_support`** — Whether to declare support for continuing to use tools within Sampling. Default: disabled
 
 ::: warning ⚠️ Sampling consumes Tokens

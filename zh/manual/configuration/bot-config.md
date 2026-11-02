@@ -11,7 +11,7 @@ titleTemplate: :title · 配置
 所有配置都能在 WebUI 里点点鼠标完成（默认 `http://127.0.0.1:8001`），效果与编辑文件一致。见 [WebUI 配置管理](/manual/webui/config-management)。
 :::
 
-保存文件后大多数设置**热重载**立即生效；改 `[maim_message]`、`[webui]` 的监听地址或端口、`[mcp]` 服务器连接、`[plugin_runtime]` 的 IPC、`[log]` 的事件循环看门狗、`[debug]` 的终端输入与强制插件兼容时需要重启 MaiBot。完整规则见 [配置概览](./index.md#改了会立即生效吗)。
+保存文件后大多数设置**热重载**立即生效；改 `[maim_message]`、`[http]` 的监听地址或端口、`[mcp]` 服务器连接、`[plugin_runtime]` 的 IPC、`[log]` 的事件循环看门狗、`[debug]` 的终端输入与强制插件兼容时需要重启 MaiBot。完整规则见 [配置概览](./index.md#改了会立即生效吗)。
 
 ## 快速上手
 
@@ -106,7 +106,6 @@ value = 1.0
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [message_receive]
-image_parse_threshold = 5   # 单条消息图片数不超过此值才识图
 ban_words = ["广告", "抽奖"]  # 含这些词的消息直接丢弃
 ban_msgs_regex = ["^\\d+$"]  # 按正则丢弃消息，适合复杂规则
 ```
@@ -174,6 +173,8 @@ alias_names = []         # [进阶] 别人可能用来称呼麦麦的名字，�
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [personality]
+selected_profile = ""     # 当前编辑的人设名称；留空表示尚未存入人设库
+profiles = []             # 备选人设库，由 WebUI 维护；运行时只读下面四个字段
 personality = "是一个大二女大学生，现在正在上网和群友聊天。善于用人类的角度思考问题，聊天偏日常。"
 behavior_style = "不会没话题硬找话题：群里聊到感兴趣的内容再插话，冷场时安静旁观，不刷屏。"
 reply_style = "你的风格平淡简短，可以参考贴吧的回复风格。不滥用比喻或者生硬句子。视情况省略主语或者进行倒装，风格较为随意。"
@@ -193,6 +194,7 @@ multiple_probability = 0  # [进阶] 每次回复按此概率临时注入一条�
 
 - **`multiple_reply_style`** — 备用说话风格，触发后只影响本次回复，想玩「人格随机切换」就把 `multiple_probability` 调到 0.1~0.3
 - **`multiple_probability`** — `0` 表示从不切换，`1` 表示每次都换
+- **`profiles` / `selected_profile`** — 多套人设的存取与切换在 WebUI「身份与人格」里完成，手动改 TOML 容易和人设库失配；保存或切换后会热重载，当前生效的始终是上面的 `personality`、`behavior_style`、`reply_style`、`multiple_*` 与 `[chat.reply_style]` 的群聊/私聊提示词
 
 ### 聊天行为
 
@@ -203,8 +205,8 @@ multiple_probability = 0  # [进阶] 每次回复按此概率临时注入一条�
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat]
 enable_reply_at = true           # 允许麦麦在回复开头 @ 人；要不要 @ 由模型看聊天内容决定
-max_context_size = 40            # 群聊回复参考最近多少条消息；越大越懂上下文，也更耗 token
-max_private_context_size = 60    # 私聊参考的最近消息数量
+max_context_size = 50            # 群聊回复参考最近多少条消息；越大越懂上下文，也更耗 token
+max_private_context_size = 75    # 私聊参考的最近消息数量
 context_compaction_summary_max_chars = 6000  # [进阶] 滚动状态摘要的最大字符数（1000~8000），由 utils 模型生成
 ```
 
@@ -218,7 +220,8 @@ context_compaction_summary_max_chars = 6000  # [进阶] 滚动状态摘要的最
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_timing]
-message_debounce_mode = "natural"          # 消息防抖：off 关闭 / fast 快速 / natural 自然 / steady 沉稳
+message_debounce_mode = "natural"          # 群聊消息防抖：off 关闭 / fast 快速 / natural 自然 / steady 沉稳
+private_message_debounce_mode = "natural"  # 私聊消息防抖：档位与群聊独立
 planner_message_steering = false           # 快速反应模式：思考/输出/等待期间收到新消息立即接入并重新推理
 talk_value = 1                             # 群聊发言频率：0~1，越小越安静
 private_reply_paused = false               # 暂停所有私聊回复：true = 私聊只收消息并维护历史，不进入思考
@@ -262,14 +265,14 @@ value = 1.0
 - **全局兜底** — `platform` 与 `item_id` 都留空，未命中任何具体规则时使用
 - **全局通配** — 两个字段都填 `"*"`，匹配任意平台和聊天；在 WebUI 编辑时可直接选「全局通配」或「默认兜底」模式
 
-**消息防抖** — `message_debounce_mode` 把一批消息先收齐再送进 Planner，四档规则固定：
+**消息防抖** — `message_debounce_mode` 管群聊、`private_message_debounce_mode` 管私聊，两档互不影响。每种都把一批消息先收齐再送进 Planner，四档规则固定：
 
 - **`off`（关闭）** — 沿用原有等待逻辑，包括被新消息打断后的短暂等待
 - **`fast`（快速）** — 安静 1 秒、活跃 3 秒；同一人续发 1 秒、换人 0.5 秒，更容易漏接分段补充
 - **`natural`（自然，默认）** — 安静 2 秒、活跃 5 秒；同一人续发 2 秒、换人 0.5 秒
 - **`steady`（沉稳）** — 安静 4 秒、活跃 7 秒；同一人续发 4 秒、换人 2 秒，给补充消息留更多时间，但没有补充时也更慢
 
-一批指合并后一起送入判断的消息。上一条有效消息距今超过 30 秒（或没有历史）算安静，否则算活跃；续发与换人只和紧邻的上一条消息比较。裸图开启的新批次至少等 4 秒，批次内纯表情包不能延长等待；整批从第一条实际收到起最多等 8 秒，被 @ 或提及后最多等 1 秒。换档位从下一条有效消息起生效，选择关闭会结束正在进行的固定规则等待。
+一批指合并后一起送入判断的消息。上一条有效消息距今超过 30 秒（或没有历史）算安静，否则算活跃；续发与换人只和紧邻的上一条消息比较。裸图开启的新批次至少等 4 秒，批次内纯表情包不能延长等待；整批从第一条实际收到起最多等 8 秒，被 @ 或提及后最多等 1 秒。换档位从下一条有效消息起生效，选择关闭会结束正在进行的固定规则等待。私聊只有安静与续发两档节奏，没有换人判断。
 
 **私聊暂停** — `private_reply_paused = true` 后所有私聊只接收消息并维护历史，不进入思考；`private_reply_pause_rules` 按平台和用户单独覆盖全局设置，也可以在 WebUI 的聊天流设置中切换或恢复跟随全局：
 
@@ -337,6 +340,7 @@ prompt = "这个群里说话要更简短。"
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [capabilities]
+files = false                          # 文件功能：聊天附件收发、保存与文本阅读；细节见「文件功能」
 planner_subagent = false               # 子代理任务派发：给 Planner 提供 subagent 工具
 advanced_sub_agent = false             # 高级子代理：子代理后台运行，结论作为新消息送回（需先开启上一项）
 tool_result_condense = false           # 超长工具结果整理：超过阈值的工具结果先整理成结论再写入上下文
@@ -344,6 +348,8 @@ tool_result_condense_threshold = 3000  # [进阶] 触发整理的字符数，最
 ```
 
 :::
+
+**文件功能** — `files = true` 打开附件登记、模型文件工具、插件 SDK 文件接口和 WebUI 文件入口，统一控制这一整套能力；关闭后拒绝新的文件操作，已有原件不会被删除。文件大小、配额与传输参数在 `[files]` 段，见[服务与连接](#文件)。
 
 **子代理** — `planner_subagent = true` 给 Planner 提供 `subagent` 工具：把自包含的查询或整理任务交给子代理，子代理在独立上下文里多轮调用被授权的工具，只把结论交还。开启 `advanced_sub_agent = true` 后子代理转到后台，派发后立刻返回任务 ID，麦麦可以继续聊天；子代理结束时结论作为一条新消息送回并唤醒 Planner，同时提供 `subagent_status`（查看任务）和 `subagent_stop`（终止任务）。
 
@@ -364,18 +370,26 @@ focus_on_private = false  # Focus 是否也作用于私聊
 focus_chat_whitelist = [] # Focus 白名单；留空 = 所有符合开关的聊天都可进入
 focus_groups = []         # Focus 共享组：同组共享 Planner 与完整上下文，不同组互不抢占
 
-[experimental.attention_drift]
-enabled = false                   # 注意力漂移：更容易被新话题、梗、反差点吸引
+[experimental.group_attention_drift]
+enabled = false                   # 群聊注意力漂移：更容易被新话题、梗、反差点吸引
 drift_level = "scattered"         # 漂移档位："subtle" / "active" / "scattered" / "wild"
 anchor_policy = "balanced"        # 回钩策略：漂移后多强地回到当前上下文
 reaction_style = "lively"         # 短反应风格："reserved" / "natural" / "lively"
+
+[experimental.private_attention_drift]
+enabled = false                   # 私聊注意力漂移：字段与群聊完全一致，开关独立
+drift_level = "scattered"
+anchor_policy = "balanced"
+reaction_style = "lively"
 ```
 
 :::
 
 **丰富回复** — 回复可直接携带图片；回复时 @ 人由 [`[chat].enable_reply_at`](#上下文与回想) 控制，回复中的表情由 [`[emoji].use_new_send_logic`](#表情包) 控制。
 
-**被动回复** — `passive_replyer = true` 时，Planner 不调用工具而直接输出正文的话，正文会作为指导启动一次回复；附件与插件参数通过 `set_reply_options` 提前设置。关闭时使用原有 `reply` 工具。切换从下一轮思考生效，Focus 不受影响。
+**被动回复** — `passive_replyer = true` 时，Planner 不调用工具而直接输出正文，这段正文就作为自然语言指导启动一次回复：篇幅、表达偏好和插件相关需求直接写进指导，引用与附件由并行回复补充器编排。关闭时使用原有 `reply` 工具。切换从下一轮思考生效，Focus 不受影响。
+
+**注意力漂移** — 群聊与私聊各有一套完整配置，开关、档位、回钩策略和短反应风格互不影响。`drift_level` 决定漂移幅度（`subtle` 最克制，`wild` 最活跃），`anchor_policy` 决定漂移后多强地拉回当前话题，`reaction_style` 决定短句与语气词的使用密度。
 
 **Focus** — `focus_mode = true` 让同组聊天共享一个持续思考的 Planner：全部消息共同进入上下文，工具通过 `session_id` 指定处理目标，跨会话协作、统一等待，被 @ 时提前唤醒。`focus_groups` 把聊天分成共享组，不同组互不抢占，未匹配的聊天各自成组；`focus_chat_whitelist` 限定哪些聊天进入 Focus，留空表示所有符合聊天类型开关的聊天都可进入。
 
@@ -387,7 +401,6 @@ reaction_style = "lively"         # 短反应风格："reserved" / "natural" / "
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [message_receive]
-image_parse_threshold = 5   # [进阶] 单条消息图片数不超过此值才识图，避免拖慢处理
 ban_words = []              # 含这些词的消息会被过滤，如 ["广告", "抽奖"]
 ban_msgs_regex = []         # 按正则过滤消息；非法正则会导致配置校验失败
 ```
@@ -434,6 +447,7 @@ expression_vector_candidate_pool_size = 50  # [进阶] 向量召回后交给 LLM
 max_expression_learner = 3            # [进阶] 同时运行的学习任务数
 learning_list = [{ platform = "", item_id = "", type = "group", use = true, learn = true }]
 expression_groups = []                # 多个聊天共享学到的表达
+learning_blacklist = []               # 不学习的来源，按平台与用户 ID 精确匹配
 ```
 
 :::
@@ -449,11 +463,23 @@ expression_groups = []                # 多个聊天共享学到的表达
 
   `item_id` 不支持 `"*"` 通配；默认规则应留空。
 
+- **`learning_blacklist`** — 按平台与用户 ID 精确匹配，命中的用户发言不参与表达学习，但聊天上下文照常保留。`platform` 与 `user_id` 缺一不可：
+
+::: code-group
+
+```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+[[expression.learning_blacklist]]
+platform = "qq"
+user_id = "123456789"   # 这个用户的发言不会被学成表达
+```
+
+:::
+
 表达向量索引会自动维护新增数据、历史回填与失败恢复；索引文件损坏时自动重建，无需配置。
 
 #### 黑话学习
 
-字段与 [expression](#表达学习) 的 `learning_list` 完全一致，只是学习对象换成群里的黑话梗：
+字段与 [expression](#表达学习) 的 `learning_list`、`learning_blacklist` 完全一致，只是学习对象换成群里的黑话梗：
 
 ::: code-group
 
@@ -461,6 +487,11 @@ expression_groups = []                # 多个聊天共享学到的表达
 [jargon]
 learning_list = [{ platform = "", item_id = "", type = "group", use = true, learn = true }]
 jargon_groups = []  # 多个聊天共享学到的黑话
+learning_blacklist = []  # 不学习这些用户的原消息
+
+[[jargon.learning_blacklist]]
+platform = "qq"
+user_id = "123456789"
 ```
 
 :::
@@ -614,17 +645,31 @@ api_server_allowed_api_keys = []  # 允许访问的 API Key 列表；为空 = �
 `api_server_host = "0.0.0.0"` 会把新版 API 暴露到所有网卡。对外提供服务务必配置 `api_server_allowed_api_keys`；启用 WSS 时 `secure_cookie` 一并打开。
 :::
 
+#### HTTP 服务
+
+文件传输与 WebUI 共用一套后端 HTTP 监听。**改这里必须重启 MaiBot**：
+
+::: code-group
+
+```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+[http]
+host = ["127.0.0.1", "::1"]  # 监听地址；允许外部访问改为 ["0.0.0.0", "::"]
+port = 8001                  # 文件传输与 WebUI 共用的端口
+```
+
+:::
+
+环境变量 `HTTP_HOST` 可追加监听地址；只更新了镜像、仍在使用 `WEBUI_HOST` 的 Docker 部署会被自动识别。`webui.enabled = false` 只关闭管理页面和管理接口，公共文件传输仍走这套监听。端口 `7999` 仅用于前端开发，不是 WebUI 入口。
+
 #### WebUI
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [webui]
-enabled = true            # 是否启动 WebUI 管理界面
-host = ["127.0.0.1", "::1"]  # 监听地址；允许外部访问改为 ["0.0.0.0", "::"]
-port = 8001               # 访问端口
+enabled = true            # 是否加载 WebUI 管理界面与管理接口
 mode = "production"       # "production" 日常使用 / "development" 调试
-webui_style = 1           # 界面风格：0 旧风格 / 1 未来复古风格 / 2 千禧风格
+webui_style = 2           # 界面风格：0 旧风格 / 1 未来复古风格 / 2 千禧风格
 
 anti_crawler_mode = "basic"  # 防爬虫："basic" 只记录 / "strict" / "loose" 拦截更多请求 / "false" 关闭
 allowed_ips = "127.0.0.1"    # 允许访问的 IP，逗号分隔，支持 CIDR 和通配符
@@ -632,14 +677,72 @@ trusted_proxies = ""         # 可信反向代理 IP，逗号分隔
 trust_xff = false            # 是否信任 X-Forwarded-For 中的真实访客 IP
 secure_cookie = false        # 只在 HTTPS 下发送登录 Cookie；没有 HTTPS 不要开
 enforce_public_outbound_url = true  # 限制 WebUI 访问外部 URL，降低访问内网地址的风险
-enable_paragraph_content = false    # 知识图谱加载段落全文；更完整但更占内存
 ```
 
 :::
 
-::: warning 监听地址与端口只在启动时读取
-改 `host` / `port` 后必须重启 MaiBot。允许外部访问时建议同时收紧 `allowed_ips`。
+::: warning 监听地址与端口不在这一节
+`host` / `port` 已归入 `[http]`，改完要重启 MaiBot。允许外部访问时建议同时收紧 `allowed_ips`。
 :::
+
+#### 文件
+
+`[files]` 控制附件存储与传输；总开关在 `[capabilities].files`，两者都打开才生效。字段全部可热重载：
+
+::: code-group
+
+```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+[files]
+max_file_mib = 50              # 单文件大小上限（MiB），按实际接收字节校验
+max_storage_gib = 10           # 实例文件存储配额（GiB），含下载、原件与上传预留
+max_text_mib = 8               # 文本解析上限（MiB）；更大的文件仍可收发与下载
+cache_days = 30                # 平台下载缓存最后访问后保留天数；本地上传与生成的原件不自动删除
+max_concurrent_transfers = 4   # 同时上传下载的数量上限
+transfer_timeout = 120         # 单次传输超时秒数
+transfer_base_url = ""         # QQ 客户端可访问的后端地址；留空使用 [http] 的本机地址
+trusted_download_origins = []  # 允许下载的内网适配器来源，填精确的 http(s)://主机:端口
+```
+
+:::
+
+**`transfer_base_url`** — QQ 客户端和主程序不在同一台机器时必填，填客户端能访问的 HTTP(S) 地址，并配好反向代理与防火墙。**`trusted_download_origins`** — 平台给出的下载地址落在内网时才需要，必须写精确来源，不接受通配符。
+
+#### 桌宠
+
+桌宠内置在主程序里，仅支持 Windows。配置支持热重载，关闭即退出窗口：
+
+::: code-group
+
+```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+[desktop_pet]
+enabled = false              # 启用桌宠：在本机 Windows 桌面显示麦麦
+chat_tools_enabled = false   # 允许主人内部聊天查询其他聊天流并唤起传话
+skin_id = "builtin"          # 当前皮肤；builtin 为内置麦麦，可导入声明式皮肤包
+```
+
+:::
+
+**`chat_tools_enabled`** — 只作用于桌宠和网页聊天室共用的 `internal / owner` 会话，普通群聊不会获得这两个工具，也不影响发送图片。皮肤、动画与插件扩展按钮的完整说明见[桌宠](../desktop-pet.md)。
+
+#### 电脑
+
+`[computer]` 是共享沙盒电脑，与 `[agent]` 的外接连接彼此独立：
+
+::: code-group
+
+```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+[computer]
+enabled = false            # 向 Planner、子 Agent 和外接 Agent 提供共享沙盒电脑与 WebUI 接管界面
+networking = true          # 允许沙盒联网；下次启动沙盒时生效
+memory_mb = 4096           # [进阶] 沙盒内存（MB），下次启动时生效
+startup_timeout = 120      # [进阶] 等待沙盒启动的超时秒数
+request_timeout = 60       # [进阶] 等待代理回复的超时秒数
+screenshot_max_edge = 1600 # [进阶] 截图最长边像素；0 表示原始分辨率
+```
+
+:::
+
+人工接管期间，所有自主输入都会被拒绝。无需启用外接 Agent 也能使用沙盒电脑。
 
 #### MCP
 
@@ -655,31 +758,34 @@ enable = true  # 是否启用 MCP 工具接入能力
 :::
 
 ::: tip MCP 服务器连接会自动重建
-改 `[mcp]` 段保存后，MaiBot 会用新配置重建 MCP 连接，不需要重启；重建结果与启动时一样打印在日志里。少数不在重载判定范围内的字段（如 `elicitation` 整节、`sampling.include_context_support`）仍需重启才生效，详见 [MCP 配置](./mcp-config.md)。
+改 `[mcp]` 段保存后，MaiBot 会用新配置重建 MCP 连接，不需要重启；重建结果与启动时一样打印在日志里。少数不在重载判定范围内的字段（如 `elicitation` 整节）仍需重启才生效，详见 [MCP 配置](./mcp-config.md)。
 :::
 
 #### Agent 连接
 
-`[agent]` 启动一个与普通聊天并行运行的外接 Agent（实验性），通过 ACP 协议连接 dsh、dsh Desktop 或其他 ACP 程序；模型与凭据使用外部 Agent 自身配置。开启 `computer_tools` 后，Agent 还能操作沙盒桌面：聊天里可以图文传话，任务重启后继续，WebUI 提供桌面画面、运行记录和人工接管。
+`[agent]` 有两类用途，共用同一套 ACP 连接设置：与普通聊天并行运行的外接 Agent，以及让指定聊天流的 Planner 直接改用外部 Agent 决策（实验性）。模型与凭据都使用外部 Agent 自身配置。沙盒桌面归 `[computer]`，与本段无关。
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [agent]
-enabled = false         # 启用外接 Agent 接口
-connection = "dsh"      # "dsh" dsh CLI / "dsh_desktop" dsh Desktop / "custom" 自定义 ACP
-acp_command = "dsh"     # 外部 Agent 可执行程序；Windows 可填 dsh.cmd
-acp_cwd = ""            # 外部进程的主机工作目录；留空使用 data/agent/workspace
-computer_tools = false  # 提供沙盒桌面工具与 WebUI 接管界面
-networking = true       # 允许沙盒联网；下次启动沙盒时生效
-desktop_manifest = ""   # [进阶] dsh Desktop 桥接文件；留空读取 ~/.dsh/maibot-desktop.json
+enabled = false                # 启用外接 Agent 接口（与普通聊天并行运行）
+planner_enabled = false        # [实验] 外接 Planner 总开关
+planner_sessions = []          # [进阶] 使用外接 Planner 的聊天流 session_id 列表
+connection = "dsh"             # "dsh" dsh CLI / "dsh_desktop" dsh Desktop / "custom" 自定义 ACP
+acp_command = "dsh"            # 外部 Agent 可执行程序；Windows 可填 dsh.cmd
+acp_cwd = ""                   # 启动外部进程的主机工作目录；留空使用 data/agent/workspace
+acp_remote_cwd = ""            # [进阶] 远端会话已存在的绝对目录；留空使用本机工作目录
+desktop_manifest = ""          # [进阶] dsh Desktop 桥接文件；留空读取 ~/.dsh/maibot-desktop.json
+mcp_port = 0                   # [进阶] 工具回连端口；0 = 自动分配回环端口
 ```
 
 :::
 
 - **dsh CLI / dsh Desktop** — dsh CLI 自动以 `--profile acp` 启动；dsh Desktop 连接正在运行的桌面应用，需先在 Desktop 安装 dsh-maibot-bridge 插件，同一会话在两侧显示
 - **自定义 ACP** — `connection = "custom"` 时用 `acp_args` 逐项传参、`acp_env` 追加环境变量、`acp_model` 指定模型选项；`acp_timeout` 控制握手与关停等待
-- **沙盒桌面** — `computer_tools = true` 提供沙盒桌面工具与 WebUI 接管界面；人工接管期间不执行 Agent 输入。沙盒内存、启动超时、截图最长边等进阶参数见 WebUI 中的对应设置
+- **外接 Planner** — `planner_enabled = true` 后只对 `planner_sessions` 里的聊天流生效，无需启用 `enabled`。连接失败直接报错，不回退本体 Planner；清空聊天会重置会话
+- **远程连接** — 跨机时 `acp_remote_cwd` 填远端已存在的绝对路径，`mcp_port` 固定端口并自行做 SSH 反向转发；多聊天流共用外接 Planner 时保留 `0`。完整步骤见[外接 Agent 连接](/develop/agent-connections)
 
 #### 插件管理
 
@@ -758,7 +864,7 @@ memory_diagnostics_interval_seconds = 60.0    # [进阶] 轻量内存诊断采�
 event_loop_watchdog_enabled = false        # [进阶] 记录事件循环卡顿，用于排查界面/主循环卡顿
 event_loop_watchdog_warn_seconds = 0.5     # [进阶] 事件循环唤醒延迟超过该秒数时记录一条警告日志
 
-suppress_libraries = ["faiss", "httpx", "urllib3", "asyncio", "websockets", "httpcore", "requests", "sqlalchemy", "openai", "uvicorn", "jieba"]  # [进阶] 完全不显示日志的第三方库
+suppress_libraries = ["faiss", "httpx", "httpx2", "urllib3", "asyncio", "websockets", "httpcore", "httpcore2", "requests", "sqlalchemy", "openai", "uvicorn", "jieba"]  # [进阶] 完全不显示日志的第三方库
 library_log_levels = { aiohttp = "WARNING", PIL = "WARNING" }  # [进阶] 单独调低某些第三方库的日志
 ```
 
@@ -802,17 +908,6 @@ enable = true  # 发送匿名运行统计；关闭不影响正常使用
 
 :::
 
-#### 数据库
-
-::: code-group
-
-```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[database]
-save_binary_data = false  # [进阶] 保存语音等二进制原文件；更占空间，方便以后重新识别。仅影响新存储的消息
-```
-
-:::
-
 #### 长期记忆
 
 A_Memorix 是独立的长记忆子系统，包含 12 个子段落，完整说明见 **[A_Memorix 配置详解](./amemorix-config.md)**。最简启用只需两行：
@@ -848,7 +943,7 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 
 **启动时直接报错退出** — TOML 语法错误，或字段值非法（`ban_msgs_regex` 正则非法、关键词规则缺 `reaction`、`chat_prompts` 缺字段）。先用上面的命令定位语法问题；字段校验的错误信息会直接点名问题字段，改掉即可。
 
-**改了没生效** — 你改的段落可能属于「仅启动时生效」：`[webui]` 与 `[maim_message]` 的监听地址和端口、`[plugin_runtime]` 的 IPC、`[log]` 的 `event_loop_watchdog_*`、`[debug]` 的 `enable_console_input` 与 `force_plugin_compatibility`。重启 MaiBot。其余段落看 [配置概览](./index.md#改了会立即生效吗)。
+**改了没生效** — 你改的段落可能属于「仅启动时生效」：`[http]` 与 `[maim_message]` 的监听地址和端口、`[plugin_runtime]` 的 IPC、`[log]` 的 `event_loop_watchdog_*`、`[debug]` 的 `enable_console_input` 与 `force_plugin_compatibility`。重启 MaiBot。其余段落看 [配置概览](./index.md#改了会立即生效吗)。
 
 **麦麦不理人** — 依次检查：宿主适配器策略有没有放行这个群（见 [统一 QQ 连接器](../adapters/qq-local-client.md) 的「先加名单，再测试」）；`talk_value` 是否被调得过低；`qq_account` 与适配器登录的 QQ 是否一致。
 

@@ -96,6 +96,15 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
+    text: '能力与外观',
+    collapsed: true,
+    items: [
+      { text: '人设库与导入', link: '/manual/personality' },
+      { text: '文件功能', link: '/manual/files' },
+      { text: '桌宠', link: '/manual/desktop-pet' },
+    ]
+  },
+  {
     text: 'WebUI 管理面板',
     collapsed: true,
     items: [
@@ -149,6 +158,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
       { text: '数据与记忆', link: '/develop/webui-api/data-and-memory-api' },
       { text: '插件管理', link: '/develop/webui-api/plugin-lifecycle-api' },
       { text: '实时通道与统计', link: '/develop/webui-api/realtime-and-stats' },
+      { text: '外接 Agent 连接', link: '/develop/agent-connections' },
     ]
   },
   {

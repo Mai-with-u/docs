@@ -131,6 +131,6 @@ maibot run --directory "/path/to/existing/MaiBot"
 
 - **命令找不到**：执行 `uv tool update-shell` 并重开终端；安装方法见 [uv 工具指南](https://docs.astral.sh/uv/guides/tools/)。
 - **提示实例未初始化**：在实例目录执行 `maibot init`；从其他目录启动时加 `--directory` 指向同一个目录。
-- **端口被占用**：在实例的 `config/bot_config.toml` 中，将 `webui.port` 改成空闲端口，例如 `18001`；若消息服务的 `8000` 端口也被占用，将 `maim_message.ws_server_port` 改成 `18000`，重启后用新 WebUI 端口访问。
+- **端口被占用**：在实例的 `config/bot_config.toml` 中，将 `[http] port` 改成空闲端口，例如 `18001`；若消息服务的 `8000` 端口也被占用，将 `maim_message.ws_server_port` 改成 `18000`，重启后用新 WebUI 端口访问。
 - **Windows 后台启动报没有控制台**：在实例配置的 `[debug]` 部分将 `enable_console_input` 设置为 `false`，重启后通过 WebUI 聊天。
 - **能登录但不回复**：查看实例目录的 `logs`，检查模型的 API Key、模型标识及任务分配，按[模型配置](/manual/configuration/model-config)修正。

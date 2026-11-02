@@ -4,7 +4,7 @@ title: API Reference
 
 # API Reference
 
-MaiBot plugins access 18 capability proxies through `self.ctx` (`PluginContext`). All capability calls are automatically forwarded to the Host over RPC, and the SDK unwraps the results for you; `ctx.paths` and `ctx.logger` are context helper objects injected by the Runner.
+MaiBot plugins access 23 capability proxies through `self.ctx` (`PluginContext`). All capability calls are automatically forwarded to the Host over RPC, and the SDK unwraps the results for you; `ctx.paths` and `ctx.logger` are context helper objects injected by the Runner.
 
 ::: code-group
 
@@ -28,6 +28,11 @@ self.ctx.knowledge  # Knowledge base search
 self.ctx.statistics # Local statistics
 self.ctx.maisaka    # Maisaka context and proactive tasks
 self.ctx.webui      # Claim WebUI upload tokens
+self.ctx.files      # File transfer, upload, and text reading
+self.ctx.web        # Web search and page fetching
+self.ctx.internal_chat  # Internal chat (the pet and web room share it)
+self.ctx.personality    # Global personality query and switching
+self.ctx.desktop_pet    # Pet control, animation, and extension buttons
 
 # Context helper objects
 self.ctx.paths      # Plugin persistence and runtime directories
@@ -775,6 +780,101 @@ image_path = Path(claimed["path"])
 :::
 
 Tokens must belong to the claiming plugin, expire after one hour, and can be claimed only once. They originate from authenticated WebUI uploads; arbitrary paths are not substitutes. File contents do not travel through ordinary JSON/RPC. See [WebUI Pages](./webui-pages.md#image-uploads) for declarations and format/size limits.
+
+## internal_chat — Internal Chat
+
+The web chat room and the desktop pet share one owner session: platform `internal`, user `owner`. Plugins use these capabilities to recognize that session and speak for the owner. Requires SDK 2.17.0+.
+
+- `await internal_chat.identity()` — returns `{platform, user_id}` for recognizing the session and messages Mai sends to the owner
+- `await internal_chat.send(text)` — deliver one message (1–2000 characters) as the owner; the message is attributed to the plugin, carries no protected-command privileges, may trigger a Mai reply, and enters the chat history
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+identity = await self.ctx.internal_chat.identity()
+if identity["platform"] == "internal":
+    await self.ctx.internal_chat.send("organize the todos")
+```
+
+:::
+
+Manifest capabilities: `internal_chat.identity`, `internal_chat.send`.
+
+## personality — Personality {#personality}
+
+Read the global personality library and switch by name, affecting every session. Requires SDK 2.20.0+; older SDKs can call the same Host capabilities via `ctx.call_capability(...)`.
+
+- `await personality.list()` — returns `{"profiles": [profile, ...]}`
+- `await personality.get_current()` — returns the current profile; `name` is an empty string when it is not in the library
+- `await personality.switch(name)` — switch by exact name, returning `{"changed": bool, "current": profile}`; switching keeps current edits and hot-reloads, and unsaved edits are archived as a "Profile before switch"
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+available = await self.ctx.personality.list()
+current = await self.ctx.personality.get_current()
+result = await self.ctx.personality.switch("Gentle Mai")
+```
+
+:::
+
+A profile object contains `name`, `personality`, `behavior_style`, `reply_style`, `group_chat_prompt`, `private_chat_prompts`, `multiple_reply_style`, and `multiple_probability`. Switching to the current name returns `changed: false`; unknown profiles, missing authorization, or a failed hot-reload raise a capability error. Manifest capabilities: `personality.list`, `personality.get_current`, `personality.switch`.
+
+## desktop_pet — Desktop Pet
+
+Control the built-in pet and offer buttons in its extension menu. Requires SDK 2.17.0+ (control), 2.18.0+ (animation), 2.21+ (buttons); older SDKs can use `ctx.call_capability(...)`. Every method requires the matching `desktop_pet.*` capability in the manifest.
+
+- `await desktop_pet.status()` — returns `enabled`, `supported`, `running`, `ready`, `visible`, `error`
+- `await desktop_pet.show()` / `hide()` — show or hide the window; hiding does not exit the process, and `show()` never bypasses the user's enable switch
+- `await desktop_pet.say(text)` — show a 1–2000 character bubble; it does not enter chat history and triggers no model call
+- `await desktop_pet.set_thinking(active)` — start or stop the thinking animation
+- `await desktop_pet.refresh_buttons()` — request a refresh of extension button states
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+state = await self.ctx.desktop_pet.status()
+if state["ready"]:
+    await self.ctx.desktop_pet.show()
+    await self.ctx.desktop_pet.say("todos are organized")
+```
+
+:::
+
+Animation (SDK 2.18.0+): `get_skin()`, `list_animations()`, `play_animation(name, repeat=1)`, `play_event(event)`, `stop_animation(playback_id)`, `animation_status(playback_id)`. A receipt means the window accepted the playback; a plugin's new action replaces its previous one, and one call runs at most 30 seconds.
+
+Extension buttons (SDK 2.21+): declare a `desktop_pet_buttons` list on the plugin class (`DesktopPetButton` objects or dicts, at most 10) and implement the two async methods `get_desktop_pet_button_states()` and `on_desktop_pet_button_click(button_id)`; callbacks are capped at 8 seconds. The pet-side events are listed in the [Hook reference](./hooks.md).
+
+## files — Files
+
+Read and write the current chat's attachments while the Host dispatches a tool call. Requires SDK 2.17.0+ with the matching `files.*` capabilities declared; the file scope comes from real chat authorization — plugins cannot pick a chat by submitting a `session_id`, and scheduled tasks or calls without chat context are refused.
+
+- `await files.list(offset=0)` — list the current chat's files
+- `await files.read_text(file_ref, offset=0, limit=12000, encoding="utf-8-sig")` — paginated text reading
+- `await files.download(file_ref)` — returns file info and a download URL; exclusively creates the local target file and verifies size and hash
+- `await files.upload(name, mime_type)` — request an upload ticket, then stream the file after reading it locally
+- `await files.send(file_ref)` — send the file to the current chat; returns `sent` or `unknown` — `unknown` means no confirmed receipt, verify the chat and never resend automatically
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+items = await self.ctx.files.list()
+if items:
+    text = await self.ctx.files.read_text(items[0]["file_ref"])
+```
+
+:::
+
+Storage, quotas, and deployment details are in [File Feature](/en/manual/files).
+
+## web — Web
+
+Reuses the unified web service's configuration and validation to give plugins search and page fetching. Requires a Host that supports it plus the `web.search` / `web.fetch` capabilities in the manifest; older SDKs call `ctx.call_capability("web.search", ...)` and receive the raw `{success, result}`.
+
+- `web.search` — web search; arguments match the unified service's `web_search` tool
+- `web.fetch` — page fetching; arguments match the `web_fetch` tool
+
+Results are full structured payloads with `service` and `retrieved_at`; payloads above the 500,000-character transfer limit raise an error — narrow the query. Web service configuration is described in [Model Config](/en/manual/configuration/model-config).
 
 ## paths — Runtime Paths
 

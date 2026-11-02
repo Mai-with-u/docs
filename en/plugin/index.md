@@ -261,7 +261,7 @@ The SDK provides 9 component decorators, all imported from the top level of `mai
 
 ### Capability Proxies
 
-Access 17 capability proxies via `self.ctx`. All calls are automatically forwarded to the Host via RPC:
+Access 23 capability proxies via `self.ctx`. All calls are automatically forwarded to the Host via RPC:
 
 ::: code-group
 
@@ -289,6 +289,12 @@ self.ctx.knowledge    # LPMM knowledge base search
 self.ctx.statistics   # Local statistics and billing data reading
 self.ctx.tool         # LLM tool definition query
 self.ctx.maisaka      # Maisaka context appending and proactive tasks
+self.ctx.webui        # Claim WebUI upload tokens
+self.ctx.files        # File transfer and reading
+self.ctx.web          # Web search and page fetching
+self.ctx.internal_chat  # Internal chat (pet and web room share it)
+self.ctx.personality    # Global personality query and switching
+self.ctx.desktop_pet    # Pet control, animation, and extension buttons
 ```
 
 :::
