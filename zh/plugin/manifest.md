@@ -267,6 +267,64 @@ title: Manifest
 - `name`：Python 包名，仅允许字母、数字、点号、下划线和横线
 - `version_spec`：版本约束表达式
 
+### 系统工具依赖
+
+`dependencies` 只覆盖 Python 包，没有声明系统包或可执行文件的类型。插件用到的 `ffmpeg`、`imagemagick`、`7z` 这类命令要由插件自带：官方 Docker 镜像不预装媒体工具，native 安装取决于用户自己的系统，同一个插件在 Windows 或 macOS 上会表现不同。
+
+需要 ffmpeg 时，用自带静态二进制的 Python 包（如 `imageio-ffmpeg`、`static-ffmpeg`），按 `python_package` 声明：
+
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
+{
+  "type": "python_package",
+  "name": "imageio-ffmpeg",
+  "version_spec": ">=0.6.0"
+}
+```
+
+:::
+
+执行时取包内二进制的绝对路径：
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+import asyncio
+
+import imageio_ffmpeg
+
+# 包内静态二进制，随插件依赖安装，不依赖宿主的 PATH
+FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
+
+
+async def merge_av(v_path: str, a_path: str, output_path: str) -> None:
+    process = await asyncio.create_subprocess_exec(
+        FFMPEG,
+        "-y",
+        "-i",
+        v_path,
+        "-i",
+        a_path,
+        "-c",
+        "copy",
+        "-map",
+        "0:v:0",
+        "-map",
+        "1:a:0",
+        output_path,
+    )
+    exit_code = await process.wait()
+    if exit_code != 0:
+        raise RuntimeError(f"ffmpeg 退出码 {exit_code}")
+```
+
+:::
+
+- **加载时预检** — 在 `on_load()` 里解析一次可执行文件路径并确认可执行。下载完几十 MB 素材、走到合并那一步才报错，用户拿不到可操作的信息。
+- **留出配置覆盖** — 配置模型里提供可选的 ffmpeg 路径字段，用户换用自备版本、排查问题时不必改代码。
+- **README 写明要求** — 确实需要用户自备系统工具时（例如 GPU 编码），在依赖一节给出各平台的安装命令。只写 Docker 镜像补装会漏掉 native 和 Windows 用户。
+
 ### 依赖解析流程
 
 `PluginDependencyPipeline` 在 Host 侧统一执行依赖分析：
@@ -328,3 +386,4 @@ python -m json.tool _manifest.json
 - **插件被阻止加载且日志提示版本不兼容** — Host 超出区间除「主次版本相同」记 warning 外都是 error；SDK 超出区间只记 warning，不会阻止加载。在真实的新版本上测试通过后，把 Host 的 `max_version` 提到该版本的「主.次」加 `.99`（如 `1.4.99`）；临时排查可开「强制插件兼容」，但它需要重启 MaiBot 且只跳过版本区间。
 - **`display.icon` 的本地图标不显示或被拒** — `type="local"` 的 `value` 必须是插件目录内的相对路径，后缀为 `.png`/`.jpg`/`.jpeg`/`.webp`/`.svg`；在线 URL 一律不允许，绝对路径、`..` 和符号链接也会被拒，加载失败会退回 `fallback`。
 - **日志提示依赖或 `llm_providers` 冲突** — 不能依赖自身、重复声明同一依赖或形成循环依赖；`client_type` 要与 `@LLMProvider` 声明完全一致，两个插件声明同一个 `client_type` 时双方都会被禁止加载。
+- **运行时报「ffmpeg 未安装或无法找到可执行文件」** — 插件在调用宿主 PATH 里的系统命令。改用 `imageio-ffmpeg` 这类自带静态二进制的 `python_package` 依赖，并在 `on_load()` 预检；官方 Docker 镜像不预装媒体工具。
