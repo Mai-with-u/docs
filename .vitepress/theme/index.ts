@@ -34,7 +34,7 @@ export default {
       // Detach the previous instance before attaching a new one, otherwise
       // every route change leaves a zoom instance listening on the old DOM.
       zoom?.detach()
-      zoom = mediumZoom('.main img', { background: 'var(--vp-c-bg)' })
+      zoom = mediumZoom('.main img:not(.linkcard img)', { background: 'var(--vp-c-bg)' })
     }
     onMounted(() => {
       initZoom()
