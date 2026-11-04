@@ -15,7 +15,7 @@ The core differences between `@Action` and `@Tool`:
 - **Parameter Declaration**: `action_parameters={"key": "description"}` → `parameters=[ToolParameterInfo(...)]`
 - **Parameter Schema**: No JSON Schema generation → Automatic generation of a complete JSON Schema
 - **Activation Method**: `activation_type` + `activation_keywords` → Always available (LLM decides when to invoke)
-- **Description Mechanism**: Single `description` → `brief_description` + `detailed_description`
+- **Description**: Use `description` for the tool purpose and invocation constraints.
 
 ### Migration Example
 
@@ -51,7 +51,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 class MyPlugin(MaiBotPlugin):
     @Tool(
         "search",
-        brief_description="Search the internet to retrieve information",
+        description="Search the internet to retrieve information",
         parameters=[
             ToolParameterInfo(
                 name="query",
@@ -115,7 +115,7 @@ The SDK internally converts all parameters of `@Action` into equivalent metadata
 
 - `action_parameters` → Converted to Tool parameter Schema (all fields are of type `string`)
 - `activation_type` / `activation_keywords` / `activation_probability` / `chat_mode` → Saved as `legacy_action` marker fields within the Tool `metadata`
-- `action_require` / `associated_types` / `action_prompt` → Merged into the Tool's `detailed_description`
+- Put usage requirements in the Tool’s `description`.
 - `invoke_method` is fixed to `"plugin.invoke_action"` (for compatibility with legacy invocation paths)
 
 After conversion, the Host side maintains a single Tool abstraction, no longer distinguishing between Action and Tool invocation flows.
@@ -126,5 +126,5 @@ After conversion, the Host side maintains a single Tool abstraction, no longer d
 
 - **The LLM stops calling the capability after migration** — `@Tool` has no `activation_type` / `activation_keywords`; it is always offered as a candidate and the LLM decides. Use [`@Command`](./commands.md) when you need keyword triggering.
 - **Arguments never arrive, or their types are rejected** — every `action_parameters` entry is converted as `string`, while `@Tool` validates against each `ToolParameterInfo.param_type`; declare `ToolParamType.INTEGER` / `ToolParamType.BOOLEAN` for numeric and boolean arguments.
-- **The tool is selected but the model uses it wrongly** — `@Tool` replaces the single `description` with `brief_description` + `detailed_description`; move the parameter notes and usage requirements into `detailed_description`, or the LLM never sees them.
+- **The model uses the tool incorrectly** — Explain the invocation conditions and constraints in `description`, and describe each argument in `parameters`.
 - **The call fails on serialization** — return a serializable dictionary: change `return results` to `return {"results": results}`.

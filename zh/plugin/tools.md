@@ -20,9 +20,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
 @Tool(
     name: str,                                              # 工具名称（必填）
-    description: str = "",                                  # 工具描述，作为备选描述字段
-    brief_description: str = "",                            # 简要描述，优先级高于 description
-    detailed_description: str = "",                         # 详细描述，可包含参数说明等
+    description: str = "",                                  # 工具用途、调用场景和约束
     parameters: list[ToolParameterInfo] | dict | None = None,  # 参数定义
     platforms: str | list[str] | None = None,                # 平台作用域
     **metadata,                                             # 额外元数据
@@ -34,17 +32,13 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 ### 参数说明
 
 - **`name`** `str` — 工具名称，需在插件内唯一。LLM 通过此名称调用工具
-- **`description`** `str` — 工具备选描述。当 `brief_description` 为空时使用此字段
-- **`brief_description`** `str` — 工具主描述（优先使用）。传给 LLM 的工具描述摘要，帮助 LLM 判断是否需要调用
-- **`detailed_description`** `str` — 详细描述，可包含参数使用说明、注意事项等。SDK 会自动合并参数 Schema 生成完整描述
+- **`description`** `str` — 工具用途、调用场景和使用约束，作为工具描述提供给 LLM。
 - **`parameters`** `list | dict | None` — 工具参数定义，支持两种格式（见下文）
 - **`core_tool`** `bool` — 可选，通过 `**metadata` 传入，默认 `False`。设为 `True` 时工具进入核心工具列表，LLM 每轮直接可见（未显式设置 `visibility` 时等价于 `visibility="visible"`）；默认的 `False` 会进入 deferred 池，需要模型先用工具搜索发现它，才会出现在后续轮次。核心工具越多、模型选择成本越高，只给高频低风险的工具设 `True`
 - **`platforms`** `str | list[str]` — 可选，通过 `**metadata` 传入。限定工具只在指定平台出现，例如 `"qq"` 或 `["qq", "telegram"]`；省略、`None` 或 `[]` 表示不限平台。工具在其他平台会被过滤，调用前还会按当前平台再校验一次
 
 描述字段约定：
-- `description`：关于工具的描述，包括使用方法，使用情景，注意事项。当 `brief_description` 为空时，`description` 会作为回退描述。
-- `brief_description`：给主程序或小模型快速判断"这个工具是做什么的"的简要描述
-- `detailed_description`：描述参数、必填项、可选项和调用约束的详细描述
+- `description`：说明工具用途、调用场景和使用约束。
 
 ## 平台作用域
 
@@ -91,8 +85,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 class MyPlugin(MaiBotPlugin):
     @Tool(
         "search",
-        brief_description="搜索互联网获取信息",
-        detailed_description="使用搜索引擎查找相关信息。参数说明：\n- query：string，必填。搜索关键词。\n- limit：integer，可选。返回结果数量上限。",
+        description="搜索互联网获取信息",
         parameters=[
             ToolParameterInfo(
                 name="query",
@@ -126,7 +119,7 @@ class MyPlugin(MaiBotPlugin):
 class MyPlugin(MaiBotPlugin):
     @Tool(
         "search",
-        brief_description="搜索互联网获取信息",
+        description="搜索互联网获取信息",
         parameters={
             "query": {"type": "string", "description": "搜索关键词"},
             "limit": {"type": "integer", "description": "返回结果数量上限", "default": 5},
@@ -283,21 +276,9 @@ Maisaka 会把这类返回拆成两种上下文消息：第一条仍是纯文本
 `stream_id` 是 Tool 组件中最重要的参数之一，它标识了当前对话流。使用 `ctx.send.text("消息", stream_id)` 可以将消息发送到对应的聊天流中。
 :::
 
-## 描述生成规则
+## 编写工具描述
 
-SDK 会自动为工具生成完整的描述信息，优先级如下：
-
-1. **`brief_description`**：优先使用（如果提供）
-2. **`description`**：降级回退（`brief_description` 为空时使用）
-3. **`detailed_description`**：如果提供了，SDK 会将其与参数 Schema 合并生成完整描述
-4. **自动生成**：如果上述字段都未提供，SDK 会使用 `"工具 {name}"` 作为描述
-
-自动生成的参数说明格式为：
-   ```
-   参数说明：
-   - query：string，必填。搜索关键词
-   - limit：integer，可选。返回结果数量上限。默认值：5
-   ```
+使用 `description` 说明工具用途、调用场景和使用约束。Host 使用这段文字进行工具发现，并作为工具描述传给模型。参数类型、必填项和用法填写在 `parameters` 中。
 
 ## 完整示例
 

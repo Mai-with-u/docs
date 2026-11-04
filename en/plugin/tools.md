@@ -20,9 +20,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
 @Tool(
     name: str,                                              # 工具名称（必填）
-    description: str = "",                                  # 工具描述，作为备选描述字段
-    brief_description: str = "",                            # 简要描述，优先级高于 description
-    detailed_description: str = "",                         # 详细描述，可包含参数说明等
+    description: str = "",                                  # 工具用途、调用场景和约束
     parameters: list[ToolParameterInfo] | dict | None = None,  # 参数定义
     platforms: str | list[str] | None = None,                # 平台作用域
     **metadata,                                             # 额外元数据
@@ -34,17 +32,13 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 ### Argument Descriptions
 
 - **`name`** `str` — Tool name, must be unique within the plugin. The LLM calls the tool via this name.
-- **`description`** `str` — Alternative tool description. Used when `brief_description` is empty.
-- **`brief_description`** `str` — Primary tool description (preferred). A summary of the tool description sent to the LLM to help it decide whether it needs to call it.
-- **`detailed_description`** `str` — Detailed description, which can include parameter usage instructions, notes, etc. The SDK automatically merges the parameter Schema to generate a complete description.
+- **`description`** `str` — Tool purpose, invocation scenarios, and constraints, provided to the LLM.
 - **`parameters`** `list | dict | None` — Tool parameter definitions, supporting two formats (see below).
 - **`core_tool`** `bool` — Optional, passed through `**metadata`, defaults to `False`. With `True` the tool enters the core tool list and is directly visible to the LLM on every turn (equivalent to `visibility="visible"` when `visibility` is not set explicitly); with the default `False` it goes into the deferred pool and only appears in later turns after the model discovers it through tool search. More core tools mean a higher model selection cost, so reserve `True` for high-frequency, low-risk tools.
 - **`platforms`** `str | list[str]` — Optional, passed through `**metadata`. Limits the tool to the listed platforms, for example `"qq"` or `["qq", "telegram"]`. Omitted, `None`, or `[]` means no platform restriction. The tool is filtered out on other platforms and checked again against the current platform before invocation.
 
 Description field conventions:
-- `description`: Description of the tool, including usage methods, scenarios, and notes. When `brief_description` is empty, `description` serves as the fallback description.
-- `brief_description`: A brief description used by the main program or small models to quickly determine "what this tool does".
-- `detailed_description`: A detailed description of parameters, required items, optional items, and invocation constraints.
+- `description`: Explain what the tool does, when to call it, and any constraints.
 
 ## Platform Scope
 
@@ -91,8 +85,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 class MyPlugin(MaiBotPlugin):
     @Tool(
         "search",
-        brief_description="搜索互联网获取信息",
-        detailed_description="使用搜索引擎查找相关信息。参数说明：\n- query：string，必填。搜索关键词。\n- limit：integer，可选。返回结果数量上限。",
+        description="搜索互联网获取信息",
         parameters=[
             ToolParameterInfo(
                 name="query",
@@ -126,7 +119,7 @@ Pass a dictionary in JSON Schema style directly:
 class MyPlugin(MaiBotPlugin):
     @Tool(
         "search",
-        brief_description="搜索互联网获取信息",
+        description="搜索互联网获取信息",
         parameters={
             "query": {"type": "string", "description": "搜索关键词"},
             "limit": {"type": "integer", "description": "返回结果数量上限", "default": 5},
@@ -283,21 +276,9 @@ In the LLM input and Prompt preview, the extracted image follows the normal `Ima
 `stream_id` is one of the most important arguments of a Tool component — it identifies the current conversation stream. Use `ctx.send.text("message", stream_id)` to send a message into the matching chat stream.
 :::
 
-## Description Generation Rules
+## Writing Tool Descriptions
 
-The SDK automatically generates the complete description for a tool, with the following priority:
-
-1. **`brief_description`**: used first (if provided)
-2. **`description`**: fallback (used when `brief_description` is empty)
-3. **`detailed_description`**: if provided, the SDK merges it with the parameter Schema to generate the complete description
-4. **Auto-generated**: if none of the fields above are provided, the SDK uses `"工具 {name}"` as the description
-
-The auto-generated parameter description has this format:
-   ```
-   参数说明：
-   - query：string，必填。搜索关键词
-   - limit：integer，可选。返回结果数量上限。默认值：5
-   ```
+Use `description` to explain the tool’s purpose, when to call it, and any constraints. The Host uses this text for tool discovery and model requests. Define parameter types, requirements, and usage in `parameters`.
 
 ## Complete Example
 

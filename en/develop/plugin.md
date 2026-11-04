@@ -80,8 +80,7 @@ class HelloPlugin(MaiBotPlugin):
 
     @Tool(
         "greet",
-        brief_description="向指定聊天流打招呼",
-        detailed_description="参数 stream_id：当前聊天流 ID。",
+        description="向指定聊天流打招呼",
         parameters=[ToolParameterInfo(
             name="stream_id", param_type=ToolParamType.STRING,
             description="当前聊天流 ID", required=True,

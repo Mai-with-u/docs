@@ -39,7 +39,7 @@ from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 
 - Serial execution, **can modify** incoming `kwargs`
 - Returning `modified_kwargs` can update parameters received by subsequent handlers
-- Returning `action: "abort"` can terminate the entire Hook call chain
+- Returning `action: "abort"` at an abortable Hook cancels its operation and stops subsequent handlers
 - Suitable for scenarios requiring message interception or rewriting
 
 ### OBSERVE Mode
@@ -119,7 +119,7 @@ class MyPlugin(MaiBotPlugin):
         raw_message = message.get("raw_message", "")
         if "banned_word" in raw_message:
             self.ctx.logger.info("Message filtered: %s", raw_message)
-            return {"action": "abort"}
+            return {"action": "abort", "custom_result": {"reason": "入站消息结构不合法。"}}
 
         # Modify message content and continue
         kwargs["message"]["filtered"] = True
@@ -253,12 +253,12 @@ The list follows what the current Host actually registers — 22 Hooks. The plug
 
 ### Maisaka Replyer Chain
 
-- **`maisaka.replyer.before_request`** — Before the Maisaka replyer sends the model request; can read or rewrite this call's `reply_tool_args` — abort allowed ❌ · param changes allowed ✅
-- **`maisaka.replyer.before_model_request`** — After the Maisaka replyer builds the final `messages` and before the model request; can rewrite the actual message list sent to the model — abort allowed ❌ · param changes allowed ✅
-- **`maisaka.replyer.after_response`** — After the Maisaka replyer receives the model response; can rewrite the reply or request regeneration — abort allowed ❌ · param changes allowed ✅
-- **`maisaka.reply.before_post_process`** — Before text post-processing of the final visible reply; can rewrite the body or adjust post-processing for this reply only — abort allowed ❌ · param changes allowed ✅
+- **`maisaka.replyer.before_request`** — Before the Maisaka replyer sends the model request; can read or rewrite this call's `reply_tool_args` — abort allowed ✅ · param changes allowed ✅
+- **`maisaka.replyer.before_model_request`** — After the Maisaka replyer builds the final `items` and before the model request; can rewrite the actual message list sent to the model — abort allowed ✅ · param changes allowed ✅
+- **`maisaka.replyer.after_response`** — After the Maisaka replyer receives the model response; can rewrite the reply or request regeneration — abort allowed ✅ · param changes allowed ✅
+- **`maisaka.reply.before_post_process`** — Before text post-processing of the final visible reply; can rewrite the body or adjust post-processing for this reply only — abort allowed ✅ · param changes allowed ✅
 
-`reply_tool_args` remains visible in the expression selection chain, `maisaka.replyer.before_request`, and `maisaka.replyer.after_response`. It contains extra reply tool arguments other than `msg_id`, `set_quote`, and `reference_info`; modifications returned from `before_request` continue to later replyer hooks.
+`reply_tool_args` remains visible in the expression selection chain, `maisaka.replyer.before_request`, and `maisaka.replyer.after_response`. It contains extra reply tool arguments other than the internal `msg_id`, `_reply_id`, and `_plugin_reply_prompt` parameters; modifications returned from `before_request` continue to later replyer hooks.
 
 #### Controlling Text Post-Processing Per Reply
 
@@ -292,17 +292,17 @@ async def preserve_selected_reply(self, **kwargs):
 
 #### Switching Models or Appending Prompts Before Replyer Requests
 
-`maisaka.replyer.before_request` is the last mutable point before the replyer sends the model request. A blocking handler can rewrite these fields:
+`maisaka.replyer.before_request` lets you adjust parameters before reply generation. A blocking handler can rewrite these fields:
 
 - **`task_name`** `str` — Task name used by this replyer request. Changing it uses that task's default model pool and generation options.
 - **`model_name`** `str` — Concrete model name for this replyer request. It must exist in `[[models]]` in `model_config.toml`. When set, only this model is attempted once instead of rotating through the task model pool.
 - **`extra_prompt`** `str` — Extra reply requirements appended to this replyer prompt.
-- **`reference_info`** `str` — Reference information passed by the reply tool. It can be rewritten.
+- **`reply_reason`** `str` — Reference information passed by the reply tool. It can be rewritten.
 - **`reply_tool_args`** `dict` — Extra reply tool arguments. Changes continue to later replyer hooks.
 
 `model_name` is a concrete model name. To route through another task's model pool, change `task_name`. If both `task_name` and `model_name` are set, the task supplies generation options such as temperature, token limit, and timeout, while `model_name` selects the actual model.
 
-If you need to rewrite the exact message list sent by the replyer, use `maisaka.replyer.before_model_request`. This Hook fires after the replyer has built `messages` for the currently selected model capability. Blocking handlers can return a new `messages` list; this is useful for inserting a synthetic first `user` message after `system`, experimenting with temporary prompts, or logging the final request body. The Hook only changes this temporary LLM request and does not write back to chat history or affect mid-term memory insertion.
+If you need to rewrite the exact message list sent by the replyer, use `maisaka.replyer.before_model_request`. This Hook fires after the replyer has built Context Items for the selected model. Blocking handlers can return new Items through `modified_kwargs["items"]`; this is useful for inserting a synthetic first `user` message after `system`, experimenting with temporary prompts, or logging the final request body. The Hook only changes this temporary LLM request and does not write back to chat history or affect mid-term memory insertion.
 
 ::: tip An easier alternative
 If you only want to inject parameters into a reply or rewrite reply content before sending (for example, turning text into voice), prefer the [Reply Extension](./reply-extensions.md): no Planner Hook changes, and sending, history, and failure handling are managed by the main program.
@@ -381,10 +381,65 @@ At runtime the Host exposes this Hook list to the WebUI backend route `/plugins/
 
 Blocking mode handlers can return a dictionary to control the subsequent flow:
 
-- **`action`** `str` — `"continue"` to continue the call chain, `"abort"` to terminate it
-- **`modified_kwargs`** `dict` — Modified parameters, will be passed to subsequent handlers
+- **`action`** `str` — `"continue"` proceeds; `"abort"` cancels the operation at an abortable checkpoint.
+- **`modified_kwargs`** `dict` — Replaces the complete parameter dictionary for subsequent handlers; preserve existing fields when editing.
+- **`custom_result`** `Any` — Additional data; use `{"reason": "reason"}` to provide the shared cancellation reason.
 
 Observe mode handler return values are ignored — no need to return a control dictionary.
+
+### Cancel an Operation with a Reason
+
+To prevent a reply or send, return `action="abort"` with a specific reason in `custom_result.reason`.
+The SDK's optional `HookResult` annotation describes this protocol; the runtime value remains a plain dictionary.
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+from maibot_sdk import HookHandler, HookResult
+from maibot_sdk.types import HookMode
+
+
+@HookHandler("maisaka.replyer.before_request", mode=HookMode.BLOCKING)
+async def guard_reply(self, request_type="", reply_message_id="", **kwargs) -> HookResult:
+    if request_type == "maisaka.replyer" and not reply_message_id:
+        return {
+            "action": "abort",
+            "custom_result": {"reason": "没有明确的回复目标，请选择具体消息后再回复。"},
+        }
+    return {"action": "continue"}
+```
+
+:::
+
+`reason` is an optional string. Explain the condition and suggest an adjustment when useful.
+Return the dictionary for normal cancellation; `error_policy` governs exceptions raised by the handler.
+Only `BLOCKING` handlers at abortable Hooks can cancel an operation. Cancellation takes priority over body
+rewrites and `retry` in the same return value; dispatch ends after the first effective abort.
+
+### Cancellation Scope
+
+- **Before generation** — `maisaka.replyer.before_request` / `before_model_request` cancel this generation before the model request, without model retries, switching, or failure penalties.
+- **After generation** — `maisaka.replyer.after_response` / `maisaka.reply.before_post_process` cancel this reply, stopping further regeneration, post-processing, and sending.
+- **Before sending** — `send_service.after_build_message` / `before_send` cancel the current message; receipts for already delivered segments are retained and later segments stop.
+- **Emoji selection** — `emoji.maisaka.before_select` / `after_select` cancel this emoji send.
+- **Expression selection** — `expression.select.before_select` / `after_selection` skip only expression selection. Reply generation may continue; the reason is retained in selection results and generation metrics.
+- **Receiving, commands, and learning** — Stop the corresponding message processing, command, jargon write, or emoji registration. Logs retain the handler and reason; expression learning also records the reason in its status.
+
+Planner Hooks, send-completion notifications, and pet state observations remain non-abortable.
+Check `allow_abort` in the running Host's `/plugins/runtime/hooks`; upgrading the SDK alone does not change Host capabilities.
+
+### What the Planner Receives
+
+reply and send_emoji share cancellation feedback: `error_code="plugin_aborted"`, with `reason` and
+`hook_abort: {hook_name, handler_name, reason}`. reply also distinguishes `model_empty_response`
+(the model produced no body) from `plugin_empty_response` (a Hook cleared a body produced by the model).
+
+Return `abort` to cancel a reply. Use `retry=True` and `retry_reason` to request a rewrite;
+`retry_reason` constrains the next generation. Plugins that cleared `response` to block replies should move
+their private suppression reasons to `custom_result.reason`. The Host dispatcher converts the legacy emoji
+`abort_message` once; a nonempty new reason takes precedence.
+
+Cancellation prompts the Planner to adjust the call or stop. It does not create a message ban across future calls.
 
 ## Hook Dispatch Flow
 
@@ -438,7 +493,7 @@ async def on_pre_process(self, **kwargs):
 **Verification** — reload the plugin, then trigger the chain once (for example, have the bot receive a message so `chat.receive.before_process` fires): the Runner log shows your handler's output and the message is modified or aborted as expected, which means the hook name, mode, and return value are all correct.
 
 - **Plugin registration fails** — the Host validates declarations at registration time: `hook` must be a name from the built-in list, and one wrong word (such as `chat.receive.before_processing`) fails registration, with the offending component named in the log.
-- **You declared `ErrorPolicy.ABORT` for a Hook that does not allow abort** — `send_service.after_send`, `maisaka.planner.*`, `maisaka.replyer.*`, and `maisaka.reply.before_post_process` do not allow abort, so that declaration fails registration; drop the policy or subscribe to a Hook that allows abort.
+- **You declared `ErrorPolicy.ABORT` for a Hook that does not allow abort** — `send_service.after_send`, `chat.command.after_execute`, and `maisaka.planner.*` do not allow abort, so that declaration fails registration; drop the policy or subscribe to a Hook that allows abort.
 - **Your `modified_kwargs` changes are ignored** — return values are honored only in `mode=HookMode.BLOCKING`; `OBSERVE` handlers run concurrently in the background and their `modified_kwargs` and `abort` requests are discarded.
 - **The plugin raises `RuntimeError` after upgrading to SDK 2.0** — it still contains `@WorkflowStep`, which SDK 2.0 removed with no compatibility mapping; migrate to `@HookHandler` (`blocking=True` → `mode=HookMode.BLOCKING`, `priority=10` → `order=HookOrder.EARLY`).
 - **Handlers run in an order you did not expect** — sorting is mode → order → origin → plugin ID → handler name: built-in plugins always precede third-party ones, and `HookOrder.EARLY` only moves you ahead within the same mode.

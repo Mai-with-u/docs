@@ -300,8 +300,7 @@ class GreeterPlugin(MaiBotPlugin):
 
     @Tool(
         "greet",
-        brief_description="Greet the user",
-        detailed_description="Parameter description:\n- stream_id: string, required. The current chat stream ID.",
+        description="Greet the user",
         parameters=[
             ToolParameterInfo(
                 name="stream_id",
