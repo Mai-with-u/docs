@@ -133,7 +133,7 @@ The `/auth/verify` endpoint has built-in per-IP failure tracking, with the follo
 Five hardening suggestions:
 
 - **Custom Token length** — Recommend at least 32 random characters, avoid dictionary words
-- **Don't expose directly on the public internet** — Default `host: ["127.0.0.1", "::1"]`. If remote access is needed, go through a reverse proxy and configure the proxy IP in `webui.trusted_proxies`
+- **Don't expose directly on the public internet** — `[http] host` defaults to `["127.0.0.1", "::1"]`. If remote access is needed, go through a reverse proxy and configure the proxy IP in `webui.trusted_proxies`
 - **HTTPS is mandatory** — Secure Cookie auto-enabled in production mode. If using a reverse proxy, confirm the `X-Forwarded-Proto` header is correctly forwarded
 - **Rotate periodically** — Recommend calling `/auth/regenerate` every 30–90 days; old Token becomes invalid immediately
 - **`webui.allowed_ips`** — Set an IP whitelist to further reduce attack surface

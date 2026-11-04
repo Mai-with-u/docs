@@ -72,7 +72,7 @@ services:
       - TZ=Asia/Shanghai               # Timezone, affects log and statistics timestamps
       - EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656    # EULA agreement marker, do not change
       - PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 # Privacy agreement marker, do not change
-      - WEBUI_HOST=0.0.0.0             # Must listen on 0.0.0.0 inside the container, or the host cannot reach it
+      - HTTP_HOST=0.0.0.0              # Must listen on 0.0.0.0 inside the container, or the host cannot reach it; the old WEBUI_HOST name still works
     ports:
       - "18001:8001"                   # Host 18001 -> container 8001; change the left side if the host port is taken
     volumes:
@@ -109,7 +109,7 @@ The first launch will automatically generate configuration files.
 - **WebUI** — 18001 (mapped to 8001 inside the container)
 
 ::: warning
-The default WebUI `host` is `127.0.0.1`, which inside a Docker container means only the container itself can access it. When deploying with Docker, make sure to change `host` to `0.0.0.0`.
+The default `[http] host` is `127.0.0.1`, which inside a Docker container means only the container itself can access it. When deploying with Docker, set `HTTP_HOST=0.0.0.0` to open the listener.
 :::
 
 ::: tip
@@ -139,7 +139,7 @@ docker run -d \
   -e TZ=Asia/Shanghai \
   -e EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656 \
   -e PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 \
-  -e WEBUI_HOST=0.0.0.0 \
+  -e HTTP_HOST=0.0.0.0 \
   -v ./docker-config/mmc:/MaiMBot/config \
   -v ./data/MaiMBot:/MaiMBot/data \
   -v ./data/MaiMBot/plugins:/MaiMBot/plugins \
@@ -185,7 +185,7 @@ docker run -d \
   -e TZ=Asia/Shanghai \
   -e EULA_AGREE=8e6e7d647f7f82d6ea98456b73908656 \
   -e PRIVACY_AGREE=91e5db7659c560bc3545e63859b6ebc0 \
-  -e WEBUI_HOST=0.0.0.0 \
+  -e HTTP_HOST=0.0.0.0 \
   -v ./docker-config/mmc:/MaiMBot/config \
   -v ./data/MaiMBot:/MaiMBot/data \
   -v ./data/MaiMBot/plugins:/MaiMBot/plugins \
@@ -247,7 +247,7 @@ For detailed steps on configuring models and connecting QQ, refer to [Model Conf
 
 **WebUI unreachable from outside?**
 
-- Confirm the container environment variable `WEBUI_HOST=0.0.0.0`
+- Confirm the container environment variable `HTTP_HOST=0.0.0.0` (the old `WEBUI_HOST` name still works)
 - On a cloud server, also allow port `18001` in the security group / firewall
 
 **Can't find the login Token?**

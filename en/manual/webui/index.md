@@ -36,15 +36,17 @@ The persistent Token must satisfy all of: at least 10 characters, at least one u
 
 ## WebUI Settings
 
-You can change some basic WebUI settings in `bot_config.toml`:
+You can change some basic WebUI settings in `bot_config.toml`. The listen address and port live in the `[http]` section, shared by the WebUI and file transfers:
 
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
+[http]
+host = ["127.0.0.1", "::1"]  # Bind address list; use ["0.0.0.0", "::"] for remote access
+port = 8001                   # Port shared by the WebUI and file transfers
+
 [webui]
 enabled = true                # Enable WebUI
-host = ["127.0.0.1", "::1"]  # Bind address list
-port = 8001                   # Port
 mode = "production"           # Mode: development or production
 webui_style = 2               # Style: 0 original / 1 future retro / 2 millennium
 anti_crawler_mode = "basic"   # Anti-crawler mode: false / strict / loose / basic

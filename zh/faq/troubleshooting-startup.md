@@ -124,7 +124,7 @@ enabled = True             # 错误！应该小写 true
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 # config/bot_config.toml
-[webui]
+[http]
 port = 8002             # 改为 8002 或其他空闲端口
 ```
 

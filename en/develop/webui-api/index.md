@@ -12,19 +12,19 @@ This page explains the skeleton of the whole API: how the service starts, how yo
 
 The WebUI backend is a FastAPI application that starts alongside the MaiBot main process. Default behavior:
 
-- **Listening port** — `8001` (`WebUIConfig.port`)
-- **Bind addresses** — `127.0.0.1` and `::1` (`WebUIConfig.host`)
+- **Listening port** — `8001` (`HTTPConfig.port`)
+- **Bind addresses** — `127.0.0.1` and `::1` (`HTTPConfig.host`)
 - **Run mode** — `production` (`WebUIConfig.mode`), switch to `development` during development
 
 ::: warning Security Warning
-By default, the server binds to loopback addresses and is only accessible locally. **Never set host to `0.0.0.0` and expose it directly on the public internet** — the WebUI does not include built-in TLS termination or WAF. If remote access is required, route traffic through a reverse proxy (Nginx / Caddy) and configure the proxy IP in `webui.trusted_proxies`.
+By default, the server binds to loopback addresses and is only accessible locally. **Never set `[http] host` to `0.0.0.0` and expose it directly on the public internet** — the WebUI does not include built-in TLS termination or WAF. If remote access is required, route traffic through a reverse proxy (Nginx / Caddy) and configure the proxy IP in `webui.trusted_proxies`.
 :::
 
 Key configuration options at a glance:
 
 - **`webui.enabled`** — `true` to start WebUI, `false` to fully disable
-- **`webui.host`** — List of listening addresses, can bind both IPv4 and IPv6 simultaneously
-- **`webui.port`** — Listening port, default `8001`
+- **`http.host`** — List of listening addresses, can bind both IPv4 and IPv6 simultaneously
+- **`http.port`** — Listening port, default `8001`
 - **`webui.allowed_ips`** — IP whitelist, comma-separated
 - **`webui.secure_cookie`** — Whether to only send the login Cookie over HTTPS
 - **`webui.anti_crawler_mode`** — Anti-crawler level, default `basic`

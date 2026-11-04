@@ -97,6 +97,7 @@ const imgSrc = computed(() => {
 
 <style scoped>
 .linkcard {
+  isolation: isolate;
   display: flex;
   align-items: center;
   justify-content: space-between;

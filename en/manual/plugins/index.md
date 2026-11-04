@@ -83,7 +83,7 @@ Beyond the Plugin Market, there is a "repository" path: first find a plugin on t
 
 Besides the built-in Plugin Market in the WebUI, you can also visit the **MaiBot Plugin Site** to browse and search community-maintained plugins and adapters:
 
-<Linkcard url="https://plugins.maibot.chat/" title="MaiBot Plugin Site" description="Browse and search community-maintained plugins and adapters" logo="/title_img/mai.png" />
+<Linkcard url="https://plugin.maibot.chat/" title="MaiBot Plugin Site" description="Browse and search community-maintained plugins and adapters" logo="/title_img/mai.png" />
 
 <Linkcard url="https://github.com/Mai-with-u" title="MaiBot Official Organization" description="Official adapters and example plugins live here" logo="/title_img/mai.png" />
 

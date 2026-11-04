@@ -133,7 +133,7 @@ curl -X POST http://127.0.0.1:8001/api/webui/auth/regenerate \
 五条强化建议供参考：
 
 - **自定义 Token 长度** — 建议至少 32 位乱码，不要用字典词
-- **不要裸奔在公网** — 默认 `host: ["127.0.0.1", "::1"]`，若需远程访问请走反向代理并在 `webui.trusted_proxies` 中配置代理 IP
+- **不要裸奔在公网** — `[http] host` 默认 `["127.0.0.1", "::1"]`，若需远程访问请走反向代理并在 `webui.trusted_proxies` 中配置代理 IP
 - **HTTPS 必须开** — 生产模式下自动启用 Secure Cookie。若走反向代理，确认 `X-Forwarded-Proto` 头已正确传递
 - **定期轮换** — 建议每 30\~90 天调一次 `/auth/regenerate`，旧 Token 立即失效
 - **`webui.allowed_ips`** — 设置 IP 白名单，进一步缩小攻击面

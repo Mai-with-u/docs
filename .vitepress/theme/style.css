@@ -98,11 +98,44 @@
   z-index: 100;
 }
 
-.medium-zoom-image {
+.medium-zoom-image--opened {
   z-index: 9999 !important;
 }
 
 /* nprogress 进度条颜色 */
 #nprogress .bar {
   background: var(--vp-c-brand-2) !important;
+}
+
+/**
+ * 顶栏：平板宽度（768–959px）收成图标搜索
+ *
+ * 这一档没有汉堡菜单，顶栏菜单、搜索、风格/阅读图标要挤在一行里。
+ * 搜索框的占位文字与 ⌘K 键帽（约 90px）在这里最占地方，收成图标后
+ * 一行放得下，也不会出现横向滚动条。
+ */
+@media (min-width: 768px) and (max-width: 959px) {
+  .VPNavBar .wrapper {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .VPNavBarSearch {
+    padding-left: 12px;
+  }
+
+  .VPNavBarSearch .DocSearch-Button {
+    justify-content: center;
+    width: 40px;
+    padding: 0;
+  }
+
+  .VPNavBarSearch .DocSearch-Button-Placeholder,
+  .VPNavBarSearch .DocSearch-Button-Keys {
+    display: none;
+  }
+
+  .VPNavBarSearch .DocSearch-Search-Icon {
+    margin-right: 0;
+  }
 }
