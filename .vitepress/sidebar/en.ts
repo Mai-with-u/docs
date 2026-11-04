@@ -7,39 +7,38 @@ import type { DefaultTheme } from 'vitepress'
 //   See zh.ts for the design notes and VitePress behaviour caveats.
 
 export const nav: DefaultTheme.NavItem[] = [
-  { text: 'Home', link: '/en/' },
   { text: 'Manual', link: '/en/manual/', activeMatch: '^/en/manual/' },
   {
-    text: 'Integration & Extension',
+    text: 'Integration',
     activeMatch: '^/en/(develop|plugin)/',
     items: [
-      { text: 'Integration Overview', link: '/en/develop/' },
-      { text: 'Connect MaiBot to a new chat platform', link: '/en/develop/adapters/' },
-      { text: 'Add features to MaiBot', link: '/en/plugin/' },
-      { text: 'Swap models or plug in your own service', link: '/en/manual/configuration/model-config' },
-      { text: 'Let MaiBot call external tools', link: '/en/manual/configuration/mcp-config' },
-      { text: 'Read or control MaiBot from your own program', link: '/en/develop/webui-api/' },
-      { text: 'Export and analyse chat data', link: '/en/develop/statistics-io' },
+      { text: 'Overview', link: '/en/develop/' },
+      { text: 'Platform Adapters', link: '/en/develop/adapters/' },
+      { text: 'Plugin Development', link: '/en/plugin/' },
+      { text: 'Model Config', link: '/en/manual/configuration/model-config' },
+      { text: 'MCP Config', link: '/en/manual/configuration/mcp-config' },
+      { text: 'WebUI API', link: '/en/develop/webui-api/' },
+      { text: 'Data Export', link: '/en/develop/statistics-io' },
     ],
   },
   { text: 'FAQ', link: '/en/faq/', activeMatch: '^/en/faq/' },
-  { text: 'Changelog', link: '/en/changelog/', activeMatch: '^/en/changelog/' },
   {
     text: 'About',
-    activeMatch: '^/en/(about|contributing)/',
+    activeMatch: '^/en/(about|contributing|changelog)/',
     items: [
-      { text: 'About the Project', link: '/en/about/' },
+      { text: 'Project Overview', link: '/en/about/' },
       { text: 'Community Groups', link: '/en/about/community' },
-      { text: 'Acknowledgements & Links', link: '/en/about/acknowledgements' },
-      { text: 'About This Docs', link: '/en/about/about-docs' },
-      { text: 'Contribute to Docs', link: '/en/contributing/' },
+      { text: 'Acknowledgements', link: '/en/about/acknowledgements' },
+      { text: 'Docs Site', link: '/en/about/about-docs' },
+      { text: 'Contribute', link: '/en/contributing/' },
+      { text: 'Changelog', link: '/en/changelog/' },
     ],
   },
 ]
 
 const manualSidebar: DefaultTheme.SidebarItem[] = [
   {
-    text: 'Getting Started & Deployment',
+    text: 'Start',
     collapsed: false,
     items: [
       { text: 'Quick Start', link: '/en/manual/' },
@@ -47,33 +46,33 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Windows Deployment', link: '/en/manual/deployment/windows' },
       { text: 'Linux Deployment', link: '/en/manual/deployment/linux' },
       { text: 'Docker Deployment', link: '/en/manual/deployment/docker' },
-      { text: 'AI-Assisted Install', link: '/en/manual/deployment/installation-agent' },
-      { text: 'Package Install & Updates', link: '/en/manual/deployment/update' },
+      { text: 'AI Install', link: '/en/manual/deployment/installation-agent' },
+      { text: 'Install & Updates', link: '/en/manual/deployment/update' },
     ]
   },
   {
     text: 'Configuration',
     collapsed: true,
     items: [
-      { text: 'Configuration Overview', link: '/en/manual/configuration/' },
+      { text: 'Overview', link: '/en/manual/configuration/' },
       { text: 'Bot Config', link: '/en/manual/configuration/bot-config' },
       { text: 'Model Config', link: '/en/manual/configuration/model-config' },
-      { text: 'Model Extra Parameters', link: '/en/manual/configuration/model-extra-params' },
+      { text: 'Extra Parameters', link: '/en/manual/configuration/model-extra-params' },
       { text: 'MCP Config', link: '/en/manual/configuration/mcp-config' },
-      { text: 'A_Memorix Config', link: '/en/manual/configuration/amemorix-config' },
+      { text: 'A_Memorix', link: '/en/manual/configuration/amemorix-config' },
     ]
   },
   {
     text: 'Connect Platforms',
     collapsed: true,
     items: [
-      { text: 'Connect Platforms', link: '/en/manual/adapters/' },
-      { text: 'Unified QQ Connector', link: '/en/manual/adapters/qq-local-client' },
-      { text: 'QQ Official Bot', link: '/en/manual/adapters/qq-official' },
+      { text: 'Overview', link: '/en/manual/adapters/' },
+      { text: 'QQ Connector', link: '/en/manual/adapters/qq-local-client' },
+      { text: 'Official Bot', link: '/en/manual/adapters/qq-official' },
       { text: 'Email', link: '/en/manual/adapters/email' },
-      { text: 'QQ Voice Call', link: '/en/manual/adapters/qq-voice-call' },
+      { text: 'Voice Call', link: '/en/manual/adapters/qq-voice-call' },
       { text: 'iMessage', link: '/en/manual/adapters/imessage' },
-      { text: 'NapCat (archived)', link: '/en/manual/adapters/napcat' },
+      { text: 'NapCat', link: '/en/manual/adapters/napcat' },
     ]
   },
   {
@@ -94,14 +93,14 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
-    text: 'WebUI Console',
+    text: 'WebUI',
     collapsed: true,
     items: [
-      { text: 'Login & Settings', link: '/en/manual/webui/' },
-      { text: 'Editing Config in the Browser', link: '/en/manual/webui/config-management' },
+      { text: 'Login', link: '/en/manual/webui/' },
+      { text: 'Edit Config', link: '/en/manual/webui/config-management' },
       { text: 'Adapter Management', link: '/en/manual/webui/adapter-management' },
       { text: 'Command Management', link: '/en/manual/webui/command-management' },
-      { text: 'Viewing & Managing Memory', link: '/en/manual/webui/memory-management' },
+      { text: 'Memory', link: '/en/manual/webui/memory-management' },
       { text: 'Data Management', link: '/en/manual/webui/data-management' },
     ]
   },
@@ -109,16 +108,16 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
 
 const developSidebar: DefaultTheme.SidebarItem[] = [
   {
-    text: 'Integration Routes',
+    text: 'Routes',
     collapsed: false,
     items: [
-      { text: 'Integration Overview', link: '/en/develop/' },
-      { text: 'Swap models or plug in your own service', link: '/en/manual/configuration/model-config' },
-      { text: 'Let MaiBot call external tools', link: '/en/manual/configuration/mcp-config' },
+      { text: 'Overview', link: '/en/develop/' },
+      { text: 'Model Config', link: '/en/manual/configuration/model-config' },
+      { text: 'MCP Config', link: '/en/manual/configuration/mcp-config' },
     ]
   },
   {
-    text: 'Platform Adapters',
+    text: 'Adapters',
     collapsed: true,
     items: [
       { text: 'Adapter Overview', link: '/en/develop/adapters/' },
@@ -130,15 +129,15 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
-    text: 'Plugin Integration',
+    text: 'Plugins',
     collapsed: true,
     items: [
-      { text: 'Plugin Integration', link: '/en/develop/plugin' },
-      { text: 'Plugin Development Guide', link: '/en/plugin/' },
+      { text: 'Overview', link: '/en/develop/plugin' },
+      { text: 'Development Guide', link: '/en/plugin/' },
     ]
   },
   {
-    text: 'Programmatic Access',
+    text: 'API',
     collapsed: true,
     items: [
       { text: 'API Overview', link: '/en/develop/webui-api/' },
@@ -146,17 +145,11 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'System Control', link: '/en/develop/webui-api/system-control' },
       { text: 'Data & Memory', link: '/en/develop/webui-api/data-and-memory-api' },
       { text: 'Plugin Management', link: '/en/develop/webui-api/plugin-lifecycle-api' },
-      { text: 'Realtime Channel & Statistics', link: '/en/develop/webui-api/realtime-and-stats' },
+      { text: 'Realtime & Stats', link: '/en/develop/webui-api/realtime-and-stats' },
       { text: 'External Agent Connections', link: '/en/develop/agent-connections' },
     ]
   },
-  {
-    text: 'Data & Statistics',
-    collapsed: true,
-    items: [
-      { text: 'Data & Statistics', link: '/en/develop/statistics-io' },
-    ]
-  },
+  { text: 'Statistics', link: '/en/develop/statistics-io' },
 ]
 
 const pluginSidebar: DefaultTheme.SidebarItem[] = [
@@ -164,7 +157,7 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
     text: 'Start',
     collapsed: false,
     items: [
-      { text: 'Plugin Development Guide', link: '/en/plugin/' },
+      { text: 'Development Guide', link: '/en/plugin/' },
       { text: 'Plugin Integration', link: '/en/develop/plugin' },
       { text: 'Vibe Coding', link: '/en/plugin/vibe-coding' },
     ]
@@ -191,15 +184,15 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'LLM Provider', link: '/en/plugin/llmprovider' },
       { text: 'Reply Extensions', link: '/en/plugin/reply-extensions' },
       { text: 'Home Cards', link: '/en/plugin/home-cards' },
-      { text: 'WebUI Custom Pages', link: '/en/plugin/webui-pages' },
+      { text: 'WebUI Pages', link: '/en/plugin/webui-pages' },
       { text: 'Action (Legacy)', link: '/en/plugin/actions' },
     ]
   },
   {
-    text: 'Reference & Publishing',
+    text: 'Reference',
     collapsed: true,
     items: [
-      { text: 'Plugin API Reference', link: '/en/plugin/api-reference' },
+      { text: 'API Reference', link: '/en/plugin/api-reference' },
       { text: 'Publishing', link: '/en/plugin/submission' },
     ]
   },
@@ -207,20 +200,20 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
 
 const aboutSidebar: DefaultTheme.SidebarItem[] = [
     {
-      text: 'Project & Community',
+      text: 'Project',
       collapsed: false,
       items: [
-        { text: 'About the Project', link: '/en/about/' },
+        { text: 'Project Overview', link: '/en/about/' },
         { text: 'Community Groups', link: '/en/about/community' },
-        { text: 'Acknowledgements & Links', link: '/en/about/acknowledgements' },
+        { text: 'Acknowledgements', link: '/en/about/acknowledgements' },
       ]
     },
     {
       text: 'Docs Site',
       collapsed: true,
       items: [
-        { text: 'About This Docs', link: '/en/about/about-docs' },
-        { text: 'Contribute to Docs', link: '/en/contributing/' },
+        { text: 'Docs Site', link: '/en/about/about-docs' },
+        { text: 'Contribute', link: '/en/contributing/' },
         { text: 'Style Guide', link: '/en/contributing/style-guide' },
         { text: 'Markdown Features', link: '/en/contributing/markdown-features' },
       ]
@@ -270,21 +263,21 @@ export const sidebar: DefaultTheme.Sidebar = {
       text: 'Troubleshooting',
       collapsed: false,
       items: [
-        { text: 'Troubleshooting Overview', link: '/en/faq/error-troubleshooting' },
+        { text: 'Overview', link: '/en/faq/error-troubleshooting' },
         { text: 'Startup & Access', link: '/en/faq/troubleshooting-startup' },
         { text: 'Models & Rules', link: '/en/faq/troubleshooting-model' },
         { text: 'Runtime & Data', link: '/en/faq/troubleshooting-runtime' },
         { text: 'Plugins & Adapters', link: '/en/faq/troubleshooting-plugins-adapters' },
-        { text: 'Getting Help', link: '/en/faq/getting-help' },
+        { text: 'Help', link: '/en/faq/getting-help' },
       ]
     },
     {
-      text: 'Go Deeper',
+      text: 'Deeper',
       collapsed: true,
       items: [
         { text: 'Configuration', link: '/en/manual/configuration/' },
-        { text: 'Plugin Development Guide', link: '/en/plugin/' },
-        { text: 'Programmatic Access', link: '/en/develop/webui-api/' },
+        { text: 'Plugin Guide', link: '/en/plugin/' },
+        { text: 'API', link: '/en/develop/webui-api/' },
       ]
     },
   ],
