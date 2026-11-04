@@ -83,7 +83,7 @@ MaiBot 内置**插件市场（Plugin Market）**，在 WebUI 里就能浏览、�
 
 除了 WebUI 内置的插件市场，你还可以访问 **MaiBot 插件站** 浏览、搜索社区维护的插件与适配器：
 
-<Linkcard url="https://plugins.maibot.chat/" title="MaiBot 插件站" description="浏览、搜索社区维护的插件与适配器" logo="/title_img/mai.png" />
+<Linkcard url="https://plugin.maibot.chat/" title="MaiBot 插件站" description="浏览、搜索社区维护的插件与适配器" logo="/title_img/mai.png" />
 
 <Linkcard url="https://github.com/Mai-with-u" title="MaiBot 官方组织" description="官方维护的适配器与示例插件都在这里" logo="/title_img/mai.png" />
 

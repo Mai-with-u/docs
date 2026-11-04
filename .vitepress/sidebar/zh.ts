@@ -3,11 +3,15 @@ import type { DefaultTheme } from 'vitepress'
 // ---------------------------------------------------------------------------
 // 双通道导航设计（顶栏 × 侧边栏）
 //
-// 顶栏 = 意图轴：覆盖全部分区，每项落在分区门户页；「接入与扩展」下拉直接复用
-//   站点自己声明的六条接入路线（见 theme/utils/integration-routes.ts）——其中
-//   换模型 / 接 MCP 两条路线落在用户手册里，只有走意图轴才能从任意页面一击到达。
+// 顶栏 = 意图轴：四个入口，每项落在分区门户页。首页由站名承载，更新日志收进
+//   「关于」下拉，其余分区入口留给侧边栏。「接入」下拉复用站点自己声明的六条
+//   接入路线（见 theme/utils/integration-routes.ts）——其中换模型 / 接 MCP 两条
+//   落在用户手册里，只有走意图轴才能从任意页面一击到达。
 //   activeMatch 是未锚定正则，匹配 normalize('/' + page.relativePath)，
 //   必须写成 '^/xxx/' 形式；en 侧要匹配 '/en/xxx/'。
+// 标签只写页面名，不复述解释：解释句留在「接入路线总览」页的卡片里，菜单写
+//   「把麦麦接到一个新聊天平台」这类句子只会把窄侧栏撑长。页面正文 H1 仍是完整
+//   标题，侧栏只是目录，二者不必逐字相同。
 // 侧边栏 = 目录轴：VitePress 的键是路径前缀，只能按分区组织；与顶栏分区一一对应。
 //   除各分区入口组外默认 collapsed: true —— 含当前页的组会被 VitePress 强制展开，
 //   折叠只控制默认视觉噪音。单组分区省略 collapsed（第三态：常开且不显示折叠箭头）。
@@ -18,39 +22,38 @@ import type { DefaultTheme } from 'vitepress'
 // ---------------------------------------------------------------------------
 
 export const nav: DefaultTheme.NavItem[] = [
-  { text: '首页', link: '/' },
-  { text: '用户手册', link: '/manual/', activeMatch: '^/manual/' },
+  { text: '手册', link: '/manual/', activeMatch: '^/manual/' },
   {
-    text: '接入与扩展',
+    text: '接入',
     activeMatch: '^/(develop|plugin)/',
     items: [
-      { text: '接入路线总览', link: '/develop/' },
-      { text: '把麦麦接到一个新聊天平台', link: '/develop/adapters/' },
-      { text: '给麦麦加功能', link: '/plugin/' },
-      { text: '换模型或接自建模型服务', link: '/manual/configuration/model-config' },
-      { text: '让麦麦调用外部工具', link: '/manual/configuration/mcp-config' },
-      { text: '用外部程序读取或控制麦麦', link: '/develop/webui-api/' },
-      { text: '导出与分析聊天数据', link: '/develop/statistics-io' },
+      { text: '总览', link: '/develop/' },
+      { text: '平台适配器', link: '/develop/adapters/' },
+      { text: '插件开发', link: '/plugin/' },
+      { text: '模型配置', link: '/manual/configuration/model-config' },
+      { text: 'MCP 配置', link: '/manual/configuration/mcp-config' },
+      { text: 'WebUI API', link: '/develop/webui-api/' },
+      { text: '数据导出', link: '/develop/statistics-io' },
     ],
   },
   { text: '常见问题', link: '/faq/', activeMatch: '^/faq/' },
-  { text: '更新日志', link: '/changelog/', activeMatch: '^/changelog/' },
   {
     text: '关于',
-    activeMatch: '^/(about|contributing)/',
+    activeMatch: '^/(about|contributing|changelog)/',
     items: [
-      { text: '关于麦麦', link: '/about/' },
+      { text: '项目介绍', link: '/about/' },
       { text: '交流群', link: '/about/community' },
-      { text: '致谢与友链', link: '/about/acknowledgements' },
-      { text: '关于文档站', link: '/about/about-docs' },
-      { text: '参与文档站', link: '/contributing/' },
+      { text: '致谢', link: '/about/acknowledgements' },
+      { text: '本站', link: '/about/about-docs' },
+      { text: '参与', link: '/contributing/' },
+      { text: '更新日志', link: '/changelog/' },
     ],
   },
 ]
 
 const manualSidebar: DefaultTheme.SidebarItem[] = [
   {
-    text: '入门与部署',
+    text: '开始',
     collapsed: false,
     items: [
       { text: '快速上手', link: '/manual/' },
@@ -58,33 +61,33 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Windows 部署', link: '/manual/deployment/windows' },
       { text: 'Linux 部署', link: '/manual/deployment/linux' },
       { text: 'Docker 部署', link: '/manual/deployment/docker' },
-      { text: 'AI 助手安装', link: '/manual/deployment/installation-agent' },
-      { text: '程序包安装与更新', link: '/manual/deployment/update' },
+      { text: 'AI 安装', link: '/manual/deployment/installation-agent' },
+      { text: '安装与更新', link: '/manual/deployment/update' },
     ]
   },
   {
     text: '配置',
     collapsed: true,
     items: [
-      { text: '配置概览', link: '/manual/configuration/' },
+      { text: '概览', link: '/manual/configuration/' },
       { text: 'Bot 配置', link: '/manual/configuration/bot-config' },
       { text: '模型配置', link: '/manual/configuration/model-config' },
-      { text: '模型额外参数', link: '/manual/configuration/model-extra-params' },
+      { text: '额外参数', link: '/manual/configuration/model-extra-params' },
       { text: 'MCP 配置', link: '/manual/configuration/mcp-config' },
-      { text: 'A_Memorix 记忆系统配置', link: '/manual/configuration/amemorix-config' },
+      { text: 'A_Memorix 配置', link: '/manual/configuration/amemorix-config' },
     ]
   },
   {
     text: '接入平台',
     collapsed: true,
     items: [
-      { text: '接入平台', link: '/manual/adapters/' },
-      { text: '统一 QQ 连接器', link: '/manual/adapters/qq-local-client' },
-      { text: 'QQ 官方机器人', link: '/manual/adapters/qq-official' },
+      { text: '概览', link: '/manual/adapters/' },
+      { text: 'QQ 连接器', link: '/manual/adapters/qq-local-client' },
+      { text: '官方机器人', link: '/manual/adapters/qq-official' },
       { text: '邮件', link: '/manual/adapters/email' },
-      { text: 'QQ 语音通话', link: '/manual/adapters/qq-voice-call' },
+      { text: '语音通话', link: '/manual/adapters/qq-voice-call' },
       { text: 'iMessage', link: '/manual/adapters/imessage' },
-      { text: 'NapCat（已归档）', link: '/manual/adapters/napcat' },
+      { text: 'NapCat', link: '/manual/adapters/napcat' },
     ]
   },
   {
@@ -105,14 +108,14 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
-    text: 'WebUI 管理面板',
+    text: 'WebUI',
     collapsed: true,
     items: [
-      { text: '登录与设置', link: '/manual/webui/' },
-      { text: '在浏览器里改配置', link: '/manual/webui/config-management' },
+      { text: '登录', link: '/manual/webui/' },
+      { text: '改配置', link: '/manual/webui/config-management' },
       { text: '适配器管理', link: '/manual/webui/adapter-management' },
       { text: '命令管理', link: '/manual/webui/command-management' },
-      { text: '查看和管理记忆', link: '/manual/webui/memory-management' },
+      { text: '记忆管理', link: '/manual/webui/memory-management' },
       { text: '数据管理', link: '/manual/webui/data-management' },
     ]
   },
@@ -120,16 +123,16 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
 
 const developSidebar: DefaultTheme.SidebarItem[] = [
   {
-    text: '接入路线',
+    text: '路线',
     collapsed: false,
     items: [
-      { text: '接入路线总览', link: '/develop/' },
-      { text: '换模型或接自建模型服务', link: '/manual/configuration/model-config' },
-      { text: '让麦麦调用外部工具', link: '/manual/configuration/mcp-config' },
+      { text: '总览', link: '/develop/' },
+      { text: '模型配置', link: '/manual/configuration/model-config' },
+      { text: 'MCP 配置', link: '/manual/configuration/mcp-config' },
     ]
   },
   {
-    text: '平台接入',
+    text: '适配器',
     collapsed: true,
     items: [
       { text: '适配器概览', link: '/develop/adapters/' },
@@ -141,15 +144,15 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
-    text: '插件接入',
+    text: '插件',
     collapsed: true,
     items: [
-      { text: '插件接入', link: '/develop/plugin' },
-      { text: '插件开发指南', link: '/plugin/' },
+      { text: '概览', link: '/develop/plugin' },
+      { text: '开发指南', link: '/plugin/' },
     ]
   },
   {
-    text: '程序化对接',
+    text: '接口',
     collapsed: true,
     items: [
       { text: '接口概览', link: '/develop/webui-api/' },
@@ -157,17 +160,11 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
       { text: '系统控制', link: '/develop/webui-api/system-control' },
       { text: '数据与记忆', link: '/develop/webui-api/data-and-memory-api' },
       { text: '插件管理', link: '/develop/webui-api/plugin-lifecycle-api' },
-      { text: '实时通道与统计', link: '/develop/webui-api/realtime-and-stats' },
+      { text: '实时与统计', link: '/develop/webui-api/realtime-and-stats' },
       { text: '外接 Agent 连接', link: '/develop/agent-connections' },
     ]
   },
-  {
-    text: '数据与统计',
-    collapsed: true,
-    items: [
-      { text: '数据与统计', link: '/develop/statistics-io' },
-    ]
-  },
+  { text: '数据统计', link: '/develop/statistics-io' },
 ]
 
 const pluginSidebar: DefaultTheme.SidebarItem[] = [
@@ -175,7 +172,7 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
     text: '开始',
     collapsed: false,
     items: [
-      { text: '插件开发指南', link: '/plugin/' },
+      { text: '开发指南', link: '/plugin/' },
       { text: '插件接入', link: '/develop/plugin' },
       { text: 'Vibe Coding', link: '/plugin/vibe-coding' },
     ]
@@ -202,15 +199,15 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'LLMProvider', link: '/plugin/llmprovider' },
       { text: '回复扩展', link: '/plugin/reply-extensions' },
       { text: '首页卡片', link: '/plugin/home-cards' },
-      { text: 'WebUI 自定义页面', link: '/plugin/webui-pages' },
-      { text: 'Action（旧版）', link: '/plugin/actions' },
+      { text: 'WebUI 页面', link: '/plugin/webui-pages' },
+      { text: 'Action 旧版', link: '/plugin/actions' },
     ]
   },
   {
     text: '参考与发布',
     collapsed: true,
     items: [
-      { text: '插件 API 参考', link: '/plugin/api-reference' },
+      { text: 'API 参考', link: '/plugin/api-reference' },
       { text: '发布插件', link: '/plugin/submission' },
     ]
   },
@@ -218,20 +215,20 @@ const pluginSidebar: DefaultTheme.SidebarItem[] = [
 
 const aboutSidebar: DefaultTheme.SidebarItem[] = [
     {
-      text: '项目与社区',
+      text: '项目',
       collapsed: false,
       items: [
-        { text: '关于麦麦', link: '/about/' },
+        { text: '项目介绍', link: '/about/' },
         { text: '交流群', link: '/about/community' },
-        { text: '致谢与友链', link: '/about/acknowledgements' },
+        { text: '致谢', link: '/about/acknowledgements' },
       ]
     },
     {
       text: '文档站',
       collapsed: true,
       items: [
-        { text: '关于文档站', link: '/about/about-docs' },
-        { text: '参与文档站', link: '/contributing/' },
+        { text: '本站', link: '/about/about-docs' },
+        { text: '参与', link: '/contributing/' },
         { text: '风格指南', link: '/contributing/style-guide' },
         { text: '写作特性', link: '/contributing/markdown-features' },
       ]
@@ -256,7 +253,7 @@ export const sidebar: DefaultTheme.Sidebar = {
       text: '常见问题',
       collapsed: false,
       items: [
-        { text: '问题分类', link: '/faq/' },
+        { text: '分类', link: '/faq/' },
         { text: '基础使用', link: '/faq/basic-usage' },
         { text: '部署与启动', link: '/faq/deployment' },
         { text: '一键包', link: '/faq/one-key' },
@@ -272,21 +269,21 @@ export const sidebar: DefaultTheme.Sidebar = {
       text: '错误排查',
       collapsed: false,
       items: [
-        { text: '错误排查总览', link: '/faq/error-troubleshooting' },
+        { text: '总览', link: '/faq/error-troubleshooting' },
         { text: '启动与访问', link: '/faq/troubleshooting-startup' },
         { text: '模型与规则', link: '/faq/troubleshooting-model' },
         { text: '运行与数据', link: '/faq/troubleshooting-runtime' },
         { text: '插件与适配器', link: '/faq/troubleshooting-plugins-adapters' },
-        { text: '获取帮助', link: '/faq/getting-help' },
+        { text: '帮助', link: '/faq/getting-help' },
       ]
     },
     {
-      text: '深入文档',
+      text: '深入',
       collapsed: true,
       items: [
-        { text: '部署与配置', link: '/manual/configuration/' },
-        { text: '插件开发指南', link: '/plugin/' },
-        { text: '程序化对接', link: '/develop/webui-api/' },
+        { text: '部署配置', link: '/manual/configuration/' },
+        { text: '插件指南', link: '/plugin/' },
+        { text: '接口', link: '/develop/webui-api/' },
       ]
     },
   ],

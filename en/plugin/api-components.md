@@ -223,8 +223,7 @@ class CallerPlugin(MaiBotPlugin):
 
     @Tool(
         "translate_text",
-        brief_description="Translate text",
-        detailed_description="Parameter description:\n- text: string, required. The text to be translated.",
+        description="Translate text",
         parameters=[
             ToolParameterInfo(
                 name="text",

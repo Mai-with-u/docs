@@ -168,8 +168,7 @@ class MyPlugin(MaiBotPlugin):
 
     @Tool(
         "greet",
-        brief_description="Greet the user",
-        detailed_description="Parameter description:\n- stream_id: string, required. Current chat stream ID.",
+        description="Greet the user",
         parameters=[
             ToolParameterInfo(
                 name="stream_id",
@@ -220,7 +219,7 @@ class MyPlugin(MaiBotPlugin):
     # Subscribe to global configuration hot reload (only "bot" and "model" are valid values)
     config_reload_subscriptions: ClassVar[Iterable[str]] = ("bot", "model")
 
-    @Tool("my_tool", brief_description="Example tool")
+    @Tool("my_tool", description="Example tool")
     async def handle_tool(self, **kwargs):
         ...
 

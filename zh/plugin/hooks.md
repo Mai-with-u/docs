@@ -39,7 +39,7 @@ from maibot_sdk.types import HookMode, HookOrder, ErrorPolicy
 
 - 串行执行，**可以修改**传入的 `kwargs`
 - 返回 `modified_kwargs` 可以更新后续处理器接收的参数
-- 返回 `action: "abort"` 可以终止整个 Hook 调用链
+- 在允许中止的 Hook 中返回 `action: "abort"`，取消所属操作并停止后续处理器
 - 适合需要拦截或改写消息的场景
 
 ### OBSERVE（观察模式）
@@ -119,7 +119,7 @@ class MyPlugin(MaiBotPlugin):
         raw_message = message.get("raw_message", "")
         if "违禁词" in raw_message:
             self.ctx.logger.info("消息被过滤: %s", raw_message)
-            return {"action": "abort"}
+            return {"action": "abort", "custom_result": {"reason": "入站消息结构不合法。"}}
 
         # 修改消息内容后继续
         kwargs["message"]["filtered"] = True
@@ -253,12 +253,12 @@ class SendInterceptorPlugin(MaiBotPlugin):
 
 ### Maisaka 回复器链
 
-- **`maisaka.replyer.before_request`** — Maisaka replyer 请求模型前；可读取或改写本次 `reply_tool_args` — 允许 abort ❌ · 允许改参 ✅
-- **`maisaka.replyer.before_model_request`** — Maisaka replyer 构造完最终 `messages` 后、请求模型前；可改写实际发送给模型的消息列表 — 允许 abort ❌ · 允许改参 ✅
-- **`maisaka.replyer.after_response`** — Maisaka replyer 收到模型响应后；可改写回复或要求重生成 — 允许 abort ❌ · 允许改参 ✅
-- **`maisaka.reply.before_post_process`** — 最终可见回复执行文本后处理前；可按单次回复改写正文或调整后处理策略 — 允许 abort ❌ · 允许改参 ✅
+- **`maisaka.replyer.before_request`** — Maisaka replyer 请求模型前；可读取或改写本次 `reply_tool_args` — 允许 abort ✅ · 允许改参 ✅
+- **`maisaka.replyer.before_model_request`** — Maisaka replyer 构造完最终 `items` 后、请求模型前；可改写实际发送给模型的消息列表 — 允许 abort ✅ · 允许改参 ✅
+- **`maisaka.replyer.after_response`** — Maisaka replyer 收到模型响应后；可改写回复或要求重生成 — 允许 abort ✅ · 允许改参 ✅
+- **`maisaka.reply.before_post_process`** — 最终可见回复执行文本后处理前；可按单次回复改写正文或调整后处理策略 — 允许 abort ✅ · 允许改参 ✅
 
-`reply_tool_args` 会在表达方式选择链、`maisaka.replyer.before_request` 和 `maisaka.replyer.after_response` 中保持可见。它包含 reply 工具里除 `msg_id`、`set_quote`、`reference_info` 外的额外参数；`before_request` 返回的 `reply_tool_args` 修改会继续传递给后续 replyer hook。
+`reply_tool_args` 会在表达方式选择链、`maisaka.replyer.before_request` 和 `maisaka.replyer.after_response` 中保持可见。它包含 reply 工具里除内部参数 `msg_id`、`_reply_id`、`_plugin_reply_prompt` 外的额外参数；`before_request` 返回的 `reply_tool_args` 修改会继续传递给后续 replyer hook。
 
 #### 按单次回复控制文本后处理
 
@@ -292,17 +292,17 @@ async def preserve_selected_reply(self, **kwargs):
 
 #### 在 replyer 请求前切换模型或追加提示词
 
-`maisaka.replyer.before_request` 是 replyer 真正请求模型前的最后一个可改写点。阻塞模式处理器可以修改以下字段：
+`maisaka.replyer.before_request` 是 replyer 生成前的参数调整点。阻塞模式处理器可以修改以下字段：
 
 - **`task_name`** `str` — 本次 replyer 请求使用的任务名。修改后会用该任务的默认模型池和生成参数。
 - **`model_name`** `str` — 本次 replyer 请求指定的具体模型名称，必须存在于 `model_config.toml` 的 `[[models]]` 中。指定后只尝试该模型一次，不再按任务模型池轮换。
 - **`extra_prompt`** `str` — 追加到本次 replyer prompt 的额外回复要求。
-- **`reference_info`** `str` — 本次 reply 工具传入的引用信息，可以被改写。
+- **`reply_reason`** `str` — 本次 reply 工具传入的引用信息，可以被改写。
 - **`reply_tool_args`** `dict` — reply 工具额外参数，修改后会传给后续 replyer hook。
 
 `model_name` 是具体模型名；如果只想切换到另一个任务的模型池，修改 `task_name` 即可。如果同时设置 `task_name` 和 `model_name`，任务提供温度、token 上限、超时等生成参数，`model_name` 指定实际调用的模型。
 
-如果需要改写 replyer 真正发给模型的消息列表，请使用 `maisaka.replyer.before_model_request`。该 Hook 会在 replyer 已经根据当前模型能力构造好 `messages` 后触发，阻塞模式处理器可以返回新的 `messages`；适合在 `system` 后插入一条合成的第一条 `user` 消息、做临时提示词实验或记录最终请求体。这个 Hook 只改写本次临时 LLM 请求，不会回写聊天历史，也不会影响中期记忆插入。
+如果需要改写 replyer 真正发给模型的消息列表，请使用 `maisaka.replyer.before_model_request`。该 Hook 会在 replyer 已经根据当前模型能力构造好 Context Items 后触发，阻塞模式处理器可以通过 `modified_kwargs["items"]` 返回新的 Items；适合在 `system` 后插入一条合成的第一条 `user` 消息、做临时提示词实验或记录最终请求体。这个 Hook 只改写本次临时 LLM 请求，不会回写聊天历史，也不会影响中期记忆插入。
 
 ::: tip 有更省事的做法
 如果只是想给回复注入参数、或在发送前改写回复内容（例如把文字转成语音），可以优先用[回复扩展](./reply-extensions.md)：不用改 Planner Hook，发送、历史记录与失败处理都由主程序负责。
@@ -396,10 +396,63 @@ Host 在插件注册阶段会对 `@HookHandler` 声明进行校验，不合法�
 
 阻塞模式的处理器可以返回字典来控制后续流程：
 
-- **`action`** `str` — `"continue"` 继续调用链，`"abort"` 终止调用链
-- **`modified_kwargs`** `dict` — 修改后的参数，将传递给后续处理器
+- **`action`** `str` — `"continue"` 放行；`"abort"` 在允许中止的检查点取消所属操作。
+- **`modified_kwargs`** `dict` — 完整替换后续处理器接收的参数；改参时保留原有字段。
+- **`custom_result`** `Any` — 附加结果；中止时使用 `{"reason": "原因"}` 提供统一原因。
 
 观察模式的处理器返回值会被忽略，不需要返回控制字典。
+
+### 主动中止并提供原因
+
+需要阻止回复或发送时，返回 `action="abort"`，将具体原因放进 `custom_result.reason`。
+`HookResult` 是 SDK 提供的可选类型提示，返回值仍是普通字典。
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+from maibot_sdk import HookHandler, HookResult
+from maibot_sdk.types import HookMode
+
+
+@HookHandler("maisaka.replyer.before_request", mode=HookMode.BLOCKING)
+async def guard_reply(self, request_type="", reply_message_id="", **kwargs) -> HookResult:
+    if request_type == "maisaka.replyer" and not reply_message_id:
+        return {
+            "action": "abort",
+            "custom_result": {"reason": "没有明确的回复目标，请选择具体消息后再回复。"},
+        }
+    return {"action": "continue"}
+```
+
+:::
+
+`reason` 为可选字符串，写明拦截条件，必要时提供调整建议。正常拦截直接返回字典即可；
+`error_policy` 决定处理器抛异常后的行为。Host 只接受 `BLOCKING` 处理器在允许中止的 Hook 中返回 `abort`。
+中止优先于同次返回中的正文改写与 `retry`，第一个有效中止之后不再调度后续处理器。
+
+### 中止范围
+
+- **回复生成前** — `maisaka.replyer.before_request` / `before_model_request` 取消本次生成，模型请求不会发出，也不会触发模型重试、切换或故障惩罚。
+- **回复生成后** — `maisaka.replyer.after_response` / `maisaka.reply.before_post_process` 取消本次回复，后续重生成、后处理和发送停止。
+- **发送前** — `send_service.after_build_message` / `before_send` 取消当前消息发送；分段回复已送达的回执保留，后续段停止发送。
+- **表情选择** — `emoji.maisaka.before_select` / `after_select` 取消本次表情发送。
+- **表达选择** — `expression.select.before_select` / `after_selection` 仅跳过表达选择，回复仍可继续，原因保留在选择结果和生成指标中。
+- **接收、命令和学习** — 停止对应消息处理、命令执行、黑话写入或表情注册，日志记录来源与原因；表达学习还会在学习状态中保留原因。
+
+Planner Hook、发送完成和桌宠状态等观察通知保持不可中止。
+可用能力以运行中 Host 的 `/plugins/runtime/hooks` 中 `allow_abort` 为准；升级 SDK 本身不会改变 Host 的能力。
+
+### Planner 能看到什么
+
+reply 和 send_emoji 共用中止反馈：`error_code="plugin_aborted"`，附带 `reason` 和
+`hook_abort: {hook_name, handler_name, reason}`。reply 还区分 `model_empty_response`（模型未生成正文）
+和 `plugin_empty_response`（模型有正文，经 Hook 修改后为空）。
+
+需要取消回复时直接返回 `abort`；需要重写回复时使用 `retry=True`、`retry_reason`，
+其中 `retry_reason` 是下一次生成的约束。原先通过清空 `response` 拦截的插件应将私有抑制原因迁移到
+`custom_result.reason`。旧表情 `abort_message` 只在 Host 调度器中兼容转换，非空的新原因优先。
+
+本次中止会提示 Planner 调整调用或停止操作；不会自动建立跨调用的消息封禁。
 
 ## Hook 分发流程
 
@@ -453,7 +506,7 @@ async def on_pre_process(self, **kwargs):
 **验收动作** — 重载插件后触发一次对应链路（如让机器人在群里收一条消息命中 `chat.receive.before_process`）：Runner 日志里出现你处理器的输出，且消息按预期被改写或中止，说明 Hook 名、模式与返回值都对。
 
 - **插件注册失败** — Host 在注册阶段校验声明：`hook` 必须是内置 Hook 清单里已有的名字，写错一个词（如 `chat.receive.before_processing`）就是注册失败，日志会指出具体是哪个组件。
-- **对不允许 abort 的 Hook 声明了 `ErrorPolicy.ABORT`** — `send_service.after_send`、`maisaka.planner.*`、`maisaka.replyer.*`、`maisaka.reply.before_post_process` 都不允许 abort，声明 `ABORT` 会注册失败；去掉该策略，或换到允许 abort 的 Hook。
+- **对不允许 abort 的 Hook 声明了 `ErrorPolicy.ABORT`** — `send_service.after_send`、`chat.command.after_execute`、`maisaka.planner.*` 都不允许 abort，声明 `ABORT` 会注册失败；去掉该策略，或换到允许 abort 的 Hook。
 - **`modified_kwargs` 改了没生效** — 只有 `mode=HookMode.BLOCKING` 下返回值才被采纳；`OBSERVE` 模式后台并发执行，返回的 `modified_kwargs` 与 `abort` 请求一律忽略。
 - **升级 SDK 2.0 后插件加载报 `RuntimeError`** — 代码里还有 `@WorkflowStep`：SDK 2.0 已移除且没有兼容映射，按迁移表改成 `@HookHandler`（`blocking=True` → `mode=HookMode.BLOCKING`，`priority=10` → `order=HookOrder.EARLY`）。
 - **执行顺序和自己预期相反** — 排序规则是「模式 → order → 来源 → 插件 ID → 处理器名」：内置插件永远排在第三方插件之前，`HookOrder.EARLY` 只保证同一模式内靠前。

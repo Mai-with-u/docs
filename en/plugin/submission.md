@@ -8,7 +8,7 @@ Once your plugin is written and verified locally, you can submit it to the offic
 
 ## What Is the Plugin Center
 
-The plugin center ([plugins.maibot.chat](https://plugins.maibot.chat/)) is powered by the official repository [Mai-with-u/plugin-repo](https://github.com/Mai-with-u/plugin-repo). Plugins themselves live as **independent public GitHub repositories**; the plugin center maintains only index files — `plugins.json` for plugin metadata and `plugin_versions.json` for each plugin's release versions and compatibility ranges — and validates every submission through automated workflows.
+The plugin center ([plugin.maibot.chat](https://plugin.maibot.chat/)) is powered by the official repository [Mai-with-u/plugin-repo](https://github.com/Mai-with-u/plugin-repo). Plugins themselves live as **independent public GitHub repositories**; the plugin center maintains only index files — `plugins.json` for plugin metadata and `plugin_versions.json` for each plugin's release versions and compatibility ranges — and validates every submission through automated workflows.
 
 Submitting is **completely open source and free** — no fees or invitations required. Once approved, your plugin appears in plugin store search results.
 
@@ -104,7 +104,7 @@ Go through this list before submitting:
 
 ## Further Reading
 
-- [Plugin Store](https://plugins.maibot.chat/) — browse all accepted plugins
+- [Plugin Store](https://plugin.maibot.chat/) — browse all accepted plugins
 - [plugin-repo repository](https://github.com/Mai-with-u/plugin-repo) — plugin index and contribution guide
 - [Manifest System](./manifest.md) — full `_manifest.json` field reference
 - [Development Guide](./) — start writing a plugin from scratch

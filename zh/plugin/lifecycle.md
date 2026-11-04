@@ -301,8 +301,7 @@ class GreeterPlugin(MaiBotPlugin):
 
     @Tool(
         "greet",
-        brief_description="向用户打招呼",
-        detailed_description="参数说明：\n- stream_id：string，必填。当前聊天流 ID。",
+        description="当对话需要寒暄、欢迎或礼貌回应时，向用户打招呼",
         parameters=[
             ToolParameterInfo(
                 name="stream_id",

@@ -8,7 +8,7 @@ title: 发布插件
 
 ## 插件中心是什么
 
-插件中心（[plugins.maibot.chat](https://plugins.maibot.chat/)）由官方仓库 [Mai-with-u/plugin-repo](https://github.com/Mai-with-u/plugin-repo) 驱动。插件本身以**独立的公开 GitHub 仓库**形式存在，插件中心只维护索引文件——`plugins.json` 描述插件元信息，`plugin_versions.json` 记录每个插件的发布版本与兼容区间——通过自动化工作流验证每一个提交。
+插件中心（[plugin.maibot.chat](https://plugin.maibot.chat/)）由官方仓库 [Mai-with-u/plugin-repo](https://github.com/Mai-with-u/plugin-repo) 驱动。插件本身以**独立的公开 GitHub 仓库**形式存在，插件中心只维护索引文件——`plugins.json` 描述插件元信息，`plugin_versions.json` 记录每个插件的发布版本与兼容区间——通过自动化工作流验证每一个提交。
 
 提交插件**完全开源免费**，不需要任何费用或邀请。审核通过后，你的插件会出现在插件市场的搜索结果中。
 
@@ -104,7 +104,7 @@ flowchart TD
 
 ## 更多信息
 
-- [插件市场](https://plugins.maibot.chat/) — 浏览所有已收录插件
+- [插件市场](https://plugin.maibot.chat/) — 浏览所有已收录插件
 - [plugin-repo 仓库](https://github.com/Mai-with-u/plugin-repo) — 插件索引与贡献指南
 - [Manifest 系统](./manifest.md) — `_manifest.json` 完整字段定义
 - [开发指南](./) — 从零开始编写插件

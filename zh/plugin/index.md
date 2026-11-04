@@ -168,8 +168,7 @@ class MyPlugin(MaiBotPlugin):
 
     @Tool(
         "greet",
-        brief_description="向用户打招呼",
-        detailed_description="参数说明：\n- stream_id：string，必填。当前聊天流 ID。",
+        description="当对话需要寒暄、欢迎或礼貌回应时，向用户打招呼",
         parameters=[
             ToolParameterInfo(
                 name="stream_id",
@@ -220,7 +219,7 @@ class MyPlugin(MaiBotPlugin):
     # 订阅全局配置热重载（仅 "bot" 和 "model" 两个值有效）
     config_reload_subscriptions: ClassVar[Iterable[str]] = ("bot", "model")
 
-    @Tool("my_tool", brief_description="示例工具")
+    @Tool("my_tool", description="示例工具")
     async def handle_tool(self, **kwargs):
         ...
 

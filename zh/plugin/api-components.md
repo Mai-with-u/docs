@@ -223,8 +223,7 @@ class CallerPlugin(MaiBotPlugin):
 
     @Tool(
         "translate_text",
-        brief_description="翻译文本",
-        detailed_description="参数说明：\n- text：string，必填。待翻译文本。",
+        description="翻译文本",
         parameters=[
             ToolParameterInfo(
                 name="text",

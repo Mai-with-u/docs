@@ -16,7 +16,7 @@ title: Action 组件（Legacy）
 - **参数声明**：`action_parameters={"key": "描述"}` → `parameters=[ToolParameterInfo(...)]`
 - **参数 Schema**：无 JSON Schema 生成 → 自动生成完整 JSON Schema
 - **激活方式**：`activation_type` + `activation_keywords` → 始终可用（由 LLM 自行判断何时调用）
-- **描述机制**：单一 `description` → `brief_description` + `detailed_description`
+- **描述机制**：使用 `description` 说明工具用途和调用约束。
 
 ### 迁移示例
 
@@ -52,7 +52,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 class MyPlugin(MaiBotPlugin):
     @Tool(
         "search",
-        brief_description="搜索互联网获取信息",
+        description="搜索互联网获取信息",
         parameters=[
             ToolParameterInfo(
                 name="query",
@@ -116,7 +116,7 @@ SDK 内部会将 `@Action` 的所有参数转换为 `@Tool` 等价的元数据�
 
 - `action_parameters` → 转换为 Tool 的参数 Schema（所有字段类型为 `string`）
 - `activation_type` / `activation_keywords` / `activation_probability` / `chat_mode` → 保存为 Tool `metadata` 中的 `legacy_action` 标记字段
-- `action_require` / `associated_types` / `action_prompt` → 合并到 Tool 的 `detailed_description` 中
+- 工具使用要求填写在 `description` 中。
 - `invoke_method` 固定为 `"plugin.invoke_action"`（兼容旧调用路径）
 
 转换后，Host 侧只维护一套 Tool 抽象，不再区分 Action 和 Tool 的调用流程。
@@ -127,5 +127,5 @@ SDK 内部会将 `@Action` 的所有参数转换为 `@Tool` 等价的元数据�
 
 - **迁移后 LLM 不再调用这个能力** — `@Tool` 没有 `activation_type` / `activation_keywords`，它始终作为候选工具交给 LLM 判断；需要关键词直接触发就改用 [`@Command`](./commands.md)。
 - **参数传不进来或类型对不上** — `@Action` 的 `action_parameters` 会全部按 `string` 转换，`@Tool` 则按 `ToolParameterInfo` 的 `param_type` 校验；数字、布尔参数要写成 `ToolParamType.INTEGER` / `ToolParamType.BOOLEAN`。
-- **工具被选中但不知道怎么用** — `@Tool` 用 `brief_description` + `detailed_description` 取代了单个 `description`，参数说明与使用要求要写进 `detailed_description`，否则 LLM 看不到。
+- **工具被选中但不知道怎么用** — 在 `description` 中说明调用条件和使用约束，在 `parameters` 中说明各参数的用法。
 - **调用返回时报序列化失败** — 处理函数要返回可序列化的字典，迁移时把 `return results` 改成 `return {"results": results}`。
