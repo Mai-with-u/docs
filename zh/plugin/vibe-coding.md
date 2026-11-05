@@ -55,6 +55,7 @@ plugins/my-plugin/
 - `host_application` 和 `sdk` 都要声明 `min_version` 与 `max_version`，上限写已测试过的最高「主.次」版本加 `.99`（如 `1.3.99`）。
 - Python 包依赖写入 `dependencies`，类型为 `python_package`。
 - 插件间依赖写入 `dependencies`，类型为 `plugin`。
+- 需要 `ffmpeg` 等系统工具时，用自带静态二进制的 Python 包（如 `imageio-ffmpeg`）声明为 `python_package`，执行时取包内绝对路径；宿主不保证这些命令存在。
 - `capabilities` 只声明确实需要的能力。
 - `i18n.default_locale` 推荐使用 `zh-CN`。
 - `webui.json` 与 `_manifest.json` 同级、由宿主独立校验，不影响 `manifest_version`；不放这个文件的插件完全不受影响。
@@ -219,6 +220,7 @@ def create_plugin() -> MyPlugin:
 - 没有修改主程序代码和根目录 `.gitignore`。
 - 没有硬编码 token、绝对路径、个人 QQ 号、群号或私有 URL。
 - 所有网络请求都有超时和异常处理。
+- 外部命令（如 `ffmpeg`）由声明的 Python 包提供，调用的是包内绝对路径，并在加载时预检。
 - 所有定时任务、后台任务、连接和文件句柄能在卸载时清理。
 - 用户可见文本是简体中文。
 - README 写明安装、启用、配置、命令和常见问题。
@@ -270,7 +272,7 @@ def create_plugin() -> MyPlugin:
 - `.gitignore` 包含 `/config.toml`，运行时配置由 Runner 根据 `config_model` 生成。
 - README 包含功能说明、安装方式、配置项、命令、权限/能力说明、故障排查。
 - 许可证与 `_manifest.json` 中的 `license` 一致。
-- 依赖声明完整，避免要求用户手动安装未声明依赖。
+- 依赖声明完整：系统工具通过声明的 Python 包提供，README 写明需要用户自备的部分，避免要求用户手动安装未声明依赖。
 - 没有提交 `.venv/`、`__pycache__/`、日志、数据库、密钥或本地配置。
 - 如果准备提交到插件仓库，阅读插件仓库贡献指南并按其要求整理元信息。
 

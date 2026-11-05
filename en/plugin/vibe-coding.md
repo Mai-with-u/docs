@@ -55,6 +55,7 @@ plugins/my-plugin/
 - `host_application` and `sdk` must both declare `min_version` and `max_version`; set the upper bound to the highest tested major.minor plus `.99` (for example `1.3.99`).
 - Python package dependencies are written in `dependencies`, with type `python_package`.
 - Inter-plugin dependencies are written in `dependencies`, type `plugin`.
+- When system tools such as `ffmpeg` are required, declare a Python package that bundles a static binary (e.g. `imageio-ffmpeg`) as `python_package` and invoke it by absolute path; the host does not guarantee these commands exist.
 - `capabilities` only declares strictly necessary capabilities.
 - `i18n.default_locale` recommends using `zh-CN`.
 - `webui.json` sits next to `_manifest.json` and is validated by the Host on its own. It does not affect `manifest_version`. Plugins without this file are completely unaffected.
@@ -219,6 +220,7 @@ Self-check each item after the AI completes:
 - No modifications made to core program or the root directory `.gitignore`.
 - No hardcoded tokens, absolute paths, personal QQ numbers, group numbers, or private URLs.
 - All network requests have timeouts and exception handling.
+- External commands (e.g. `ffmpeg`) come from declared Python packages, are invoked by absolute path, and are preflighted at load.
 - All scheduled tasks, background tasks, connections, and file handles can be cleaned up upon unloading.
 - User-visible text is in Simplified Chinese.
 - README specifies installation, enabling, configuration, commands, and FAQs.
@@ -270,7 +272,7 @@ Self-check each item after the AI completes:
 - `.gitignore` includes `/config.toml`, and the Runner generates runtime configuration from `config_model`.
 - README includes function description, installation, configuration, commands, permissions/capabilities, and troubleshooting.
 - License is consistent with `_manifest.json` in `license`.
-- Dependency declarations are complete, avoiding requiring users to manually install undeclared dependencies.
+- Dependency declarations are complete: system tools come from declared Python packages, and README documents anything users must provide themselves, avoiding undeclared manual installs.
 - No committed `.venv/`, `__pycache__/`, logs, databases, keys, or local configs.
 - If submitting to a plugin repository, read the repository's contribution guide and organize metadata accordingly.
 

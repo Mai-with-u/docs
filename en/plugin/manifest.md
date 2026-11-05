@@ -264,6 +264,64 @@ The `dependencies` array supports two types of dependencies, distinguished by th
 - `name`: Python package name; only letters, numbers, dots, underscores, and hyphens are allowed
 - `version_spec`: Version constraint expression
 
+### System Tool Dependencies
+
+`dependencies` only covers Python packages; there is no type for system packages or executables. Commands such as `ffmpeg`, `imagemagick`, and `7z` must ship with the plugin: the official Docker image does not preinstall media tools, native installs depend on the user's system, and the same plugin behaves differently on Windows or macOS.
+
+For ffmpeg, use a Python package that bundles a static binary (such as `imageio-ffmpeg` or `static-ffmpeg`) and declare it as `python_package`:
+
+::: code-group
+
+```json [JSON ~vscode-icons:file-type-json~]
+{
+  "type": "python_package",
+  "name": "imageio-ffmpeg",
+  "version_spec": ">=0.6.0"
+}
+```
+
+:::
+
+Resolve the absolute path of the bundled binary when calling it:
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+import asyncio
+
+import imageio_ffmpeg
+
+# Static binary from the installed package dependency, independent of the host PATH
+FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
+
+
+async def merge_av(v_path: str, a_path: str, output_path: str) -> None:
+    process = await asyncio.create_subprocess_exec(
+        FFMPEG,
+        "-y",
+        "-i",
+        v_path,
+        "-i",
+        a_path,
+        "-c",
+        "copy",
+        "-map",
+        "0:v:0",
+        "-map",
+        "1:a:0",
+        output_path,
+    )
+    exit_code = await process.wait()
+    if exit_code != 0:
+        raise RuntimeError(f"ffmpeg exited with code {exit_code}")
+```
+
+:::
+
+- **Preflight at load** — Resolve the executable path once in `on_load()` and confirm it runs. Failing at the merge step after downloading tens of MB of media leaves users without an actionable message.
+- **Allow a config override** — Add an optional ffmpeg path field to the config model so users can switch to their own build or troubleshoot without editing code.
+- **Document requirements in README** — When users truly must provide a system tool (for example, GPU encoding), list the install command for each platform under dependencies. A Docker-only workaround misses native and Windows users.
+
 ### Dependency Resolution Process
 
 `PluginDependencyPipeline` performs dependency analysis uniformly on the Host side:
@@ -325,3 +383,4 @@ python -m json.tool _manifest.json
 - **The plugin is blocked as version-incompatible** — a Host mismatch is an error unless major and minor match (patch-level tolerance); an SDK mismatch only logs a warning and does not block loading. Once you have tested on the new version, raise the Host `max_version` to that version's major.minor plus `.99` (for example `1.4.99`), or enable "Force plugin compatibility" for triage — it needs a MaiBot restart and skips version ranges only.
 - **A local `display.icon` does not render or is rejected** — with `type="local"`, `value` must be a relative path inside the plugin directory ending in `.png`, `.jpg`, `.jpeg`, `.webp`, or `.svg`; online URLs are never allowed, and absolute paths, `..`, and symbolic links are refused. A failed load falls back to `fallback`.
 - **The log reports a dependency or `llm_providers` conflict** — no self-dependency, duplicate declaration, or circular dependency, and each `client_type` must match its `@LLMProvider` declaration exactly; when two plugins declare the same `client_type`, both are blocked.
+- **`ffmpeg not installed or executable not found` at runtime** — the plugin is calling a system command from the host PATH. Depend on a `python_package` that bundles a static binary (for example `imageio-ffmpeg`) and preflight it in `on_load()`; the official Docker image does not preinstall media tools.
