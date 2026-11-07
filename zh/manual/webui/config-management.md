@@ -35,6 +35,7 @@ title: 在浏览器里改配置
 - **表达** 共享组写 `expression_groups`，**黑话** 共享组写 `jargon_groups`，**记忆** 共享组写 `a_memorix.shared_memory_groups`
 - 打开 `a_memorix.global_memory_sharing_enabled` 后，记忆共享组变为只读
 
+![共享组设置](/images/webui/chat-management.webp)
 
 ### 源文件编辑
 

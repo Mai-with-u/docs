@@ -48,6 +48,10 @@ From zero to chatting takes just four steps.
 
 </div>
 
+After those four steps, the WebUI home page is your console: the "麦麦" (Mai) tab on top shows runtime status and chat statistics, and the "日志" (Logs) tab shows terminal output, reasoning traces, and detailed statistics.
+
+![WebUI home page](/images/webui/home.webp)
+
 ## Lesson Two
 
 Once it's running, explore the sections below to shape MaiBot into what you want.

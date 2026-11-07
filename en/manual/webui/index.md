@@ -40,6 +40,22 @@ The persistent Token must satisfy all of: at least 10 characters, at least one u
 
 4. After saving, the old Token is invalidated immediately; log in again with the new Token and continue the wizard
 
+## First-Time Setup Wizard
+
+Once the password is set, two wizard steps remain; finish them and you can start chatting.
+
+**Basics and Persona** — fill in the platform, account, nickname, and aliases, then confirm the persona preset. Pick the platform that matches your adapter (QQ, email, and so on); for a custom adapter, choose "其他平台" (Other platform) and enter its name. The nickname is the name MaiBot uses in public; aliases are the other names people in the group might call it.
+
+![Basics and persona](/images/webui/setup-bot-profile.webp)
+
+![Basics and persona, filled in](/images/webui/setup-bot-profile-filled.webp)
+
+**Model Setup** — enter the provider's Base URL and Key, then assign a model identifier such as `deepseek-chat` to both "规划思考" (planning) and "回复发言" (replying). Once both are filled in and the Key is valid, the dropdown lists the models the provider returns; tick "启用视觉" (enable vision) if that model can see images.
+
+![Model setup](/images/webui/setup-model.webp)
+
+Click "完成配置" (Finish setup) to enter the WebUI. To run the wizard again later, look for the entry in **WebUI Settings → 常规** (General); to change settings item by item, use [Configuration Management in the Browser](./config-management.md).
+
 ## WebUI Settings
 
 You can change some basic WebUI settings in `bot_config.toml`. The listen address and port live in the `[http]` section, shared by the WebUI and file transfers:
@@ -60,6 +76,10 @@ allowed_ips = "127.0.0.1"     # IP allowlist (comma-separated)
 ```
 
 :::
+
+Changes to `[http]` take effect only after restarting MaiBot.
+
+![WebUI settings](/images/webui/settings.webp)
 
 ![About page](/images/webui/settings-about.webp)
 

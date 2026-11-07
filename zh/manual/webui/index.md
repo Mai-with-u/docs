@@ -40,6 +40,21 @@ MaiBot 启动后访问 `http://localhost:8001` 即可访问 WebUI
 
 4. 保存后旧 Token 立即失效，用新 Token 重新登录，再继续向导
 
+## 首次配置向导
+
+设置完密码后，向导剩下两步，完成后就能聊天。
+
+**基础与人格** — 填平台、账号、昵称和别名，再确认人格预设。平台按适配器选 QQ、邮件等，用自建适配器就选「其他平台」并填平台名；昵称是麦麦对外的名字，别名是群里可能出现的其他称呼。
+
+![基础与人格](/images/webui/setup-bot-profile.webp)
+
+![填写完成的基础与人格](/images/webui/setup-bot-profile-filled.webp)
+
+**模型配置** — 填 API 服务商的 Base URL 和 Key，再给「规划思考」和「回复发言」各指定一个模型标识，例如 `deepseek-chat`。两项都填好、Key 有效时，下拉框会列出服务商返回的模型；勾选「启用视觉」表示该模型能看图。
+
+![模型配置](/images/webui/setup-model.webp)
+
+点「完成配置」后进入 WebUI 主界面。之后想重新走一遍向导，在 **WebUI 设置 → 常规** 里找进入配置向导的入口；想逐项改，用[在浏览器里改配置](./config-management.md)。
 
 ## Webui设置
 
@@ -64,6 +79,7 @@ allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 
 改完 `[http]` 必须重启 MaiBot 才生效。
 
+![WebUI 设置](/images/webui/settings.webp)
 
 ![关于页](/images/webui/settings-about.webp)
 

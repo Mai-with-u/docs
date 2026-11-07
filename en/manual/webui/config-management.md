@@ -35,6 +35,8 @@ View all registered plugin commands and configure execution permissions; see [Co
 - **Expression** groups write `expression_groups`, **jargon** groups write `jargon_groups`, and **memory** groups write `a_memorix.shared_memory_groups`
 - Enabling `a_memorix.global_memory_sharing_enabled` makes memory shared groups read-only
 
+![Shared groups](/images/webui/chat-management.webp)
+
 ### Source File Editing
 
 **源文件编辑** (Source File Editing) in the ellipsis menu edits the raw `bot_config.toml`, for users familiar with TOML:
