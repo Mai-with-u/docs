@@ -96,7 +96,7 @@ uv tool upgrade maibot
 
 :::
 
-Run `maibot run` again in the original instance directory. Instances sharing a tool environment share the application version and upgrade together. Use uv to upgrade the installed package; the WebUI's Git updater serves source deployments.
+Run `maibot run` again in the original instance directory. Instances sharing a tool environment share the application version and upgrade together. You can also check for and install updates from **Settings → About** in the WebUI.
 
 To pin a stable version, specify its version number:
 

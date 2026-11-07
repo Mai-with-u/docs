@@ -20,7 +20,7 @@ Do not move only a similarly named subdirectory because layouts differ between p
 
 ## Why does the bundled NapCat connection fail?
 
-One-click packages are normally used together with a SnowLuma / NapCat client, which connects to MaiBot through the **Unified QQ Connector** (`MaiBot-SnowLuma-Adapter`). When the connection fails, follow the steps in [Adapter Connections](/en/faq/adapters) under "Why can't the Unified QQ Connector reach SnowLuma / NapCat?"; if an older package installed the archived standalone NapCat adapter, the [NapCat Adapter (archived)](../manual/adapters/napcat.md) page is historical reference only—upgrade to the Unified QQ Connector.
+One-click packages are normally used together with a SnowLuma / NapCat client, which connects to MaiBot through the **Unified QQ Connector** (`MaiBot-SnowLuma-Adapter`). When the connection fails, follow the steps in [Adapter Connections](/en/faq/adapters) under "Why can't the Unified QQ Connector reach SnowLuma / NapCat?".
 
 ## Why does SnowLuma fail after switching the package's client from NapCat?
 

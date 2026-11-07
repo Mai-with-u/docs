@@ -73,14 +73,14 @@ force_plugin_compatibility = true
 - 消息发送失败，返回 `400 Bad Request`
 
 ### 快速自查三连
-1️⃣ **检查适配器连接** — NapCat 等适配器是否正常启动并连上了 MaiBot
+1️⃣ **检查适配器连接** — 统一 QQ 连接器等适配器是否正常启动并连上了 MaiBot
 2️⃣ **验证账号凭证** — 确认适配器里登录的 QQ 号状态正常、未被封禁或掉线
 3️⃣ **查看适配器日志** — 在 WebUI 日志面板或终端里找适配器相关记录
 
 ### 解决方案
 
 **步骤一：确认适配器已连接**
-平台账号由适配器侧维护，不在 `bot_config.toml` 里填写。先确认 NapCat（或其他适配器）已启动，并按[适配器文档](/manual/adapters/)连上 MaiBot。
+平台账号由适配器侧维护，不在 `bot_config.toml` 里填写。先确认 对应的适配器已启动，并按[适配器文档](/manual/adapters/)连上 MaiBot。
 
 **步骤二：检查适配器连接状态**
 ::: code-group
@@ -124,7 +124,7 @@ docker logs maibot | grep -i adapter
 
 ### 解决方案
 **确认 MaiBot 侧的连接地址**
-适配器（如 NapCat）里的 WebSocket 地址由适配器自己的配置文件维护，不在 `bot_config.toml` 里。默认连 MaiBot 的 `8000` 端口：
+使用旧版 `maim_message` 服务的适配器时，在适配器自身的配置文件填写 MaiBot 的 WebSocket 地址，默认端口为 `8000`。统一 QQ 连接器请按[连接指南](../manual/adapters/qq-local-client.md)核对客户端地址。
 
 ::: code-group
 

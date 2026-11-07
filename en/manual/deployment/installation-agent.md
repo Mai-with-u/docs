@@ -78,7 +78,7 @@ See [Access Policy and Account Routing](/en/develop/adapters/policy) for all fie
 
 ## Verify and Troubleshoot
 
-**Verify**: after handing the prompt to an AI, its installation steps no longer mention the standalone NapCat / SnowLuma adapters; once you follow them, you can chat with Mai in the WebUI, and if QQ is connected, @-mentioning Mai in an allowed group (or messaging the official bot) gets a reply.
+**Verify**: after installation, you can chat with Mai in the WebUI, and if QQ is connected, @-mentioning Mai in an allowed group (or messaging the official bot) gets a reply.
 
 **`uv: command not found`?**
 

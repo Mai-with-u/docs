@@ -26,11 +26,16 @@ QQ 可通过统一 QQ 连接器接入 SnowLuma 或 NapCat 客户端。群聊和�
 ### QQ（本地客户端登录）
 
 - [QQ 本地客户端](./qq-local-client) — 🏛️ 官方维护。统一 QQ 连接器：登录你自己的 QQ 号，一个插件同时支持 SnowLuma / NapCat，连接后自动识别
-- [NapCat](./napcat) — 已归档。原独立 NapCat 适配器已并入统一 QQ 连接器，本页仅作历史参考
 
 ### QQ（开放平台机器人）
 
 - [QQ 官方机器人](./qq-official) — 🏛️ 官方维护。AppID + AppSecret 直连 QQ 开放平台，支持单聊与群聊的文本、@、图片、表情
+
+### Telegram 与微信
+
+**Telegram** — 在 [BotFather](https://t.me/BotFather) 创建机器人。在 WebUI 的适配器管理中打开内置 Telegram 适配器，填写 `telegram.bot_token` 并启用。需要代理时设置 `telegram.proxy_url`，例如 `http://127.0.0.1:7890`。向机器人私聊发送 `/start`，确认日志出现「Telegram 网关已就绪」。要接收群内普通消息，在 BotFather 关闭 Privacy Mode，必要时重新添加机器人。
+
+**微信 ClawBot** — 启用内置微信 ClawBot 适配器后，打开「插件扩展 → 微信账号管理」，点击「添加账号并扫码」。状态显示「已连接：微信私聊」后，从微信机器人会话发送文字或图片验证。可分别绑定和管理多个账号。登录失效时，在对应账号卡片点击「重新扫码」。语音以微信提供的转写文本接收，适用范围为 ClawBot 私聊。
 
 ### 邮件、iMessage 与语音通话
 

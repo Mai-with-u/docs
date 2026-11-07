@@ -45,5 +45,5 @@ allow_chats = ["chat-xxxx"]     # 额外放行的聊天流 ID
 
 ## 相关文档
 
-- [插件 Command 组件](../../plugin/commands.md) — 插件侧如何声明命令与操作员级别
+- [插件 Command 组件](../../develop/plugin/commands.md) — 插件侧如何声明命令与操作员级别
 - [Bot 配置](../configuration/bot-config.md) — `[plugin]` 段完整配置说明

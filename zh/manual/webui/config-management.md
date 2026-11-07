@@ -97,7 +97,6 @@ title: 在浏览器里改配置
 - [适配器管理](./adapter-management.md) — 适配器账号与访问策略
 - [记忆管理](./memory-management.md) — 长期记忆的查看与维护
 - [数据管理](./data-management.md) — 打包导出与导入整份数据
-- [MCP 配置](../configuration/mcp-config.md) — MCP 服务，入口在「插件扩展 → MCP 服务」
 - [模型配置](../configuration/model-config.md) — `model_config.toml` 完整参考
 - [模型额外参数](../configuration/model-extra-params.md) — 思考模式与推理强度参数
 - [Bot 配置](../configuration/bot-config.md) — `bot_config.toml` 完整参考

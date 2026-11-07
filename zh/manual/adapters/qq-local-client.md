@@ -11,7 +11,7 @@ title: 统一 QQ 连接器
 :::
 
 ::: warning 升级到 MaiBot 1.3.0 时
-MaiBot 1.3.0 需要配合 v1.0.0 及以上的统一 QQ 连接器使用：新版适配器已合并原 NapCat 适配器，升级后请**重新设置黑白名单**（原名单不会自动沿用）。原独立的 NapCat 适配器已停止演进并归档，见 [NapCat 适配器（已归档）](./napcat.md)。
+使用 v1.0.0 或更高版本的统一 QQ 连接器。升级后请重新设置黑白名单。
 :::
 
 适配器仓库（🏛️ 官方维护）：
@@ -120,7 +120,7 @@ ignore_self_message = false                    # 忽略机器人自身发送的�
 :::
 
 ::: tip 旧配置自动迁移
-旧版 SnowLuma / NapCat 适配器的 `[luma_client]` / `[napcat_server]` / `[connection]` 配置段，会在加载时**自动迁移到 `[client]`**（`host` → `server`、`access_token` → `token`），旧版本号自动改写，无需手动改。
+旧版配置中的 `[luma_client]` / `[napcat_server]` / `[connection]` 配置段，会在加载时**自动迁移到 `[client]`**（`host` → `server`、`access_token` → `token`），旧版本号自动改写，无需手动改。
 :::
 
 ### client_type 怎么选

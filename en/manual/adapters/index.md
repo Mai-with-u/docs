@@ -26,11 +26,16 @@ The Unified QQ Connector supports SnowLuma and NapCat clients. Group and private
 ### QQ (Local Client Login)
 
 - [QQ Local Client](./qq-local-client) — 🏛️ officially maintained. The Unified QQ Connector: log in your own QQ account; one plugin supports SnowLuma / NapCat and detects the peer automatically
-- [NapCat](./napcat) — archived. The former standalone NapCat adapter has been merged into the Unified QQ Connector; this page is kept for historical reference only
 
 ### QQ (Open Platform Bot)
 
 - [QQ Official Bot](./qq-official) — 🏛️ officially maintained. Connect directly to the QQ Open Platform with AppID + AppSecret; supports private and group chat text, @, images, and emoji
+
+### Telegram and WeChat
+
+**Telegram** — Create a bot with [BotFather](https://t.me/BotFather). Open the built-in Telegram adapter in WebUI adapter management, enter `telegram.bot_token`, and enable it. If you need a proxy, set `telegram.proxy_url`, for example to `http://127.0.0.1:7890`. Send `/start` in a direct message and check the log for the Telegram gateway ready message. To receive ordinary group messages, turn off Privacy Mode in BotFather and add the bot to the group again if needed.
+
+**WeChat ClawBot** — Enable the built-in WeChat ClawBot adapter, then open **Plugin Extensions → WeChat Account Management** and select **Add account and scan QR code**. When the status shows that WeChat direct messaging is connected, send text or an image from the WeChat bot conversation. You can manage multiple accounts separately. If a login expires, scan again from the account's card. The adapter handles ClawBot direct messages and receives voice transcripts supplied by WeChat.
 
 ### Email, iMessage & Voice Calls
 

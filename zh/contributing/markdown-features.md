@@ -321,7 +321,7 @@ Mermaid 流程图（` ```mermaid `）用于渲染图表，` ```mmd ` 用于展�
 
 **效果预览：**
 
-<IntegrationRoutes only="adapter,plugin,model" />
+<IntegrationRoutes only="adapter,plugin" />
 
 ### xgplayer 视频播放器
 

@@ -60,7 +60,7 @@ Host 按 Platform IO 的 `platform`、`account_id`、`scope` 路由找到适配�
 
 ## SDK 调用
 
-调用方在 `_manifest.json` 的 `capabilities` 数组中加入 `chat.get_avatar`，保留插件原有的其他能力声明。字段说明见 [Manifest](/plugin/manifest)。
+调用方在 `_manifest.json` 的 `capabilities` 数组中加入 `chat.get_avatar`，保留插件原有的其他能力声明。字段说明见 [Manifest](/develop/plugin/manifest)。
 
 ::: code-group
 
@@ -86,7 +86,7 @@ if avatar["status"] == "available":
 - **`expires_at`** — Host 缓存到期的 Unix 时间戳，单位为秒。
 :::
 
-SDK 与 WebUI 共用 Host 头像服务、图片缓存和过期规则。`force_refresh=True` 跳过现有缓存并重新查询、下载；同一目标已有刷新任务时复用该任务。查询、协议校验或下载失败时，异常通过能力调用暴露。调用参考见 [SDK 头像查询](/plugin/api-reference#chat-avatar)。
+SDK 与 WebUI 共用 Host 头像服务、图片缓存和过期规则。`force_refresh=True` 跳过现有缓存并重新查询、下载；同一目标已有刷新任务时复用该任务。查询、协议校验或下载失败时，异常通过能力调用暴露。调用参考见 [SDK 头像查询](/develop/plugin/api-reference#chat-avatar)。
 
 ## WebUI 图片入口
 
@@ -101,7 +101,7 @@ SDK 与 WebUI 共用 Host 头像服务、图片缓存和过期规则。`force_re
 - **`502`** — 路由、适配器调用、协议校验或下载失败，`detail` 包含错误信息。
 :::
 
-`platform=webui` 读取本地上传头像，未上传时返回 404 和文字错误信息。本地头像是持久资源，不应用远程缓存过期规则，响应使用 `Cache-Control: private, no-cache`；上传接口见 [WebUI 头像 API](/develop/webui-api/data-and-memory-api#avatar-api)。
+`platform=webui` 读取本地上传头像，未上传时返回 404 和文字错误信息。本地头像是持久资源，不应用远程缓存过期规则，响应使用 `Cache-Control: private, no-cache`。
 
 ## 缓存与刷新
 

@@ -14,7 +14,7 @@ MaiBot supports two kinds of "adapter"—pick the one that fits your scenario:
 
 **Standalone external adapter process** — deployed and upgraded on its own, so a process crash leaves the MaiBot core untouched; it can be written in any language (as long as it speaks WebSocket + that JSON). Platform adapters for QQ, Telegram, email, and the like all take this route. Best for: a production integration with one platform.
 
-**Plugin gateway ([`@MessageGateway`](/en/plugin/message-gateway))** — you implement send and receive inside a MaiBot plugin, the plugin runtime manages its lifecycle, and it starts and stops together with Mai; Python only. Best for: lightweight platforms, internal systems, or a plugin you already have that should also handle messages.
+**Plugin gateway ([`@MessageGateway`](/en/develop/plugin/message-gateway))** — you implement send and receive inside a MaiBot plugin, the plugin runtime manages its lifecycle, and it starts and stops together with Mai; Python only. Best for: lightweight platforms, internal systems, or a plugin you already have that should also handle messages.
 
 Both routes end up in the same routing and policy layer, and they can coexist; you can also run a platform on an external adapter first and switch it to a plugin gateway later.
 

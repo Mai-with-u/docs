@@ -1059,10 +1059,10 @@ html[data-theme-style='millennium'] .hs .hs-btn:hover {
 }
 
 /* ==========================================================================
- * 内容页里的自定义卡片（手册首页的步骤卡片 / 导航卡片、1.0.0 专题的发布卡片）
+ * 内容页里的自定义卡片（手册首页的步骤卡片 / 导航卡片）
  * 都是嵌在屏幕里的凸起塑料模块
  * ======================================================================== */
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card, .release-lead div, .release-grid section) {
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) {
   background-color: var(--mil-panel);
   background-image: var(--mil-speck);
   background-size: 5px 5px;
@@ -1079,13 +1079,13 @@ html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card):hover {
   transform: translateY(-2px);
 }
 
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card, .release-grid section) h3 {
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) h3 {
   border-left: 0;
   color: var(--mil-ink);
   padding-left: 0;
 }
 
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card, .release-lead div, .release-grid section) :is(p, span, strong) {
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) :is(p, span, strong) {
   color: var(--mil-ink);
 }
 
@@ -1114,7 +1114,7 @@ html[data-theme-style='millennium'] .vp-doc .step-no {
   width: 30px;
 }
 
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card, .release-grid section) :not(pre) > code {
+html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) :not(pre) > code {
   background: var(--mil-screen);
 }
 

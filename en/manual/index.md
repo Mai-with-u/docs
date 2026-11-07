@@ -96,8 +96,8 @@ Once it's running, explore the sections below to shape MaiBot into what you want
 
 Want to write plugins or adapters for MaiBot, or integrate it with your own program?
 
-- [Integration Overview](/en/develop/) — six integration routes, organized by audience and prerequisites
-- [Plugin Development Guide](/en/plugin/) — write plugins to extend MaiBot's behavior
+- [Development Overview](/en/develop/) — platform adapters and plugin development
+- [Plugin Development Guide](/en/develop/plugin/) — write plugins to extend MaiBot's behavior
 
 ## Need Help?
 

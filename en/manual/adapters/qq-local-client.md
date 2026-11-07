@@ -11,7 +11,7 @@ The Unified QQ Connector is continuously maintained by the MaiBot official team;
 :::
 
 ::: warning Upgrading to MaiBot 1.3.0
-MaiBot 1.3.0 requires the Unified QQ Connector v1.0.0 or later: the new adapter has merged the former NapCat adapter, and after upgrading you must **re-configure the allow/deny lists** (existing lists are not carried over automatically). The standalone NapCat adapter is no longer evolving and has been archived—see [NapCat Adapter (archived)](./napcat.md).
+Use Unified QQ Connector v1.0.0 or later. Reconfigure your allow/deny lists after upgrading.
 :::
 
 Adapter repository (🏛️ officially maintained):
@@ -120,7 +120,7 @@ ignore_self_message = false                    # Ignore messages sent by the bot
 :::
 
 ::: tip Legacy config is migrated automatically
-Legacy `[luma_client]` / `[napcat_server]` / `[connection]` sections from the old SnowLuma / NapCat adapters are **migrated to `[client]`** on load (`host` → `server`, `access_token` → `token`), and the legacy config version is rewritten automatically—no manual edits needed.
+Legacy `[luma_client]` / `[napcat_server]` / `[connection]` configuration sections are **migrated to `[client]`** on load (`host` → `server`, `access_token` → `token`), and the legacy config version is rewritten automatically—no manual edits needed.
 :::
 
 ### How to pick client_type

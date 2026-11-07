@@ -34,18 +34,13 @@ OpenIDs on the QQ Open Platform are not interchangeable with real QQ numbers (th
 
 To use group chat features, the **group owner** must open the QQ group settings, select the bot, and set "message scope accessible to the bot" to "receive all messages in the group". Without this, the bot only receives messages within the platform-allowed scope and cannot fully participate in group chats. This setting can only be changed by the group owner and must be configured separately for every group that uses the bot.
 
-## Install the adapter
+## Enable the built-in adapter
 
-1. Install "QQ Official Bot Adapter" from the plugin store in the MaiBot WebUI, or download the zip from the GitHub repository and extract it into `plugins/`;
-2. Enable the adapter in the plugin list.
-
-::: info Dependencies are handled automatically
-The adapter depends on `aiohttp` (>= 3.14.3), which is declared in the plugin manifest and handled by MaiBot automatically—no manual installation needed.
-:::
+Open **QQ Official Bot Adapter** in WebUI adapter management, enter its connection settings, and enable it. Upgrades migrate the old configuration and retain existing data. The old installation is backed up under `plugins/.builtin-backups/`. The adapter is updated with MaiBot.
 
 ## Configure the adapter connection
 
-Config file: `plugins/qq_official_adapter/config.toml`. You can also fill it in the WebUI under "QQ Official Bot Adapter → QQ Open Platform". Here is a **complete, copy-ready** config template—edit the values per the comments:
+Config file: `config/builtin_plugins/qq_official_adapter/config.toml`. You can also fill it in the WebUI under "QQ Official Bot Adapter → QQ Open Platform". Here is a **complete, copy-ready** config template—edit the values per the comments:
 
 ::: code-group
 
@@ -92,7 +87,7 @@ The adapter reports its identity to MaiBot automatically once connected: it uses
 
 ## Unified ID binding commands
 
-OpenIDs on the QQ Open Platform are not interchangeable with real QQ numbers. To attribute messages to real QQ numbers (unifying data with NapCat-family adapters), send binding commands in a chat:
+OpenIDs on the QQ Open Platform are not interchangeable with real QQ numbers. To attribute messages to real QQ numbers (sharing data with the Unified QQ Connector), send binding commands in a chat:
 
 - **`/assign_group_id <group number>`** — binds the current group's `group_openid` to the given group number; available in group chats;
 - **`/assign_id <QQ number>`** — binds the sender's OpenID to the given QQ number;

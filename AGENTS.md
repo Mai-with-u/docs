@@ -42,7 +42,7 @@ A ，不是 非A 这种句式
 - **`zh/`** — 中文文档（权威内容源）
   - `manual/` 用户手册：deployment、adapters、configuration、plugins、webui
   - `develop/` 接入文档（中文，技术名词用英文）：`adapters/`（适配器五篇）、plugin、`webui-api/`、statistics-io；模型与 MCP 的配置说明归 `manual/configuration/`
-  - `plugin/` 插件开发文档（权威统一入口）
+  - `develop/plugin/` 插件开发文档（权威统一入口）
   - `contributing/` 文档站协作规范（style-guide、markdown-features）
   - `changelog/` 更新日志、`faq/` 常见问题、`about/` 项目元信息与法律
   - `examples/` 被 `<<<` 导入的真实示例代码（不是页面，不要在里面放 `.md`）

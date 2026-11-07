@@ -228,7 +228,7 @@ MaiBot 找不到对应消息时只记一条调试日志，不影响主流程。
 
 旧消息中的 `additional_config.self_id`、`platform_io_account_id` 等归属别名，以及 `route_metadata` 中的旧归属格式暂时兼容，使用时打印 WARNING，提示下个版本移除。新适配器应直接填写正式字段；提供顶层 `account_id` 后，旧字段不再参与选择，也不会在正式字段为空时兜底。
 
-旧 WebSocket / `maim_message` 接口仍走其兼容消息格式，不应把该格式当作新插件网关的开发规范。完整字典示例与迁移规则见[消息网关](../../plugin/message-gateway.md#消息归属)。
+旧 WebSocket / `maim_message` 接口仍走其兼容消息格式，不应把该格式当作新插件网关的开发规范。完整字典示例与迁移规则见[消息网关](../../develop/plugin/message-gateway.md#消息归属)。
 
 ::: warning 不要占用 `webui` 这个平台名
 `webui` 由 Platform IO 隐式注册为内置平台，`bot_console`、`maisaka_cli` 也是保留名。适配器用一个自己的名字，例如 `telegram`。

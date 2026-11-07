@@ -20,7 +20,7 @@ title: 一键包
 
 ## 一键包中的 NapCat 连接失败怎么办？
 
-一键包通常配合 SnowLuma / NapCat 客户端使用，客户端通过**统一 QQ 连接器**（`MaiBot-SnowLuma-Adapter`）接入 MaiBot。连接失败时，按[适配器连接](./adapters.md)中「统一 QQ 连接器为什么连不上 SnowLuma / NapCat」的步骤排查即可；如果旧版一键包装的是已归档的独立 NapCat 适配器，[NapCat 适配器（已归档）](../manual/adapters/napcat.md)仅作历史参考，请升级到统一 QQ 连接器。
+一键包通常配合 SnowLuma / NapCat 客户端使用，客户端通过**统一 QQ 连接器**（`MaiBot-SnowLuma-Adapter`）接入 MaiBot。连接失败时，按[适配器连接](./adapters.md)中「统一 QQ 连接器为什么连不上 SnowLuma / NapCat」的步骤排查即可。
 
 ## 把一键包客户端从 NapCat 换成 SnowLuma 后连接失败怎么办？
 

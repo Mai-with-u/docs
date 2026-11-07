@@ -20,7 +20,7 @@ You can also join a QQ group and get it from the group files — see [Community 
 
 If you'd rather not babysit every step, hand the [installation prompt](./installation-agent) to an AI assistant and let it follow the source deployment flow for you.
 
-If you do not want to maintain a Git checkout, or want one-click updates from the WebUI, use [package install and updates](./update.md).
+If you do not want to maintain a Git checkout, or want one-click updates from the WebUI, use [Install with uv](./uv-tool.md).
 
 ::: tip
 If you run into issues, check the [FAQ](/en/faq/) first — most common situations are covered there.

@@ -33,7 +33,7 @@ platforms = []            # 其他平台的备用账号，格式 platform:账号
 :::
 
 ::: warning qq_account 要和适配器登录的 QQ 一致
-用 NapCat 这类适配器接入时，`qq_account` 必须与适配器登录的 QQ 号完全一致，否则麦麦会把自己的消息当成别人的。适配器正常上报身份时这两个字段只是备用值，但保持一致永远是对的。详见 [统一 QQ 连接器](../adapters/qq-local-client.md)。
+使用统一 QQ 连接器时，`qq_account` 必须与适配器登录的 QQ 号完全一致，否则麦麦会把自己的消息当成别人的。适配器正常上报身份时这两个字段只是备用值，但保持一致永远是对的。详见 [统一 QQ 连接器](../adapters/qq-local-client.md)。
 :::
 
 ### 捏人设
@@ -75,27 +75,17 @@ mentioned_bot_reply = false  # 消息提到麦麦名字时是否更容易回复
 
 :::
 
-想让麦麦按群、按时段分别调整频率，用 `talk_value_rules`（需先 `enable_talk_value_rules = true`）：
+想让麦麦按群、按时段分别调整频率，用 `talk_value_rules`。例如，将 QQ 群 123456 在夜间的发言频率调到 0.8：
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[chat.reply_timing]
-enable_talk_value_rules = true
-
 [[chat.reply_timing.talk_value_rules]]
-platform = ""            # 留空 = 不限平台，"*" = 任意平台
-item_id = ""             # 留空 = 不限聊天，"*" = 任意聊天
+platform = "qq"
+item_id = "123456"
 rule_type = "group"
-time = "00:00-08:59"     # 生效时段；留空 = 兜底，"*" = 全天，支持跨夜 "23:00-02:00"
-value = 0.8              # 该时段的发言频率
-
-[[chat.reply_timing.talk_value_rules]]
-platform = ""
-item_id = ""
-rule_type = "group"
-time = "09:00-18:59"
-value = 1.0
+time = "23:00-02:00"
+value = 0.8
 ```
 
 :::
@@ -232,38 +222,24 @@ no_action_backoff_base_seconds = 15        # 连续决定不回复后，下次�
 no_action_backoff_cap_seconds = 300        # [进阶] 退避等待的上限（秒）
 no_action_backoff_start_count = 2          # [进阶] 连续几次不回复后开始放慢检查
 no_action_backoff_bypass_pending_count = 6 # [进阶] 等待期间新消息达到几条就立刻重新处理；0 = 不按条数打断
-enable_talk_value_rules = false            # 开启后可按聊天/时段单独调频率，见下
 ```
 
 :::
 
-`talk_value_rules` 按平台、聊天流、时段设置发言频率，默认带两条全局规则：
+`talk_value_rules` 为具体聊天设置发言频率。群聊未命中规则时使用总体发言频率。
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [[chat.reply_timing.talk_value_rules]]
-platform = ""         # 留空 = 不限平台；"*" = 任意平台
-item_id = ""          # 群号或用户 ID；留空 = 不限聊天，"*" = 任意聊天
-rule_type = "group"   # "group" / "private"
-time = "00:00-08:59"  # 留空 = 兜底，"*" = 全天，支持跨夜 "23:00-02:00"
-value = 0.8           # 该时段发言频率：0 更安静，1 按正常频率
-
-[[chat.reply_timing.talk_value_rules]]
-platform = ""
-item_id = ""
-rule_type = "group"
-time = "09:00-18:59"
-value = 1.0
+platform = "qq"  # 平台
+item_id = "123456"  # 群号或用户 ID
+rule_type = "group"  # 群聊填 group，私聊填 private
+time = "23:00-02:00"  # 时段，支持跨夜；"*" 表示全天
+value = 0.8  # 发言频率
 ```
 
 :::
-
-**要点：**
-
-- **具体群** — `platform = "qq"`、`item_id = "123456"`，只对这一个群生效
-- **全局兜底** — `platform` 与 `item_id` 都留空，未命中任何具体规则时使用
-- **全局通配** — 两个字段都填 `"*"`，匹配任意平台和聊天；在 WebUI 编辑时可直接选「全局通配」或「默认兜底」模式
 
 **消息防抖** — `message_debounce_mode` 管群聊、`private_message_debounce_mode` 管私聊，两档互不影响。每种都把一批消息先收齐再送进 Planner，四档规则固定：
 
@@ -722,7 +698,7 @@ skin_id = "builtin"          # 当前皮肤；builtin 为内置麦麦，可导�
 
 :::
 
-**`chat_tools_enabled`** — 只作用于桌宠和网页聊天室共用的 `internal / owner` 会话，普通群聊不会获得这两个工具，也不影响发送图片。皮肤、动画与插件扩展按钮的完整说明见[桌宠](../desktop-pet.md)。
+**`chat_tools_enabled`** — 只作用于桌宠和网页聊天室共用的 `internal / owner` 会话，普通群聊不会获得这两个工具，也不影响发送图片。
 
 #### 电脑
 
@@ -746,7 +722,7 @@ screenshot_max_edge = 1600 # [进阶] 截图最长边像素；0 表示原始分�
 
 #### MCP
 
-`[mcp]` 段只有总开关，服务器列表、Sampling、Roots 等详见 **[MCP 配置详解](./mcp-config.md)**：
+`[mcp]` 段设置 MCP 总开关。
 
 ::: code-group
 
@@ -758,7 +734,7 @@ enable = true  # 是否启用 MCP 工具接入能力
 :::
 
 ::: tip MCP 服务器连接会自动重建
-改 `[mcp]` 段保存后，MaiBot 会用新配置重建 MCP 连接，不需要重启；重建结果与启动时一样打印在日志里。少数不在重载判定范围内的字段（如 `elicitation` 整节）仍需重启才生效，详见 [MCP 配置](./mcp-config.md)。
+改 `[mcp]` 段保存后，MaiBot 会用新配置重建 MCP 连接，不需要重启；重建结果与启动时一样打印在日志里。少数不在重载判定范围内的字段（如 `elicitation` 整节）仍需重启才生效。
 :::
 
 #### Agent 连接
@@ -958,6 +934,5 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 - 配置模型：[模型配置](./model-config.md)
 - 模型高级参数（思考模式等）：[模型额外参数](./model-extra-params.md)
 - 长期记忆详解：[A_Memorix 配置](./amemorix-config.md)
-- 接入外部工具：[MCP 配置](./mcp-config.md)
 - 连接 QQ：[统一 QQ 连接器](../adapters/qq-local-client.md)
 - 在浏览器里改配置：[WebUI 配置管理](../webui/config-management.md)

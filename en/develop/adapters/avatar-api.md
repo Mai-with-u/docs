@@ -60,7 +60,7 @@ The `url` must be an HTTP(S) image address that the Host can read directly, with
 
 ## SDK Calls
 
-Add `chat.get_avatar` to the calling plugin's `capabilities` array in `_manifest.json`, keeping its other capability declarations. See [Manifest](/en/plugin/manifest) for the field definition.
+Add `chat.get_avatar` to the calling plugin's `capabilities` array in `_manifest.json`, keeping its other capability declarations. See [Manifest](/en/develop/plugin/manifest) for the field definition.
 
 ::: code-group
 
@@ -86,7 +86,7 @@ if avatar["status"] == "available":
 - **`expires_at`** — A Unix timestamp in seconds indicating when the Host cache expires.
 :::
 
-The SDK and WebUI share the Host avatar service, image cache, and expiry rules. `force_refresh=True` skips the existing cache and queries and downloads again; an ongoing refresh for the same target is reused. Query, protocol validation, and download failures surface through the capability call. See [SDK Avatar Queries](/en/plugin/api-reference#chat-avatar) for the calling reference.
+The SDK and WebUI share the Host avatar service, image cache, and expiry rules. `force_refresh=True` skips the existing cache and queries and downloads again; an ongoing refresh for the same target is reused. Query, protocol validation, and download failures surface through the capability call. See [SDK Avatar Queries](/en/develop/plugin/api-reference#chat-avatar) for the calling reference.
 
 ## WebUI Image Endpoint
 
@@ -101,7 +101,7 @@ For remote avatars, the shared service queries the routed adapter, downloads and
 - **`502`** — Routing, adapter invocation, protocol validation, or download failed. `detail` contains the error information.
 :::
 
-`platform=webui` reads a locally uploaded avatar, returning 404 with a text error detail when none exists. Local avatars are persistent resources, are exempt from remote cache expiry, and use `Cache-Control: private, no-cache`. See the [WebUI Avatar API](/en/develop/webui-api/data-and-memory-api#avatar-api) for the upload endpoint.
+`platform=webui` reads a locally uploaded avatar, returning 404 with a text error detail when none exists. Local avatars are persistent resources, are exempt from remote cache expiry, and use `Cache-Control: private, no-cache`.
 
 ## Caching and Refresh
 

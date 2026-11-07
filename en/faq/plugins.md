@@ -47,10 +47,10 @@ Plugins can declare WebUI pages through a `webui.json` in their own directory. I
 - **Look for a registration failure in the log** — when the declaration is malformed, that plugin's **entire registration fails for this run**. The log prints "plugin WebUI declaration invalid" with the reason (out-of-range fields, component attributes that do not apply, a danger button missing its confirmation text, and so on)
 - **Look for "referenced unregistered static API" in the log** — a page binding whose API short name or `version` does not match what `@API` registered, or one that binds a dynamic API, never attaches
 - **Confirm the plugin was reloaded** — changes to `webui.json` require a **plugin reload** to take effect. Plugins without this file are completely unaffected
-- **Confirm you are looking in the right place** — `sidebar` pages appear in the workspace sidebar under "Plugin Extensions", while `workspace` pages live in the plugin's own top workspace; do not only scan one side
+- **Check the sidebar** for the plugin page.
 - **Wait up to 30 seconds** — the frontend polls for declarations. Entries come down together with plugin uninstall or disable, and the browser reflects that within 30 seconds at most; refresh manually for it to apply immediately
 
-For the field reference, component types, and troubleshooting, see [WebUI Pages](/en/plugin/webui-pages).
+For the field reference, component types, and troubleshooting, see [WebUI Pages](/en/develop/plugin/webui-pages).
 
 ## What should I do when a plugin download fails?
 

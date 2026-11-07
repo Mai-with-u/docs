@@ -150,7 +150,7 @@ Lists every platform account MaiBot has seen, with fields such as `online`, `las
 
 ## Change the Policy with the WebUI or the API
 
-For day-to-day changes, **Adapter Settings** in the WebUI is the least trouble; for the entry point, see [Adapter Management](/en/manual/webui/adapter-management). When you need to drive it from an automation script, use these endpoints (they all require a login Cookie, see [Programmatic Access](../webui-api/)):
+For day-to-day changes, **Adapter Settings** in the WebUI is the least trouble; for the entry point, see [Adapter Management](/en/manual/webui/adapter-management). When you need to drive it from an automation script, use these endpoints (they all require a login Cookie):
 
 ::: fields
 - **`GET /api/chat/adapters/policy/defaults`** — read the fallback rules.

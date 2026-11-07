@@ -6,7 +6,7 @@ title: Linux 部署
 
 在 Linux 和 macOS 上，可以通过 [uv 安装](./uv-tool)直接安装主程序和 WebUI。下面介绍适合修改代码的源码部署，也可以选择 [Docker 部署](./docker)，或把[安装提示词](./installation-agent)交给 AI 助手。
 
-不想维护 Git 仓库、或者想从 WebUI 一键更新主程序，用[程序包安装与更新](./update.md)。
+不想维护 Git 仓库、或者想从 WebUI 一键更新主程序，用[uv 安装](./uv-tool.md)。
 
 ## 准备环境
 

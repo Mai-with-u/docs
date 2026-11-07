@@ -17,7 +17,7 @@ Content sections:
 
 - **`manual/`** — User manual: deployment, adapters, configuration, plugin installation, WebUI.
 - **`develop/`** — Integration docs: adapters, plugin integration, programmatic access (WebUI API), data statistics; model and MCP configuration guidance lives under `manual/configuration/`.
-- **`plugin/`** — Plugin development docs (the authoritative single entry point).
+- **`develop/plugin/`** — Plugin development docs (the authoritative single entry point).
 - **`contributing/`** — The docs-site collaboration conventions, which is this page.
 - **`faq/` `changelog/` `about/`** — FAQ, changelog, project metadata.
 

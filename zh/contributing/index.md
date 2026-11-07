@@ -17,7 +17,7 @@ title: 参与文档站
 
 - **`manual/`** — 用户手册：部署、适配器、配置、插件安装、WebUI。
 - **`develop/`** — 接入文档：适配器、插件接入、程序化对接（WebUI API）、数据统计；模型与 MCP 的配置说明归 `manual/configuration/`。
-- **`plugin/`** — 插件开发文档（权威统一入口）。
+- **`develop/plugin/`** — 插件开发文档（权威统一入口）。
 - **`contributing/`** — 本页所在的文档站协作规范。
 - **`faq/` `changelog/` `about/`** — 常见问题、更新日志、项目元信息。
 

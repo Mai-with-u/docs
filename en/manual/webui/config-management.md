@@ -95,7 +95,6 @@ Use a model's lightning icon to send a test request and check availability. Resp
 - [Adapter Management](./adapter-management.md) — adapter accounts and access policies
 - [Memory Management](./memory-management.md) — viewing and maintaining long-term memory
 - [Data Management](./data-management.md) — exporting and importing the whole data set
-- [MCP Config](../configuration/mcp-config.md) — MCP services, entered via "Plugin Extensions → MCP Services"
 - [Model Config](../configuration/model-config.md) — full `model_config.toml` reference
 - [Model Extra Parameters](../configuration/model-extra-params.md) — thinking mode and reasoning effort parameters
 - [Bot Config](../configuration/bot-config.md) — full `bot_config.toml` reference

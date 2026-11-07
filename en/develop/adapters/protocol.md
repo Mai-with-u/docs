@@ -228,7 +228,7 @@ Plugin gateways declare routes with `ctx.gateway.update_state(ready=True, platfo
 
 Legacy aliases such as `additional_config.self_id` and `platform_io_account_id`, and legacy ownership in `route_metadata`, remain temporarily supported. Their use logs a WARNING that support will be removed in the next version. New adapters should use formal fields directly. When top-level `account_id` is present, legacy fields do not participate in selection or provide a fallback for empty formal fields.
 
-Legacy WebSocket / `maim_message` interfaces retain their compatibility format; it is not the development contract for new plugin gateways. See [Message Gateway](../../plugin/message-gateway.md#message-ownership) for complete dictionary examples and migration rules.
+Legacy WebSocket / `maim_message` interfaces retain their compatibility format; it is not the development contract for new plugin gateways. See [Message Gateway](../../develop/plugin/message-gateway.md#message-ownership) for complete dictionary examples and migration rules.
 
 ::: warning Don't take the `webui` platform name
 Platform IO implicitly registers `webui` as a built-in platform, and `bot_console` and `maisaka_cli` are reserved names as well. Give your adapter a name of its own, such as `telegram`.

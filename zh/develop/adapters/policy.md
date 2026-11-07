@@ -150,7 +150,7 @@ allow_ids = ["-1001234567890"]
 
 ## 用 WebUI 或接口改策略
 
-日常改动用 WebUI 的**适配器设置**最省事，入口见[适配器管理](/manual/webui/adapter-management)。要写进自动化脚本时，用这几个接口（都需要登录 Cookie，见[程序化对接](../webui-api/)）：
+日常改动用 WebUI 的**适配器设置**最省事，入口见[适配器管理](/manual/webui/adapter-management)。要写进自动化脚本时，用这几个接口（都需要登录 Cookie）：
 
 ::: fields
 - **`GET /api/chat/adapters/policy/defaults`** — 读兜底规则。

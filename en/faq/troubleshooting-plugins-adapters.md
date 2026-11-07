@@ -73,14 +73,14 @@ When enabled, the version range check is skipped and only one warning is logged 
 - Message sending fails, returns `400 Bad Request`
 
 ### Quick Self-Check Trio
-1️⃣ **Check the adapter connection** — Is NapCat or another adapter started and connected to MaiBot
+1️⃣ **Check the adapter connection** — Is the relevant adapter started and connected to MaiBot?
 2️⃣ **Verify account credentials** — Confirm the QQ number logged into the adapter is healthy and not banned or offline
 3️⃣ **Check adapter logs** — Look for adapter-related records in the WebUI log panel or terminal
 
 ### Solutions
 
 **Step 1: Confirm the Adapter Is Connected**
-Platform accounts are maintained on the adapter side and are not filled into `bot_config.toml`. First confirm that NapCat (or another adapter) is started and connected to MaiBot according to the [Adapters](/en/manual/adapters/) documentation.
+Platform accounts are maintained on the adapter side and are not filled into `bot_config.toml`. First confirm that the relevant adapter is started and connected to MaiBot according to the [Adapters](/en/manual/adapters/) documentation.
 
 **Step 2: Check Adapter Connection Status**
 ::: code-group
@@ -124,7 +124,7 @@ Message sending and receiving is unstable, sometimes works and sometimes doesn't
 
 ### Solutions
 **Confirm the Connection Address on the MaiBot Side**
-The WebSocket address in the adapter (e.g. NapCat) is maintained by the adapter's own configuration file, not in `bot_config.toml`. It connects to MaiBot's `8000` port by default:
+For adapters using the legacy `maim_message` service, set the MaiBot WebSocket address in the adapter configuration. The default port is `8000`. For the Unified QQ Connector, check the client address against its [connection guide](../manual/adapters/qq-local-client.md).
 
 ::: code-group
 

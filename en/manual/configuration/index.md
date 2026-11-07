@@ -22,7 +22,6 @@ Both files are generated automatically **after the first launch of MaiBot**. If 
 Beyond the two main files, these topics have their own pages:
 
 - **[Model Extra Parameters](/en/manual/configuration/model-extra-params)** — thinking modes, provider parameter templates, custom request headers, and other advanced model settings
-- **[MCP Configuration](/en/manual/configuration/mcp-config)** — let MaiBot call external tool services (weather, files, APIs)
 - **[A_Memorix Configuration](/en/manual/configuration/amemorix-config)** — storage, retrieval, vectorization, and tuning for the memory engine
 
 ## Does It Take Effect Immediately

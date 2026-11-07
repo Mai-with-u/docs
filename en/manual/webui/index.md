@@ -6,6 +6,12 @@ title: Login & Settings
 
 After starting MaiBot, open `http://localhost:8001` to access the WebUI.
 
+## Manage multiple bots
+
+Use host management in the WebUI to create, switch, start, stop, rename, clone, or archive bots. Check which bot is selected before editing its chat, plugin, or persona settings. Shared settings hold model providers, model definitions, and web services. Each bot selects its models in the task assignment panel.
+
+Ask a question in Mai Observation to open a dedicated help conversation. Reopen a conversation from its history to continue it. To change plugin settings, authorize writes for the current turn and review the changes shown in the conversation.
+
 ## Get the Login Password
 
 When starting MaiBot for the first time, the console prints a temporary Token:
@@ -64,7 +70,7 @@ allowed_ips = "127.0.0.1"     # IP allowlist (comma-separated)
 - **Git deployment** — syncs code and dependencies, then restarts; a dependency sync failure rolls back automatically
 - **Package install** — updates the program from PyPI or the selected mirror; configuration, data, and plugins in the instance directory are untouched
 
-See [Package Install and Updates](../deployment/update.md) for details and troubleshooting.
+See [Install with uv](../deployment/uv-tool.md) for details and troubleshooting.
 
 ## Forgot Your Password?
 
@@ -101,6 +107,5 @@ If you can no longer sign in:
 - [Adapter Management](./adapter-management.md) - Account identities and allow/deny lists
 - [Command Management](./command-management.md) - Plugin commands and execution permissions
 - [Memory Management](./memory-management.md) - View and manage memories
-- [MCP Configuration](../configuration/mcp-config.md) - external tool services, entered via "Plugin Extensions → MCP Services"
 - [Plugin Management](/en/manual/plugins/) - Install and manage plugins
 - [Data Management](./data-management.md) (`/data-transfer`) - sidebar "高级工具 (Advanced Tools) → 数据管理 (Data Management)" packages exports and imports of the whole data set

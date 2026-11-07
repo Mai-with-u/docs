@@ -17,7 +17,7 @@ EULA 全文：https://docs.maibot.chat/about/EULA
 1. 操作系统（Windows / Linux / macOS）
 2. 安装方案选择(问用户)：
    - **方案 A：仅 MaiBot** — 只安装核心，通过 WebUI http://127.0.0.1:8001/ 对话
-   - **方案 B：MaiBot + 统一 QQ 连接器** — 登录自己的 QQ 号收发消息（推荐，全平台）。1.3.0 起原 SnowLuma 适配器与 NapCat 适配器已合并为**统一 QQ 连接器**（仓库 `MaiBot-SnowLuma-Adapter`），**不要再安装独立的 NapCat 适配器或 SnowLuma 适配器**
+   - **方案 B：MaiBot + 统一 QQ 连接器** — 登录自己的 QQ 号收发消息（推荐，全平台）。使用**统一 QQ 连接器**（仓库 `MaiBot-SnowLuma-Adapter`）连接 SnowLuma 或 NapCat 客户端。
    - **方案 C：MaiBot + QQ 官方机器人适配器** — 在 QQ 开放平台申请机器人，用 AppID + AppSecret 直连，不需要登录任何 QQ 客户端
 3. 提前说明所选方案的前提：
    - 方案 B：需要先部署一个 QQ 客户端（SnowLuma 或 NapCat）并登录机器人小号、开启正向 WebSocket 服务器；搭建 QQ 机器人有被风控或封禁的风险，务必提醒用户使用小号
@@ -97,7 +97,6 @@ Windows 后台运行没有交互控制台时，在实例 `config/bot_config.toml
    - SnowLuma：https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter
    - NapCat：https://doc.napneko.icu/
    登录机器人小号，并开启客户端的**正向 WebSocket 服务器**，默认监听 `ws://127.0.0.1:3001`
-   - 这里装的是 QQ 客户端本身，不是 MaiBot 的适配器；**不要**再去安装 `MaiBot-Napcat-Adapter` 等独立适配器
 2. 安装统一 QQ 连接器（二选一）：
    - 推荐：WebUI → 插件扩展 → 插件市场，搜索「统一 QQ 连接器」→ 安装
    - 手动方式（在 MaiBot 实例目录执行）：`git clone https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter.git plugins/MaiBot-SnowLuma-Adapter`
@@ -183,7 +182,6 @@ allow_ids = ["测试群号"]     # 只放行这些群
 - 启动后"模型列表不能为空" — 需要在 WebUI 配置至少一个模型：https://docs.maibot.chat/manual/configuration/model-config
 - 非交互环境无法输入"同意" — 设置环境变量 `EULA_AGREE=<终端显示的hash>` 和 `PRIVACY_AGREE=<终端显示的hash>` 后重新启动
 - 找不到 WebUI 登录 Token — 在启动日志里搜索 `Token`，或直接查看 `data/webui.json`
-- 提示词里的旧方案不适用 — 1.3.0 起没有独立的 NapCat / SnowLuma 适配器，统一用「统一 QQ 连接器」，旧配置加载时会自动迁移
 - 适配器连不上客户端 — 核对 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 的 `[client] server / port / token` 是否与客户端正向 WebSocket 设置一致，确认端口未被防火墙拦截，并保持先启动客户端、后启动 MaiBot
 - QQ 群收不到消息 — 先查适配器策略是否放行该群（WebUI 适配器设置或 `config/adapter_policy.toml`）；再确认 `bot_config.toml` 的 `qq_account` 与客户端登录的 QQ 号一致，发送者不在适配器的黑名单里
 - 麦麦把自己的消息当成别人 — `bot_config.toml` 的 `qq_account` 与客户端登录的 QQ 号不一致，改成一致后重启 MaiBot

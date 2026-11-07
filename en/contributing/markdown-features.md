@@ -321,7 +321,7 @@ Integration route cards, meant for overview or landing pages: the copy switches 
 
 **Rendered effect:**
 
-<IntegrationRoutes only="adapter,plugin,model" />
+<IntegrationRoutes only="adapter,plugin" />
 
 ### xgplayer Video Player
 

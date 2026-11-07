@@ -44,5 +44,5 @@ allow_chats = ["chat-xxxx"]     # extra allowed chat flow IDs
 
 ## Related Docs
 
-- [Plugin Command Component](../../plugin/commands.md) — how plugins declare commands and the operator level
+- [Plugin Command Component](../../develop/plugin/commands.md) — how plugins declare commands and the operator level
 - [Bot Config](../configuration/bot-config.md) — full `[plugin]` section reference

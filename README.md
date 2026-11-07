@@ -18,7 +18,7 @@
 - **开发文档**（`zh/develop/`）
     只讲「怎么接入」：适配器（概览 / 消息协议 / 编写适配器 / 访问策略 / 排错）、插件接入、WebUI API 程序化对接、数据统计。模型与 MCP 的配置说明在用户手册 `zh/manual/configuration/`，不在开发文档里。
 
-- **插件开发**（`zh/plugin/`）
+- **插件开发**（`zh/develop/plugin/`）
     插件开发的权威入口：Manifest、生命周期、配置、Tool / Command / Hook / Event 等组件、API 参考与发布流程。
 
 - **文档站协作**（`zh/contributing/`）

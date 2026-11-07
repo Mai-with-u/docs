@@ -54,4 +54,3 @@ title: 数据管理
 
 - [数据与迁移](/faq/backup-and-migration) — 迁移前要备份什么、手工整目录备份方法
 - [配置管理](./config-management.md) — 在浏览器里改配置
-- [数据与记忆 API](/develop/webui-api/data-and-memory-api) — `data-transfer` 相关端点的完整参考

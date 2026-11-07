@@ -54,4 +54,3 @@ Back up your current data first (you can export another copy on this page) and c
 
 - [Data and Migration](/en/faq/backup-and-migration) — what to back up before migration and how to copy the entire directory manually
 - [Configuration Management](./config-management.md) — edit configuration in your browser
-- [Data and Memory API](/en/develop/webui-api/data-and-memory-api) — full reference for `data-transfer` endpoints

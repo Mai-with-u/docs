@@ -33,7 +33,7 @@ platforms = []            # Fallback accounts on other platforms, format platfor
 :::
 
 ::: warning qq_account must match the adapter's logged-in QQ
-When connecting through an adapter such as NapCat, `qq_account` must exactly match the QQ number logged in on the adapter, otherwise Mai treats her own messages as other people's. When the adapter reports identity normally these two fields are only fallbacks, but keeping them consistent is always correct. See the [Unified QQ Connector](/en/manual/adapters/qq-local-client).
+When using the Unified QQ Connector, `qq_account` must exactly match the QQ number logged in on the adapter, otherwise Mai treats her own messages as other people's. When the adapter reports identity normally these two fields are only fallbacks, but keeping them consistent is always correct. See the [Unified QQ Connector](/en/manual/adapters/qq-local-client).
 :::
 
 ### Shape the Personality
@@ -77,27 +77,17 @@ mentioned_bot_reply = false  # Reply more easily when a message mentions Mai's n
 
 :::
 
-To adjust frequency per chat or per time of day, use `talk_value_rules` (requires `enable_talk_value_rules = true` first):
+Use `talk_value_rules` to set a reply frequency for a specific chat and time window. For example, set QQ group 123456 to 0.8 overnight:
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[chat.reply_timing]
-enable_talk_value_rules = true
-
 [[chat.reply_timing.talk_value_rules]]
-platform = ""            # Empty = any platform, "*" = any platform
-item_id = ""             # Empty = any chat, "*" = any chat
+platform = "qq"
+item_id = "123456"
 rule_type = "group"
-time = "00:00-08:59"     # Active period; empty = fallback, "*" = all day, overnight "23:00-02:00" is supported
-value = 0.8              # Talk frequency during this period
-
-[[chat.reply_timing.talk_value_rules]]
-platform = ""
-item_id = ""
-rule_type = "group"
-time = "09:00-18:59"
-value = 1.0
+time = "23:00-02:00"
+value = 0.8
 ```
 
 :::
@@ -234,38 +224,24 @@ no_action_backoff_base_seconds = 15        # After consecutive no-reply decision
 no_action_backoff_cap_seconds = 300        # [Advanced] Upper bound of the backoff wait (seconds)
 no_action_backoff_start_count = 2          # [Advanced] Start slowing down after this many consecutive no-replies
 no_action_backoff_bypass_pending_count = 6 # [Advanced] Re-process immediately once this many new messages pile up; 0 = never bypass by count
-enable_talk_value_rules = false            # Enable per-chat / per-time rules, see below
 ```
 
 :::
 
-`talk_value_rules` set the talk frequency per platform, chat stream, and time period. Two global rules ship by default:
+`talk_value_rules` sets reply frequency for individual chats. Group chats without a matching rule use the overall reply frequency.
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [[chat.reply_timing.talk_value_rules]]
-platform = ""         # Empty = no platform limit, "*" = any platform
-item_id = ""          # Group or user ID; empty = no chat limit, "*" = any chat
-rule_type = "group"   # "group" / "private"
-time = "00:00-08:59"  # Empty = fallback, "*" = all day, overnight "23:00-02:00" is supported
-value = 0.8           # Talk frequency in this period: 0 quieter, 1 normal
-
-[[chat.reply_timing.talk_value_rules]]
-platform = ""
-item_id = ""
+platform = "qq"
+item_id = "123456"
 rule_type = "group"
-time = "09:00-18:59"
-value = 1.0
+time = "23:00-02:00"
+value = 0.8
 ```
 
 :::
-
-**Key points:**
-
-- **One specific group** — `platform = "qq"`, `item_id = "123456"`, applies only to that group
-- **Global fallback** — leave both `platform` and `item_id` empty; used when no specific rule matches
-- **Global wildcard** — set both to `"*"` to match any platform and any chat; in the WebUI you can pick the "global wildcard" or "fallback" mode directly
 
 **Message debouncing** — `message_debounce_mode` covers group chats and `private_message_debounce_mode` covers private chats; the two do not affect each other. Each collects a batch of messages before sending it to the Planner. The four modes use fixed rules:
 
@@ -724,7 +700,7 @@ skin_id = "builtin"          # Current skin; builtin is the bundled Mai, declara
 
 :::
 
-**`chat_tools_enabled`** — applies only to the `internal / owner` session shared by the pet and the web chat room; ordinary group chats never get these two tools, and sending images is unaffected. See [Desktop Pet](../desktop-pet.md) for skins, animations, and plugin extension buttons.
+**`chat_tools_enabled`** — applies only to the `internal / owner` session shared by the pet and the web chat room; ordinary group chats never get these two tools, and sending images is unaffected.
 
 #### Computer
 
@@ -748,7 +724,7 @@ While a human is taking over, all autonomous input is refused. The sandbox compu
 
 #### MCP
 
-The `[mcp]` section only holds the master switch; the server list, Sampling, Roots, and more are documented in **[MCP Configuration](/en/manual/configuration/mcp-config)**:
+The `[mcp]` section controls whether MCP is enabled.
 
 ::: code-group
 
@@ -760,7 +736,7 @@ enable = true  # Whether to enable MCP tool integration
 :::
 
 ::: tip MCP server connections are rebuilt automatically
-After you save a change to `[mcp]`, MaiBot rebuilds the MCP connections with the new configuration — no restart needed, and the result is logged exactly as it is at startup. A few fields outside the reload signature (such as the whole `elicitation` section) still require a restart; see [MCP Configuration](./mcp-config.md).
+After you save a change to `[mcp]`, MaiBot rebuilds the MCP connections with the new configuration — no restart needed, and the result is logged exactly as it is at startup. A few fields outside the reload signature (such as the whole `elicitation` section) still require a restart.
 :::
 
 #### Agent Connection
@@ -960,6 +936,5 @@ Then watch the log or the WebUI: once the file is saved, a successful config-rel
 - Configure models: [Model Configuration](/en/manual/configuration/model-config)
 - Advanced model parameters (thinking mode, etc.): [Model Extra Parameters](/en/manual/configuration/model-extra-params)
 - Long-term memory in depth: [A_Memorix Configuration](/en/manual/configuration/amemorix-config)
-- External tools: [MCP Configuration](/en/manual/configuration/mcp-config)
 - Connect QQ: [Unified QQ Connector](/en/manual/adapters/qq-local-client)
 - Configure in the browser: [WebUI Config Management](/en/manual/webui/config-management)

@@ -5,6 +5,25 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 # Changelog
 
+## 1.4.0 (unreleased)
+
+### Core
+
+- Create, switch, start, stop, rename, clone, and archive bots. Each bot has its own chats, plugin settings, and data. Model providers and web services are managed in shared settings.
+- Import a bot from 1.3.19, transfer its data, or upgrade online from a Git or uv tool installation. Migration backs up existing data first.
+- WeChat ClawBot supports QR sign-in for multiple accounts, text and image direct messages, and voice transcripts. The built-in QQ Official and Telegram adapters migrate existing settings and data during upgrades.
+- Chat supports Creative Mode, experimental Super Creative Mode, and commands to pause or resume replies. Focus shares context across chats. Stickers can be matched by mood or visual content, and existing stickers are tagged and indexed in batches.
+- Typo settings migrate to the built-in Mai Toolbox plugin. Command management covers `/pm`, including operator permissions, disabling, and aliases.
+- Plugin access can be scoped to users and chats. Within the same major version, plugins whose supported version ceiling is one minor release behind can load in compatibility mode.
+- The standalone Tauri desktop pet can sign in to a local or remote WebUI and supports screen reading, to-dos, reminders, and exploration. The Android pet includes a floating character, chat, to-dos, and exploration history.
+
+### WebUI 1.10.0
+
+- The Mai Observation layout is enabled by default. Add, remove, reorder, and resize home cards, and view reasoning and replies from the same turn together.
+- Help has dedicated conversations, conversation history, docs and plugin search, and diagnostics using redacted logs and reasoning records. Plugin installation requests require confirmation, and plugin configuration writes require authorization for the current turn.
+- Manage models by provider and assign them to bot tasks. Test reasoning controls and leave the API Key blank for services without authentication, such as a local Ollama instance.
+- Fixed HTTP 400 responses behind domain-based reverse proxies and a connection screen that could stall on some mobile browsers.
+
 ::: timeline 2026-10-29
 ### Main program [1.3.19]
 * Improved plugin marketplace loading stability.
@@ -221,7 +240,6 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 * Plugin updates can be cancelled; leaving the page stops the download, while an already-started version replacement finishes cleanly.
 * Added the experimental Planner "Quick reaction mode": new messages received during thinking, output, or wait immediately join the round and trigger another reasoning pass; interrupted thinking and output remain visible in history.
 * High-frequency word learning ignores platform notices and the bot's own messages, counts raw user text, merges duplicate terms, and corrects message coverage counts.
-* The Docker image no longer bundles the NapCat adapter.
 * Fixed delayed image sending when descriptions are long, and sentence-splitting calls still running with reply splitting disabled.
 * Long-term memory fixes: mixed vectors when switching models during a rebuild, and mismatches after switching candidate models.
 * Person facts fixes: facts disagreeing with evidence, incorrect confidence handling, mislabelled legacy migrations, and missing historical evidence.
@@ -410,7 +428,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 * Improved compatibility with adapter plugins; adapter plugins can use MaiBot's built-in allow/deny lists directly.
 
-* The SnowLuma adapter must be updated to the latest version: the new adapter has merged the NapCat adapter, and the allow/deny lists must be re-configured after upgrading.
+* The SnowLuma adapter must be updated to the latest version: the allow/deny lists must be re-configured after upgrading.
 
 ### Webui [1.7.5]
 
@@ -623,7 +641,6 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 - WebUI/Dashboard completes a new interface system upgrade: chat, configuration, plugins, memory, and other core capabilities are integrated
 - The plugin system is refactored into an independent `plugin_runtime`, supporting independent start/stop, reload, and runtime status tracking
 - For dev builds and more detailed changelogs, see [GitHub Releases](https://github.com/Mai-with-u/MaiBot/releases).
-- For a more complete illustrated explanation, see the [MaiBot 1.0.0 Update Feature](./v1-0-0.md)
 :::
 
 ::: timeline 2026-01-11
