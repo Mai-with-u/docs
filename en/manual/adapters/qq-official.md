@@ -4,7 +4,7 @@ title: QQ Official Bot Adapter
 
 # QQ Official Bot Adapter
 
-**Connect through the QQ Open Platform bot, no QQ client login needed (officially maintained).** The QQ Official Bot Adapter lets MaiBot connect directly to the [QQ Open Platform](https://q.qq.com/): it authenticates with **AppID + AppSecret**, exchanges private and group messages over the official WebSocket gateway and OpenAPI, and supports outbound text, @, images, and emoji—no QQ client needs to be online.
+**Connect through the QQ Open Platform bot, no QQ client login needed (officially maintained).** The QQ Official Bot Adapter lets MaiBot connect directly to the [QQ Open Platform](https://q.qq.com/): it authenticates with **AppID + AppSecret**, exchanges private and group messages over the official WebSocket gateway and OpenAPI, and supports outbound text, @, images, emoji, voice, video, and files—no QQ client needs to be online.
 
 ::: info Connection direction
 `QQ Open Platform ← QQ Official Bot Adapter (wss client) → MaiBot plugin message gateway`
@@ -80,10 +80,10 @@ The adapter reports its identity to MaiBot automatically once connected: it uses
 
 ## Outbound message capabilities
 
-- **Supported content** — text, @ (sent as markdown when an @ is included, so a real @ renders), images and emoji (jpg / png / gif / webp / bmp);
+- **Supported content** — text, @ (sent as markdown when an @ is included, so a real @ renders), images and emoji (jpg / png / gif / webp / bmp), voice, video, and files;
 - **Splitting rules** — an official message can only carry one kind of content; mixed messages are split into multiple messages in order, each taking one passive-reply slot, with **at most 5 passive replies per inbound group message**;
-- **Image upload** — images / emoji are uploaded through the official chunked upload to obtain `file_info` before sending; no manual work needed;
-- **Not supported yet** — outbound voice and files; such calls fail directly with a send error.
+- **Media upload** — images, emoji, voice, video, and files are all uploaded through the official chunked upload to obtain `file_info` before sending; no manual work needed;
+- **Voice and files** — voice supports SILK, MP3, WAV, and OGG up to 20 MB; video must be MP4; files up to 100 MiB.
 
 ## Unified ID binding commands
 

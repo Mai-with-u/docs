@@ -261,6 +261,8 @@ const en = mdFiles('en')
   const v = []
   for (const p of [...zh, ...en]) {
     const r = rel(p)
+    // 语言根首页（zh/index.md、en/index.md）由站名承载，不进侧边栏也不被 .md 入链引用，不算孤儿页
+    if (r === 'zh/index.md' || r === 'en/index.md') continue
     const isEn = r.startsWith('en/')
     const body = r
       .replace(/^(zh|en)\//, '')
