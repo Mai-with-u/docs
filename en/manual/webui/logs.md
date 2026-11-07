@@ -49,4 +49,3 @@ The top of the page shows the live connection status and how many log entries ar
 
 - [Bot Config → Logging](../configuration/bot-config.md#logging) — log levels, file count, and retention
 - [Data Management](./data-management.md) — package up logs and statistics for export
-- [Exporting & Analyzing Chat Data](/en/develop/statistics-io) — statistics APIs and file formats

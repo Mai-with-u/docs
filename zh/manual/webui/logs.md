@@ -49,4 +49,3 @@ title: 日志与详细统计
 
 - [Bot 配置 → 日志](../configuration/bot-config.md#日志) — 日志级别、文件数量与保留天数
 - [数据管理](./data-management.md) — 打包导出日志和统计数据
-- [导出与分析聊天数据](/develop/statistics-io) — 统计数据的接口与文件格式

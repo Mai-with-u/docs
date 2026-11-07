@@ -15,7 +15,7 @@ The **麦麦聊天** (Chat) page (`/chat`) under "概览" (Overview) in the side
 - **Sending** — press Enter to send, Shift + Enter for a new line
 - **Identity** — "以「人类」发送" (Send as "Human") above the input lets you change your nickname and avatar in this room
 - **Images** — "添加图片" (Add image) attaches pictures to the next message
-- **Attachments** — the paperclip button sends files; enable [file features](../files.md) first
+- **Attachments** — the paperclip button sends files; enable [file features](../configuration/bot-config.md#files) first
 - **Emoji stickers** — pick one from "用户表情包" (User stickers) to send to Mai
 - **Header actions** — "会话信息" (Conversation info) shows the message count and connection status; "清空当前显示" (Clear display) only clears the messages shown on the page and keeps the history
 
