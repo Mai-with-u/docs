@@ -6,7 +6,7 @@ title: Linux Deployment
 
 On Linux and macOS, [Install with uv](./uv-tool) installs MaiBot and its WebUI directly. This page covers source deployment for working on the code. You can also use [Docker Deployment](./docker) or hand the [installation prompt](./installation-agent) to an AI assistant.
 
-If you do not want to maintain a Git checkout, or want one-click updates from the WebUI, use [Install with uv](./uv-tool.md).
+If you do not want to maintain a Git checkout, use [Install with uv](./uv-tool.md). Both source and uv tool installations support one-click updates from the WebUI.
 
 ## Prepare the Environment
 

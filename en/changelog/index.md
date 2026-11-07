@@ -5,7 +5,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 # Changelog
 
-## 1.4.0 (unreleased)
+## 1.4.0 (2026-11-07)
 
 ### Core
 
@@ -16,13 +16,17 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 - Typo settings migrate to the built-in Mai Toolbox plugin. Command management covers `/pm`, including operator permissions, disabling, and aliases.
 - Plugin access can be scoped to users and chats. Within the same major version, plugins whose supported version ceiling is one minor release behind can load in compatibility mode.
 - The standalone Tauri desktop pet can sign in to a local or remote WebUI and supports screen reading, to-dos, reminders, and exploration. The Android pet includes a floating character, chat, to-dos, and exploration history.
+- The plugin runtime no longer supports legacy Action components; old plugins need to migrate to Tool components.
+- Dynamic chat rules drop the master switch, the global wildcard, and the default fallback.
 
 ### WebUI 1.10.0
 
 - The Mai Observation layout is enabled by default. Add, remove, reorder, and resize home cards, and view reasoning and replies from the same turn together.
 - Help has dedicated conversations, conversation history, docs and plugin search, and diagnostics using redacted logs and reasoning records. Plugin installation requests require confirmation, and plugin configuration writes require authorization for the current turn.
-- Manage models by provider and assign them to bot tasks. Test reasoning controls and leave the API Key blank for services without authentication, such as a local Ollama instance.
+- Manage models by provider and assign them to bot tasks. Local and intranet model services can be configured and tested in the WebUI. Reasoning controls are testable, and the API Key can be left blank for services without authentication, such as a local Ollama instance.
+- Plugins can be cloned from and updated in Git repositories; configure a clone prefix to reach intranet Git repos.
 - Fixed HTTP 400 responses behind domain-based reverse proxies and a connection screen that could stall on some mobile browsers.
+- The statistics pages are rebuilt with much faster computation; legacy HTML statistics reports are removed, and detailed statistics live in the WebUI.
 
 ::: timeline 2026-10-29
 ### Main program [1.3.19]

@@ -81,10 +81,13 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     collapsed: true,
     items: [
       { text: 'Login', link: '/en/manual/webui/' },
+      { text: 'Chat', link: '/en/manual/webui/chat' },
       { text: 'Edit Config', link: '/en/manual/webui/config-management' },
       { text: 'Adapter Management', link: '/en/manual/webui/adapter-management' },
       { text: 'Command Management', link: '/en/manual/webui/command-management' },
+      { text: 'Learning', link: '/en/manual/webui/learning' },
       { text: 'Memory', link: '/en/manual/webui/memory-management' },
+      { text: 'Logs & Stats', link: '/en/manual/webui/logs' },
       { text: 'Data Management', link: '/en/manual/webui/data-management' },
     ]
   },

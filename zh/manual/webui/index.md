@@ -40,6 +40,21 @@ MaiBot 启动后访问 `http://localhost:8001` 即可访问 WebUI
 
 4. 保存后旧 Token 立即失效，用新 Token 重新登录，再继续向导
 
+## 首次配置向导
+
+设置完密码后，向导剩下两步，完成后就能聊天。
+
+**基础与人格** — 填平台、账号、昵称和别名，再确认人格预设。平台按适配器选 QQ、邮件等，用自建适配器就选「其他平台」并填平台名；昵称是麦麦对外的名字，别名是群里可能出现的其他称呼。
+
+![基础与人格](/images/webui/setup-bot-profile.webp)
+
+![填写完成的基础与人格](/images/webui/setup-bot-profile-filled.webp)
+
+**模型配置** — 填 API 服务商的 Base URL 和 Key，再给「规划思考」和「回复发言」各指定一个模型标识，例如 `deepseek-chat`。两项都填好、Key 有效时，下拉框会列出服务商返回的模型；勾选「启用视觉」表示该模型能看图。
+
+![模型配置](/images/webui/setup-model.webp)
+
+点「完成配置」后进入 WebUI 主界面。之后想重新走一遍向导，在 **WebUI 设置 → 常规** 里找进入配置向导的入口；想逐项改，用[在浏览器里改配置](./config-management.md)。
 
 ## Webui设置
 
@@ -64,6 +79,7 @@ allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 
 改完 `[http]` 必须重启 MaiBot 才生效。
 
+![WebUI 设置](/images/webui/settings.webp)
 
 ![关于页](/images/webui/settings-about.webp)
 
@@ -108,8 +124,11 @@ allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 ## 更多功能
 
 - [配置管理](./config-management.md) - 在浏览器里改配置
+- [与麦麦聊天](./chat.md) - 本地聊天室与观察聊天流
 - [适配器管理](./adapter-management.md) - 账号身份与黑白名单
 - [命令管理](./command-management.md) - 插件命令与执行权限
+- [学习管理](./learning.md) - 表达方式、黑话与表情包
 - [记忆管理](./memory-management.md) - 查看和管理记忆
+- [日志与详细统计](./logs.md) - 终端日志、推理过程与用量统计
 - [插件管理](/manual/plugins/) - 安装和管理插件
 - [数据管理](./data-management.md)（`/data-transfer`）- 侧边栏「高级工具 → 数据管理」，打包导出和导入整份数据

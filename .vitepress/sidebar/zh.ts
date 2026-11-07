@@ -94,10 +94,13 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     collapsed: true,
     items: [
       { text: '登录', link: '/manual/webui/' },
+      { text: '聊天', link: '/manual/webui/chat' },
       { text: '改配置', link: '/manual/webui/config-management' },
       { text: '适配器管理', link: '/manual/webui/adapter-management' },
       { text: '命令管理', link: '/manual/webui/command-management' },
+      { text: '学习', link: '/manual/webui/learning' },
       { text: '记忆管理', link: '/manual/webui/memory-management' },
+      { text: '日志统计', link: '/manual/webui/logs' },
       { text: '数据管理', link: '/manual/webui/data-management' },
     ]
   },
