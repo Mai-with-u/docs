@@ -124,8 +124,11 @@ allowed_ips = "127.0.0.1"     # IP 白名单（逗号分隔）
 ## 更多功能
 
 - [配置管理](./config-management.md) - 在浏览器里改配置
+- [与麦麦聊天](./chat.md) - 本地聊天室与观察聊天流
 - [适配器管理](./adapter-management.md) - 账号身份与黑白名单
 - [命令管理](./command-management.md) - 插件命令与执行权限
+- [学习管理](./learning.md) - 表达方式、黑话与表情包
 - [记忆管理](./memory-management.md) - 查看和管理记忆
+- [日志与详细统计](./logs.md) - 终端日志、推理过程与用量统计
 - [插件管理](/manual/plugins/) - 安装和管理插件
 - [数据管理](./data-management.md)（`/data-transfer`）- 侧边栏「高级工具 → 数据管理」，打包导出和导入整份数据

@@ -48,7 +48,7 @@ MaiBot（麦麦）是一个基于大语言模型的聊天机器人框架——�
 
 </div>
 
-四步走完，WebUI 首页就是你的控制台：顶部切到「麦麦」看运行状态和聊天统计，切到「日志」看终端输出、推理过程与详细统计。
+四步走完，WebUI 首页就是你的控制台：顶部切到「麦麦」看运行状态和聊天统计，切到[「日志」](/manual/webui/logs)看终端输出、推理过程与详细统计。
 
 ![WebUI 首页](/images/webui/home.webp)
 
@@ -90,7 +90,7 @@ MaiBot（麦麦）是一个基于大语言模型的聊天机器人框架——�
     <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></span>
     <h3>WebUI 管理面板</h3>
   </div>
-  <p>WebUI 全功能指南：配置、适配器、命令、记忆、数据与聊天统计。</p>
+  <p>WebUI 全功能指南：配置、聊天、学习、记忆、日志与数据。</p>
   <a href="/manual/webui/">登录与设置 →</a>
 </div>
 

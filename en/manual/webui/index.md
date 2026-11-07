@@ -124,8 +124,11 @@ If you can no longer sign in:
 ## More Features
 
 - [Configuration Management](./config-management.md) - Change configurations in the browser
+- [Chatting with Mai](./chat.md) - Local chat room and observing chat streams
 - [Adapter Management](./adapter-management.md) - Account identities and allow/deny lists
 - [Command Management](./command-management.md) - Plugin commands and execution permissions
+- [Learning Management](./learning.md) - Expressions, jargon, and emoji stickers
 - [Memory Management](./memory-management.md) - View and manage memories
+- [Logs & Detailed Statistics](./logs.md) - Terminal logs, reasoning traces, and usage statistics
 - [Plugin Management](/en/manual/plugins/) - Install and manage plugins
 - [Data Management](./data-management.md) (`/data-transfer`) - sidebar "高级工具 (Advanced Tools) → 数据管理 (Data Management)" packages exports and imports of the whole data set
