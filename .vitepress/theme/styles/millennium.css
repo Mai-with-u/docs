@@ -178,11 +178,6 @@ html[data-theme-style='millennium'] :is(.VPLocalSearchBox, .VPLocalSearchBox *) 
   border-radius: 0 !important;
 }
 
-/* 首页极光只属于原版风格 */
-html[data-theme-style='millennium'] .aurora-bg {
-  display: none;
-}
-
 /* 选中文字是薄荷绿 */
 html[data-theme-style='millennium'] ::selection {
   background: var(--mil-on);
@@ -270,6 +265,7 @@ html[data-theme-style='millennium'] .VPNavBarMenuGroup .button {
   font-weight: 700;
   height: 38px;
   line-height: 31px;
+  min-height: 0;
   padding: 0 12px 5px;
   transition: background-color 120ms ease-out;
 }
@@ -340,6 +336,109 @@ html[data-theme-style='millennium'] .VPMenu {
   background-size: 5px 5px;
   border: 2px solid var(--mil-line);
   box-shadow: var(--mil-float);
+}
+
+/* 键帽只有 38px 高，而 VPFlyout 的下拉定位按整条 64px 的顶栏算，
+ * 两者之间会空出 14px 的死区：指针一离开键帽菜单就收起来，选不中。
+ * 把下拉紧贴键帽下沿，并让这段距离归下拉自身所有（padding 属于 .menu，
+ * 指针停在其中不会触发 pointerleave）。 */
+html[data-theme-style='millennium'] .VPNavBarMenuGroup .menu {
+  padding-top: 10px;
+  top: 100%;
+}
+
+/* 外观 / 风格切换菜单：与 .VPMenu 同一套浮层语言（方角、描边、硬阴影），
+ * 否则在 millennium 下它是全站唯一一个圆角软阴影的浮层。 */
+html[data-theme-style='millennium'] .theme-style-switch .style-menu {
+  background-color: var(--mil-panel);
+  background-image: var(--mil-speck);
+  background-size: 5px 5px;
+  border: 2px solid var(--mil-line);
+  border-radius: 0;
+  box-shadow: var(--mil-float);
+  margin-top: 10px;
+  padding: 10px;
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-menu-title {
+  border-bottom: 2px solid var(--mil-line);
+  color: var(--mil-ink);
+  font-family: var(--mil-font-pixel);
+  letter-spacing: 0.04em;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-menu-title + .style-menu-title {
+  border-top: 0;
+  margin-top: 12px;
+  padding-top: 0;
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .appearance-row {
+  background: var(--mil-screen);
+  border: 2px solid var(--mil-line);
+  border-radius: 0;
+  box-shadow: var(--mil-sunk);
+  gap: 2px;
+  padding: 2px;
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .appearance-option {
+  border: 0;
+  border-radius: 0;
+  color: var(--mil-screen-dim);
+  font-weight: 700;
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .appearance-option:hover {
+  background: var(--mil-key-hover);
+  color: var(--mil-ink);
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .appearance-option.active {
+  background: var(--mil-on);
+  box-shadow: var(--mil-pressed);
+  color: var(--mil-on-ink);
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-option {
+  border: 2px solid transparent;
+  border-radius: 0;
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-option:hover {
+  background: var(--mil-key);
+  border-color: var(--mil-line);
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-option.active {
+  background: var(--mil-on);
+  border-color: var(--mil-line);
+  box-shadow: var(--mil-pressed);
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-option.active :is(.style-option-name, .style-option-desc) {
+  color: var(--mil-on-ink);
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-option-name {
+  color: var(--mil-ink);
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-option-desc {
+  color: var(--mil-ink);
+  opacity: 0.72;
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .swatch {
+  border: 1px solid var(--mil-line);
+  border-radius: 0;
+}
+
+html[data-theme-style='millennium'] .theme-style-switch .style-trigger:hover,
+html[data-theme-style='millennium'] .theme-style-switch .style-trigger.open {
+  color: var(--mil-accent-text);
 }
 
 html[data-theme-style='millennium'] .VPMenu :is(.VPMenuLink a, .VPMenuLink .link):hover {
@@ -906,16 +1005,12 @@ html[data-theme-style='millennium'] .VPHero .image-container::before {
   width: min(340px, 100%);
 }
 
-/* 首页分区（HomeSections） */
-html[data-theme-style='millennium'] .hs :is(.hs-title, .hs-eyebrow, .hs-banner-title) {
+/* 首页分区（HomeSections）
+ * 组件模板只用得到下面这些类；新增类时同步补样式，删类时把这里的规则一并删掉。 */
+html[data-theme-style='millennium'] .hs :is(.hs-title, .hs-banner-title) {
   font-family: var(--mil-font-pixel);
   font-synthesis: none;
   font-weight: 400;
-}
-
-html[data-theme-style='millennium'] .hs .hs-eyebrow {
-  color: var(--mil-print);
-  letter-spacing: 0.18em;
 }
 
 html[data-theme-style='millennium'] .hs .hs-pill {
@@ -939,7 +1034,7 @@ html[data-theme-style='millennium'] .hs .hs-pill-dot {
   box-shadow: inset 0 0 0 1px var(--mil-line);
 }
 
-html[data-theme-style='millennium'] .hs :is(.hs-card, .hs-link, .hs-browser, .hs-chat) {
+html[data-theme-style='millennium'] .hs :is(.hs-card, .hs-link) {
   backdrop-filter: none;
   background-color: var(--mil-panel);
   background-image: var(--mil-speck);
@@ -949,67 +1044,21 @@ html[data-theme-style='millennium'] .hs :is(.hs-card, .hs-link, .hs-browser, .hs
   box-shadow: var(--mil-raise);
 }
 
-html[data-theme-style='millennium'] .hs :is(.hs-card, .hs-link, .hs-browser):hover {
+html[data-theme-style='millennium'] .hs .hs-head {
+  padding: 0 22px;
+}
+
+html[data-theme-style='millennium'] .hs .hs-card:hover {
   border-color: var(--mil-line);
   box-shadow: var(--mil-bevel), 0 7px 0 var(--mil-drop);
   transform: translateY(-2px);
 }
 
-html[data-theme-style='millennium'] .hs :is(.hs-card-icon, .hs-link-icon) {
+html[data-theme-style='millennium'] .hs .hs-card-icon {
   background: var(--mil-on);
   border-radius: 0;
   box-shadow: var(--mil-pressed);
   color: var(--mil-on-ink);
-}
-
-/* 聊天演示和截图：模块里嵌一块屏幕 */
-html[data-theme-style='millennium'] .hs :is(.hs-chat-bar, .hs-browser-bar) {
-  background: transparent;
-  border-bottom: 2px solid var(--mil-lo);
-  box-shadow: 0 2px 0 var(--mil-hi);
-}
-
-html[data-theme-style='millennium'] .hs :is(.hs-chat-dot, .hs-dot) {
-  background: var(--mil-vent);
-  border-radius: 0;
-}
-
-html[data-theme-style='millennium'] .hs .hs-dot--g {
-  background: var(--mil-led);
-}
-
-html[data-theme-style='millennium'] .hs .hs-dot--r {
-  background: var(--mil-hot);
-}
-
-html[data-theme-style='millennium'] .hs .hs-chat-body {
-  background-color: var(--mil-screen);
-  background-image: var(--mil-screen-tex);
-  background-size: 16px 16px;
-  box-shadow: inset 3px 3px 0 var(--mil-screen-shade);
-}
-
-html[data-theme-style='millennium'] .hs .hs-bubble {
-  border-radius: 0;
-}
-
-html[data-theme-style='millennium'] .hs .hs-bubble--in {
-  background: var(--mil-panel);
-  border: 2px solid var(--mil-line);
-  color: var(--mil-ink);
-}
-
-html[data-theme-style='millennium'] .hs .hs-bubble--out {
-  background: var(--mil-on);
-  box-shadow: inset 0 0 0 2px var(--mil-line);
-  color: var(--mil-on-ink);
-}
-
-html[data-theme-style='millennium'] .hs .hs-browser-url {
-  background: var(--mil-screen);
-  border: 0;
-  border-radius: 0;
-  box-shadow: inset 2px 2px 0 var(--mil-screen-shade), 0 0 0 1px var(--mil-lo);
 }
 
 /* 底部横幅：一块深色示波屏 */
@@ -1028,11 +1077,6 @@ html[data-theme-style='millennium'] .hs .hs-banner {
   text-shadow: none;
 }
 
-html[data-theme-style='millennium'] .hs .hs-banner::before,
-html[data-theme-style='millennium'] .hs .hs-banner::after {
-  display: none;
-}
-
 html[data-theme-style='millennium'] .hs .hs-banner-title {
   color: var(--mil-on);
 }
@@ -1044,13 +1088,6 @@ html[data-theme-style='millennium'] .hs .hs-btn {
   background: var(--mil-key);
   color: var(--mil-ink);
   font-weight: 700;
-  padding-bottom: calc(0.7em + 5px);
-}
-
-html[data-theme-style='millennium'] .hs .hs-btn--solid {
-  background: var(--mil-hot);
-  box-shadow: var(--mil-keycap-hot);
-  color: var(--mil-hot-ink);
 }
 
 html[data-theme-style='millennium'] .hs .hs-btn:hover {
@@ -1058,74 +1095,3 @@ html[data-theme-style='millennium'] .hs .hs-btn:hover {
   filter: brightness(1.05);
 }
 
-/* ==========================================================================
- * 内容页里的自定义卡片（手册首页的步骤卡片 / 导航卡片）
- * 都是嵌在屏幕里的凸起塑料模块
- * ======================================================================== */
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) {
-  background-color: var(--mil-panel);
-  background-image: var(--mil-speck);
-  background-size: 5px 5px;
-  border: 2px solid var(--mil-line);
-  border-radius: 0;
-  box-shadow: var(--mil-raise);
-  color: var(--mil-ink);
-  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
-}
-
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card):hover {
-  border-color: var(--mil-line);
-  box-shadow: var(--mil-bevel), 0 7px 0 var(--mil-drop);
-  transform: translateY(-2px);
-}
-
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) h3 {
-  border-left: 0;
-  color: var(--mil-ink);
-  padding-left: 0;
-}
-
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) :is(p, span, strong) {
-  color: var(--mil-ink);
-}
-
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) p {
-  color: var(--mil-print);
-}
-
-/* 步骤卡片的标题条：下面一道刻线，序号是一颗按下的绿键 */
-html[data-theme-style='millennium'] .vp-doc .step-head {
-  border-bottom: 2px solid var(--mil-lo);
-  box-shadow: 0 2px 0 var(--mil-hi);
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-}
-
-html[data-theme-style='millennium'] .vp-doc .step-no {
-  background: var(--mil-on);
-  border-radius: 0;
-  box-shadow: var(--mil-pressed);
-  color: var(--mil-on-ink);
-  font-family: var(--mil-font-pixel);
-  font-synthesis: none;
-  font-weight: 400;
-  height: 30px;
-  padding-bottom: 3px;
-  width: 30px;
-}
-
-html[data-theme-style='millennium'] .vp-doc :is(.step-card, .nav-card) :not(pre) > code {
-  background: var(--mil-screen);
-}
-
-html[data-theme-style='millennium'] .vp-doc :is(.step-more, .nav-card a) {
-  color: var(--mil-accent-text);
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
-}
-
-html[data-theme-style='millennium'] .vp-doc .step-more:hover {
-  color: var(--mil-ink);
-  transform: none;
-}
