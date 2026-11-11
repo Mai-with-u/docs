@@ -4,7 +4,7 @@ title: Configuration Management
 
 # Configuration Management
 
-MaiBot plugins support a declarative configuration management mechanism. By defining strongly-typed configuration models through `PluginConfigBase` and `Field`, the Runner automatically generates default configurations, fills in missing fields, and exposes renderable configuration schemas to the WebUI.
+Declare a strongly-typed config with `PluginConfigBase` and `Field`; the Runner generates defaults, fills in missing fields, and exposes a renderable schema to the WebUI.
 
 ## Configuration Generation and Storage
 

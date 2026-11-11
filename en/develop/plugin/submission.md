@@ -4,6 +4,8 @@ title: Submit and Release Plugins
 
 # Submit and Release Plugins
 
+Publish to the official plugin market (`Mai-with-u/plugin-repo`) and users can find, install, and upgrade your plugin from the WebUI plugin market. Submission needs one public GitHub repository and one release; version updates go through the same automated review pipeline.
+
 ## Submit a plugin
 
 Use a public GitHub repository with `_manifest.json` (v2), `plugin.py`, and `LICENSE` at its root. Keep runtime `config.toml` local. Publish at least one GitHub Release, then submit your plugin ID and repository URL using the [Add Plugin template](https://github.com/Mai-with-u/plugin-repo/issues/new/choose).

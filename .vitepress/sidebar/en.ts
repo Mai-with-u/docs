@@ -61,7 +61,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     collapsed: true,
     items: [
       { text: 'Overview', link: '/en/manual/adapters/' },
-      { text: 'QQ Connector', link: '/en/manual/adapters/qq-local-client' },
+      { text: 'OneBot Adapter', link: '/en/manual/adapters/qq-local-client' },
       { text: 'Official Bot', link: '/en/manual/adapters/qq-official' },
       { text: 'Email', link: '/en/manual/adapters/email' },
       { text: 'Voice Call', link: '/en/manual/adapters/qq-voice-call' },
@@ -69,22 +69,38 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
+    text: 'Features',
+    collapsed: true,
+    items: [
+      { text: 'Multi-instance', link: '/en/manual/multi-bot-host' },
+      { text: 'Personality', link: '/en/manual/personality' },
+      { text: 'Chat Scenes', link: '/en/manual/chat-scenes' },
+      { text: 'Files', link: '/en/manual/files' },
+      { text: 'Desktop Pet', link: '/en/manual/desktop-pet' },
+      { text: 'Internal Chat', link: '/en/manual/internal-chat' },
+    ]
+  },
+  {
     text: 'Plugins',
     collapsed: true,
     items: [
       { text: 'Plugin Marketplace', link: '/en/manual/plugins/' },
-      { text: 'Submit and Release Plugins', link: '/en/develop/plugin/submission' },
+      { text: 'Publish Plugins', link: '/en/develop/plugin/submission' },
     ]
   },
   {
     text: 'WebUI',
     collapsed: true,
     items: [
-      { text: 'Login', link: '/en/manual/webui/' },
+      { text: 'Login and Home', link: '/en/manual/webui/' },
+      { text: 'Help Assistant', link: '/en/manual/webui/ai-help' },
       { text: 'Edit Config', link: '/en/manual/webui/config-management' },
       { text: 'Adapter Management', link: '/en/manual/webui/adapter-management' },
       { text: 'Command Management', link: '/en/manual/webui/command-management' },
+      { text: 'Chat Management', link: '/en/manual/webui/chat-management' },
       { text: 'Memory', link: '/en/manual/webui/memory-management' },
+      { text: 'Statistics and Observation', link: '/en/manual/webui/statistics' },
+      { text: 'Files and Attachments', link: '/en/manual/webui/files' },
       { text: 'Data Management', link: '/en/manual/webui/data-management' },
     ]
   },
@@ -102,7 +118,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
     text: 'Adapters',
     collapsed: true,
     items: [
-      { text: 'Adapter Overview', link: '/en/develop/adapters/' },
+      { text: 'Overview', link: '/en/develop/adapters/' },
       { text: 'Message Protocol', link: '/en/develop/adapters/protocol' },
       { text: 'Avatar API', link: '/en/develop/adapters/avatar-api' },
       { text: 'Writing an Adapter', link: '/en/develop/adapters/build' },
@@ -161,7 +177,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
         ]
       },
       { text: 'SDK API Reference', link: '/en/develop/plugin/api-reference' },
-      { text: 'Submit and Release Plugins', link: '/en/develop/plugin/submission' },
+      { text: 'Publish Plugins', link: '/en/develop/plugin/submission' },
     ],
   },
   {

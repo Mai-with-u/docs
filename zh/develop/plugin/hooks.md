@@ -4,11 +4,9 @@ title: Hook 处理器
 
 # Hook 处理器
 
-`@HookHandler` 是 MaiBot 插件系统中用于订阅**命名 Hook 点**的组件装饰器。主程序在关键执行点触发命名 Hook，所有订阅该 Hook 的插件处理器按固定规则调度执行，从而实现消息拦截、改写和观察。
+`@HookHandler` 订阅**命名 Hook 点**。主程序在关键执行点触发命名 Hook，所有订阅该 Hook 的插件处理器按固定规则调度执行，实现消息拦截、改写与观察。
 
-::: warning WorkflowStep 已移除
-SDK 2.0 中 `WorkflowStep` 已被 `@HookHandler` 取代。旧代码仍在使用 `WorkflowStep` 时会在运行时抛出 `RuntimeError`，这是一个不向后兼容的更改，必须迁移到 `@HookHandler`。
-:::
+`WorkflowStep` 已移除，调用它会抛 `RuntimeError`，用 `@HookHandler` 订阅同样的检查点。
 
 ## 装饰器签名
 
@@ -204,59 +202,62 @@ class SendInterceptorPlugin(MaiBotPlugin):
 
 ## 内置 Hook 清单
 
-以下是 Host 运行时中心表注册的全部 Hook 点，共 29 个。每个 Hook 注明是否允许 abort（中止调用链）和是否允许改参（修改后续处理器接收的 kwargs）。
-
-::: warning 清单以 Host 实际注册的为准
-清单以当前 Host 实际注册的为准，共 29 个。插件 SDK 的文档里另列有 3 个尚未注册的 Hook（`emoji.register.after_build_emotion`、`jargon.query.before_search`、`jargon.query.after_search`）——**订阅它们会导致插件注册失败**，请以下表为准。
-:::
+Host 启动时注册 30 个 Hook 点，每个都标明是否允许 abort（中止调用链）与是否允许改参（修改后续处理器接收的 kwargs）。订阅未注册的名字会让插件注册直接失败，列表以 Host 实际注册的为准。
 
 ### 聊天消息链
 
-- **`chat.receive.before_process`** — 入站消息执行 `SessionMessage.process()` 前 — 允许 abort ✅ · 允许改参 ✅
+- **`chat.receive.before_process`** — 入站消息执行 `SessionMessage.process()` 前 — 允许 abort · 允许改参
 
   可用于图片识别后的上下文注释：消息字典 `raw_message` 中的图片/表情携带 `binary_data_base64`（素材可用时），转发内容在 `data[].content` 中递归展开。阻塞处理器可返回 `modified_kwargs={"message": updated_message}`，在对应图片后加入 `{"type":"text","data":"识别提示"}`。同步推理放入线程或独立进程，限制总耗时；超时或失败继续原消息。模型得分不是校准后的正确概率。此钩子本身不要求将聊天图片收集进训练库。
-- **`chat.receive.after_process`** — 入站消息轻量预处理完成后 — 允许 abort ✅ · 允许改参 ✅
+- **`chat.receive.after_process`** — 入站消息轻量预处理完成后 — 允许 abort · 允许改参
 
 ### 命令执行链
 
-- **`chat.command.before_execute`** — 命令匹配成功、正式执行前 — 允许 abort ✅ · 允许改参 ✅
-- **`chat.command.after_execute`** — 命令执行结束后 — 允许 abort ❌ · 允许改参 ✅
+- **`chat.command.before_execute`** — 命令匹配成功、正式执行前 — 允许 abort · 允许改参
+- **`chat.command.after_execute`** — 命令执行结束后 — 不允许 abort · 允许改参
 
 ### 表情包链
 
-- **`emoji.maisaka.before_select`** — Maisaka 选择表情前 — 允许 abort ✅ · 允许改参 ✅
-- **`emoji.maisaka.after_select`** — Maisaka 选出表情后 — 允许 abort ✅ · 允许改参 ✅
-- **`emoji.register.after_build_description`** — 表情包描述生成完成后 — 允许 abort ✅ · 允许改参 ✅
+- **`emoji.receive.before_cache`** — 聊天表情未命中缓存、即将写入缓存前 — 允许 abort · 不支持改参
+
+  收 `emoji_hash`、`binary_data_base64`、`session_id`。中止即跳过该表情的缓存与内置识别。
+- **`emoji.maintenance.before_register`** — 定时维护尝试注册候选表情前 — 允许 abort · 不支持改参
+
+  收 `file_name`、`file_size`。中止只跳过当前候选，扫描继续。
+- **`emoji.register.after_build_description`** — 视觉模型生成表情包描述后 — 允许 abort · 允许改参
+
+  收 `emoji`、`description`、`image_format`；改参可改写描述，中止则本次描述生成作废。
 
 ### 黑话（Jargon）链
 
-- **`jargon.extract.before_persist`** — 黑话条目写库前 — 允许 abort ✅ · 允许改参 ✅
-- **`jargon.inference.before_finalize`** — 黑话推断结果写回前 — 允许 abort ✅ · 允许改参 ✅
+- **`jargon.extract.before_persist`** — 黑话条目写库前 — 允许 abort · 允许改参
+- **`jargon.inference.before_finalize`** — 黑话推断结果写回前 — 允许 abort · 允许改参
 
 ### 表达方式（Expression）链
 
-- **`expression.select.before_select`** — 表达方式选择前 — 允许 abort ✅ · 允许改参 ✅
-- **`expression.select.after_selection`** — 表达方式选择完成后 — 允许 abort ✅ · 允许改参 ✅
-- **`expression.learn.after_extract`** — 表达方式学习解析候选后 — 允许 abort ✅ · 允许改参 ✅
-- **`expression.learn.before_upsert`** — 表达方式写库前 — 允许 abort ✅ · 允许改参 ✅
+- **`expression.select.before_select`** — 表达方式选择前 — 允许 abort · 允许改参
+- **`expression.select.after_selection`** — 表达方式选择完成后 — 允许 abort · 允许改参
+- **`expression.learn.after_extract`** — 表达方式学习解析候选后 — 允许 abort · 允许改参
+- **`expression.learn.before_upsert`** — 表达方式写库前 — 允许 abort · 允许改参
 
 ### 发送服务链
 
-- **`send_service.after_build_message`** — 出站 `SessionMessage` 构建完成后 — 允许 abort ✅ · 允许改参 ✅
-- **`send_service.before_send`** — 调用 Platform IO 发送前 — 允许 abort ✅ · 允许改参 ✅
-- **`send_service.after_send`** — 发送流程完成后 — 允许 abort ❌ · 允许改参 ❌
+- **`send_service.after_build_message`** — 出站 `SessionMessage` 构建完成后 — 允许 abort · 允许改参
+- **`send_service.before_send`** — 调用 Platform IO 发送前 — 允许 abort · 允许改参
+- **`send_service.after_send`** — 发送流程完成后 — 不允许 abort · 不支持改参
 
 ### Maisaka 规划器链
 
-- **`maisaka.planner.before_request`** — Maisaka 规划器请求模型前 — 允许 abort ❌ · 允许改参 ✅
-- **`maisaka.planner.after_response`** — Maisaka 收到模型响应后 — 允许 abort ❌ · 允许改参 ✅
+- **`maisaka.planner.before_request`** — Maisaka 规划器请求模型前 — 不允许 abort · 允许改参
+- **`maisaka.planner.after_response`** — Maisaka 收到模型响应后 — 不允许 abort · 允许改参
 
 ### Maisaka 回复器链
 
-- **`maisaka.replyer.before_request`** — Maisaka replyer 请求模型前；可读取或改写本次 `reply_tool_args` — 允许 abort ✅ · 允许改参 ✅
-- **`maisaka.replyer.before_model_request`** — Maisaka replyer 构造完最终 `items` 后、请求模型前；可改写实际发送给模型的消息列表 — 允许 abort ✅ · 允许改参 ✅
-- **`maisaka.replyer.after_response`** — Maisaka replyer 收到模型响应后；可改写回复或要求重生成 — 允许 abort ✅ · 允许改参 ✅
-- **`maisaka.reply.before_post_process`** — 最终可见回复执行文本后处理前；可按单次回复改写正文或调整后处理策略 — 允许 abort ✅ · 允许改参 ✅
+- **`maisaka.replyer.before_request`** — Maisaka replyer 请求模型前；可读取或改写本次 `reply_tool_args` — 允许 abort · 允许改参
+- **`maisaka.replyer.before_model_request`** — Maisaka replyer 构造完最终 `items` 后、请求模型前；可改写实际发送给模型的消息列表 — 允许 abort · 允许改参
+- **`maisaka.replyer.after_response`** — Maisaka replyer 收到模型响应后；可改写回复或要求重生成 — 允许 abort · 允许改参
+- **`maisaka.reply.before_post_process`** — 最终可见回复执行文本后处理前；可按单次回复改写正文或调整后处理策略 — 允许 abort · 允许改参
+- **`maisaka.reply.after_split`** — 最终回复完成断句后、限制段数与合并前；可修改有序文本分段 — 不允许 abort · 允许改参
 
 `reply_tool_args` 会在表达方式选择链、`maisaka.replyer.before_request` 和 `maisaka.replyer.after_response` 中保持可见。它包含 reply 工具里除内部参数 `msg_id`、`_reply_id`、`_plugin_reply_prompt` 外的额外参数；`before_request` 返回的 `reply_tool_args` 修改会继续传递给后续 replyer hook。
 
@@ -350,7 +351,6 @@ class ThinkingLevelPlugin(MaiBotPlugin):
 
 ### 示例：改写表达方式选择
 
-
 `before_select` 会收到 `chat_id`、`session_id`、`chat_info`、`chat_history`、`reply_message`、`reply_tool_args`、`target_message`、`reply_reason`、`max_num`、`think_level`、`candidates`。`reply_tool_args` 包含 reply 工具里除 `msg_id`、`set_quote`、`reference_info` 外的额外参数。`after_selection` 在此基础上额外包含 `selected_expression_ids` 与 `selected_expressions`。
 
 ::: code-group
@@ -381,7 +381,6 @@ async def replace_expression_selection(self, **kwargs):
 
 窗口未曾就绪便退出时不触发 `closed`；单击不会触发拖动 Hook。插件可在 Hook 中调用桌宠气泡与动画能力，动画被占用时会返回忙碌错误。
 
-
 ## Host 校验规则
 
 Host 在插件注册阶段会对 `@HookHandler` 声明进行校验，不合法时插件直接注册失败。校验规则如下：
@@ -404,18 +403,17 @@ Host 在插件注册阶段会对 `@HookHandler` 声明进行校验，不合法�
 
 ### 主动中止并提供原因
 
-需要阻止回复或发送时，返回 `action="abort"`，将具体原因放进 `custom_result.reason`。
-`HookResult` 是 SDK 提供的可选类型提示，返回值仍是普通字典。
+需要阻止回复或发送时，返回 `action="abort"`，把具体原因放进 `custom_result.reason`。返回值就是普通字典。
 
 ::: code-group
 
 ```python [Python ~vscode-icons:file-type-python~]
-from maibot_sdk import HookHandler, HookResult
+from maibot_sdk import HookHandler
 from maibot_sdk.types import HookMode
 
 
 @HookHandler("maisaka.replyer.before_request", mode=HookMode.BLOCKING)
-async def guard_reply(self, request_type="", reply_message_id="", **kwargs) -> HookResult:
+async def guard_reply(self, request_type="", reply_message_id="", **kwargs) -> dict:
     if request_type == "maisaka.replyer" and not reply_message_id:
         return {
             "action": "abort",
@@ -435,7 +433,7 @@ async def guard_reply(self, request_type="", reply_message_id="", **kwargs) -> H
 - **回复生成前** — `maisaka.replyer.before_request` / `before_model_request` 取消本次生成，模型请求不会发出，也不会触发模型重试、切换或故障惩罚。
 - **回复生成后** — `maisaka.replyer.after_response` / `maisaka.reply.before_post_process` 取消本次回复，后续重生成、后处理和发送停止。
 - **发送前** — `send_service.after_build_message` / `before_send` 取消当前消息发送；分段回复已送达的回执保留，后续段停止发送。
-- **表情选择** — `emoji.maisaka.before_select` / `after_select` 取消本次表情发送。
+- **表情缓存与注册** — `emoji.receive.before_cache` 跳过该表情的缓存与识别；`emoji.maintenance.before_register` 跳过当前候选；`emoji.register.after_build_description` 取消本次描述生成。
 - **表达选择** — `expression.select.before_select` / `after_selection` 仅跳过表达选择，回复仍可继续，原因保留在选择结果和生成指标中。
 - **接收、命令和学习** — 停止对应消息处理、命令执行、黑话写入或表情注册，日志记录来源与原因；表达学习还会在学习状态中保留原因。
 
@@ -474,33 +472,6 @@ sequenceDiagram
     HD-->>Host: 返回最终结果
 ```
 
-## 迁移指南：WorkflowStep → HookHandler
-
-- **`@WorkflowStep(stage="pre_process")`** → **`@HookHandler("chat.receive.before_process")`** — 使用命名 Hook 点代替固定 stage
-- **`blocking=True`** → **`mode=HookMode.BLOCKING`** — 参数名变更
-- **`observe=True`** → **`mode=HookMode.OBSERVE`** — 参数名变更
-- **`priority=10`** → **`order=HookOrder.EARLY`** — 改为三档枚举
-
-::: danger
-直接调用 `WorkflowStep(...)` 现在会立即抛出 `RuntimeError`，不存在兼容映射。必须手动将所有 `@WorkflowStep` 替换为 `@HookHandler`。
-:::
-
-::: code-group
-
-```python [Python ~vscode-icons:file-type-python~]
-# 旧代码（SDK 1.x）— 不再可用
-@WorkflowStep(stage="pre_process", blocking=True)
-async def on_pre_process(self, **kwargs):
-    ...
-
-# 新代码（SDK 2.0）
-@HookHandler("chat.receive.before_process", mode=HookMode.BLOCKING)
-async def on_pre_process(self, **kwargs):
-    ...
-```
-
-:::
-
 ## 验证与排错
 
 **验收动作** — 重载插件后触发一次对应链路（如让机器人在群里收一条消息命中 `chat.receive.before_process`）：Runner 日志里出现你处理器的输出，且消息按预期被改写或中止，说明 Hook 名、模式与返回值都对。
@@ -508,5 +479,5 @@ async def on_pre_process(self, **kwargs):
 - **插件注册失败** — Host 在注册阶段校验声明：`hook` 必须是内置 Hook 清单里已有的名字，写错一个词（如 `chat.receive.before_processing`）就是注册失败，日志会指出具体是哪个组件。
 - **对不允许 abort 的 Hook 声明了 `ErrorPolicy.ABORT`** — `send_service.after_send`、`chat.command.after_execute`、`maisaka.planner.*` 都不允许 abort，声明 `ABORT` 会注册失败；去掉该策略，或换到允许 abort 的 Hook。
 - **`modified_kwargs` 改了没生效** — 只有 `mode=HookMode.BLOCKING` 下返回值才被采纳；`OBSERVE` 模式后台并发执行，返回的 `modified_kwargs` 与 `abort` 请求一律忽略。
-- **升级 SDK 2.0 后插件加载报 `RuntimeError`** — 代码里还有 `@WorkflowStep`：SDK 2.0 已移除且没有兼容映射，按迁移表改成 `@HookHandler`（`blocking=True` → `mode=HookMode.BLOCKING`，`priority=10` → `order=HookOrder.EARLY`）。
+- **插件加载报 `RuntimeError`** — 代码里还有 `@WorkflowStep`。它已移除且没有兼容映射，改成 `@HookHandler` 订阅同一个检查点，参数名换成 `mode` / `order`。
 - **执行顺序和自己预期相反** — 排序规则是「模式 → order → 来源 → 插件 ID → 处理器名」：内置插件永远排在第三方插件之前，`HookOrder.EARLY` 只保证同一模式内靠前。

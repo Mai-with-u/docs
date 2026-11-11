@@ -4,7 +4,7 @@ title: Command Component
 
 # Command Component
 
-`@Command` is a command component based on regex matching. When a message sent by a user matches a Command's regex pattern, MaiBot will dispatch and execute the corresponding Command handler function.
+`@Command` fires on a regex match: when a user message hits a Command's `pattern`, MaiBot dispatches its handler.
 
 ## Decorator Signature
 
@@ -253,7 +253,7 @@ class AdminPlugin(MaiBotPlugin):
     async def handle_status(self, **kwargs):
         """View system status"""
         stream_id = kwargs["stream_id"]
-        await self.ctx.send.text("System running normally ✅", stream_id)
+        await self.ctx.send.text("System running normally", stream_id)
         return True, "System running normally", 1
 
     @Command("echo", pattern=r"^/echo\s+(?P<text>.+)$")

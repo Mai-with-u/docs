@@ -4,16 +4,16 @@ title: 编写一个适配器
 
 # 编写一个适配器
 
-**接一个新平台只需要写三个方法。** 其余部分——连接 MaiBot、断线重连、认证、消息格式——都由官方 `maim_message` 库和一份百来行的骨架代码包办。这一页带你从零把它跑起来。
+**接一个新平台只需要写三个方法。** 连接 MaiBot、断线重连、认证、消息格式都由官方 `maim_message` 库和一份百来行的骨架包办。
 
 前置条件：
 
 - **Python 3.10+**，能 `pip install maim_message`；
 - 一个**能收发消息的平台 SDK**（平台官方库、OneBot 实现或你自己的协议栈）；
-- 一个**已经跑起来的 MaiBot**，并且知道它的消息服务器地址与令牌。
+- 一个**已经跑起来的 MaiBot**，并且知道宿主地址、目标 Bot ID 与它的 `auth_token`。
 
 ::: tip 先确认你要接哪套服务
-本页用**经典消息服务器**（默认开启，`ws://127.0.0.1:8000/ws`）。如果你要接的是 API 服务器（`enable_api_server`），连接参数换成 `x-apikey` / `x-platform`，报文要在外层多包一层信封——差别见[消息协议参考](./protocol.md)。
+本页用**经典消息服务器**（默认开启，`ws://<宿主>:<端口>/maim/<bot_id>/ws`）。要接 API 服务器（`enable_api_server`）时，连接参数换成 `x-apikey` / `x-platform`，报文外层多包一层信封——差别见[消息协议参考](./protocol.md)。
 :::
 
 ## 骨架的分工
@@ -121,7 +121,13 @@ flowchart TB
 
 ## 完整代码
 
-下面就是上面每一步拼起来的成品。复制出去，把 `PlatformBridge` 三个方法填上，改掉顶部的四个常量即可运行。
+下面就是上面每一步拼起来的成品。复制出去，把 `PlatformBridge` 三个方法填上，改掉顶部的五个常量即可运行。
+
+- **`PLATFORM`** — 平台名，全局唯一。
+- **`BOT_ID`** — 目标 Bot 的 ID，32 位十六进制，来自 `maibot host list` 或 WebUI 的 Bot 管理。
+- **`MAIBOT_WS_URL`** — `ws://<宿主地址>:<宿主端口>/maim/<bot_id>/ws`，宿主默认 `127.0.0.1:8001`。
+- **`MAIBOT_TOKEN`** — 该 Bot 的 `maim_message.auth_token` 里的令牌原文；列表为空时置空字符串连不上，需先填令牌。
+- **`SELF_ID`** — 本适配器实例的账号标识，用于多账号路由。
 
 ::: code-group
 
@@ -131,18 +137,20 @@ flowchart TB
 
 ## MaiBot 侧要改什么
 
-默认配置只监听本机。适配器和 MaiBot 不在同一台机器（或不在同一个容器网络）时，改 `config/bot_config.toml`：
+适配器和 MaiBot 不在同一台机器（或不在同一个容器网络）时，先给该 Bot 配上令牌，再把宿主的监听地址放开。
+
+Bot 侧只需要令牌：
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [maim_message]
-ws_server_host = "0.0.0.0"   # 从 127.0.0.1 改成 0.0.0.0 才能被外部连上
-ws_server_port = 8000
-auth_token = ["换成一段足够长的随机串"]   # 非空即开启认证；适配器侧要填一模一样的值
+auth_token = ["换成一段足够长的随机串"]   # 空列表拒绝全部连接；适配器侧要填一模一样的值
 ```
 
 :::
+
+监听地址与端口属于宿主配置，在 `host/config.toml` 的 `[webui]` 段（`hosts`、`port`，默认 `127.0.0.1` + `::1`、`8001`），或在 WebUI 的「麦麦设置 → 公共设置」里改。要让容器或另一台机器连上，把监听地址加上 `0.0.0.0` 并放行端口。
 
 ::: warning 认证值是原文比对
 `auth_token` 走 `authorization` 请求头做**整串比较**，没有 `Bearer` 前缀解析。适配器侧多打一个 `Bearer ` 就会被以关闭码 1008 断开。

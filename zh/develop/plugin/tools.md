@@ -4,7 +4,7 @@ title: Tool 组件
 
 # Tool 组件
 
-`@Tool` 是 MaiBot 插件系统中最核心的组件类型。它允许插件向 LLM 暴露可调用的工具函数，使 LLM 能够在推理过程中主动调用外部能力——例如搜索知识库、查询数据库、调用外部 API 等。
+`@Tool` 向 LLM 暴露可调用的函数，由 LLM 在推理过程中自行决定何时调用——搜索知识库、查询数据库、请求外部 API 都走这条路。
 
 ## 装饰器签名
 
@@ -46,7 +46,7 @@ from maibot_sdk.types import ToolParameterInfo, ToolParamType
 
 平台标识去除首尾空白、转为小写并去重。空名称、非字符串元素或其他类型会报错。平台限制与 `chat_scope`、`allowed_session` 共同生效；执行受限工具必须有匹配的平台上下文。此字段是组件声明，不进入工具参数 Schema，LLM 不能通过调用参数修改作用域。
 
-Host 必须支持平台作用域过滤，旧 Host 会忽略此字段。依赖平台权限的操作，插件也应校验宿主注入的 `platform`。
+平台作用域由 Host 过滤，依赖平台权限的操作，插件自身也应校验宿主注入的 `platform`。
 
 ::: code-group
 

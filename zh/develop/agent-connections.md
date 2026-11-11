@@ -25,6 +25,40 @@ acp_command = "dsh"   # Windows 可填 dsh.cmd 或实际程序的绝对路径
 
 `acp_command` 只填程序，参数放 `acp_args`（仅 `custom` 模式使用）；`acp_env` 会覆盖子进程环境，程序查找也用覆盖后的 `PATH`。
 
+## 连接字段
+
+全部字段都在 `bot_config.toml` 的 `[agent]` 段，改完重启生效。
+
+**`enabled`** — `false`。启用与普通聊天并行的外接 Agent。
+
+**`connection`** — `dsh`，取值 `dsh` / `dsh_desktop` / `custom`。`dsh` 自动附加 `--profile acp`；`dsh_desktop` 连正在运行的桌面应用；`custom` 用于其他 ACP 程序。
+
+**`desktop_manifest`** — 空。`dsh_desktop` 模式读取的桥接文件，留空用 `~/.dsh/maibot-desktop.json`，见 [dsh Desktop](#dsh-desktop)。
+
+**`acp_command`** — `dsh`。外部 Agent 可执行程序或绝对路径，不是整段 shell 命令；Windows 可填 `dsh.cmd`。
+
+**`acp_args`** — 空列表。仅 `custom` 模式使用，逐项填参数；`{mcp_port}` 会替换成本次工具服务端口。
+
+**`acp_cwd`** — 空。麦麦所在主机上启动 ACP 程序（或 `ssh`）的目录，留空用 `data/agent/workspace`；同一会话恢复期间保持不变。
+
+**`acp_remote_cwd`** — 空。远端已存在的绝对路径，原样传给外部会话，不在本机创建或展开。
+
+**`acp_env`** — 空。追加或覆盖外部进程环境变量，例如 `DSH_HOME`。
+
+**`acp_model`** — 空。留空用外部 Agent 自身的模型配置；填写时必须是其 model 配置选项公布的值。
+
+**`acp_timeout`** — `60` 秒。握手、会话恢复与取消确认的等待时间，不限制任务执行时长。
+
+**`mcp_port`** — `0`。`0` 表示自动分配本机回环端口；同一端口只能给一个连接用。
+
+**`planner_enabled`** — `false`。外接 Planner 总开关，关闭时保留 `planner_sessions` 名单。
+
+**`planner_sessions`** — 空列表。填真实聊天流 `session_id`；空列表不启用任何聊天流。
+
+**`allow_users`** — 空列表。允许指挥 Agent 的私聊用户，格式 `platform:user_id`，例如 `qq:123456`。
+
+**`allow_groups`** — 空列表。允许指挥 Agent 的群聊，格式 `platform:group_id`。两个白名单都为空时不限制；填任意一项后只放行命中的聊天。
+
 ## 让指定聊天改用外接 Planner
 
 不启用 `enabled` 也可以：打开 `planner_enabled`，把要接管的聊天流 `session_id` 填进 `planner_sessions`，这些聊天的主 Planner 就走 ACP。
@@ -121,7 +155,7 @@ Desktop 重启后桥接端口和令牌可能变化，需要同步更新隧道与
 
 正常结束原因是 `end_turn`。其他停止原因（如 `refusal`、`max_tokens`）和 dsh 返回的模型请求错误，会保留已收到的输出、清除在途标记并报告单轮失败，不暂停整个队列；来源聊天会收到带任务编号和原始错误的内部通知。换模型不会触发重试，换好后发送「继续」或新请求即可进入同一会话。
 
-重启保留暂停状态。旧版本记录的故障暂停可由新的用户请求或 WebUI 恢复，系统输入不能解除暂停；手动暂停始终要在 WebUI 恢复，暂停期间的传话回执会明确提示仅入队。
+重启保留暂停状态。故障暂停可由新的用户请求或 WebUI 恢复，系统输入不能解除暂停；手动暂停始终要在 WebUI 恢复，暂停期间传话的回执会明确提示仅入队。
 
 ## 验证与排错
 

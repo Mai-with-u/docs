@@ -3,7 +3,7 @@ title: Lifecycle
 ---
 # Lifecycle
 
-MaiBot plugins have three lifecycle methods: `on_load()`, `on_unload()`, and `on_config_update()`. The SDK enforces that all plugins implement these three methods; otherwise, the Runner will refuse to load the plugin.
+A plugin needs three lifecycle methods — `on_load()`, `on_unload()`, `on_config_update()`. Miss one and the Runner refuses to load it.
 
 ## create_plugin() Factory Function
 

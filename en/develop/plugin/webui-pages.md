@@ -6,7 +6,7 @@ title: WebUI Pages
 
 Add `webui.json` to your plugin directory to expose data and actions in the WebUI. Use predefined components for simple pages and write HTML/CSS/JS for complex interfaces. Both modes call static `@API` methods owned by the plugin.
 
-This page describes the in-development `schema_version: 2` protocol and requires matching host and dashboard builds. Updating the Python SDK alone does not update the page protocol. A plugin can mix both modes:
+`schema_version: 2` is still an in-development protocol and requires matching host and dashboard builds. Updating the Python SDK alone does not update the page protocol. A plugin can mix both modes:
 
 ::: fields
 - **`declarative` components** — Overviews, simple settings, and single-row table actions. The plugin declares components, data, and business APIs; the host manages appearance, forms, query refresh, confirmation, and details.
@@ -295,7 +295,7 @@ try {
 
 The alias library resolves to the action in the declaration. Uploads can require confirmation; arguments are copied before confirmation, and API state and arguments are checked before file processing and again before invocation.
 
-Declare `webui.claim_upload` in `_manifest.json` capabilities and use an SDK that provides `ctx.webui.claim_upload()` (2.11.0+). WebUI required_capabilities checks frontend features; manifest capabilities authorizes Python SDK calls. These are separate checks.
+Declare `webui.claim_upload` in `_manifest.json` capabilities. WebUI required_capabilities checks frontend features; manifest capabilities authorizes Python SDK calls. These are separate checks.
 
 Add this receiving method to a MaiBotPlugin subclass with its lifecycle methods already implemented:
 
@@ -334,19 +334,19 @@ Each page allows two active bridge requests, a burst of 20 messages and a sustai
 
 These controls protect the host origin and API permissions; they do not fully isolate malicious plugins. A frame can still navigate itself and send a network request before its subsequent load causes removal. Arbitrary JavaScript loops or memory exhaustion may affect the browser tab. Python plugin processes are not OS sandboxes. CSP and the stop button do not provide complete data-loss prevention or resource isolation.
 
-## Declaration migration
+## Declaration Rules
 
-schema_version describes the WebUI declaration format, independently of manifest_version, the SDK version, and each API's version. Version 1 first appeared in the [3507afcf commit](https://github.com/Mai-with-u/MaiBot/commit/3507afcf6e8351664810868be59340cbaf4deb2e) on October 3, 2026 as `schema_version: Literal[1] = 1`. Version 2 described here accompanies the separation of page responsibilities and shared protocol changes.
+`schema_version` describes the WebUI declaration format, independently of manifest_version, the SDK version, and each API's version; the format only accepts `2`.
 
-Update the host, dashboard, and plugin declaration together. Version 1 declarations receive a migration error; changing the number alone does not restore removed components.
+**Page mode** — every page is `declarative` or `custom`. Declarative pages hold basic layouts, single-row details, and scalar forms; complex interaction goes into HTML.
 
-1. Set schema_version to 2 and choose declarative/custom. Replace file_upload with image_upload and remove interactive_controls. Declare structured_arguments when using array/object parameters.
-2. Remove repeat/item contexts, gallery, upload, checkbox, multi-selection, cross-page selection, clear_selection, button.detail, dynamic button.value, select.presentation, and old component-specific fields from declarative pages. Keep basic layouts, single-row details, and scalar forms; move complex UI to HTML.
-3. Remove content, component-style arguments, auto_refresh, and poll_interval_seconds from HTML pages. Manage behavior in script and select document/viewport layout as appropriate.
-4. result.success=false no longer triggers a host exception; raise in the API or interpret results in HTML. Replace implicit navigate_page/navigate_params behavior with maibot.navigate(pageId, state).
-5. Use uploads aliases and correctly typed business arguments. Leave upload_id for the host to inject. Host confirmation is supported.
+**Arguments** — declare `structured_arguments` for array or object parameters. Image uploads use the `uploads` alias, business arguments must match the declaration exactly, and `upload_id` is left for the host to inject.
 
-There are no compatibility branches or dedicated APIs for old plugin names, business results, or invalid declarations.
+**Failure semantics** — a business failure raises in the API or is interpreted in HTML; the host ignores `result.success`. Navigate with the explicit `maibot.navigate(pageId, state)`.
+
+**Layout** — HTML pages manage their own UI in script; use the viewport layout for full-screen or very long interfaces.
+
+The Host adds no compatibility branches for plugin names, business results, or invalid declarations: an invalid declaration fails registration.
 
 ## Verification and troubleshooting
 

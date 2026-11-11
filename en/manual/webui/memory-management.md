@@ -1,167 +1,165 @@
 ---
-title: View and Manage Memory
+title: Viewing and Managing Memory
 ---
 
-# View and Manage Memory
+# Viewing and Managing Memory
 
-MaiBot stores what it learns from chats in long-term memory. The **长期记忆** (Long-term Memory) page (`/resource/knowledge-base`) under the "麦麦资源管理" (MaiBot Resource Management) sidebar group centralizes memory management: query, import, correct, delete, and tune — all in one place.
+Long-term memory lives in the local data directory, and the **长期记忆** (Long-term memory) page in the WebUI (`/resource/knowledge-base`) puts search, writing, correction, erasure and tuning in one place. For the memory system's own parameters see [A_Memorix configuration](../configuration/amemorix-config.md).
 
 ![Long-term memory](/images/webui/knowledge-base.webp)
 
-## Memory Overview
+## The six tabs
 
-Open the Long-term Memory page; the tab bar is organized by purpose:
+The tabs come in two rows:
 
-- **记忆查询** (Memory query) - search memory content, further split into the "文字记录" (Text records) and "人物画像" (Person profiles) views
-- **图片记忆** (Image memory) - view image assets, image cognition, and related memories; launch image search and historical backfill
-- **记忆流** (Memory stream) - review memory changes per chat flow
-- **导入导出** (Import & export) - import materials, and export and install shareable memory bundles
-- **记忆检修** (Memory inspection) - maintain memory state and correct content
-- **记忆抹除** (Memory purge) - bulk purge and history rollback
+::: fields
+- **记忆查询** (Memory search) — search text records, related content and person profiles; it has two inner views, "文字记录" (Text records) and "人物画像" (Person profiles).
+- **图片记忆** (Image memory) — image assets, image observations, visual similarity search and historical backfill.
+- **记忆流** (Memory stream) — check memory additions, updates and deletions per chat stream.
+- **导入导出** (Import/export) — create import tasks, import and export memory bundles, add facts by hand.
+- **记忆检修** (Memory inspection) — content correction, state maintenance, retrieval tuning, episodes, profile maintenance, feedback history.
+- **记忆抹除** (Memory erasure) — erase by source in bulk and roll a deletion back.
+:::
 
-The "更多操作" (More actions) menu in the top-right corner also has **查看记忆状态** (View memory status) and **打开图谱** (Open graph); `tab=graph` in old links still opens the graph directly.
+The "更多操作" (More actions) menu on the right of the tab row holds "查看记忆状态" (View memory status) and "打开图谱" (Open graph). When the vector store and the current embedding model fingerprint disagree, a red "重建向量" (Rebuild vectors) button appears in the same row.
 
-Use "重建向量" (Rebuild vectors) when memory vectors need rebuilding.
+## Searching memory
 
-## Search Memory
+The search box under "记忆查询 → 文字记录" matches content, names, relations, facts, episodes and IDs at once. The adjacent "记录类型" (Record type) selector narrows results to paragraphs, entities, relations, facts or episodes, and the "显示停用" (Show inactive) switch also lists records that are no longer active.
 
-In **记忆查询** (Memory query), enter keywords (e.g. "game", "food") and filter by time or by user to see memories from a period or from chats with a specific person.
+Select several results and use "修正所选" (Correct selected) to batch-correct paragraphs and relations; facts are edited one at a time and entities are changed in the graph.
 
-Memory query is further split into the "文字记录" (Text records) and "人物画像" (Person profiles) views: the former queries authoritative records such as paragraphs, the latter person dossiers (see [Person Profiles](#person-profiles)).
+The "人物画像" inner view either locates a person exactly by platform plus user account, or searches fuzzily by name, group nickname or person_id.
 
-![Memory query](/images/webui/knowledge-query.webp)
+![Memory search](/images/webui/knowledge-query.webp)
 
-## Knowledge Graph
+## Knowledge graph
 
-The knowledge graph uses nodes for concepts and edges for relations. Open it through "更多操作 → 打开图谱" (More actions → Open graph); `tab=graph` in existing links is still supported.
-
-The standalone **长期记忆图谱** (Long-term Memory Graph) page (`/resource/knowledge-graph`) provides full-screen visualization:
+"打开图谱" (Open graph) shows entities, relations and their evidence chains, and can jump straight to a node by paragraph hash. The graph only lets you inspect and delete wrong nodes, relations or evidence paragraphs; content correction goes through "记忆检修 → 内容修正".
 
 ![Long-term memory graph](/images/webui/knowledge-graph.webp)
 
-## Image Memory
+## Image memory
 
-The **图片记忆** (Image memory) tab manages the images Mai has "seen". It needs an image embedding model configured first (`[model_task_config.image_embedding]` in `model_config.toml`); without one, images and cognition are still saved normally, but the page will show retrieval as unavailable. Related parameters: [A_Memorix Config → Image Memory](../configuration/amemorix-config.md#image-memory).
+Image memory first needs a model that maps image input to vectors, configured under `[model_task_config.image_embedding]` in `model_config.toml`. Without one, images and observations are still stored; only retrieval is unavailable. The parameters are documented under [A_Memorix configuration → Image memory](../configuration/amemorix-config.md#image-memory).
 
-What this tab can do:
+After selecting a stored image, the "相似图片" (Similar images) panel searches by a similarity threshold, labels results as "同一图片" (Same image) or "相似图片" (Similar image), and expands the chats, observations and related memories behind each hit.
 
-- **View image assets and occurrence records** - thumbnails, source chat flow, cognition (user description, model description, manual corrections), and their related paragraphs, entities, relations, and Episodes
-- **Search by image** - pick an image in the store to launch a similar search, with an adjustable similarity threshold. Results distinguish **exact same image** and **visually similar**, and show the score, real chat name, cognition, related knowledge, and per-stage timing
-- **Historical backfill** - click "预览历史回填" (Preview historical backfill) to scan historical messages by category (processable, already processed, missing source, missing chat flow, missing file, invalid image, write failed) before confirming execution; execution ignores messages that arrive after the preview
-- **Task diagnostics** - view the image embedding job and description-compensation job lists, filter by status, see retry counts, last error, lease deadline, and index progress under the current model fingerprint
-- **Cognition confirmation and correction, record deletion** - confirm or correct image cognition, delete wrong relations or occurrence records
+"查看历史图片回填" (View historical backfill) opens the "图片记忆高级维护" (Advanced image memory maintenance) dialog, whose "图片维护" (Image maintenance) panel holds four collapsible sections:
 
-**Troubleshooting tips**:
+::: fields
+- **入库失败任务** (Failed ingestion jobs) — the first ingestion attempt retries automatically; after the retry limit the error is kept and the whole batch can be requeued once the cause is fixed.
+- **历史图片回填** (Historical image backfill) — preview first to scan and classify old messages (recoverable, already backfilled, missing file, missing chat stream, missing source, unsupported or corrupt image, write failed), then execute. Execution re-validates and ignores messages that arrived after the preview.
+- **索引状态与任务诊断** (Index status and job diagnostics) — process the index queue and inspect queued jobs and failure reasons.
+- **模型指纹与启动恢复记录** (Model fingerprint and startup recovery) — the current image vector generation and what recovery did at startup.
+:::
 
-- Image search keeps showing "等待构建" (Pending build) → confirm the `image_embedding` task has a working image embedding model configured
-- Showing "模型不可用" (Model unavailable) → model probing failed; check whether the provider supports image input or whether the key is valid; failures retry automatically at `probe_retry_seconds`
-- Lots of "文件缺失" (Missing file) during historical backfill → historical image binaries have been cleaned up, which is normal and does not affect new images entering the store
+"文件缺失" (Missing file) during backfill means the historical image binary has already been cleaned up, which does not affect new images. If the panel keeps showing "waiting to build", confirm the image embedding model is usable first.
 
-## Memory Stream
+## Memory stream
 
-Review memory changes for each chat flow:
+"记忆流" lists memory changes per chat stream and event type: paragraphs, episodes, person profiles, feedback corrections, delete/restore and maintenance actions, over the last 24 hours, 7 days or 30 days.
 
 ![Audit timeline](/images/webui/knowledge-timeline.webp)
 
-Filter memory additions, updates, deletions, and change summaries by chat stream and event type.
+## Importing material
 
-## Import & Memory Bundles
+"导入导出 → 导入任务" (Import/export → Import tasks) feeds outside material into memory. The `⋮` in the card header switches between three task types:
 
-The **导入导出** (Import & export) tab lets you teach MaiBot new knowledge manually, and also packs up existing memories to take away:
+::: fields
+- **资料导入** (Document import) — upload text, files or a folder.
+- **LPMM OpenIE** — read LPMM data and extract relations.
+- **LPMM 转换** (LPMM conversion) — convert LPMM data into the target directory.
+:::
+
+Pick a content category before importing; it decides how text is chunked and extracted. Narrative material is split into scenes and then a sliding window (default 1600 characters with 400 overlap), factual material is chunked by structure (default 1200 characters, never splitting lists or definitions), quotes and short lines are kept whole without relation extraction, and chat logs are chunked on message boundaries.
+
+The common and advanced parameters under "导入参数" (Import parameters) decide how new tasks chunk and extract; they are not written back to any config file. Limits and concurrency are documented under [A_Memorix configuration → Import center](../configuration/amemorix-config.md#import-center).
 
 ![Import memory](/images/webui/knowledge-import.webp)
 
-Import methods include material import (text, files, or folders), LPMM OpenIE, and LPMM conversion. Common and advanced options are available under "导入参数" (Import parameters).
+## Memory bundles
 
-**Memory bundles (`.amembundle`)** are used to migrate or share memories between one MaiBot and another:
+"记忆包导入导出" (Memory bundle import/export) moves memory between two MaiBot instances or produces a shareable `.amembundle` file.
 
-- **Export** - choose the memory scope to export, with a preview of the paragraphs, entities, relations, images, and uncompressed size it will contain; images can be multi-selected, and you can check "携带直接关联知识" (Carry directly associated knowledge)
-- **Install** - first upload the bundle for a preview check (size, image count, resource check, vector compatibility), then execute the install; installed content and retrieval capability are shown separately
-- **Image vector reuse** - when the installing instance's image embedding model matches the source, package vectors are reused directly; when the model differs, vectors are missing, or the model is temporarily unavailable, content installation still completes, the image status shows "等待构建" (Pending build), and vectors are built later with the local model
-- **Uninstall** - uninstalling a memory bundle cleans up resources exclusive to the bundle; shared images still referenced by local chats or other bundles are kept
+Pick a content level and a scope when exporting:
 
-**What is inside a bundle** - a memory bundle is a ZIP, packed according to its content level:
+::: fields
+- **知识** (Knowledge) — paragraphs, entities, relations and their vectors, equivalent to an LPMM knowledge package with the same semantics.
+- **完整** (Full) — knowledge plus person profiles, episodes, the fact ledger, external references and lifecycle state; suited to whole-machine migration or a full backup.
+- **导出范围** (Export scope) — all memory, a given chat stream, a given source, a given import task, an installed knowledge package, or hand-picked images.
+- **携带兼容向量** (Carry compatible vectors) — bundle vectors to speed up installation under the same embedding configuration; without it the installing side builds them.
+:::
 
-- **`knowledge`** - paragraphs, entities, relations, and their vectors, equivalent to an LPMM same-semantics knowledge pack; suited to migrating "knowledge" without person profiles
-- **`full`** - everything in `knowledge` plus person profiles, Episodes, the fact ledger, external references, and lifecycle state; suited to whole-machine migration or a complete backup
+Inspect the file before installing: the page reports its size, image counts, missing resources and whether the vectors are compatible. Installation scope is either "所有聊天可用" (usable in all chats) or "指定聊天流" (a given chat stream), and the install mode is either "合并安装" (merge) or "空库恢复" (restore into an empty store, for moving a whole store).
 
-Members include `manifest.json`, `knowledge.json`, an optional `state.json`, paragraph and relation vectors, and for image memory `images.json`, `images/assets/` (original images), and an optional `vectors/images.npz` (image vectors).
+Bundle members include `manifest.json`, `knowledge.json`, an optional `state.json`, paragraph and relation vectors, plus `images.json`, `images/assets/` (original images) and an optional `vectors/images.npz` (image vectors) for image memory. Limits are 4096 members per bundle, 256 MiB per member after decompression and 1 GiB total after decompression; bundles without the image extension install just the same, they simply carry no image memory.
 
-**Capacity and compatibility**: a bundle holds at most 4096 members, a single member may not exceed 256 MiB uncompressed, and total uncompressed size may not exceed 1 GiB. Legacy-format (v1) text-only bundles can still be installed directly. Installation **calls no LLM at all**: package vectors are reused when usable, and when missing or unusable only the image vector index is rebuilt — no extraction is redone.
+Installation only moves existing content and fills in missing vectors; it does not extract anything again. Image vectors are reused when the fingerprint matches the local model, and content is installed anyway when they do not match, are missing, or the model is temporarily unavailable — image retrieval then shows as waiting to build and is filled in locally later. Uninstalling a bundle removes the resources it exclusively owns; shared images still referenced by other chat streams or bundles are kept.
 
-## Correct Memory
+## Correcting memory
 
-When a profile or relation is inaccurate, correct it via **记忆检修 → 内容修正** (Memory inspection → Content correction):
+"记忆检修 → 内容修正" takes a natural-language description of what to change and an optional correction scope (for example one person profile), produces a change plan with a cascade preview, and executes it after confirmation. Executed plans can be rolled back from "修正计划" (Correction plans), and "纠错历史" (Feedback history) records retrieval corrections and rollbacks.
 
-1. Set or remove manual overrides in person profiles
-2. Adjust nodes, relations, or weights in the knowledge graph
-3. Use feedback correction, delete-and-restore, or re-import to handle outdated content
+"记忆检修 → 画像维护" (Profile maintenance) maintains one person's supporting evidence, aliases and field overrides; select a person under "记忆查询 → 人物画像" first.
 
-Plain paragraph text currently has no arbitrary text editing entry; to correct it, delete the wrong source and re-import, or use the feedback correction mechanism.
+"记忆检修 → 情景记忆" (Episodes) manages episode generation state and filters by waiting to rebuild, running, completed or failed source.
 
-## Purge Memory
+![Feedback history](/images/webui/knowledge-feedback.webp)
 
-Don't want to remember something? The **记忆抹除** (Memory purge) tab supports:
+## Erasing and restoring
+
+"记忆抹除" has two halves:
+
+::: fields
+- **按来源抹除** (Erase by source) — select sources and preview the deletion, which shows how many entities, relations and paragraphs it touches before moving them to the recycle bin.
+- **删除记录** (Deletion records) — search past operations by mode, status or keyword, and restore an executed deletion as a whole.
+:::
+
+Deleted relations stay in "记忆检修 → 状态维护 → 记忆回收站" (Memory recycle bin) and can be restored row by row. Deletion is not immediate physical removal and leaves shared data that is still referenced elsewhere untouched.
 
 ![Delete memory](/images/webui/knowledge-delete.webp)
 
-Delete individual memories, multiple memories, or all memories from a chat stream.
+## Person profiles
 
-⚠️ **Note**: deleted items go to the recycle bin and can be restored
+Person profiles record personality, interests and chat habits. View them under "记忆查询 → 人物画像", or open `/resource/person` (the person info page) to manage them centrally: search by name, filter by whether the person is known and by platform, edit the person name, nickname, naming reason and personal impression, and select several people to delete in bulk.
 
-Feedback and rollback records can be viewed in **记忆检修** (Memory inspection):
+![Person info](/images/webui/person.webp)
 
-![Correction history](/images/webui/knowledge-feedback.webp)
+## Retrieval tuning
 
-## Person Profiles
+Run tuning when MaiBot keeps forgetting things. "记忆检修 → 检索调优" samples questions from real memory, evaluates candidate retrieval parameters against an objective (precision first, balanced, or recall first) and an intensity (quick, standard, deep), and reports a composite score plus an independent-sample validation verdict.
 
-Person profiles record personality traits, interests, and chatting habits. View and correct descriptions or add notes in the **人物画像** (Person profiles) tab or **人物信息管理** (Person Info Management) page (`/resource/person`).
-
-![Person info management](/images/webui/person.webp)
-
-## Retrieval Tuning
-
-If MaiBot's memory is poor, run a tuning task to optimize retrieval (**记忆检修 → 检索调优**, Memory inspection → Retrieval tuning):
+Tuning parameters only affect the next task, so keeping the defaults is usually right. Apply a result only when it is marked "推荐" (recommended): applying merges it into the running configuration, and "同时保存为默认设置" (Also save as default) writes it back to the config file.
 
 ![Retrieval tuning](/images/webui/knowledge-tuning.webp)
 
-- Tuning parameters affect only the next tuning task; the defaults are usually appropriate
-- After a task completes, review the evaluation result and apply the recommendation with one click if it passes validation
+## State maintenance
 
-## Runtime Maintenance
+"记忆检修 → 状态维护" works on the lifecycle of individual relations:
 
-**记忆检修 → 状态维护** (Memory inspection → State maintenance) provides runtime checks, auto-save, vector rebuild, paragraph vector backfill, image asset reconciliation, and operation records. View the current runtime state under "更多操作 → 查看记忆状态" (More actions → View memory status).
+::: fields
+- **维护操作** (Maintenance actions) — reinforce, freeze, protect or restore a relation matched by relation hash or by query text; protection can be time-limited, and leaving the duration empty protects it permanently.
+- **记忆回收站** (Memory recycle bin) — lists deleted relations and restores them row by row.
+:::
+
+Protected or pinned relations are exempt from memory-evolution decay and pruning.
 
 ![State maintenance](/images/webui/knowledge-maintenance.webp)
 
-## Verification & Troubleshooting
+## Verification and troubleshooting
 
-**Verify**: import a piece of text; after the task completes, the content should be searchable in **记忆查询** (Memory query).
+**Verification**: import a piece of text, wait for the task to reach "已完成" (completed), and the content should be searchable under "记忆查询".
 
-**Import tasks stuck in queue or failing?**
+- **Import tasks stay queued or fail** — make sure a usable model provider is configured (import needs extraction and embedding), then read the failure reason in the task detail.
+- **Just-imported content cannot be found** — confirm the task state is "已完成", then check whether vectors were built; if "重建向量" appears at the top of the page, rebuild first.
+- **Image retrieval keeps showing waiting to build** — confirm `[model_task_config.image_embedding]` has an embedding model that accepts image input; while the model is unavailable the page shows the matching error.
+- **Lots of "文件缺失" during backfill** — the historical image binaries were cleaned up, which is expected and does not affect new images.
+- **How long is memory kept** — by default indefinitely. Memory evolution only decays relations; weak relations are frozen, archived and end up in the recycle bin, with a strength of 1.0 dropping below 0.1 in about 3.3 days by default.
+- **Does memory leak privacy** — memory data stays in the local directory; summaries, profiles, corrections and embeddings call the model services you configured, so the data boundary depends on your deployment and provider.
 
-- Confirm a working model provider is configured (import needs models for extraction and vectorization)
-- Check the failure reason in the task details
+## Related docs
 
-**Memory query finds nothing?**
-
-- Confirm the import task completed (status "已完成")
-- Check whether vectors are built; rebuild them in "状态维护" (State maintenance) if necessary
-
-**Images not searchable or stuck at "等待构建" (Pending build)?**
-
-- Confirm `[model_task_config.image_embedding]` in `model_config.toml` has an embedding model that supports image input configured
-- Check the failure reason and retry counts under "图片记忆 → 任务诊断" (Image memory → Task diagnostics); the page reports the corresponding error when the model is unavailable
-
-**How long are memories kept?**
-
-Kept long-term by default. Memory evolution gradually decays old relation weights, and low-weight content may be marked for pruning; the exact behavior is controlled by A_Memorix's memory evolution configuration.
-
-**Do memories leak privacy?**
-
-Memory data is stored in local directories by default. Generating summaries, profiles, corrections, or vectors may call the model services you configured; confirm the data boundary according to your deployment and model provider.
-
-## Related Docs
-
-- [A_Memorix Config](../configuration/amemorix-config.md) — memory system parameters, including [Image Memory](../configuration/amemorix-config.md#image-memory)
-- [Model Config](../configuration/model-config.md) — configure the `image_embedding` image embedding task
+- [A_Memorix configuration](../configuration/amemorix-config.md) — memory system parameters, including [image memory](../configuration/amemorix-config.md#image-memory)
+- [Model configuration](../configuration/model-config.md) — configuring the `image_embedding` task
+- [Chat management](./chat-management.md) — per-session settings and observing chat streams

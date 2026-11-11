@@ -4,7 +4,7 @@ title: Reply Extensions
 
 # Reply Extensions
 
-A reply extension (`@ReplyExtension`, plugin SDK 2.10.0+) lets a plugin take part directly in MaiBot's `reply` flow: the plugin registers a set of **namespaced parameters**, the Planner can pass them when calling the reply tool, and the plugin uses them to add extra requirements **before generation** or transform the whole outgoing message group **before sending** (for example, turning text into voice).
+A reply extension (`@ReplyExtension`) lets a plugin take part directly in MaiBot's `reply` flow: the plugin registers a set of **namespaced parameters**, the Planner can pass them when calling the reply tool, and the plugin uses them to add extra requirements **before generation** or transform the whole outgoing message group **before sending** (for example, turning text into voice).
 
 If you need lower-level intervention points (arbitrary hooks, global message rewriting), use [Hook Handlers](./hooks.md) instead; for "inject parameters into a reply / rewrite reply content" needs, a reply extension is simpler: sending, history, monitoring, and failure handling are all managed by the main program.
 
@@ -36,7 +36,7 @@ from maibot_sdk import ReplyExtension
 
 ## Platform Scope
 
-`platforms` restricts the chat platforms where an extension applies, using the same syntax as [Tool Components](./tools.md#platform-scope). This parameter requires `maibot-plugin-sdk>=2.14.0` and a main program that supports reply extension platform filtering; older Hosts ignore this restriction.
+`platforms` restricts the chat platforms where an extension applies, using the same syntax as [Tool Components](./tools.md#platform-scope). It requires `maibot-plugin-sdk>=2.14.0` and a main program that filters reply extensions by platform.
 
 - **Single platform** — A string such as `"qq"`.
 - **Multiple platforms** — A list such as `["qq", "telegram"]`.
@@ -122,7 +122,7 @@ Multiple extensions are processed by ascending `priority`, then dictionary order
 
 - Do not send the reply group yourself from the extension; sending, history, monitoring, and failure handling are all managed by the main program
 - An empty message group, invalid return values, plugin errors, and timeouts all fail this reply; a failure before sending sends no messages at all
-- A released plugin should require `maibot-plugin-sdk>=2.10.0` in its dependency declaration; see [Manifest System](./manifest.md)
+- A released plugin should declare the SDK version it needs in the manifest `sdk` range; see [Manifest System](./manifest.md)
 
 ## Full Example: Voice Reply
 

@@ -7,6 +7,8 @@ titleTemplate: :title · 模型配置
 
 `model_config.toml` 给麦麦配置"AI 大脑"——决定不同组件使用什么 LLM 模型，以及如何连接 API 服务商。
 
+文件分两层：服务商（`[[api_providers]]`）、模型（`[[models]]`）与联网服务（`[web.services.*]`）写在**工作区的 `host/model_catalog.toml`**，由所有 Bot 共用；每个 Bot 的 `config/model_config.toml` 只保存任务分配（`[model_task_config.*]`）、任务参数和联网服务选择。下面各节按内容分组介绍，实际写入哪个文件由 WebUI 自动处理。
+
 最少启动只需一个 LLM 模型和一个 API 提供商（`models` 和 `api_providers` 均非空）。完整功能还需 VLM 模型（看图）和嵌入模型（记忆搜索）。
 
 ## API 提供商
@@ -20,7 +22,7 @@ titleTemplate: :title · 模型配置
 name = "deepseek"                          # [必填] API 服务商名称，在 models 的 api_provider 中需使用这个命名
 base_url = "https://api.deepseek.com/v1"   # [必填] API 服务商的 BaseURL
 api_key = "your-api-key"                   # [必填] API 密钥。若 auth_type 为 none 则不需要
-client_type = "openai"                     # [可选] 客户端类型：openai(默认) / openai_responses / google
+client_type = "openai"                     # [可选] 客户端类型：openai(默认) / openai_responses / gemini
 auth_type = "bearer"                       # [可选] 鉴权方式：bearer(默认) / header / query / none
 auth_header_name = "Authorization"         # [可选] 当 auth_type 为 header 时使用的请求头名称
 auth_header_prefix = "Bearer"              # [可选] 当 auth_type 为 header 时的请求头前缀，留空表示直接发送原始密钥
@@ -41,11 +43,12 @@ retry_interval = 4                         # [可选] 重试间隔，单位秒�
 
 **要点：**
 
-- **必填**：`name`（服务商名称）、`base_url`（端点地址）、`api_key`（密钥，`auth_type = "none"` 时除外）
+- **必填**：`name`（服务商名称）、`base_url`（端点地址）、`api_key`（密钥；`api_key` 留空或 `auth_type = "none"` 时按无鉴权发送）
 - **鉴权**：默认 `bearer` 适用于绝大部分服务商。其他可选 `header` / `query` / `none`
 - **客户端**：默认 `openai`。Google Gemini 用 `"gemini"`，见 [模型额外参数](./model-extra-params.md#gemini-原生-api)
 - **Responses API**：支持 OpenAI Responses 协议的服务商（如 DeepSeek v4 flash 的联网搜索）用 `"openai_responses"`，见 [模型额外参数](./model-extra-params.md#responses-api)
 - **超时与重试**：`timeout` 默认 120s，`retry_interval` 默认 4s。`max_retry` 默认 3，算的是**总共请求几次**（第一次也算），所以 3 = 失败后最多再试 2 次，填 0 或 1 就是不重试
+- **无鉴权服务**：本机 Ollama、vLLM、内网网关这类不校验密钥的服务，把 `api_key` 留空或写 `auth_type = "none"` 即可；服务在别的机器上时，`base_url` 换成 MaiBot 所在环境能访问到的地址
 - 其余字段参见上方注释，均有合理默认值
 
 
@@ -57,6 +60,7 @@ retry_interval = 4                         # [可选] 重试间隔，单位秒�
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 [[models]]
+model_type = "llm"                           # [必填] 模型类型：llm / embedding / image_embedding
 model_identifier = "deepseek-v4-flash"       # [必填] API 服务商提供的模型标识符
 name = "deepseek-v4-flash"                   # [必填] 模型名称，在 model_task_config 中需使用这个命名
 api_provider = "deepseek"                    # [必填] 对应 api_providers 中配置的服务商名称
@@ -64,7 +68,6 @@ price_in = 1.0                               # [可选] 输入价格（缓存未
 price_out = 2.0                              # [可选] 输出价格，单位：元/M token
 cache_price_in = 0.0                         # [可选] 缓存命中输入价格：0 表示命中免费；WebUI 留空按输入价格解析
 price_periods = []                           # [可选] 分时价格列表，见下方「分时价格」
-# cache = false                              # [已废弃] 遗留兼容字段，不再参与任何计费逻辑
 # temperature = 0.7                          # [可选] 模型级别温度，会覆盖任务配置中的 temperature
 # max_tokens = 4096                          # [可选] 模型级别最大 token 数，会覆盖任务配置中的 max_tokens
 # send_temperature = true                    # [可选] 是否发送 MaiBot 管理的 temperature，默认 true；设为 false 后模型/任务温度均不发送
@@ -77,8 +80,9 @@ extra_params = {}                            # [可选] 额外参数，详见 �
 
 **要点：**
 
-- **必填**：`model_identifier`（API 标识符）、`name`（自定义名称）、`api_provider`（归属服务商）
-- **价格**：`price_in` / `price_out` 用于统计，单位 元/百万 token。缓存命中价由 `cache_price_in` 决定：填 `0` 表示命中免费，未命中部分按 `price_in` 计费；旧字段 `cache` 已废弃，服务商是否返回缓存用量由响应自动探测
+- **必填**：`model_type`（模型类型）、`model_identifier`（API 标识符）、`name`（自定义名称）、`api_provider`（归属服务商）
+- **模型类型**：`llm` 普通对话模型；`embedding` 文本嵌入；`image_embedding` 图片嵌入。旧配置缺少该字段时，升级过程会按模型名和任务分配自动补上
+- **价格**：`price_in` / `price_out` 用于统计，单位 元/百万 token。缓存命中价由 `cache_price_in` 决定：填 `0` 表示命中免费，未命中部分按 `price_in` 计费；服务商是否返回缓存用量由响应自动探测
 - **分时价格**：服务商按时段计价时用 `price_periods` 覆盖默认单价，见下方「分时价格」
 - **模型级覆盖**：`temperature` / `max_tokens` 可覆盖任务配置，不设则使用任务默认值
 - **温度发送开关**：`send_temperature` 默认 `true`；设为 `false`（对应 WebUI 模型高级设置中关闭"发送 temperature 参数"）后，MaiBot 不再向该模型发送任何由它管理的 temperature（模型级、任务级与附加参数中的温度），兼容不接受该参数的模型
@@ -278,16 +282,6 @@ selection_strategy = "random"                 # [可选] 模型选择策略
 hard_timeout = 240.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [mid_memory（聊天回想） ~vscode-icons:file-type-toml~]
-# [可选] 聊天回想：上下文裁切时将历史聊天压缩为摘要。留空时自动回退到 fast_model，fast_model 也留空时回退到 utils。
-[model_task_config.mid_memory]
-model_list = []                               # [可选] 模型名称列表（→回退 fast_model → utils）
-max_tokens = 8192                             # [可选] 最大输出 token 数
-temperature = 0.7                             # [可选] 模型温度
-selection_strategy = "random"                 # [可选] 模型选择策略
-hard_timeout = 180.0                          # [可选] 硬超时（秒）
-```
-
 ```toml [learner（学习） ~vscode-icons:file-type-toml~]
 # [可选] 学习模型：表达方式学习和黑话学习。留空时自动回退到 utils。
 [model_task_config.learner]
@@ -297,7 +291,7 @@ hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
 ```toml [fast_model（快速小任务） ~vscode-icons:file-type-toml~]
-# [可选] 快速模型：挑表达方式、给回复断句这类要马上出结果的小任务，选响应快的模型。留空时自动回退到 utils；聊天回想留空时也会回退到这里。
+# [可选] 快速模型：挑表达方式、给回复断句这类要马上出结果的小任务，选响应快的模型。留空时自动回退到 utils。
 [model_task_config.fast_model]
 model_list = []                               # [可选] 模型名称列表（→回退 utils）
 max_tokens = 8192                             # [可选] 最大输出 token 数
@@ -370,20 +364,14 @@ hard_timeout = 60.0                           # [可选] 硬超时（秒）
 
 部分任务的 `model_list` 为空时，自动复用其他任务：
 
-```
-         ┌────────────┐
-         │ fast_model │◄──── mid_memory（留空时回退）
-         └────────────┘
-              │
-              │ 留空时回退
-              ▼
-         ┌──────────┐
-         │  utils   │◄──── learner（留空时回退）
-         └──────────┘
+```text
+fast_model 留空 → 改用 utils
+learner    留空 → 改用 utils
 
-memory · emoji · vlm · voice · embedding · image_embedding → 留空不自动回退，调用方会跳过或报错
+memory · emoji · vlm · voice · embedding · image_embedding
+  → 留空不自动回退，调用方跳过或报错
 
-emoji 特殊逻辑：emoji 有模型→用 emoji，planner 全视觉→用 planner，否则→用 vlm
+emoji 特殊逻辑：emoji 有模型 → 用 emoji；planner 全视觉 → 用 planner；否则 → 用 vlm
 ```
 
 **嵌入模型的两个特殊规则**：`embedding` 与 `image_embedding` 会**忽略 `selection_strategy`**，始终按 `model_list` 顺序取第一个可用模型——这是为了保证向量空间一致，不会在多个模型之间轮换；WebUI 里这两个任务也呈现为**单选模型**。`image_embedding` 留空时图片记忆直接显示"模型不可用"，不会回退到文本嵌入模型。
@@ -392,5 +380,5 @@ emoji 特殊逻辑：emoji 有模型→用 emoji，planner 全视觉→用 plann
 
 - 模型高级参数（思考模式、推理强度）：[模型额外参数](./model-extra-params.md)
 - 配置机器人：看 [Bot 配置](./bot-config.md)
-- 连接 QQ：[统一 QQ 连接器](../adapters/qq-local-client.md)
+- 连接 QQ：[OneBot 适配器](../adapters/qq-local-client.md)
 - 管理 WebUI：[WebUI 配置管理](../webui/config-management.md)

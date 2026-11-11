@@ -50,14 +50,15 @@ export default {
     app.component('xgplayer', defineAsyncComponent(() => import('./components/xgplayer.vue')))
     app.component('ArticleMetadata', ArticleMetadata)
     app.component('Linkcard', defineAsyncComponent(() => import('./components/Linkcard.vue')))
-    app.component('AuroraBackground', defineAsyncComponent(() => import('./components/AuroraBackground.vue')))
     app.component('HomeSections', defineAsyncComponent(() => import('./components/HomeSections.vue')))
     app.component('IntegrationRoutes', defineAsyncComponent(() => import('./components/IntegrationRoutes.vue')))
 
     if (inBrowser) {
       NProgress.configure({ showSpinner: false })
+      // VitePress 2 把钩子改名为 onAfterRouteChange（1.x 是 onAfterRouteChanged，
+      // v2 里已删除，写旧名不报错但进度条永远不结束）。
       router.onBeforeRouteChange = () => { NProgress.start() }
-      router.onAfterRouteChanged = () => { NProgress.done() }
+      router.onAfterRouteChange = () => { NProgress.done() }
     }
   }
 } satisfies Theme

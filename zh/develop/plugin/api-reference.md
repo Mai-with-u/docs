@@ -4,7 +4,7 @@ title: API 参考
 
 # API 参考
 
-MaiBot 插件通过 `self.ctx`（`PluginContext`）访问 23 种能力代理。所有能力调用自动通过 RPC 转发到 Host 处理，SDK 会自动解包结果；`ctx.paths` 与 `ctx.logger` 是 Runner 注入的上下文辅助对象。
+MaiBot 插件通过 `self.ctx`（`PluginContext`）访问 24 种能力代理。所有能力调用自动通过 RPC 转发到 Host 处理，SDK 会自动解包结果；`ctx.paths` 与 `ctx.logger` 是 Runner 注入的上下文辅助对象。
 
 ::: code-group
 
@@ -30,6 +30,7 @@ self.ctx.maisaka    # Maisaka 上下文与主动任务
 self.ctx.webui      # WebUI 上传凭证领取
 self.ctx.files      # 文件收发与读取
 self.ctx.web        # 联网搜索与网页读取
+self.ctx.market     # 插件市场只读查询（搜索、详情、README）
 self.ctx.internal_chat  # 内部聊天（桌宠与网页共用会话）
 self.ctx.personality    # 全局人设查询与切换
 self.ctx.desktop_pet    # 桌宠控制、动画与扩展按钮
@@ -758,7 +759,7 @@ Manifest 示例：
 
 ## internal_chat — 内部聊天
 
-网页聊天室与桌宠共用同一条主人会话：平台为 `internal`、用户为 `owner`。插件通过这组能力识别这条会话并代主人发言。需要 SDK 2.17.0+。
+网页聊天室与桌宠共用同一条主人会话：平台为 `internal`、用户为 `owner`。插件通过这组能力识别这条会话并代主人发言。
 
 - `await internal_chat.identity()` — 返回 `{platform, user_id}`，用于识别这条聊天流及麦麦发给主人的消息
 - `await internal_chat.send(text)` — 以主人身份投递一句话（1～2000 字符）；消息记录插件来源，不具备受保护命令权限，可能触发麦麦回复并进入聊天历史
@@ -777,7 +778,7 @@ Manifest 能力：`internal_chat.identity`、`internal_chat.send`。
 
 ## personality — 人设 {#personality}
 
-读取全局人设库并按名称切换，作用于所有会话。需要 SDK 2.20.0+；旧版 SDK 可用 `ctx.call_capability(...)` 调用同名 Host 能力。
+读取全局人设库并按名称切换，作用于所有会话。
 
 - `await personality.list()` — 返回 `{"profiles": [人设对象, ...]}`
 - `await personality.get_current()` — 返回当前人设对象；未入库时 `name` 为空字符串
@@ -797,7 +798,7 @@ result = await self.ctx.personality.switch("温柔的麦麦")
 
 ## desktop_pet — 桌宠
 
-控制内置桌宠并在扩展菜单里提供按钮。需要 SDK 2.17.0+（控制）、2.18.0+（动画）、2.21+（按钮）；旧版 SDK 可用 `ctx.call_capability(...)`。所有方法都要求 manifest 声明同名 `desktop_pet.*` 能力。
+控制内置桌宠并在扩展菜单里提供按钮。所有方法都要求 manifest 声明同名 `desktop_pet.*` 能力。
 
 - `await desktop_pet.status()` — 返回 `enabled`、`supported`、`running`、`ready`、`visible`、`error`
 - `await desktop_pet.show()` / `hide()` — 显示或隐藏窗口；隐藏不退出进程，`show()` 不会绕过用户的启用开关
@@ -816,13 +817,13 @@ if state["ready"]:
 
 :::
 
-动画接口（SDK 2.18.0+）：`get_skin()`、`list_animations()`、`play_animation(name, repeat=1)`、`play_event(event)`、`stop_animation(playback_id)`、`animation_status(playback_id)`。回执表示窗口确认开始播放；同一插件的新动作替换旧动作，一次调用最多 30 秒。
+动画接口：`get_skin()`、`list_animations()`、`play_animation(name, repeat=1)`、`play_event(event)`、`stop_animation(playback_id)`、`animation_status(playback_id)`。回执表示窗口确认开始播放；同一插件的新动作替换旧动作，一次调用最多 30 秒。
 
-扩展按钮（SDK 2.21+）：在插件类上声明 `desktop_pet_buttons` 列表（`DesktopPetButton` 或字典，最多 10 个），并实现 `get_desktop_pet_button_states()` 与 `on_desktop_pet_button_click(button_id)` 两个异步方法；回调限时 8 秒。桌宠侧的对应事件见 [Hook 清单](./hooks.md)。
+扩展按钮：在插件类上声明 `desktop_pet_buttons` 列表（`DesktopPetButton` 或字典，最多 10 个），并实现 `get_desktop_pet_button_states()` 与 `on_desktop_pet_button_click(button_id)` 两个异步方法；回调限时 8 秒。桌宠侧的对应事件见 [Hook 清单](./hooks.md)。
 
 ## files — 文件
 
-在宿主派发的工具调用期间读写当前聊天的附件。需要 SDK 2.17.0+，manifest 声明对应的 `files.*` 能力；文件作用域来自真实聊天授权，不能靠提交 `session_id` 选择聊天，定时任务与无聊天上下文的调用会被拒绝。
+在宿主派发的工具调用期间读写当前聊天的附件。manifest 声明对应的 `files.*` 能力；文件作用域来自真实聊天授权，不能靠提交 `session_id` 选择聊天，定时任务与无聊天上下文的调用会被拒绝。
 
 - `await files.list(offset=0)` — 列出当前聊天的文件
 - `await files.read_text(file_ref, offset=0, limit=12000, encoding="utf-8-sig")` — 分页读取文本
@@ -844,16 +845,36 @@ if items:
 
 ## web — 联网
 
-复用统一联网服务的配置与参数校验，为插件提供搜索与网页读取。需要 Host 支持并在 manifest 声明 `web.search` / `web.fetch`；旧版 SDK 用 `ctx.call_capability("web.search", ...)` 调用，返回原始 `{success, result}`。
+复用统一联网服务的配置与参数校验，为插件提供搜索与网页读取。在 manifest 声明 `web.search` / `web.fetch`。
 
 - `web.search` — 联网搜索，参数与统一联网服务的 `web_search` 工具一致
 - `web.fetch` — 网页读取，参数与 `web_fetch` 工具一致
 
 结果为完整结构化数据并附 `service` 与 `retrieved_at`；超过 500000 字符的传输上限会直接报错，请缩小查询范围。联网服务的配置见[模型配置](/manual/configuration/model-config)。
 
+## market — 插件市场
+
+只读查询插件市场，使用 Host 已配置的信息源与缓存。manifest 需分别声明 `market.search`、`market.get_detail`、`market.get_readme`。
+
+- `await market.search(query="", category="", page=1, limit=20, sort_by="name", compatible_only=False, include_manifest=False, include_stats=False, force_refresh=False)` — 返回 `plugins`、分页、`source`、`features` 与 `cache`；每页最多 50 项。`sort_by` 支持 `name`、`downloads`、`likes`、`rating` 及四组 7 天 / 30 天增长字段，统计排序要求信息源提供统计，不支持时直接抛错。
+- `await market.get_detail(plugin_id, force_refresh=False)` — 返回 `plugin`、`releases` 与兼容性，`plugin_id` 可填准确 ID、名称或已登记仓库地址。
+- `await market.get_readme(plugin_id, max_chars=8000, prefer_local=True, branch="main", force_refresh=False)` — 读 README，先查本地再按需访问市场登记仓库；`max_chars` 取值 500～20000，只读取指定分支的 `README.md`。
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+found = await self.ctx.market.search(query="语法检查", limit=5, compatible_only=True)
+for plugin in found["plugins"]:
+    self.ctx.logger.info("%s %s", plugin["id"], plugin["name"])
+```
+
+:::
+
+`id` 是 manifest ID，`marketplace_id` 是市场登记 ID。网络、数据或信息源不支持等错误直接抛出，不做静默降级。
+
 ## WebUI 上传领取
 
-`ctx.webui.claim_upload(upload_id)` 将宿主暂存的图片领取到本插件持久化数据目录的 `uploads/`，返回 `path`、`sha256` 和 `upload_id`。需要 SDK 2.11.0+、支持 `image_upload` 能力的宿主，以及 manifest 能力 `webui.claim_upload`。
+`ctx.webui.claim_upload(upload_id)` 将宿主暂存的图片领取到本插件持久化数据目录的 `uploads/`，返回 `path`、`sha256` 和 `upload_id`。manifest 需声明 `webui.claim_upload` 能力。
 
 ::: code-group
 

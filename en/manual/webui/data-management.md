@@ -4,25 +4,17 @@ title: Data Management
 
 # Data Management
 
-Use the WebUI's **Data Management** page to download MaiBot's configuration, data, plugins, and logs as a zip archive for migration. Open **高级工具 → 数据管理** (Advanced Tools → Data Management) in the sidebar.
+Data management packages config, data, plugins, and logs into a zip for download, or restores them from a zip. Open it from **Advanced tools → Data management** in the sidebar.
 
-## Export Data
+## Export
 
-Choose the scope under "导出数据" (Export Data) and start the export. Configuration and data are selected by default.
+Pick a scope and start the export. Exports run in the background with one job at a time; the archive is staged in the system temp directory, expires automatically, and its retention is reset to 24 hours whenever a download starts or finishes.
 
-- Export runs in the background; only one export can run at a time
-- Archives are stored in the system temporary directory and cleaned up when they expire
-- Each download resets retention to 24 hours when it starts and finishes
+The archive is named `maibot-data-<export time>.zip`, for example `maibot-data-20260709-123456.zip`.
 
-::: tip Archive Filename
-Archives are named `maibot-data-<export-time>.zip`, for example `maibot-data-20260709-123456.zip`.
-:::
+## Archive layout
 
-## Archive Contents
-
-The archive always contains a top-level `manifest.json`. The rest consists of `config/` and `data/`, plus optional `plugins/` and `logs/`, according to your selection. Paths inside the archive match the relative paths in the MaiBot directory.
-
-`manifest.json` records archive metadata, which the backend validates during import:
+The top level always contains `manifest.json`, plus `config/`, `data/`, and optionally `plugins/` and `logs/` per the selected scope. Paths inside match the instance directory's relative paths.
 
 ::: code-group
 
@@ -42,15 +34,37 @@ The archive always contains a top-level `manifest.json`. The rest consists of `c
 
 :::
 
-## Import and Restore
+The backend validates this metadata on import.
 
-Under "导入数据" (Import Data), select a `.zip` archive exported by this feature, choose the restoration scope, and start the import. Configuration and data are selected by default; plugins and logs are optional. Select at least one part.
+## Behaviour with multiple bots
 
-::: warning Import Overwrites Existing Files
-Back up your current data first (you can export another copy on this page) and confirm the versions match: `manifest.json` records the MaiBot version used for export. Restart MaiBot after importing, then verify that it runs correctly.
+Transfers are provided by the host and remain available while the target bot is stopped. The host stops the target process and holds the instance process lock first, then restores the previous desired state; upload, compression, and disk transactions stay off the WebUI event loop.
+
+::: fields
+- **Job isolation** — Job records, downloaded files, and temporary directories are isolated per bot ID, so switching bots never reuses a previous bot's job.
+- **Import scope** — Only files provided in the package for the selected categories are replaced; other files in the target instance are left alone.
+- **Database replacement** — Replacing a SQLite database clears the target's old WAL, SHM, and journal so stale transactions cannot pollute the new one.
+- **Rejected input** — Path traversal, symbolic links, and duplicate paths are refused.
 :::
 
-## Related Docs
+Overwritten files are backed up to the target bot's `temp/data-import/<transaction id>/backup/`, with `backup-manifest.json` recording original paths; failures roll back through the transaction log, and an interrupted process resumes recovery the next time the workspace opens.
 
-- [Data and Migration](/en/faq/backup-and-migration) — what to back up before migration and how to copy the entire directory manually
-- [Configuration Management](./config-management.md) — edit configuration in your browser
+Exported config includes the models, providers, and web services the current bot uses. Importing an old config merges those definitions into the shared model catalog: a same-named but different definition keeps the existing shared entry, the imported one gets a new name, and the current bot's task references are updated while other bots' references stay untouched. Network addresses plus cache and log retention policies from old packages never overwrite the host's shared config.
+
+Config history backups are not part of the export and are not restored from old packages.
+
+## Backup advice
+
+Import overwrites existing files. Back up current data first — export another copy here for a safety net — and confirm the version recorded in `manifest.json` matches. After importing, restart the bot before verifying.
+
+When no migration is needed, stopping the instance and copying the whole instance directory is a valid backup too.
+
+## Verify and troubleshoot
+
+**Verify** — Export a full package and confirm the downloaded zip contains `manifest.json`; import it, restart the bot, and chats and config should be back.
+
+- **The export button does nothing** — Only one export job runs at a time; wait for the current one to finish.
+- **A download link expired** — Retention resets to 24 hours whenever a download starts or finishes; export again after it lapses.
+- **Files are missing after import** — Import only replaces files the package contains and deletes nothing else; missing content means that scope was not selected on export.
+- **Import is refused** — Check the package for path traversal, symbolic links, or duplicate paths — all three are rejected outright.
+- **Config is unchanged after import** — Old packages never overwrite the host's shared network and retention settings; that is expected. Models and web services are merged into the shared model catalog.

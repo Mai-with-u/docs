@@ -10,7 +10,7 @@ title: iMessage 适配器
 `MaiBot（插件）← 本地 WebSocket 127.0.0.1:18763 → Node.js 侧车 ← spectrum-ts SDK → Photon 云端 ←→ Apple iMessage`
 :::
 
-适配器仓库（🌐 社区维护）：
+适配器仓库（社区维护）：
 
 <Linkcard url="https://github.com/mayan613/MaiBot-iMessage-Adapter" title="MaiBot-iMessage-Adapter" description="mayan613 维护的 iMessage 适配器插件" />
 

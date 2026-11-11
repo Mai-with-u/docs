@@ -1,13 +1,13 @@
 ---
-title: 🔧 Error Troubleshooting FAQ
+title: Error Troubleshooting FAQ
 ---
 
-# 🔧 Error Troubleshooting FAQ
+# Error Troubleshooting FAQ
 
-> ⚠️ **Network is the root cause of 80% of problems** — API can't connect, Git can't pull, plugins can't install, it's most likely a network issue.
+> **Network is the root cause of 80% of problems** — API can't connect, Git can't pull, plugins can't install, it's most likely a network issue.
 > When encountering any error, first check if you can access the external network (`curl -I https://www.baidu.com`), if not, switch networks / enable proxy.
 
-> Troubleshooting is now split into the topic pages below. Start with "Browse by Topic" to find the right page; when the log already contains a specific error code or keyword, use the "⚡ Error Code Quick Reference" to jump straight there; if you're unsure which category your problem falls into, check the "📋 Error Troubleshooting Flowchart" at the end.
+> Troubleshooting is now split into the topic pages below. Start with "Browse by Topic" to find the right page; when the log already contains a specific error code or keyword, use the "Error Code Quick Reference" to jump straight there; if you're unsure which category your problem falls into, check the "Error Troubleshooting Flowchart" at the end.
 
 ## Browse by Topic
 
@@ -21,75 +21,75 @@ title: 🔧 Error Troubleshooting FAQ
 
 **[Getting Help](/en/faq/getting-help)** — Self-checks before asking, the issue checklist, community support channels, and how to export logs.
 
-## ⚡ Error Code Quick Reference
+## Error Code Quick Reference
 
 > Quickly locate the corresponding scenario by common keywords in error logs.
 
 ### HTTP Status Code Quick Reference
 
-**HTTP 400 Bad Request** 🟧 Severe → [Adapter Not Connected or Account Unavailable](/en/faq/troubleshooting-plugins-adapters#adapter-not-connected-or-account-unavailable) — Request parameter error, message sending failed
+**HTTP 400 Bad Request**（Serious） → [Adapter Not Connected or Account Unavailable](/en/faq/troubleshooting-plugins-adapters#adapter-not-connected-or-account-unavailable) — Request parameter error, message sending failed
 
-**HTTP 401 Unauthorized** 🟥 Fatal → [API Key Error / Insufficient Balance](/en/faq/troubleshooting-model#api-key-error-insufficient-balance) — API Key invalid or missing
+**HTTP 401 Unauthorized**（Fatal） → [API Key Error / Insufficient Balance](/en/faq/troubleshooting-model#api-key-error-insufficient-balance) — API Key invalid or missing
 
-**HTTP 401 Unauthorized** 🟧 Severe → [WebUI Login Failed / Token Expired](/en/faq/troubleshooting-startup#webui-login-failed-token-expired) — Session expired or Token invalid
+**HTTP 401 Unauthorized**（Serious） → [WebUI Login Failed / Token Expired](/en/faq/troubleshooting-startup#webui-login-failed-token-expired) — Session expired or Token invalid
 
-**HTTP 402 Payment Required** 🟧 Severe → [API Key Error / Insufficient Balance](/en/faq/troubleshooting-model#api-key-error-insufficient-balance) — Account balance insufficient
+**HTTP 402 Payment Required**（Serious） → [API Key Error / Insufficient Balance](/en/faq/troubleshooting-model#api-key-error-insufficient-balance) — Account balance insufficient
 
-**HTTP 403 Forbidden** 🟥 Fatal → [API Key Error / Insufficient Balance](/en/faq/troubleshooting-model#api-key-error-insufficient-balance) — API Key insufficient permissions
+**HTTP 403 Forbidden**（Fatal） → [API Key Error / Insufficient Balance](/en/faq/troubleshooting-model#api-key-error-insufficient-balance) — API Key insufficient permissions
 
-**HTTP 429 Too Many Requests** 🟧 Severe → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — Request frequency too high, rate limited
+**HTTP 429 Too Many Requests**（Serious） → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — Request frequency too high, rate limited
 
-**HTTP 500 Internal Server Error** 🟧 Severe → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — API server internal error
+**HTTP 500 Internal Server Error**（Serious） → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — API server internal error
 
-**HTTP 502 Bad Gateway** 🟧 Severe → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — Gateway error, upstream service unreachable
+**HTTP 502 Bad Gateway**（Serious） → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — Gateway error, upstream service unreachable
 
-**HTTP 503 Service Unavailable** 🟧 Severe → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — Service temporarily unavailable (overload/maintenance)
+**HTTP 503 Service Unavailable**（Serious） → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — Service temporarily unavailable (overload/maintenance)
 
 ### Common Error Keyword Index
 
-**`Address already in use`** / **`[Errno 98]`** / **`[Errno 10048]`** 🟧 Severe → [Port Occupied](/en/faq/troubleshooting-startup#port-occupied) — Port is already in use by another process
+**`Address already in use`** / **`[Errno 98]`** / **`[Errno 10048]`**（Serious） → [Port Occupied](/en/faq/troubleshooting-startup#port-occupied) — Port is already in use by another process
 
-**`APIConnectionError`** 🟧 Severe → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — API connection failed
+**`APIConnectionError`**（Serious） → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — API connection failed
 
-**`Connection refused`** / **`无法访问此网站`** 🟥 Fatal → [WebUI Page Won't Open](/en/faq/troubleshooting-startup#webui-page-won-t-open) — WebUI service not started or port unreachable
+**`Connection refused`** / **`无法访问此网站`**（Fatal） → [WebUI Page Won't Open](/en/faq/troubleshooting-startup#webui-page-won-t-open) — WebUI service not started or port unreachable
 
-**`database is locked`** 🟧 Severe → [Database Error](/en/faq/troubleshooting-runtime#database-error) — Database locked by multiple processes
+**`database is locked`**（Serious） → [Database Error](/en/faq/troubleshooting-runtime#database-error) — Database locked by multiple processes
 
-**`DatabaseError`** / **`OperationalError`** 🟧 Severe → [Database Error](/en/faq/troubleshooting-runtime#database-error) — Database operation exception
+**`DatabaseError`** / **`OperationalError`**（Serious） → [Database Error](/en/faq/troubleshooting-runtime#database-error) — Database operation exception
 
-**`FileNotFoundError`** 🟥 Fatal → [Configuration File Not Found or Incorrect Format](/en/faq/troubleshooting-startup#configuration-file-not-found-or-incorrect-format) — Configuration file does not exist
+**`FileNotFoundError`**（Fatal） → [Configuration File Not Found or Incorrect Format](/en/faq/troubleshooting-startup#configuration-file-not-found-or-incorrect-format) — Configuration file does not exist
 
-**`Host version incompatible`** / **`SDK version incompatible`** 🟧 Severe → [Plugin Loading Failed](/en/faq/troubleshooting-plugins-adapters#plugin-loading-failed) — The plugin's declared version range does not cover the current version
+**`Host version incompatible`** / **`SDK version incompatible`**（Serious） → [Plugin Loading Failed](/en/faq/troubleshooting-plugins-adapters#plugin-loading-failed) — The plugin's declared version range does not cover the current version
 
-**`ImportError`** / **`ModuleNotFoundError`** 🟧 Severe → [Plugin Loading Failed](/en/faq/troubleshooting-plugins-adapters#plugin-loading-failed) — Plugin dependency missing
+**`ImportError`** / **`ModuleNotFoundError`**（Serious） → [Plugin Loading Failed](/en/faq/troubleshooting-plugins-adapters#plugin-loading-failed) — Plugin dependency missing
 
-**`No space left on device`** 🟧 Severe → [Log Files Too Large / Disk Space Full](/en/faq/troubleshooting-runtime#log-files-too-large-disk-space-full) — Disk space insufficient
+**`No space left on device`**（Serious） → [Log Files Too Large / Disk Space Full](/en/faq/troubleshooting-runtime#log-files-too-large-disk-space-full) — Disk space insufficient
 
-**`PluginConfigVersionError`** 🟧 Severe → [Plugin Loading Failed](/en/faq/troubleshooting-plugins-adapters#plugin-loading-failed) — Plugin configuration version not supported
+**`PluginConfigVersionError`**（Serious） → [Plugin Loading Failed](/en/faq/troubleshooting-plugins-adapters#plugin-loading-failed) — Plugin configuration version not supported
 
-**`re.error`** / **`bad escape`** 🟨 Warning → [Invalid Regular Expression](/en/faq/troubleshooting-model#invalid-regular-expression) — Regex syntax error
+**`re.error`** / **`bad escape`**（Warning） → [Invalid Regular Expression](/en/faq/troubleshooting-model#invalid-regular-expression) — Regex syntax error
 
-**`TimeoutError`** 🟧 Severe → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — Request timeout
+**`TimeoutError`**（Serious） → [Network Timeout / Connection Failure](/en/faq/troubleshooting-model#network-timeout-connection-failure) — Request timeout
 
-**`Token expired`** 🟨 Warning → [WebUI Login Failed / Token Expired](/en/faq/troubleshooting-startup#webui-login-failed-token-expired) — Login session expired
+**`Token expired`**（Warning） → [WebUI Login Failed / Token Expired](/en/faq/troubleshooting-startup#webui-login-failed-token-expired) — Login session expired
 
-**`TOML syntax error`** 🟥 Fatal → [Configuration File Not Found or Incorrect Format](/en/faq/troubleshooting-startup#configuration-file-not-found-or-incorrect-format) — Configuration file format error
+**`TOML syntax error`**（Fatal） → [Configuration File Not Found or Incorrect Format](/en/faq/troubleshooting-startup#configuration-file-not-found-or-incorrect-format) — Configuration file format error
 
-**`ValueError`** 🟥 Fatal → [MCP Configuration Error](/en/faq/troubleshooting-startup#mcp-configuration-error) — MCP server configuration parameter invalid
+**`ValueError`**（Fatal） → [MCP Configuration Error](/en/faq/troubleshooting-startup#mcp-configuration-error) — MCP server configuration parameter invalid
 
-**Emoji registration failed** 🟨 Warning → [Emoji System Error](/en/faq/troubleshooting-runtime#emoji-system-error) — Quantity limit exceeded or `data/emojis/` is unwritable
+**Emoji registration failed**（Warning） → [Emoji System Error](/en/faq/troubleshooting-runtime#emoji-system-error) — Quantity limit exceeded or `data/emojis/` is unwritable
 
-**Memory loading failed** 🟧 Severe → [Memory System Error](/en/faq/troubleshooting-runtime#memory-system-error) — Memory index corrupted or memory directory unwritable
+**Memory loading failed**（Serious） → [Memory System Error](/en/faq/troubleshooting-runtime#memory-system-error) — Memory index corrupted or memory directory unwritable
 
-**`Session 过期`** 🟨 Warning → [WebUI Login Failed / Token Expired](/en/faq/troubleshooting-startup#webui-login-failed-token-expired) — Browser session expired
+**`Session 过期`**（Warning） → [WebUI Login Failed / Token Expired](/en/faq/troubleshooting-startup#webui-login-failed-token-expired) — Browser session expired
 
-## 📋 Error Troubleshooting Flowchart
+## Error Troubleshooting Flowchart
 
 > Not sure which category your problem falls into? Follow the flowchart to find the corresponding section.
 
 ```mermaid
 graph TD
-    A[❓ What's the problem?] --> B{Crashes/exits on startup?}
+    A[What's the problem?] --> B{Crashes/exits on startup?}
     B -->|Yes| C[Startup and Access Troubleshooting]
     B -->|No| D{Starts normally but functions abnormal?}
     D -->|Yes| E{Which function?}

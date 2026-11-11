@@ -4,7 +4,7 @@ title: Event Handlers
 
 # Event Handler
 
-`@EventHandler` is a component decorator used to subscribe to message and workflow events. Unlike the named Hook point mechanism of `@HookHandler`, `@EventHandler` subscribes to events based on fixed `EventType` enum values, making it suitable for intercepting or observing specific stages of the message processing flow.
+`@EventHandler` subscribes to message and workflow events by fixed `EventType` enum values. Unlike the named Hook points of `@HookHandler`, it hooks specific stages of the message pipeline.
 
 ## Decorator Signature
 

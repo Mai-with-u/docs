@@ -13,7 +13,7 @@ title: 邮件适配器
 邮箱侧不需要配置 Webhook：适配器优先用 IMAP IDLE 推送，服务器不支持时回退为按间隔轮询。
 :::
 
-适配器仓库（🌐 社区维护）：
+适配器仓库（社区维护）：
 
 <Linkcard url="https://github.com/yufei-pan/maibot-email-adapter" title="maibot-email-adapter" description="yufei-pan 维护的邮件适配器插件" />
 

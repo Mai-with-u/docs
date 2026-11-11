@@ -3,20 +3,14 @@
 /en/features/*    /en/manual/    301
 /en/manual/features/*    /en/manual/    301
 
-/manual/adapters/snowluma    /manual/adapters/qq-local-client    301
-/manual/adapters/snowluma/*    /manual/adapters/qq-local-client    301
-/en/manual/adapters/snowluma    /en/manual/adapters/qq-local-client    301
-/en/manual/adapters/snowluma/*    /en/manual/adapters/qq-local-client    301
 /manual/adapters/qqbot    /manual/adapters/qq-official    301
 /manual/adapters/qqbot/*    /manual/adapters/qq-official    301
 /en/manual/adapters/qqbot    /en/manual/adapters/qq-official    301
 /en/manual/adapters/qqbot/*    /en/manual/adapters/qq-official    301
 
-# 开发文档改成「怎么接入」：分区根与两个交还给使用文档的主题
-/develop    /develop/adapters/    301
-/develop/    /develop/adapters/    301
-/en/develop    /en/develop/adapters/    301
-/en/develop/    /en/develop/adapters/    301
+# 开发文档改成「怎么接入」：两个交还给使用文档的主题
+# 注意：不要给 /develop 本身写 301——分区根有真实总览页（develop/index.md），
+# 该页也是 nav 与侧边栏「总览」的目标，重定向会把它整个盖掉。
 /develop/llm-providers    /manual/configuration/model-config    301
 /en/develop/llm-providers    /en/manual/configuration/model-config    301
 /develop/mcp-integration    /manual/configuration/    301
@@ -51,12 +45,6 @@
 /en/manual/deployment/update    /en/manual/deployment/uv-tool    301
 /manual/plugins/management    /manual/plugins/    301
 /en/manual/plugins/management    /en/manual/plugins/    301
-/manual/personality    /manual/configuration/bot-config#身份与人设    301
-/manual/files    /manual/configuration/bot-config#文件    301
-/manual/desktop-pet    /manual/configuration/bot-config#桌宠    301
-/en/manual/personality    /en/manual/configuration/bot-config#identity-and-personality    301
-/en/manual/files    /en/manual/configuration/bot-config#files    301
-/en/manual/desktop-pet    /en/manual/configuration/bot-config#desktop-pet    301
 /manual/configuration/mcp-config    /manual/configuration/    301
 /develop/webui-api/auth-and-setup    /develop/    301
 /develop/webui-api/data-and-memory-api    /manual/webui/data-management    301

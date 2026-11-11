@@ -4,7 +4,7 @@ title: 插件开发指南
 
 # 插件开发指南
 
-MaiBot 的插件系统采用 Host/Runner IPC 架构，插件代码运行在独立的子进程中，通过 msgpack 编码的 RPC 协议与主进程通信。本节介绍插件系统的架构原理、开发流程和核心概念。
+插件是一段跑在独立子进程里的 Python 代码，通过 msgpack 编码的 RPC 与主进程通信。一个目录、一个 manifest、一个 `create_plugin()` 就能加载。
 
 ## 架构概览
 
@@ -24,27 +24,22 @@ graph TD
     E <-->|msgpack over UDS/TCP/NamedPipe| H
 ```
 
-### Host（主进程侧）
+**Host（主进程侧）**
 
-- **PluginRuntimeManager**：单例管理器，管理 Builtin 和 Third-party 两个 Supervisor
-- **PluginSupervisor**：负责 Runner 子进程的启动、停止、健康检查和插件热重载
-- **ComponentRegistry**：组件注册表，管理所有插件声明的 Tool、Command 等组件
-- **HookDispatcher**：Hook 分发器，将命名 Hook 调用分发到对应 Supervisor
+- **`PluginRuntimeManager`** — 单例，管理 Builtin 与 Third-party 两个 Supervisor。
+- **`PluginSupervisor`** — 负责 Runner 子进程的启动、停止、健康检查与插件热重载。
+- **`ComponentRegistry`** — 收全部插件声明的 Tool、Command、HookHandler 等组件。
+- **`HookDispatcher`** — 把命名 Hook 调用分发给订阅它的处理器，见 [Hook 处理器](./hooks.md)。
 
-### Runner（子进程侧）
+**Runner（子进程侧）**
 
-- 每种 Supervisor 各自管理一个独立的 Runner 子进程
-- 通过 `PluginLoader` 发现和加载插件
-- 通过 `RPCClient` 与 Host 通信
-- 在插件加载后注入 `PluginContext`，再调用 `on_load()` 生命周期方法
+- 每个 Supervisor 各自管一个 Runner 子进程，用 `PluginLoader` 发现和加载插件。
+- 用 `RPCClient` 与 Host 通信，加载后注入 `PluginContext`，再调 `on_load()`。
 
-### 通信协议
+**通信协议**
 
-- **编解码**：使用 msgpack 格式进行二进制序列化（`MsgPackCodec`）
-- **传输层**：支持 Unix Domain Socket、TCP、Named Pipe 三种传输方式
-- **RPC 模型**：
-  - Host → Runner：通过 `invoke_plugin()` 调用插件组件（Tool、Command 等）
-  - Runner → Host：插件通过 `self.ctx` 的能力代理发起 RPC 回调（如 `ctx.send.text()`、`ctx.db.query()`）
+- 编解码用 msgpack（`MsgPackCodec`），传输层支持 Unix Domain Socket、TCP、Named Pipe。
+- Host → Runner 走 `invoke_plugin()`；Runner → Host 由插件通过 `self.ctx` 的能力代理发起，例如 `ctx.send.text()`、`ctx.db.query()`。
 
 ## 快速开始
 
@@ -128,12 +123,12 @@ plugins/
     "repository": "https://github.com/developer/my-plugin"
   },
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
-    "min_version": "1.0.0",
-    "max_version": "2.9.99"
+    "min_version": "2.22.0",
+    "max_version": "2.22.99"
   },
   "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": {
@@ -238,27 +233,27 @@ def create_plugin():
 
 SDK 提供 9 种组件装饰器，全部从 `maibot_sdk` 顶层导入：
 
-**`@Tool`** — LLM 工具/函数调用，LLM 可调用的工具，最常用的组件类型
+**`@Tool`** — LLM 工具/函数调用，最常用的组件类型
 
-**`@Command`** — 斜杠命令，用户通过正则匹配触发的命令
+**`@Command`** — 斜杠命令，正则匹配触发
 
-**`@HookHandler`** — 命名 Hook 处理器，订阅特定 Hook 点，支持 blocking/observe 模式
+**`@HookHandler`** — 命名 Hook 处理器，支持 blocking/observe 模式
 
-**`@EventHandler`** — 消息/工作流事件，监听消息、LLM 生成等生命周期事件
+**`@EventHandler`** — 消息/工作流事件订阅
 
-**`@API`** — 插件间 API，暴露可被其他插件调用的 API
+**`@API`** — 插件间 API
 
-**`@MessageGateway`** — 平台适配器，将外部平台（QQ、邮件等）接入 MaiBot
+**`@MessageGateway`** — 平台适配器网关，把外部平台接入 MaiBot
 
-**`@HomeCard`** — WebUI 首页卡片，在首页展示插件状态、入口或自定义内容
+**`@HomeCard`** — WebUI 首页卡片，展示插件状态、入口或自定义内容
 
-**`@LLMProvider`** — LLM Provider，声明新 LLM 模型接入点（client_type），扩展模型服务
+**`@LLMProvider`** — 声明新的 LLM Provider `client_type`
 
-**`@ReplyExtension`** — 回复扩展，为 reply 工具注入命名空间参数并参与回复生成（SDK 2.10.0+，详见 [回复扩展](./reply-extensions.md)）
+**`@ReplyExtension`** — 回复扩展，为 reply 工具注入命名空间参数并参与回复生成，详见 [回复扩展](./reply-extensions.md)
 
 ### 能力代理
 
-通过 `self.ctx` 访问 23 种能力代理，所有调用自动通过 RPC 转发到 Host：
+通过 `self.ctx` 访问 24 种能力代理，所有调用自动通过 RPC 转发到 Host：
 
 ::: code-group
 
@@ -268,7 +263,7 @@ self.ctx              # PluginContext 实例
 self.ctx.paths        # 插件持久化与运行时目录
 self.ctx.logger       # logging.Logger，名称为 "plugin.<plugin_id>"
 
-# 能力代理
+# 代理列表
 self.ctx.api          # 插件 API 查询、调用与动态同步
 self.ctx.gateway      # 消息网关路由与运行时状态上报
 self.ctx.send         # 发送文本、图片、表情、转发、混合消息
@@ -289,6 +284,7 @@ self.ctx.maisaka      # Maisaka 上下文追加与主动任务
 self.ctx.webui        # WebUI 上传凭证领取
 self.ctx.files        # 文件收发与读取
 self.ctx.web          # 联网搜索与网页读取
+self.ctx.market       # 插件市场只读查询（搜索、详情、README）
 self.ctx.internal_chat  # 内部聊天（桌宠与网页共用会话）
 self.ctx.personality    # 全局人设查询与切换
 self.ctx.desktop_pet    # 桌宠控制、动画与扩展按钮
@@ -343,7 +339,7 @@ my-plugin/
 
 配置模型属于插件源码，运行时配置实例由 Runner 生成。插件仓库的 `.gitignore` 应包含 `/config.toml`，安装后的用户配置由 WebUI 或运行时配置接口维护。
 
-插件运行时数据统一写入 Host 注入的插件专属目录。SDK 2.6.0 起可以通过 `self.ctx.paths` 获取这些目录：
+插件运行时数据统一写入 Host 注入的插件专属目录，用 `self.ctx.paths` 取：
 
 ::: code-group
 

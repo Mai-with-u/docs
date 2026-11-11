@@ -4,234 +4,79 @@ title: Quick Start
 
 # Quick Start
 
-Hello!
+MaiBot is an interactive agent built on large language models. Through adapters it connects to QQ, Telegram, email, iMessage, and other platforms — chatting in groups like a person, remembering, learning, and doubling as a desktop pet on your computer.
 
-MaiBot (Mai) is an LLM-powered chatbot framework. Through adapters, it connects to QQ, Telegram, email, iMessage, and other platforms. Like a person, it can chat, remember, learn, be curious, act cheeky, surprise you with what it says, and become your digital pet.
+Getting it running takes four steps: install, open the WebUI, add a model, connect a chat platform.
 
-This manual walks you through installation, configuration, and platform connection from scratch, then helps you master every feature.
+## Requirements
 
-::: tip System Requirements
 A computer with internet access (Windows 10+ / Linux / macOS), at least 2GB of free memory, and an LLM API key.
 
-A willingness to ask people and AI for help and think things through.
+## Running in five minutes
+
+::: steps
+
+1. **Install MaiBot** — Install the main program with uv, then generate config in the instance directory. The commands are the same on Windows, Linux, and macOS.
+
+   ::: code-group
+
+   ```bash [Install and initialize ~vscode-icons:file-type-python~]
+   uv tool install --python 3.13 maibot
+   mkdir my-maibot && cd my-maibot
+   maibot init
+   ```
+
+   :::
+
+   `maibot init` creates `config/` in the current directory plus `data`, `logs`, `plugins`, and `temp`; existing config is preserved. On success it prints `MaiBot 实例已初始化：<directory>`.
+
+   Prefer not to use uv? See [Windows deployment](./deployment/windows), [Linux deployment](./deployment/linux), [Docker deployment](./deployment/docker), or the [one-click package](./deployment/windows).
+
+2. **Start and open the WebUI** — Run `maibot run` in the instance directory. It starts the host and every bot in that workspace. Open `http://127.0.0.1:8001/` in a browser, log in with the temporary login password printed in the terminal, then set a fixed password in the wizard.
+
+3. **Configure a model** — In **Model Management**, enter the provider URL, API key, and model names. In **Task Assignment**, map thinking, reply, and vision tasks to specific models. See [Model configuration](./configuration/model-config) for field meanings.
+
+4. **Connect a chat platform** — QQ has two routes: the OneBot Adapter, installed from the plugin market, and the QQ Official Bot, which ships with the program. Telegram and WeChat ClawBot are built-in adapters as well. See [Connect platforms](./adapters/).
+
 :::
 
-## Mai 101
+Once that works, send MaiBot a message. A reply means both the model and the platform are wired correctly.
 
-From zero to chatting takes just four steps.
+## Look things up
 
-<div class="step-grid">
+**[Deployment](./deployment/uv-tool.md)** — uv install, Windows / Linux source deployment, Docker, and the one-click package.
 
-<div class="step-card">
-  <div class="step-head"><span class="step-no">1</span> <h3>Install MaiBot</h3></div>
-  <p>Install MaiBot and its WebUI with <strong>uv</strong> on Windows, Linux, or macOS.<br>OneKey, source deployment, and Docker are also available.</p>
-  <a class="step-more" href="/en/manual/deployment/uv-tool">Install with uv →</a>
-</div>
+**[Configuration](./configuration/)** — Every field in `bot_config.toml` and `model_config.toml`, thinking-mode parameters, and memory engine tuning.
 
-<div class="step-card">
-  <div class="step-head"><span class="step-no">2</span> <h3>Open the WebUI</h3></div>
-  <p>After startup, open <code>http://localhost:8001</code> in your browser. The login password usually appears in the startup window.</p>
-  <a class="step-more" href="/en/manual/webui/">Learn about the WebUI →</a>
-</div>
+**[Connect platforms](./adapters/)** — Adapter selection and setup: QQ, Telegram, WeChat ClawBot, email, iMessage, voice calls.
 
-<div class="step-card">
-  <div class="step-head"><span class="step-no">3</span> <h3>Configure a Model</h3></div>
-  <p>Follow the setup guide to enter your API provider's base URL and key, then choose the models to use.</p>
-  <a class="step-more" href="/en/manual/configuration/model-config">View model config →</a>
-</div>
+**[WebUI](./webui/)** — Login, editing config, chat and observation, statistics, file management, data migration.
 
-<div class="step-card">
-  <div class="step-head"><span class="step-no">4</span> <h3>Connect a Chat Platform</h3></div>
-  <p>For QQ, the most common example, use an adapter to connect to a QQ Official Bot or SnowLuma to receive messages.</p>
-  <a class="step-more" href="/en/manual/adapters/qq-local-client">Connect to QQ →</a>
-</div>
+**[Plugins](./plugins/)** — Install, enable, and update plugins from the plugin market.
 
-</div>
+## Go further
 
-## Lesson Two
+**[Multiple bots](./multi-bot-host.md)** — Run several Mai instances in one workspace, each with its own config, data, and plugins.
 
-Once it's running, explore the sections below to shape MaiBot into what you want.
+**[Personality](./personality.md)** — Keep several profiles, import JSON, and hot-swap between them.
 
-<div class="nav-grid">
+**[Chat scenes](./chat-scenes.md)** — Talk-rule groups, quick reaction, Focus, and reply templates.
 
-<div class="nav-card">
-  <div class="step-head nav-head">
-    <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m9 3-.6 2.4-2.1 1.2L4 6l-2 3 1.8 1.8v2.4L2 15l2 3 2.3-.6 2.1 1.2L9 21h6l.6-2.4 2.1-1.2L20 18l2-3-1.8-1.8v-2.4L22 9l-2-3-2.3.6-2.1-1.2L15 3Z"/></svg></span>
-    <h3>Configuration</h3>
-  </div>
-  <p>Personality, nickname, chat style, memory toggles… learn what these settings mean and what they do.</p>
-  <a href="/en/manual/configuration/">Configuration Overview →</a>
-</div>
+**[Files](./files.md)** — Send, receive, save, and read chat attachments.
 
-<div class="nav-card">
-  <div class="step-head nav-head">
-    <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v5m6-5v5M6 8h12v3a6 6 0 0 1-12 0V8Zm6 9v4"/></svg></span>
-    <h3>Connect Platforms</h3>
-  </div>
-  <p>Besides QQ, MaiBot can connect to Telegram, email, and iMessage. Explore the available adapters.</p>
-  <a href="/en/manual/adapters/">Connect Platforms →</a>
-</div>
+**[Desktop pet](./desktop-pet.md)** — Skin packs, remote connections, todos, images, and screen reading.
 
-<div class="nav-card">
-  <div class="step-head nav-head">
-    <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path transform="translate(0 2)" d="M4 4h5V3a3 3 0 0 1 6 0v1h5v5h-1a3 3 0 0 0 0 6h1v5h-5v-1a3 3 0 0 0-6 0v1H4v-5h1a3 3 0 0 0 0-6H4Z"/></svg></span>
-    <h3>Plugins</h3>
-  </div>
-  <p>Install new abilities from the plugin market — games, drawing, weather, and platform adapters.</p>
-  <a href="/en/manual/plugins/">Install Plugins →</a>
-</div>
+**[Internal chat](./internal-chat.md)** — The web chat room and desktop pet share one owner identity.
 
-<div class="nav-card">
-  <div class="step-head nav-head">
-    <span class="step-no nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></span>
-    <h3>WebUI Console</h3>
-  </div>
-  <p>The full WebUI guide: configuration, adapters, commands, memory, data, and chat statistics.</p>
-  <a href="/en/manual/webui/">Login & Settings →</a>
-</div>
+**[Mai help](./webui/ai-help.md)** — The built-in help agent that searches docs, finds plugins, and edits config.
 
-</div>
+## For developers
 
-## I'm a Developer
+- [Development overview](/en/develop/) — Platform adapters and plugin development
+- [Plugin development guide](/en/develop/plugin/) — Write plugins that extend MaiBot
 
-Want to write plugins or adapters for MaiBot, or integrate it with your own program?
+## Troubleshooting
 
-- [Development Overview](/en/develop/) — platform adapters and plugin development
-- [Plugin Development Guide](/en/develop/plugin/) — write plugins to extend MaiBot's behavior
-
-## Need Help?
-
-- Check the [FAQ](/en/faq/) first — most deployment, connection, and error questions already have answers.
-- Join the [MaiBot community](/en/about/community) — the QQ groups offer technical Q&A and friendly help.
-- Ask or discuss in [GitHub Discussions](https://github.com/Mai-with-u/docs/discussions).
-
-<style scoped>
-/* Quick-start step cards */
-.step-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin: 24px 0;
-}
-
-.step-card {
-  padding: 20px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 14px;
-  background: var(--vp-c-bg-soft);
-  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
-}
-.step-card:hover {
-  border-color: var(--vp-c-brand-2);
-  box-shadow: 0 6px 20px var(--vp-c-brand-soft);
-  transform: translateY(-2px);
-}
-
-.step-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.step-head h3 {
-  margin: 0;
-  font-size: 17px;
-  color: var(--vp-c-text-1);
-}
-
-.step-no {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--vp-c-brand-1);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.step-card p {
-  margin: 0 0 12px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--vp-c-text-2);
-}
-
-.step-more {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--vp-c-brand-1);
-  text-decoration: none;
-  transition: color 0.2s, transform 0.2s;
-}
-.step-more:hover {
-  color: var(--vp-c-brand-2);
-  transform: translateX(2px);
-}
-
-/* Section navigation cards */
-.nav-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin: 24px 0;
-}
-
-.nav-card {
-  padding: 18px 20px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 14px;
-  background: var(--vp-c-bg-soft);
-  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
-}
-.nav-card:hover {
-  border-color: var(--vp-c-brand-2);
-  box-shadow: 0 6px 20px var(--vp-c-brand-soft);
-  transform: translateY(-2px);
-}
-
-.nav-card .nav-icon {
-  padding: 0;
-}
-
-.nav-icon svg {
-  width: 18px;
-  height: 18px;
-}
-
-.nav-card .nav-head h3 {
-  margin: 0;
-}
-
-.nav-card h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
-  color: var(--vp-c-text-1);
-}
-
-.nav-card p {
-  margin: 0 0 12px;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--vp-c-text-2);
-}
-
-.nav-card a {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--vp-c-brand-1);
-  text-decoration: none;
-}
-
-/* Single column on mobile */
-@media (max-width: 768px) {
-  .step-grid,
-  .nav-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
-</style>
+- Check the [FAQ](/en/faq/) first — deployment, connection, and most error questions are already answered there.
+- Join the [community](/en/about/community) for technical help and friendly chat.
+- Or ask on GitHub Discussions: <Linkcard url="https://github.com/Mai-with-u/docs/discussions" title="MaiBot Discussions" description="Ask questions, report doc issues, and join the discussion" />

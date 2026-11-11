@@ -6,6 +6,8 @@ title: Markdown Features
 
 Writer's note: This page covers the **non-native VitePress** plugin features used on this site; these features require you to write specific syntax in Markdown to trigger them. For VitePress-native features such as custom containers (`::: tip` / `::: warning`, etc.) and code block line highlighting, see the [VitePress official documentation](https://vitepress.dev/guide/markdown). Snippet import is also enabled on this site — see "Snippet Import" below.
 
+The site runs on **VitePress 2** (`2.0.0-alpha.21`). Content syntax is unchanged; only a few site-level config options and theme APIs were renamed. They are listed in [VitePress 2 Differences](#vitepress-2-differences) — writers don't need to care, but read that section before touching the site config.
+
 This page follows the hard rules in [Contributing to the Docs Site](./): **content pages must not use Markdown tables** — use definition lists or the `::: fields` container instead; index pages may use tables as needed.
 
 ## Mermaid Diagrams
@@ -161,8 +163,8 @@ Bare language fences without a code group (` ```toml `, ` ```python `, ` ```bash
 
 Code-group labels must be written as `[label text ~iconify-icon-name~]`, with the icon given explicitly. **Do not rely on automatic keyword matching**:
 
-- ❌ ` ```toml [Config] ` — no icon
-- ✅ ` ```toml [Config ~vscode-icons:file-type-toml~] ` — explicit icon
+- 错误：` ```toml [Config] ` — no icon
+- 正确：` ```toml [Config ~vscode-icons:file-type-toml~] ` — explicit icon
 
 Get icon names from [Iconify](https://icon-sets.iconify.design/). Common ones: `vscode-icons:file-type-toml`, `vscode-icons:file-type-python`, `vscode-icons:file-type-json`, `vscode-icons:file-type-shell`, `vscode-icons:file-type-git`, `logos:docker-icon`.
 
@@ -304,6 +306,43 @@ Rules:
 - `#region-name` imports only the fragment between `# region name` and `# endregion name` in the file;
 - `{1,3-5}` highlights line numbers;
 - A wrong file path fails the build, on purpose — it doubles as an existence check for example code.
+
+## VitePress 2 Differences
+
+The site runs on VitePress 2. **Content syntax stays fully compatible** — the points below only matter when editing site config, theme components, or custom Markdown plugins. Each one was hit during the migration, not guessed.
+
+### Renamed / removed site config options
+
+- **`markdown.headers` is unchanged** — still `{ level: [2, 3, 4] }`, same meaning (an exact level list, not a range). It fills the "On this page" outline; omitting it or treating it as a range leaves the outline empty.
+- **`markdown.codeCopyButtonTitle` → `markdown.codeCopyButton.tooltipText`** — not used on this site, but don't copy 1.x syntax when editing config.
+- **`markdown.attrs` options renamed** — now `left` / `right` / `allowed`.
+- **`metaChunk` is gone** — `metaChunk: true` from 1.x is an unknown option in 2.x; remove it, page metadata is split automatically.
+- **`markdown.anchor` now uses [@mdit/plugin-anchor](https://github.com/mdit-vue/mdit-vue) option types** — custom anchor plugins need their signature updated.
+
+### Theme API changes
+
+- **`router.onAfterRouteChanged` → `router.onAfterRouteChange`** — 1.x accepted both names (the new one won), 2.x only accepts the new one. The old name fails silently: the callback never runs. This site uses it to finish the nprogress bar, so the symptom is a progress bar stuck halfway.
+- **`useData().hash` was removed** — read `useRoute().hash` yourself, or watch the `hash` ref.
+- **`enhanceApp` still receives `router`**, and its signature is otherwise unchanged.
+
+### Dependency and peer requirements
+
+- **`vue` must be an explicit `package.json` dependency** — VitePress 2 depends on Vue 3.5.43+, and `@nolebase/ui` pins its peer to the same line; declaring it yourself keeps one copy of Vue around, instead of two — which shows up as `useData()` returning empty data.
+- **`@nolebase/*` plugins must be 2.21.x** — 2.18.x declares a `^1` peer, which resolves against the wrong vitepress types under 2.x.
+- **`vitepress-plugin-mermaid` still declares a `^1` peer, but works** — build and rendering both verified fine, so the site keeps it. Expect the peer warning when upgrading, but don't switch approaches because of it.
+
+### Styling
+
+- **Default typography moved to `rem`** — 2.x replaced values like `28px / 48px / 24px` in `vp-doc` with `1.75rem / 3rem / 1.5rem`. The root font size is still `16px`, so the result is identical — but a future change to the root size now scales the whole prose layer.
+- **Logical properties replaced physical ones** — `margin-left` / `padding-left` / `border-left` became `padding-inline-start` / `border-inline-start` and friends. Overrides written in logical properties win.
+- **`.vp-code` is no longer on `<pre>`** — code blocks are `<pre class="shiki shiki-themes ...">` now; target `div[class*='language-']` or `pre.shiki` instead.
+- **The `.VPNavBarMenu` classes survive** — but the component internals were renamed to `VPNavMenu` (the desktop nav still carries the `VPNavBarMenu` class). Inspect the built DOM before styling the nav.
+- **Social icons became Iconify icons** — `icon: 'github'` resolves to `simple-icons:github`; custom SVG icons still work via `{ svg: '...' }`.
+
+### Build time
+
+- **Local imports need file extensions** — Vite 8's native config loader wants `.ts` on relative imports in the config (`'./sidebar/zh.ts'`). It still builds without them, but warns.
+- **Node.js 22+ is required** — CI here runs Node 24.
 
 ## Registered Vue Components
 

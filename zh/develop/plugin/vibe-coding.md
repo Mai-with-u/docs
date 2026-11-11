@@ -4,7 +4,7 @@ title: Vibe Coding 插件开发指南
 
 # Vibe Coding 插件开发指南
 
-本文面向使用 AI 辅助编写 MaiBot 插件的开发者。目标是把插件需求拆成 AI 容易理解、容易验证、不会误改主程序的工作单元。
+用 AI 写插件，关键是把需求拆成 AI 容易理解、容易验证、不会误改主程序的工作单元。
 
 ## AI 任务简报
 
@@ -52,7 +52,7 @@ plugins/my-plugin/
 - `id` 使用小写反向域名或作者前缀，例如 `com.example.my-plugin`。
 - `version` 使用严格三段式语义版本，例如 `1.0.0`。
 - `author.url`、`urls.repository` 等 URL 必须以 `http://` 或 `https://` 开头。
-- `host_application` 和 `sdk` 都要声明 `min_version` 与 `max_version`，上限写已测试过的最高「主.次」版本加 `.99`（如 `1.3.99`）。
+- `host_application` 和 `sdk` 都要声明 `min_version` 与 `max_version`，上限写已测试过的最高「主.次」版本加 `.99`（如 `1.4.99`）。
 - Python 包依赖写入 `dependencies`，类型为 `python_package`。
 - 插件间依赖写入 `dependencies`，类型为 `plugin`。
 - 需要 `ffmpeg` 等系统工具时，用自带静态二进制的 Python 包（如 `imageio-ffmpeg`）声明为 `python_package`，执行时取包内绝对路径；宿主不保证这些命令存在。
@@ -78,12 +78,12 @@ plugins/my-plugin/
     "repository": "https://github.com/developer/my-plugin"
   },
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
     "min_version": "2.5.1",
-    "max_version": "2.9.99"
+    "max_version": "2.22.99"
   },
   "dependencies": [],
   "capabilities": ["send.text", "send.emoji", "config.get"],
@@ -291,7 +291,7 @@ git status --short
 :::
 
 - **AI 顺手改了主程序** — 提示词里缺约束：「AI 任务简报」必须写死只改 `plugins/<plugin-name>/`、必须实现 `on_load` / `on_unload` / `on_config_update` 和 `create_plugin()`、新代码只用 `@Tool` / `@Command` / `@HookHandler` 这类组件；漏一条，diff 里就可能多出 `src/` 的改动。
-- **插件被 Host 拒绝加载，报 manifest 校验错误** — 对照「Manifest 要点」逐条查：`manifest_version` 必须是 `2`，`id` 全小写且带 `.` / `-`，`version` 是严格 `X.Y.Z`，URL 以 `http://` 或 `https://` 开头，`host_application` 与 `sdk` 都要有上下界；先跑上面的 `json.tool` 排除语法问题。
+- **插件被 Host 拒绝加载，报 manifest 校验错误** — 对照「Manifest 要点」逐条查：`manifest_version` 必须是 `2`，`id` 由字母、数字、下划线组成并用 `.` / `-` 分段（大小写不限，但习惯小写），`version` 是严格 `X.Y.Z`，URL 以 `http://` 或 `https://` 开头，`host_application` 与 `sdk` 都要有上下界；先跑上面的 `json.tool` 排除语法问题。
 - **能力调用被拒，或加载时报「未注册的能力」** — `capabilities` 与代码对不上：代码里调了 `ctx.send.text`、`ctx.config.get` 却没声明，Host 会拒绝对应能力；反过来声明了拼错或未注册的能力名，注册阶段就失败。按实际调用逐项对齐。
 - **提示「缺少 create_plugin 工厂函数」** — 生成的 `plugin.py` 要么没写 `create_plugin()`，要么返回的不是 `MaiBotPlugin` 子类实例；同时确认插件类继承 `MaiBotPlugin` 并声明了 `config_model`。
 - **让 AI 改已有插件，diff 却牵扯全仓库** — 修改类提示词要写上「只改该插件目录、先读 `_manifest.json` 和现有配置模型、不做无关重构、不整理全仓库格式」；拿到结果先看变更文件列表，多出来的改动直接打回。

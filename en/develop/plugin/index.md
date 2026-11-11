@@ -3,7 +3,7 @@ title: Plugin Development Guide
 ---
 # Plugin Development Guide
 
-MaiBot's plugin system adopts a Host/Runner IPC architecture. Plugin code runs in isolated child processes and communicates with the main process via an RPC protocol encoded with msgpack. This section introduces the architectural principles, development workflow, and core concepts of the plugin system.
+A plugin is Python code running in an isolated child process that talks to the main process over msgpack-encoded RPC. One directory, one manifest, and a `create_plugin()` factory is all it takes to load.
 
 ## Architecture Overview
 
@@ -23,27 +23,22 @@ graph TD
     E <-->|msgpack over UDS/TCP/NamedPipe| H
 ```
 
-### Host (Main Process Side)
+**Host (main process)**
 
-- **PluginRuntimeManager**: Singleton manager that manages both Builtin and Third-party Supervisors
-- **PluginSupervisor**: Responsible for starting, stopping, health checking, and hot-reloading of Runner subprocesses
-- **ComponentRegistry**: Component registry that manages all components (such as Tools, Commands, etc.) declared by plugins
-- **HookDispatcher**: Hook dispatcher that routes named hook invocations to the corresponding Supervisor
+- **`PluginRuntimeManager`** — singleton that owns the Builtin and Third-party Supervisors.
+- **`PluginSupervisor`** — starts, stops, health-checks, and hot-reloads the Runner subprocess.
+- **`ComponentRegistry`** — holds every Tool, Command, and HookHandler a plugin declares.
+- **`HookDispatcher`** — fans a named hook invocation out to the handlers subscribed to it; see [Hook Handlers](./hooks.md).
 
-### Runner (Subprocess Side)
+**Runner (subprocess)**
 
-- Each Supervisor manages its own independent Runner subprocess
-- Discovers and loads plugins via `PluginLoader`
-- Communicates with the Host via `RPCClient`
-- Injects `PluginContext` after plugin loading, then calls the `on_load()` lifecycle method
+- Each Supervisor owns one Runner subprocess and discovers plugins through `PluginLoader`.
+- It talks to the Host over `RPCClient`, injects `PluginContext` after loading, then calls `on_load()`.
 
-### Communication Protocol
+**Protocol**
 
-- **Encoding/Decoding**: Uses msgpack format for binary serialization (`MsgPackCodec`)
-- **Transport Layer**: Supports three transport methods: Unix Domain Socket, TCP, and Named Pipe
-- **RPC Model**:
-  - Host → Runner: Invokes plugin components (Tools, Commands, etc.) via `invoke_plugin()`
-  - Runner → Host: Plugins initiate RPC callbacks via the capability proxy in `self.ctx` (e.g., `ctx.send.text()`, `ctx.db.query()`)
+- msgpack codec (`MsgPackCodec`); transport over Unix Domain Socket, TCP, or Named Pipe.
+- Host → Runner goes through `invoke_plugin()`; Runner → Host goes through the capability proxies on `self.ctx`, for example `ctx.send.text()` or `ctx.db.query()`.
 
 
 ## Quick Start
@@ -128,12 +123,12 @@ Declare plugin metadata in `_manifest.json` (for full field descriptions, see [M
     "repository": "https://github.com/developer/my-plugin"
   },
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
-    "min_version": "1.0.0",
-    "max_version": "2.9.99"
+    "min_version": "2.22.0",
+    "max_version": "2.22.99"
   },
   "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": {
@@ -238,27 +233,27 @@ def create_plugin():
 
 The SDK provides 9 component decorators, all imported from the top level of `maibot_sdk`:
 
-**`@Tool`** — LLM tool/function calling. Tools callable by the LLM, the most commonly used component type
+**`@Tool`** — LLM tool/function calling, the most commonly used component type
 
-**`@Command`** — Slash commands. Commands triggered by users via regex matching
+**`@Command`** — Slash commands, triggered by a regex match
 
-**`@HookHandler`** — Named Hook handlers. Subscribes to specific Hook points, supports blocking/observe modes
+**`@HookHandler`** — Named Hook handlers, with blocking/observe modes
 
-**`@EventHandler`** — Message/Workflow events. Listens to lifecycle events such as messages and LLM generation
+**`@EventHandler`** — Message and workflow event subscriptions
 
-**`@API`** — Inter-plugin API. Exposes APIs callable by other plugins
+**`@API`** — Inter-plugin APIs
 
-**`@MessageGateway`** — Platform adapter. Integrates external platforms (QQ, Email, etc.) into MaiBot
+**`@MessageGateway`** — Platform adapter gateway, bringing an external platform into MaiBot
 
-**`@HomeCard`** — WebUI home page card. Shows plugin status, entry points, or custom content on the home page
+**`@HomeCard`** — WebUI home page card for plugin status, entry points, or custom content
 
-**`@LLMProvider`** — LLM Provider. Declares new LLM model access points (client_type) to extend model services
+**`@LLMProvider`** — Declares a new LLM Provider `client_type`
 
-**`@ReplyExtension`** — Reply extension. Injects namespaced parameters into the reply tool and participates in reply generation (SDK 2.10.0+; see [Reply Extensions](./reply-extensions.md))
+**`@ReplyExtension`** — Reply extension. Injects namespaced parameters into the reply tool and participates in reply generation; see [Reply Extensions](./reply-extensions.md)
 
 ### Capability Proxies
 
-Access 23 capability proxies via `self.ctx`. All calls are automatically forwarded to the Host via RPC:
+Access 24 capability proxies via `self.ctx`. All calls are forwarded to the Host over RPC:
 
 ::: code-group
 
@@ -268,7 +263,7 @@ self.ctx              # PluginContext instance
 self.ctx.paths        # Plugin persistence and runtime directories
 self.ctx.logger       # logging.Logger, named "plugin.<plugin_id>"
 
-# Capability proxies
+# Proxy list
 self.ctx.api          # Plugin API query, invocation, and dynamic synchronization
 self.ctx.gateway      # Message gateway routing and runtime status reporting
 self.ctx.send         # Send text, images, emojis, forwards, and mixed messages
@@ -289,6 +284,7 @@ self.ctx.maisaka      # Maisaka context appending and proactive tasks
 self.ctx.webui        # Claim WebUI upload tokens
 self.ctx.files        # File transfer and reading
 self.ctx.web          # Web search and page fetching
+self.ctx.market       # Read-only plugin market queries (search, detail, README)
 self.ctx.internal_chat  # Internal chat (pet and web room share it)
 self.ctx.personality    # Global personality query and switching
 self.ctx.desktop_pet    # Pet control, animation, and extension buttons
@@ -343,7 +339,7 @@ my-plugin/
 
 The configuration model is part of the plugin source, and the Runner generates the runtime configuration instance. The plugin repository's `.gitignore` should include `/config.toml`; after installation, WebUI or runtime configuration APIs maintain the user's configuration.
 
-Store plugin runtime data in the plugin-specific directories injected by the Host. Starting from SDK 2.6.0, these directories are available through `self.ctx.paths`:
+Plugin runtime data goes to plugin-specific directories injected by the Host; read them through `self.ctx.paths`:
 
 ::: code-group
 

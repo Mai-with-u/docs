@@ -10,10 +10,10 @@ Prerequisites:
 
 - **Python 3.10+**, with `pip install maim_message` working;
 - A **platform SDK that can send and receive messages** (the platform's official library, an OneBot implementation, or your own protocol stack);
-- A **MaiBot instance that is already running**, plus its message server address and token.
+- A **MaiBot instance that is already running**, plus the Host address, the target bot ID, and its `auth_token`.
 
 ::: tip Decide which service you are connecting to first
-This page uses the **legacy message server** (enabled by default, `ws://127.0.0.1:8000/ws`). If you are connecting to the API server (`enable_api_server`) instead, the connection parameters become `x-apikey` / `x-platform`, and every packet needs an extra envelope on the outside — for the differences, see [Message Protocol Reference](./protocol.md).
+This page uses the **legacy message server** (enabled by default, `ws://<host>:<port>/maim/<bot_id>/ws`). To connect to the API server (`enable_api_server`) instead, the connection parameters become `x-apikey` / `x-platform` and every packet needs an extra envelope on the outside — for the differences, see [Message Protocol Reference](./protocol.md).
 :::
 
 ## What the Skeleton Handles
@@ -121,7 +121,13 @@ flowchart TB
 
 ## Full Code
 
-Below is the finished result, assembled from every step above. Copy it out, fill in the three `PlatformBridge` methods, and change the four constants at the top to run it.
+Below is the finished result, assembled from every step above. Copy it out, fill in the three `PlatformBridge` methods, and change the five constants at the top to run it.
+
+- **`PLATFORM`** — the platform name, globally unique.
+- **`BOT_ID`** — the target bot's 32-character hex ID, from `maibot host list` or the WebUI's bot management.
+- **`MAIBOT_WS_URL`** — `ws://<host>:<port>/maim/<bot_id>/ws`; the Host defaults to `127.0.0.1:8001`.
+- **`MAIBOT_TOKEN`** — the raw token from that bot's `maim_message.auth_token`; with an empty list you must fill one in first, otherwise the connection is refused.
+- **`SELF_ID`** — this adapter instance's account identifier, used for multi-account routing.
 
 ::: code-group
 
@@ -131,18 +137,18 @@ Below is the finished result, assembled from every step above. Copy it out, fill
 
 ## What to Change on the MaiBot Side
 
-The default configuration listens on the local machine only. When the adapter and MaiBot are not on the same machine (or not in the same container network), edit `config/bot_config.toml`:
+The bot itself only needs a token. When the adapter and MaiBot are not on the same machine (or not in the same container network), set that token first, then widen the Host listen addresses:
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [maim_message]
-ws_server_host = "0.0.0.0"   # Change 127.0.0.1 to 0.0.0.0 so external clients can connect
-ws_server_port = 8000
-auth_token = ["换成一段足够长的随机串"]   # Non-empty enables authentication; the adapter must send exactly the same value
+auth_token = ["换成一段足够长的随机串"]   # An empty list rejects every connection; the adapter must send exactly the same value
 ```
 
 :::
+
+The listen address and port belong to the Host configuration: `[webui]` in `host/config.toml` (`hosts`, `port`, defaulting to `127.0.0.1` + `::1` on `8001`), or "MaiBot Settings → Shared Settings" in the WebUI. To accept connections from a container or another machine, add `0.0.0.0` to the listen addresses and open the port.
 
 ::: warning The auth value is compared verbatim
 `auth_token` is compared as a **whole string** against the `authorization` header, with no `Bearer` prefix parsing. One extra `Bearer ` on the adapter side and you are disconnected with close code 1008.

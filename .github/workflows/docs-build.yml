@@ -27,6 +27,8 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
+      # VitePress 2 走 Vite 8，Vite 8 要求 Node ^20.19.0 || >=22.12.0。
+      # 这里固定 24，与 .node-version 保持一致，别降回 20 以下。
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

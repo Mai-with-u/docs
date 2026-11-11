@@ -653,7 +653,7 @@ max_tokens = 4096
 
 ## 常用参数速查
 
-### OpenAI 兼容 API
+### OpenAI 兼容 API 速查
 
 - **`thinking`** — 思考模式控制，含 `type`。智谱/Kimi 写 `enabled`、MiniMax 写 `adaptive`、豆包写 `auto`，关闭写 `disabled`
 - **`enable_thinking`** — 布尔思考开关。适用阿里云百炼、硅基流动
@@ -667,7 +667,7 @@ max_tokens = 4096
 - **`query`** — 自定义 URL 查询参数。适用全部
 - **`body`** — 自定义请求体字段。适用全部
 
-### Gemini 原生 API
+### Gemini 原生 API 速查
 
 - **`thinking_config`** — 思考配置，含 `thinking_budget` 或 `thinking_level`。适用 Gemini 全系
 - **`thinking_budget`** — 思考预算（-1 自动 / 0 关闭 / N 指定）。适用 Gemini 2.5

@@ -4,7 +4,7 @@ title: Message Gateway
 
 # Message Gateway
 
-The `@MessageGateway` decorator is used to declare a message gateway component, implementing bidirectional message routing between MaiBot and external message platforms (such as QQ, Email, etc.). The message gateway is the core component of a platform adapter, responsible for outbound message sending and inbound message injection.
+`@MessageGateway` declares a message gateway: bidirectional routing between MaiBot and an external platform, handling outbound sends and inbound injection. For a plugin-based platform adapter, this is its core component.
 
 ## Decorator Signature
 
@@ -321,7 +321,7 @@ stateDiagram-v2
 ## Platform Field Descriptions
 
 - **`platform`** `str` — Target platform name (e.g., `"qq"`, `"email"`, `"webhook"`)
-- **`protocol`** `str` — Protocol or implementation name (e.g., `"napcat"`, `"snowluma"`, `"email"`)
+- **`protocol`** `str` — Protocol or implementation name (e.g., `"napcat"`, `"onebot"`, `"email"`)
 - **`account_id`** `str` — Bot account ID (e.g., `"10001"`, `"bot#1234"`)
 - **`scope`** `str` — Routing scope (e.g., `"primary"`, `"default"`)
 

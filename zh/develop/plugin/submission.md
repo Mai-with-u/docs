@@ -4,6 +4,8 @@ title: 提交与发布插件
 
 # 提交与发布插件
 
+插件发布到官方插件市场（`Mai-with-u/plugin-repo`）后，用户在 WebUI 的插件市场里能直接搜到、安装和升级。提交只要求一个公开 GitHub 仓库和一个 Release，版本更新走同一条自动化审核流水线。
+
 ## 提交插件
 
 准备公开 GitHub 仓库，根目录放 `_manifest.json`（v2）、`plugin.py` 和 `LICENSE`，运行配置 `config.toml` 留在本地。先发布至少一个 GitHub Release，再用 [Add Plugin 模板](https://github.com/Mai-with-u/plugin-repo/issues/new/choose)提交插件 ID 和仓库地址。

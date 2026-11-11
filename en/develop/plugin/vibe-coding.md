@@ -4,7 +4,7 @@ title: Vibe Coding Plugin Development Guide
 
 # Vibe Coding Plugin Development Guide
 
-This guide is for developers using AI to help write MaiBot plugins. The goal is to break down plugin requirements into units that are easy for AI to understand and verify without accidentally modifying the core program.
+Writing plugins with AI works when the requirement is split into units AI can understand, verify, and change without touching the core program.
 
 ## AI Task Brief
 
@@ -49,10 +49,10 @@ plugins/my-plugin/
 `_manifest.json` is used by the Host to validate the plugin before loading. When generating, the AI must note:
 
 - `manifest_version` is currently fixed to `2`.
-- `id` uses lowercase reverse domains or author prefixes, e.g., `com.example.my-plugin`.
+- `id` uses reverse domains or author prefixes, e.g., `com.example.my-plugin`. Lowercase is conventional, not enforced; the validator also accepts uppercase and underscores.
 - `version` uses strict three-part semantic versioning, e.g., `1.0.0`.
 - URLs `author.url` and `urls.repository` must start with `http://` or `https://`.
-- `host_application` and `sdk` must both declare `min_version` and `max_version`; set the upper bound to the highest tested major.minor plus `.99` (for example `1.3.99`).
+- `host_application` and `sdk` must both declare `min_version` and `max_version`; set the upper bound to the highest tested major.minor plus `.99` (for example `1.4.99`).
 - Python package dependencies are written in `dependencies`, with type `python_package`.
 - Inter-plugin dependencies are written in `dependencies`, type `plugin`.
 - When system tools such as `ffmpeg` are required, declare a Python package that bundles a static binary (e.g. `imageio-ffmpeg`) as `python_package` and invoke it by absolute path; the host does not guarantee these commands exist.
@@ -78,12 +78,12 @@ plugins/my-plugin/
     "repository": "https://github.com/developer/my-plugin"
   },
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
     "min_version": "2.5.1",
-    "max_version": "2.9.99"
+    "max_version": "2.22.99"
   },
   "dependencies": [],
   "capabilities": ["send.text", "send.emoji", "config.get"],
@@ -291,7 +291,7 @@ git status --short
 :::
 
 - **The AI edits the core program** — the prompt is missing constraints: the "AI Task Brief" must state that only `plugins/<plugin-name>/` may change, that `on_load` / `on_unload` / `on_config_update` and `create_plugin()` are mandatory, and that new code uses only components such as `@Tool` / `@Command` / `@HookHandler`. Miss one line and the diff may contain `src/` changes.
-- **The Host refuses to load the plugin with a manifest validation error** — walk the Manifest Key Points: `manifest_version` must be `2`, `id` must be lowercase with a `.` or `-`, `version` must be strict `X.Y.Z`, URLs must start with `http://` or `https://`, and both `host_application` and `sdk` need min/max bounds. Run the `json.tool` check above first to rule out a syntax problem.
+- **The Host refuses to load the plugin with a manifest validation error** — walk the Manifest Key Points: `manifest_version` must be `2`, `id` must be letters, digits, and underscores split by `.` or `-` (case is not enforced, lowercase is conventional), `version` must be strict `X.Y.Z`, URLs must start with `http://` or `https://`, and both `host_application` and `sdk` need min/max bounds. Run the `json.tool` check above first to rule out a syntax problem.
 - **A capability call is denied, or loading reports an unregistered capability** — `capabilities` does not match the code: if you call `ctx.send.text` or `ctx.config.get` without declaring it, the Host denies that capability; declare a misspelled or unregistered name and registration fails instead. Align the list with the calls you actually make.
 - **"missing create_plugin factory function"** — the generated `plugin.py` either has no `create_plugin()`, or it does not return a `MaiBotPlugin` subclass instance; also confirm the plugin class inherits `MaiBotPlugin` and declares `config_model`.
 - **Asking the AI to modify an existing plugin produces a repo-wide diff** — the modification prompt must say to edit only that plugin directory, read `_manifest.json` and the existing config model first, avoid unrelated refactors, and never reformat the whole repository. Check the changed-file list before reviewing anything else and send back any extra changes.

@@ -12,7 +12,7 @@ title: QQ 官方机器人适配器
 适配器用 AppID + AppSecret 换取 access_token，再向 QQ OpenAPI（默认 `https://api.bot.qq.com`）请求网关地址后主动建立连接。全部连接由适配器向外发起，不需要公网回调地址，也不使用 `[maim_message]` 配置段。
 :::
 
-适配器仓库（🏛️ 官方维护）：
+适配器仓库（官方维护）：
 
 <Linkcard url="https://github.com/Mai-with-u/MaiBot-QQ-Adapter" title="MaiBot-QQ-Adapter" description="MaiBot 官方维护的 QQ 官方机器人适配器插件，直连 QQ 开放平台" logo="/title_img/mai.png" />
 
@@ -46,24 +46,34 @@ QQ 官方平台的 OpenID 与真实 QQ 号不互通（通常是不可读字符�
 
 ```toml [config.toml ~vscode-icons:file-type-toml~]
 [plugin]
-enabled = true            # 启用适配器，必须为 true 才会建立连接
-config_version = "0.4.1"  # 配置结构版本，一般不要改动
+enabled = true             # 启用适配器，必须为 true 才会建立连接
+config_version = "0.4.15"  # 配置结构版本，由程序管理
 
 [qq_official]
 app_id = "开放平台显示的 AppID"
 app_secret = "与 AppID 配对的 AppSecret"
 api_base_url = "https://api.bot.qq.com"  # QQ 开放平台 API 地址，一般不用改
-reconnect_delay_sec = 5.0                # 断线重连间隔（秒）
-unified_account_id = ""   # 可选：统一账号 ID（如 NapCat 机器人 QQ 号），填写后与其它 qq 适配器共享聊天流
-assign_admin_ids = []     # 可选：允许执行绑定命令的用户（统一 ID 或 OpenID），留空不限制
+unified_account_id = ""    # 关联 QQ 号：填写后聊天流按此 ID 归属，与其它 qq 适配器共享上下文
+silent_user_sync = true    # 在已绑定群中与关联账号静默匹配 QQ 号、昵称与群名片；需先填关联 QQ 号
+snowluma_identity_only = false  # 官方连接就绪时让关联账号只采集身份，避免双重发送
 
 [mute]
-enabled = true            # 启用 mute 禁言工具，见「LLM 工具」
-allowed_groups = []       # 允许禁言的群（统一群号或 group_openid），留空不限制
+enabled = true             # 启用 set_mute 禁言工具，见「LLM 工具」
+allowed_groups = []        # 允许禁言的群（统一群号或 group_openid），留空不限制
+admin_users = []           # 禁言保护名单（统一 QQ 号或 OpenID），名单内用户不会被禁言
+min_duration = 60          # 最短禁言时长（秒）
+max_duration = 2592000     # 最长禁言时长（秒），官方上限 30 天
 
 [recall]
-enabled = true            # 启用 recall_message 撤回工具
-allowed_groups = []       # 允许撤回的群（统一群号或 group_openid），留空不限制；单聊不受此限制
+enabled = true             # 启用 recall_message 撤回工具
+allowed_groups = []        # 允许撤回的群（统一群号或 group_openid），留空不限制；单聊不受此限制
+
+[filter]
+ignore_other_bots = true   # 忽略其它机器人发送的消息
+
+[advanced]
+show_debug_info = false    # 在日志中逐条显示消息按主动还是被动方式发送
+reconnect_delay_sec = 5.0  # 断线后重连间隔（秒），1~300
 ```
 
 :::
@@ -87,7 +97,7 @@ allowed_groups = []       # 允许撤回的群（统一群号或 group_openid）
 
 ## 统一 ID 绑定命令
 
-QQ 官方平台的 OpenID 与真实 QQ 号不互通。为了让消息以真实 QQ 号归属（与统一 QQ 连接器共享数据），可在聊天内发送绑定命令：
+QQ 官方平台的 OpenID 与真实 QQ 号不互通。为了让消息以真实 QQ 号归属（与 OneBot 适配器共享数据），可在聊天内发送绑定命令：
 
 - **`/assign_group_id <群号>`** — 把当前群的 `group_openid` 绑定到指定群号，群聊可用；
 - **`/assign_id <QQ号>`** — 把发送者的 OpenID 绑定到指定 QQ 号；
@@ -123,7 +133,7 @@ QQ 官方平台的 OpenID 与真实 QQ 号不互通。为了让消息以真实 Q
 
 ## 头像接口（开发者）
 
-提供公开 API `adapter.avatar.get`（版本 `1`），与统一 QQ 连接器使用相同的[头像协议](/develop/adapters/avatar-api)。参数为 `platform`、`target_id`、`target_type`（`user` 或 `group`，默认 `user`），并接受宿主传入的 `account_id` 和 `scope`。
+提供公开 API `adapter.avatar.get`（版本 `1`），与 OneBot 适配器使用相同的[头像协议](/develop/adapters/avatar-api)。参数为 `platform`、`target_id`、`target_type`（`user` 或 `group`，默认 `user`），并接受宿主传入的 `account_id` 和 `scope`。
 
 - 数字 QQ 号、群号返回头像 URL 和 `expires_in = 86400`，图片由宿主统一下载、缓存；
 - OpenID 已通过 `/assign_id` 或 `/assign_group_id` 绑定真实数字 ID 时，使用绑定值查询头像；

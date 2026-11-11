@@ -4,6 +4,8 @@ title: Plugin Issues
 
 # Plugin Issues
 
+This page covers plugin problems: enabled plugins that do nothing, version and compatibility messages, commands not firing, a market that will not load, and failed updates or downgrades.
+
 ## Why does an enabled plugin not work?
 
 Read the plugin's README and confirm required configuration, dependencies, permissions, and compatible MaiBot versions. Then inspect startup logs for load, validation, command-registration, or event-registration errors.

@@ -7,7 +7,6 @@
 export interface IntegrationRoute {
   /** 稳定标识，用作锚点与筛选键 */
   key: string
-  icon: string
   category: string
   title: string
   intent: string
@@ -27,11 +26,6 @@ export interface IntegrationRouteText {
 const links = {
   adapter: '/develop/adapters/',
   plugin: '/develop/plugin/',
-}
-
-const icons: Record<string, string> = {
-  adapter: '🔌',
-  plugin: '🧩',
 }
 
 const zh: Record<string, IntegrationRouteText> = {
@@ -71,8 +65,8 @@ const en: Record<string, IntegrationRouteText> = {
 const order = ['adapter', 'plugin']
 
 export const integrationRoutes: Record<'zh' | 'en', IntegrationRoute[]> = {
-  zh: order.map((key) => ({ key, icon: icons[key], link: links[key as keyof typeof links], ...zh[key] })),
-  en: order.map((key) => ({ key, icon: icons[key], link: links[key as keyof typeof links], ...en[key] })),
+  zh: order.map((key) => ({ key, link: links[key as keyof typeof links], ...zh[key] })),
+  en: order.map((key) => ({ key, link: links[key as keyof typeof links], ...en[key] })),
 }
 
 export const routeLabels: Record<'zh' | 'en', { audience: string; requires: string; cta: string }> = {

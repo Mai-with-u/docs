@@ -12,7 +12,7 @@ title: QQ 语音通话适配器
 适配器不直接连接 QQ：它轮询本机回环地址上的桥接状态接口，音频经 PulseAudio 虚拟设备进出。桥接只监听回环地址，并对状态与控制接口校验 Bearer Token。仓库不分发 QQ、NapCat 或 `libAVSDKPlugin.so`。
 :::
 
-适配器仓库（🌐 社区维护）：
+适配器仓库（社区维护）：
 
 <Linkcard url="https://github.com/ClaudiaGardner/maibot-qq-voice-call" title="maibot-qq-voice-call" description="ClaudiaGardner 维护的 QQ 语音通话适配器插件" />
 

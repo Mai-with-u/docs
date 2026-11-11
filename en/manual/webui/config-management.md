@@ -1,100 +1,85 @@
 ---
-title: Edit Configuration in Your Browser
+title: Editing Config in the Browser
 ---
 
-# Edit Configuration in Your Browser
+# Editing Config in the Browser
 
-## MaiBot Settings
+**Mai Settings** (`/config/bot`) turns every section of `bot_config.toml` into a form: changes save automatically, and you can also save by hand, edit the raw file, or manage sharing groups.
 
-**麦麦设置** (MaiBot Settings) provides the following configuration options:
+## Three ways to edit
 
-![MaiBot settings](/images/webui/config-bot.webp)
+The top tabs switch between **Detailed settings** and **Command management**; the `⋮` menu adds two more:
 
-- **详细设置** (Detailed Settings) — the full form, organized by section
-- **命令管理** (Command Management) — plugin commands and execution permissions
-- **⋮ 更多设置** (More Settings) — manual save, shared groups, and source file editing
+::: fields
+- **Detailed settings** — Sectioned forms covering every section of `bot_config.toml`. Hover an option to read its description.
+- **Command management** — Plugin commands and execution permissions; see [Command management](./command-management.md).
+- **Sharing groups** — Group several chat streams so they share expressions, slang, or long-term memory.
+- **Source editing** — Edit the raw `bot_config.toml`, for people comfortable with TOML.
+:::
 
-### Detailed Settings
+Changes save automatically; for manual control use **Save manually** in the `⋮` menu, whose status shows "saving / auto-saving / saved".
 
-The full form covers every section of `bot_config.toml`, including chat, memory, stickers, voice, and MCP. Hover over an option for an explanation if you are unsure.
+## Pinning frequent sections
 
-![Detailed settings](/images/webui/config-bot-detail.webp)
+Section tabs in detailed settings can be pinned: use the pin button next to a tab to keep frequently used sections in front.
 
-### Pin Frequently Used Settings at the Top
+On phone widths the sections become a horizontally scrollable row of pills.
 
-Use the pin in the section dropdown beside the page title to pin frequently used sections.
+## Sharing groups
 
-### Command Management
+Sharing groups bundle several chat streams so they share one set of learned results:
 
-View all registered plugin commands and configure execution permissions; see [Command Management](./command-management.md).
+::: fields
+- **Expression groups** — Written to `expression_groups`.
+- **Slang groups** — Written to `jargon_groups`.
+- **Memory groups** — Written to `a_memorix.shared_memory_groups`.
+:::
 
-### Shared Groups
+With `a_memorix.global_memory_sharing_enabled` on, memory groups become read-only on the page.
 
-**共享组设置** (Shared Groups) in the ellipsis menu groups chat streams so they share expression styles, jargon, or long-term memory:
+## Model management
 
-- **Expression** groups write `expression_groups`, **jargon** groups write `jargon_groups`, and **memory** groups write `a_memorix.shared_memory_groups`
-- Enabling `a_memorix.global_memory_sharing_enabled` makes memory shared groups read-only
+**Model management** (`/config/model`) covers providers, models, and task assignment:
 
-### Source File Editing
+::: fields
+- **Model settings** — Pick a provider on the left, then edit the API URL, key, and model list on the right; **Test connection** verifies it.
+- **Task assignment** — Map thinking, reply, vision, and other tasks to specific models, with each model's most recent call shown.
+- **Config copies** — Save the current config as a copy and manage history for rollback.
+:::
 
-**源文件编辑** (Source File Editing) in the ellipsis menu edits the raw `bot_config.toml`, for users familiar with TOML:
+Providers, models, and web services maintained under **Common settings** are shared by every bot; each bot only selects its own task models. See [Multiple bots](../multi-bot-host.md).
 
-![Source file editing](/images/webui/config-bot-source.webp)
+### Time-of-day pricing
 
-## Model Management
+A model's **Time-of-day pricing** bills by time windows each day:
 
-The Model Management page manages providers, models, and task assignments:
+- Set a start and end time (`HH:MM`, server local time) plus input, output, and cache prices (CNY per M tokens).
+- An end earlier than the start means the window crosses midnight.
+- Windows are billed start-inclusive and end-exclusive; the default price applies when nothing matches. Windows cannot overlap, and start and end must differ.
 
-![Model management](/images/webui/config-model.webp)
+### Thinking switch
 
-- **模型设置** (Model Settings) — select a provider on the left, then edit its API URL, key, and model list on the right; click "测试连接" (Test Connection) to verify
-- **功能分配** (Task Assignment) — assign thinking, replying, vision, and other tasks to specific models
+The **Enable thinking** switch in the model dialog follows the provider template:
 
-![Task assignment](/images/webui/config-model-tasks.webp)
+::: fields
+- **`thinking.type`** — Zhipu, Kimi, MiniMax, Doubao, and others; can be turned on or off, and off writes `disabled`.
+- **`enable_thinking`** — Bailian, SiliconFlow, and others.
+- **`reasoning_effort`** — StepFun, OpenAI, xAI and other reasoning models; thinking is always on and only the effort level changes.
+:::
 
-- **配置副本** (Configuration Copies) — save the current configuration and manage previous copies for rollback
+Parameter names, effort levels, and thinking budgets are covered in [Model extra parameters](../configuration/model-extra-params.md).
 
-### Time-Based Pricing
+## When changes take effect
 
-Besides default input, output, and cache prices, models can use different prices for daily time periods:
+Most settings hot-reload after saving, and model changes apply to subsequent requests. A host restart is required for listen addresses and ports, the whole `[maim_message]` section, `[plugin_runtime]` binding and IPC settings, the `[log]` event-loop watchdog, and the network and login settings in `host/config.toml`.
 
-- Set the start and end times (`HH:MM`, server local time) and input, output, and cache prices (CNY per million tokens) under **分时价格** (Time-Based Pricing) in the model editor
-- An end time earlier than the start crosses midnight
-- Periods include their start and exclude their end; unmatched times use default prices. Periods cannot overlap, and start and end cannot be equal
+To tell: after saving, check the log for a successful config reload message; for startup-time settings such as listen addresses, restart the host.
 
-### Thinking Controls
+## Verify and troubleshoot
 
-The "启用思考" (Enable Thinking) switch in the model editor appears according to the provider template:
+**Verify** — Change an option under **Detailed settings**, wait for "saved", then check the log for a successful reload message. Behavior should follow the new value immediately.
 
-- `thinking.type` (Zhipu / Kimi / MiniMax / Doubao, etc.) — can be enabled or disabled; disabling writes `disabled`
-- `enable_thinking` (Bailian / SiliconFlow, etc.)
-- `reasoning_effort` (Step / OpenAI / xAI reasoning models, etc.) — thinking is always on; only the effort level can be adjusted
-
-Doubao and Qwen support a thinking budget. See [Model Extra Parameters](../configuration/model-extra-params.md) for parameter names, effort levels, and budget fields.
-
-### Model Testing
-
-Use a model's lightning icon to send a test request and check availability. Response time in actual tasks depends on context length and task complexity.
-
-## Suggested Changes
-
-### For Beginners
-
-- Set the bot nickname and personality under "基础 → 身份与人格" (Basic → Identity & Personality)
-- Adjust reply triggers to suit the conversation frequency; see [Bot Config](../configuration/bot-config.md#chat-behavior)
-
-### Advanced Options
-
-- Assign different models to reply, vision, and other tasks under Task Assignment
-- Configure keyword reaction prompts; see [Bot Config](../configuration/bot-config.md#keyword-reactions)
-- Adjust [Memory Config](../configuration/amemorix-config.md) for specific retrieval, sharing, or resource-usage problems
-
-## Related Docs
-
-- [Command Management](./command-management.md) — plugin commands and execution permissions
-- [Adapter Management](./adapter-management.md) — adapter accounts and access policies
-- [Memory Management](./memory-management.md) — viewing and maintaining long-term memory
-- [Data Management](./data-management.md) — exporting and importing the whole data set
-- [Model Config](../configuration/model-config.md) — full `model_config.toml` reference
-- [Model Extra Parameters](../configuration/model-extra-params.md) — thinking mode and reasoning effort parameters
-- [Bot Config](../configuration/bot-config.md) — full `bot_config.toml` reference
+- **Saving fails** — Read the error on the page; the backend names the offending field for invalid values. You can also syntax-check first: `python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb'))"`.
+- **A change has no effect** — Compare against "When changes take effect": listen addresses and ports, `[maim_message]`, `[plugin_runtime]`, and the watchdog need a host restart.
+- **Sharing groups do nothing** — Memory groups are read-only while `a_memorix.global_memory_sharing_enabled` is on; turn the global switch off first.
+- **Forms look wrong after source editing** — The raw file broke the structure; roll back with the pre-save state or a saved config copy.

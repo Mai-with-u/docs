@@ -13,7 +13,7 @@ title: Email Adapter
 No webhook is needed on the mailbox side: the adapter prefers IMAP IDLE push and falls back to interval polling when the server does not support IDLE.
 :::
 
-Adapter repository (🌐 community-maintained):
+Adapter repository (community-maintained):
 
 <Linkcard url="https://github.com/yufei-pan/maibot-email-adapter" title="maibot-email-adapter" description="yufei-pan's email adapter plugin" />
 

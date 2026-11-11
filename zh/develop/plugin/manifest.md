@@ -4,7 +4,7 @@ title: Manifest
 
 # Manifest 系统
 
-每个 MaiBot 插件必须在其根目录下包含一个 `_manifest.json` 文件，用于声明插件的元信息、版本兼容性、依赖关系和能力需求。Host 侧的 `ManifestValidator` 会在加载前严格校验此文件。
+每个插件根目录必须有 `_manifest.json`，声明元信息、版本兼容性、依赖关系与能力需求。Host 侧的 `ManifestValidator` 在加载前严格校验。
 
 ::: tip 插件元信息与运行时配置
 - `_manifest.json`：声明插件 ID、版本、依赖和能力，由 Host 校验和管理
@@ -37,14 +37,15 @@ title: Manifest
     "issues": "https://github.com/developer/my-plugin/issues"
   },
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
-    "min_version": "1.0.0",
-    "max_version": "2.9.99"
+    "min_version": "2.22.0",
+    "max_version": "2.22.99"
   },
   "dependencies": [],
+  "changelog": "CHANGELOG.md",
   "plugin_type": "tool",
   "display": {
     "icon": {
@@ -66,7 +67,7 @@ title: Manifest
 ## 必填字段
 
 - **`manifest_version`** `2` — Manifest 协议版本，当前固定为 `2`
-- **`id`** `string` — 插件唯一标识符，格式为小写字母/数字，以点号或横线分隔（如 `com.author.plugin`）
+- **`id`** `string` — 插件唯一标识符，字母、数字、下划线组成，用点号或横线分段（如 `com.author.plugin`）。校验器不强制大小写，`Mai-with-u.qq-adapter` 就是带大写的官方插件；插件市场和官方插件约定俗成用小写。
 - **`version`** `string` — 插件版本号，必须为严格三段式语义版本（如 `1.0.0`）
 - **`name`** `string` — 插件展示名称
 - **`description`** `string` — 插件描述
@@ -135,6 +136,12 @@ title: Manifest
 - **`documentation`** · 可选 — 插件文档地址
 - **`issues`** · 可选 — 插件问题反馈地址
 
+### changelog 更新日志
+
+- **`changelog`** · 可选 — 更新日志位置，两种写法：`http://` / `https://` 开头的 URL，或插件目录内的 `.md` 相对路径（如 `CHANGELOG.md`）
+
+绝对路径、含 `..` 的路径、以及后缀不是 `.md` 的文件会被校验器直接拒绝。省略该字段时，本地已安装插件会回退读取插件根目录下名为 `changelog.md` 的文件（不区分大小写，`CHANGELOG.md` 也算）；插件市场的详情页只认这里声明的路径。
+
 ### host_application / sdk 版本区间
 
 两者结构相同，为闭区间声明：
@@ -143,8 +150,8 @@ title: Manifest
 
 ```json [JSON ~vscode-icons:file-type-json~]
 {
-  "min_version": "1.0.0",
-  "max_version": "1.3.99"
+  "min_version": "1.4.0",
+  "max_version": "1.4.99"
 }
 ```
 
@@ -155,15 +162,15 @@ title: Manifest
 - 两者均必须为严格三段式语义版本号（`X.Y.Z`），不能留空
 - `min_version` 不能大于 `max_version`
 
-**校验时机与结果**：这两个区间由 Runner 在加载插件时用 `ManifestValidator` 校验，Host 通过 `MAIBOT_HOST_VERSION` 把自身版本传给 Runner，SDK 版本则取 Runner 运行环境里实际导入的 `maibot-plugin-sdk` 版本。握手阶段（`runner.hello`）Host 只校验 Runner 自身 SDK 版本是否落在固定区间 `[1.0.0, 2.99.99]`，与 manifest 里声明的 `sdk` 区间是两道独立检查。
+**校验时机与结果**：这两个区间由 Runner 在加载插件时用 `ManifestValidator` 校验，Host 通过 `MAIBOT_HOST_VERSION` 把自身版本传给 Runner，SDK 版本则取 Runner 运行环境里实际导入的 `maibot-plugin-sdk` 版本。握手阶段（`runner.hello`）Host 另外校验 Runner 自身 SDK 版本是否落在固定区间 `[1.0.0, 2.99.99]`，越界只记 warning，与 manifest 里声明的 `sdk` 区间是两道独立检查。
 
 不兼容时的处理并不相同：
 
-- **Host 超范围** — 当前 Host 高于 `max_version` 但主次版本与声明上界相同时，插件**仍会加载**，只记一条 warning（补丁级容忍）；其余情况记为 error，插件被阻止加载
+- **Host 超范围** — 当前 Host 高于 `max_version`，但主版本相同且次版本最多高 1 时，插件**仍会加载**，只记一条 warning；再高就是 error，插件被阻止加载。低于 `min_version` 一律 error
 - **SDK 超范围** — 无论高低都只记一条 warning，插件**仍会加载**。安装、更新和 Runner 连接都不会因 SDK 区间被阻止；实际兼容性由运行期表现决定
 
 ::: danger max_version 必须是明确的上限
-`max_version` 写成你实际测试过的最高「主.次」版本加 `.99`，例如在 1.3 上验证过就写 `1.3.99`，在 1.2 上验证过就写 `1.2.99`。这样同一个次版本内的补丁更新都能放行，而麦麦升到下一个次版本时，由你重新测试后再放宽上限。
+`max_version` 写成你实际测试过的最高「主.次」版本加 `.99`，例如在 1.4 上验证过就写 `1.4.99`，在 1.5 上验证过就写 `1.5.99`。同一个次版本内的补丁更新（`1.4.10`、`1.4.37`）落在区间里，不产生任何告警；写成 `1.4.0` 则每次补丁更新都会触发一条超范围告警。次版本前进一档（`1.5.x`）时靠兼容窗口告警放行，给你留出重新测试的时间。
 
 禁止写 `1.99.99`、`999.999.999` 这类没有对应真实版本的上限：它们相当于没有声明上限，插件会被加载到从未验证过的版本上。
 :::
@@ -173,19 +180,17 @@ title: Manifest
 ```json [JSON ~vscode-icons:file-type-json~]
 {
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
-    "min_version": "2.0.0",
-    "max_version": "2.9.99"
+    "min_version": "2.22.0",
+    "max_version": "2.22.99"
   }
 }
 ```
 
 :::
-
-把它当作排查"插件是不是被版本号挡住"的临时手段，不要长期开启：跳过校验后，因接口变化导致的运行期异常不会有任何前置提示。
 
 ### i18n 国际化配置
 
@@ -198,8 +203,8 @@ title: Manifest
 声明插件提供的 LLM Provider 能力，供其他插件通过 `ctx.llm` 代理调用。
 
 - **`client_type`** · 必填 — Provider 唯一标识符，必须与 `@LLMProvider` 装饰器中声明的值完全一致
-- **`name`** · 必填 — Provider 展示名称
-- **`description`** · 可选 — Provider 功能描述
+- **`name`** · 可选 · 默认空字符串 — Provider 展示名称
+- **`description`** · 可选 · 默认空字符串 — Provider 功能描述
 - **`version`** · 可选 · 默认 `"1.0.0"` — Provider 版本号
 
 ::: warning 双重声明要求
@@ -342,7 +347,7 @@ async def merge_av(v_path: str, a_path: str, output_path: str) -> None:
 Manifest 校验器（`ManifestValidator`）采用 Pydantic 严格模式，主要校验规则包括：
 
 - **禁止多余字段**：不允许出现 `_manifest.json` 未声明的字段
-- **ID 格式**：必须匹配 `^[a-z0-9]+(?:[.-][a-z0-9]+)+$`（如 `com.example.my-plugin`）
+- **ID 格式**：必须匹配 `^[A-Za-z0-9_]+(?:[.-][A-Za-z0-9_]+)+$`，即字母、数字、下划线，用点号或横线分成至少两段（如 `com.example.my-plugin`）。不强制小写，`Mai-with-u.qq-adapter` 合法
 - **版本号格式**：必须为 `X.Y.Z` 三段式
 - **URL 格式**：必须以 `http://` 或 `https://` 开头
 - **不允许自依赖**：`dependencies` 中不能依赖自身
@@ -352,8 +357,8 @@ Manifest 校验器（`ManifestValidator`）采用 Pydantic 严格模式，主要
 
 `host_application` 与 `sdk` 两个区间由同一个校验入口判定，结果分 error 与 warning 两档：
 
-- **Host 高于 `max_version` 但主次版本相同** — warning，插件照常加载（补丁级容忍）
-- **Host 其余情况超出区间** — error，插件被阻止加载
+- **Host 高于 `max_version`，主版本相同且次版本最多高 1** — warning，插件照常加载
+- **Host 其余情况超出区间** — error，插件被阻止加载（含低于 `min_version`、次版本高出 2 档以上、主版本不同）
 - **SDK 超出区间** — warning，插件照常加载；日志会写明声明的 SDK 区间与当前 SDK 版本
 
 握手阶段 Host 对 Runner 自身 SDK 版本的检查（固定区间 `[1.0.0, 2.99.99]`）独立于上面两档，既不由 manifest 声明，也不受「强制插件兼容」影响。
@@ -366,7 +371,7 @@ Manifest 校验器（`ManifestValidator`）采用 Pydantic 严格模式，主要
 - **只跳过版本区间** — `manifest_version`、握手阶段的固定 SDK 区间、依赖解析、能力白名单、`llm_providers` 一致性等校验一律照旧
 - **不影响插件市场** — 版本索引的兼容性判断不读这个开关，市场与版本下拉里显示的"不兼容"仍然按 manifest 声明计算
 
-把它当作排查"插件是不是被版本号挡住"的临时手段，不要长期开启：跳过校验后，因接口变化导致的运行期异常不会有任何前置提示。
+强制兼容只用于排查"插件是不是被版本号挡住"，不要长期开启：跳过校验后，因接口变化导致的运行期异常不会有任何前置提示。
 
 ## 验证与排错
 
@@ -382,8 +387,8 @@ python -m json.tool _manifest.json
 :::
 
 - **报「extra fields not permitted」** — 校验器是 Pydantic 严格模式，不允许出现未声明的字段：自定义注释字段、临时字段都要删掉。
-- **报 ID / 版本 / 作者字段格式错误** — `id` 必须匹配 `^[a-z0-9]+(?:[.-][a-z0-9]+)+$`（全小写、至少一个 `.` 或 `-`），`version` 与两个区间的上下界必须是严格三段式 `X.Y.Z`，`author` 必须是 `{ name, url }` 且 `url` 以 `http://` 或 `https://` 开头。
-- **插件被阻止加载且日志提示版本不兼容** — Host 超出区间除「主次版本相同」记 warning 外都是 error；SDK 超出区间只记 warning，不会阻止加载。在真实的新版本上测试通过后，把 Host 的 `max_version` 提到该版本的「主.次」加 `.99`（如 `1.4.99`）；临时排查可开「强制插件兼容」，但它需要重启 MaiBot 且只跳过版本区间。
+- **报 ID / 版本 / 作者字段格式错误** — `id` 必须匹配 `^[A-Za-z0-9_]+(?:[.-][A-Za-z0-9_]+)+$`（字母、数字、下划线，至少一个 `.` 或 `-` 分出两段；大小写不限），`version` 与两个区间的上下界必须是严格三段式 `X.Y.Z`，`author` 必须是 `{ name, url }` 且 `url` 以 `http://` 或 `https://` 开头。
+- **插件被阻止加载且日志提示版本不兼容** — Host 超出区间除「主版本相同且次版本最多高 1」记 warning 外都是 error；SDK 超出区间只记 warning，不会阻止加载。在真实的新版本上测试通过后，把 Host 的 `max_version` 提到该版本的「主.次」加 `.99`（如 `1.4.99`）；临时排查可开「强制插件兼容」，但它需要重启 MaiBot 且只跳过版本区间。
 - **`display.icon` 的本地图标不显示或被拒** — `type="local"` 的 `value` 必须是插件目录内的相对路径，后缀为 `.png`/`.jpg`/`.jpeg`/`.webp`/`.svg`；在线 URL 一律不允许，绝对路径、`..` 和符号链接也会被拒，加载失败会退回 `fallback`。
 - **日志提示依赖或 `llm_providers` 冲突** — 不能依赖自身、重复声明同一依赖或形成循环依赖；`client_type` 要与 `@LLMProvider` 声明完全一致，两个插件声明同一个 `client_type` 时双方都会被禁止加载。
 - **运行时报「ffmpeg 未安装或无法找到可执行文件」** — 插件在调用宿主 PATH 里的系统命令。改用 `imageio-ffmpeg` 这类自带静态二进制的 `python_package` 依赖，并在 `on_load()` 预检；官方 Docker 镜像不预装媒体工具。

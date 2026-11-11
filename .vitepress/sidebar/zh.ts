@@ -74,7 +74,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     collapsed: true,
     items: [
       { text: '概览', link: '/manual/adapters/' },
-      { text: 'QQ 连接器', link: '/manual/adapters/qq-local-client' },
+      { text: 'OneBot 适配器', link: '/manual/adapters/qq-local-client' },
       { text: '官方机器人', link: '/manual/adapters/qq-official' },
       { text: '邮件', link: '/manual/adapters/email' },
       { text: '语音通话', link: '/manual/adapters/qq-voice-call' },
@@ -82,22 +82,38 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
     ]
   },
   {
+    text: '功能',
+    collapsed: true,
+    items: [
+      { text: '多实例', link: '/manual/multi-bot-host' },
+      { text: '人设与预设', link: '/manual/personality' },
+      { text: '聊天场景', link: '/manual/chat-scenes' },
+      { text: '文件功能', link: '/manual/files' },
+      { text: '桌宠', link: '/manual/desktop-pet' },
+      { text: '内部聊天', link: '/manual/internal-chat' },
+    ]
+  },
+  {
     text: '插件',
     collapsed: true,
     items: [
       { text: '插件市场', link: '/manual/plugins/' },
-      { text: '提交与发布插件', link: '/develop/plugin/submission' },
+      { text: '插件发布', link: '/develop/plugin/submission' },
     ]
   },
   {
     text: 'WebUI',
     collapsed: true,
     items: [
-      { text: '登录', link: '/manual/webui/' },
+      { text: '登录与首页', link: '/manual/webui/' },
+      { text: '麦麦答疑', link: '/manual/webui/ai-help' },
       { text: '改配置', link: '/manual/webui/config-management' },
       { text: '适配器管理', link: '/manual/webui/adapter-management' },
       { text: '命令管理', link: '/manual/webui/command-management' },
+      { text: '聊天管理', link: '/manual/webui/chat-management' },
       { text: '记忆管理', link: '/manual/webui/memory-management' },
+      { text: '统计与观察', link: '/manual/webui/statistics' },
+      { text: '文件与附件', link: '/manual/webui/files' },
       { text: '数据管理', link: '/manual/webui/data-management' },
     ]
   },
@@ -115,7 +131,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
     text: '适配器',
     collapsed: true,
     items: [
-      { text: '适配器概览', link: '/develop/adapters/' },
+      { text: '概览', link: '/develop/adapters/' },
       { text: '消息协议', link: '/develop/adapters/protocol' },
       { text: '头像接口', link: '/develop/adapters/avatar-api' },
       { text: '编写适配器', link: '/develop/adapters/build' },
@@ -174,7 +190,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
         ]
       },
       { text: 'SDK API 参考', link: '/develop/plugin/api-reference' },
-      { text: '提交与发布插件', link: '/develop/plugin/submission' },
+      { text: '插件发布', link: '/develop/plugin/submission' },
     ],
   },
   {

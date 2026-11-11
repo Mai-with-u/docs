@@ -4,6 +4,8 @@ title: Memory and Learning
 
 # Memory and Learning
 
+This page covers memory and learning: long-term memory that will not start, unavailable image memory, failing embedding requests, and expressions or jargon that are never learned.
+
 ## How do I enable long-term memory?
 
 Enable A_Memorix in the WebUI and configure a working embedding model. In configuration, the master switch is `enabled` under `[a_memorix.plugin]`. See [A_Memorix Configuration](../manual/configuration/amemorix-config.md).

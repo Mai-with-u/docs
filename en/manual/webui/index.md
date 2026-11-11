@@ -1,111 +1,119 @@
 ---
-title: Login & Settings
+title: WebUI
 ---
 
-# Login & Settings
+# WebUI
 
-After starting MaiBot, open `http://localhost:8001` to access the WebUI.
+The WebUI is MaiBot's management page: after signing in you can edit config, chat with Mai, watch her thinking, and manage plugins and data in the browser instead of touching TOML files.
 
-## Manage multiple bots
+## First login
 
-Use host management in the WebUI to create, switch, start, stop, rename, clone, or archive bots. Check which bot is selected before editing its chat, plugin, or persona settings. Shared settings hold model providers, model definitions, and web services. Each bot selects its models in the task assignment panel.
+After the host starts, the terminal prints the WebUI address and a temporary login password for this run:
 
-Ask a question in Mai Observation to open a dedicated help conversation. Reopen a conversation from its history to continue it. To change plugin settings, authorize writes for the current turn and review the changes shown in the conversation.
-
-## Get the Login Password
-
-When starting MaiBot for the first time, the console prints a temporary Token:
-
-```
-🔑 WebUI 登录 Token: e37fd618051f802816dc3bf32067583294b2648aff233a2d4caee0f67ebfdfcb
-💡 请使用此 Token 登录 WebUI
+```text
+MaiBot 宿主已启动：/MaiMBot
+WebUI：http://127.0.0.1:8001/bots#ticket=...（登录链接一分钟内有效）
+WebUI 临时登录密码：3f2c9a5b...
+可用 maibot host status/start/stop/restart 管理 Bot；Ctrl+C 关闭宿主。
 ```
 
-This Token is only for the first login of the current startup. After signing in, the setup wizard requires you to set a persistent Token. A temporary Token is regenerated on the next startup.
+Click the link in the log to go straight in, or open `http://127.0.0.1:8001/` and paste that temporary login password. The first login enters the setup wizard, one step of which asks for a fixed password.
 
-## Log In
+::: fields
+- **Temporary login password** — Regenerated on every start and valid only for the current host run; once a fixed password is set, the log stops printing this line.
+- **Login link** — Carries a one-time ticket and is valid for one minute; after it expires, type the password on the login page instead.
+- **Fixed password** — At least 10 characters with an uppercase letter, a lowercase letter, and a special symbol, for example `MaiBot-Docs-2026!`.
+- **After saving** — The old password stops working immediately; sign in with the new password to continue the wizard.
+:::
 
-1. Open `http://localhost:8001` in your browser to reach the login page
-2. Enter the Token shown in the console and click **登录** (Log in)
+Login sessions last 8 hours. With a fixed password, a session survives a host restart and the original Cookie signs you back in automatically, but the restart does not extend expiry. Browsers store only a random ticket; the database stores a digest bound to the current password. Signing out revokes the current session; changing or resetting the password revokes every session, including other browsers.
 
-![WebUI login page](/images/webui/login.webp)
+On a remote machine where copying the password is awkward, run `maibot host open-webui --directory <workspace>` for a one-time login link valid for 60 seconds.
 
-3. On first login, the setup wizard opens; the first step is setting a persistent Token
+## Layout
 
-![Set login password](/images/webui/setup-token.webp)
+The WebUI organizes pages in a sidebar with these groups: Overview, Configuration, Resources, Extensions, Advanced tools.
 
-The persistent Token must satisfy all of: at least 10 characters, at least one uppercase letter, at least one lowercase letter, and at least one special character (e.g. `MaiBot-Docs-2026!`).
+::: fields
+- **Home** — Click the logo at the top of the sidebar to return home, which summarizes run state, usage, and shortcuts.
+- **Switch bot** — The entry point sits at the bottom of the sidebar. The selected bot is what config, chat, plugin, and resource pages read and write; when every bot is stopped you can still manage them here.
+- **Layout** — Choose **Classic** or **Mai Observation** under WebUI Settings → Appearance. Classic keeps the top bar and card home; Mai Observation drops the top bar, puts settings in the upper sidebar and all conversations below, and uses a run-state panel as home. Desktop widths only.
+:::
 
-![Filling in the persistent Token](/images/webui/setup-token-filled.webp)
+The other item at the bottom of the sidebar is the update entry, which shows a notice when a new version exists.
 
-4. After saving, the old Token is invalidated immediately; log in again with the new Token and continue the wizard
+## Common pages
 
-## WebUI Settings
+::: fields
+- **Mai chat** — Talk to Mai or observe her other chat streams; see [Chat management](./chat-management.md).
+- **Mai settings** — Sectioned forms for `bot_config.toml`; see [Edit config in the browser](./config-management.md).
+- **Model management** — Providers, models, and task assignment; see [Model configuration](../configuration/model-config.md).
+- **Adapter settings** — Account identity, allowlists, and denylists; see [Adapter management](./adapter-management.md).
+- **Detailed statistics** — Model calls, tokens, cost, and message counts; see [Statistics and observation](./statistics.md).
+- **Reasoning process** — Prompt stages and tool call records for each Planner and Replyer run.
+- **Files** — Attachment upload, download, and text reading; see [Files and attachments](./files.md).
+- **Plugin extensions / Plugin market** — Install and manage plugins; see [Plugins](../plugins/).
+- **Data management** — Package export and import; see [Data management](./data-management.md).
+:::
 
-You can change some basic WebUI settings in `bot_config.toml`. The listen address and port live in the `[http]` section, shared by the WebUI and file transfers:
+The composer on the **Mai Observation** page switches between **Chat** and **Ask** modes; see [Mai Help](./ai-help.md).
+
+## Network and login settings
+
+The WebUI's listen address, port, and login policy live in `[webui]` of the host config `host/config.toml`, and changes require a host restart:
 
 ::: code-group
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-[http]
-host = ["127.0.0.1", "::1"]  # Bind address list; use ["0.0.0.0", "::"] for remote access
-port = 8001                   # Port shared by the WebUI and file transfers
-
+```toml [host/config.toml ~vscode-icons:file-type-toml~]
 [webui]
-enabled = true                # Enable WebUI
-mode = "production"           # Mode: development or production
-webui_style = 2               # Style: 0 original / 1 future retro / 2 millennium
-anti_crawler_mode = "basic"   # Anti-crawler mode: false / strict / loose / basic
-allowed_ips = "127.0.0.1"     # IP allowlist (comma-separated)
+enabled = true                       # Enable the WebUI
+hosts = ["127.0.0.1", "::1"]         # Listen addresses; use ["0.0.0.0", "::"] for remote access
+port = 8001                          # Shared by the WebUI and file transfer
+public_base_url = ""                 # Externally reachable HTTP(S) URL for file links; empty uses the local address
+ssl_certfile = ""                    # HTTPS certificate path; must be set together with ssl_keyfile
+ssl_keyfile = ""                     # HTTPS private key path
+secure_cookie = false                # Only send login cookies over HTTPS
+anti_crawler_mode = "basic"          # false off / basic log only / loose lenient / strict strict blocking
+allowed_ips = "127.0.0.1"            # IPs exempt from anti-crawler protection, comma-separated, CIDR and wildcards allowed
+trusted_proxies = ""                 # Trusted reverse proxy IPs, comma-separated
+trust_xff = false                    # Honor X-Forwarded-For only when the direct address is in trusted_proxies
 ```
 
 :::
 
-![About page](/images/webui/settings-about.webp)
+These are also editable under **Mai Settings → Common Settings**, and still require a host restart. The first time a legacy instance enters the host, the listen address, port, certificates and file-transfer address from its config are read to generate this host config.
 
-## Updating MaiBot
+The port is owned by the host and shared by every bot; file-transfer addresses always come from the host's `webui.public_base_url`, and `bot_config.toml` holds no listen-related settings.
 
-**Settings → About** checks for and installs main-program updates. When a new version is found, an update card appears in the top-right corner of the top bar, with the version and pending commits:
+## Forgotten password
 
-- **Git deployment** — syncs code and dependencies, then restarts; a dependency sync failure rolls back automatically
-- **Package install** — updates the program from PyPI or the selected mirror; configuration, data, and plugins in the instance directory are untouched
+While you can still sign in: open **WebUI Settings** (the gear in the sidebar) → **Security** and change or regenerate the access password there.
 
-See [Install with uv](../deployment/uv-tool.md) for details and troubleshooting.
+When you can no longer sign in:
 
-## Forgot Your Password?
+::: steps
+1. Stop the host.
+2. Delete `host/webui.json` in the workspace.
+3. Start the host again, sign in with the newly printed temporary login password, and set a fixed password in the wizard.
+:::
 
-If you can still sign in, change or regenerate the Token in the "Security" tab of **WebUI Settings** (`/settings`, opened from the gear on the right of the top bar):
+## Updating the main program
 
-![Security settings](/images/webui/settings-security.webp)
+**Settings → About** checks for and installs updates. When a new version exists, an update card appears at the bottom of the sidebar.
 
-If you can no longer sign in:
+::: fields
+- **Source deployment** — Fast-forwards the official branch; uncommitted changes or a diverged branch block the update.
+- **Package install** — Updates the program from PyPI or a chosen mirror; config, data, and plugins in the instance directory are unaffected.
+:::
 
-1. Shut down MaiBot
-2. Delete the `data/webui.json` file
-3. Restart MaiBot, log in with the new temporary Token shown in the console, and set a new persistent Token
+The update stops every bot first, keeps the registered desired states, and shuts down the host; afterwards bots resume their previous states. A failed precheck never interrupts bots, and a failed update uses the updater's rollback. See [uv install](../deployment/uv-tool.md) for details.
 
-## Common Questions
+## Verify and troubleshoot
 
-**Page won't open?**
+**Verify** — `http://127.0.0.1:8001/` shows the login page; signing in with the temporary login password printed in the terminal reveals the full sidebar groups and the bot switcher at the bottom.
 
-- Confirm MaiBot is running and the console printed "🌐 WebUI 服务器启动中..." (WebUI server starting) and "🌐 访问地址" (Access address)
-- Confirm `[webui].enabled = true` and the port is not occupied
-
-**Token error on login?**
-
-- The temporary Token changes on every startup; use the value printed by the current startup
-- Don't copy extra spaces or line breaks
-
-**Locked out after setting the persistent Token?**
-
-- The old Token is invalidated as soon as the persistent Token is saved; log in with the new Token
-- As a last resort, delete `data/webui.json` to reset
-
-## More Features
-
-- [Configuration Management](./config-management.md) - Change configurations in the browser
-- [Adapter Management](./adapter-management.md) - Account identities and allow/deny lists
-- [Command Management](./command-management.md) - Plugin commands and execution permissions
-- [Memory Management](./memory-management.md) - View and manage memories
-- [Plugin Management](/en/manual/plugins/) - Install and manage plugins
-- [Data Management](./data-management.md) (`/data-transfer`) - sidebar "高级工具 (Advanced Tools) → 数据管理 (Data Management)" packages exports and imports of the whole data set
+- **The page will not open** — Confirm the host is running and printed its access address; check `[webui].enabled` in `host/config.toml` and whether the port is taken.
+- **Password rejected** — Temporary login passwords change on every start; use the one printed by this run and copy it without spaces or newlines.
+- **Locked out after setting a fixed password** — The old password dies immediately on save and other browsers are signed out; sign in with the new password. If all else fails, delete `host/webui.json` to reset.
+- **Signed out after a while** — Sessions last 8 hours and are invalidated on expiry or auth state changes; sign in again.
+- **A listen-address change has no effect** — `[webui]` addresses and ports need a host restart; hot reload does not rebind listeners.

@@ -10,56 +10,56 @@ This page shows how to get help efficiently: what to check before asking, what t
 
 Before asking for help, take 2 minutes to do the following checks — most problems can be resolved on your own:
 
-**`📖 1. Consult the Official Documentation`**
+**1. Consult the Official Documentation**
 : Your problem has likely already been answered in various scenarios of this document. Search through it first — it saves time and effort.
 
-**`🔍 2. Check the Error Logs`**
+**2. Check the Error Logs**
 : The logs will specify the specific error cause and stack trace — this is the primary clue for locating the problem. Don't know how to export them? See "How to Get Logs" below.
 
-**`⚙️ 3. Review Recent Changes`**
+**3. Review Recent Changes**
 : Think back to what configuration you recently changed, what plugins you installed, or what versions you updated. Try reverting to the last working state to confirm if something was changed incorrectly.
 
-**`🌐 4. Search Known Issues`**
+**4. Search Known Issues**
 : Use error keywords to search [GitHub Issues](https://github.com/Mai-with-u/docs/issues) or search engines to see if others have encountered the same problem.
 
 ## Information Checklist for Submitting an Issue
 
 When submitting an Issue on GitHub, please be sure to include the following information. Issues missing key information may be delayed:
 
-**`🖥️ System and Environment`**
+**System and Environment**
 : Operating system type and version, deployment method (source/Docker), Python version (for source deployment)
 
-**`🔢 MaiBot Version`**
+**MaiBot Version**
 : Run `git log --oneline -1` to view the current commit, or get the version number from the bottom of WebUI
 
-**`📄 Complete Error Logs`**
+**Complete Error Logs**
 : Log snippets containing the stack trace (traceback) — don't just screenshot a small portion. See "How to Get Logs" below
 
-**`⚙️ Related Configuration`**
+**Related Configuration**
 : Configuration content related to the problem (be sure to redact sensitive information like API Keys)
 
-**`🎯 Reproduction Steps`**
+**Reproduction Steps**
 : Specific steps from startup to error occurrence — the more detailed, the better
 
 ## Community Support Channels
 
-**`💬 QQ Group`**
+**QQ Group**
 : Join the MaiBot user community to exchange experiences with other users. Group numbers and what each group is for: see [Community Groups](/en/about/community)
 
-**`🐱 GitHub Issues`**
+**GitHub Issues**
 : If you've confirmed it's a bug or feature suggestion, please submit at [GitHub Issues](https://github.com/Mai-with-u/docs/issues). Remember to search first to avoid duplicates
 
-**`📖 Official Documentation Site`**
+**Official Documentation Site**
 : For the latest and most comprehensive documentation, visit [MaiBot Documentation Site](https://docs.maibot.chat/)
 
-**`💬 GitHub Discussions`**
+**GitHub Discussions**
 : For feature discussions and technical questions, visit [GitHub Discussions](https://github.com/Mai-with-u/docs/discussions) to join the community conversation
 
 ## How to Get Logs
 
 Depending on your deployment method, the way to get logs differs:
 
-**`🐍 Source Deployment`**
+**Source Deployment**
 : The terminal output where MaiBot is running is the most direct log. If the terminal has been closed, check the log files as follows:
 
 ::: code-group
@@ -82,7 +82,7 @@ log_level = "DEBUG"
 
 :::
 
-**`🐳 Docker Deployment`**
+**Docker Deployment**
 : Use the `docker logs` command to view container logs:
 
 ::: code-group
@@ -100,7 +100,7 @@ docker logs --tail 100 maibot
 
 :::
 
-**`🪟 Windows Deployment`**
+**Windows Deployment**
 : Log files are located in the `logs\` directory by default:
 
 ::: code-group
@@ -115,7 +115,7 @@ Get-ChildItem logs\app_*.log.jsonl | Sort-Object LastWriteTime -Descending | Sel
 
 :::
 
-> 💡 **Tip**: After getting the logs, wrap them in a ` ``` ` code block and paste them into the Issue. If the logs are very long, only include the section from the last startup to the error — don't paste thousands of lines of complete logs.
+> **Tip**: After getting the logs, wrap them in a ` ``` ` code block and paste them into the Issue. If the logs are very long, only include the section from the last startup to the error — don't paste thousands of lines of complete logs.
 
 ## Related
 

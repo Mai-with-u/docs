@@ -4,7 +4,7 @@ title: LLMProvider 组件
 
 # LLMProvider 组件
 
-`@LLMProvider` 用于声明插件提供新的 LLM Provider `client_type`。主程序会将该 `client_type` 注册到 LLM 客户端注册表中，因此现有 `LLMService` 和模型任务配置不需要改调用方式——只要模型配置里的 `api_providers[].client_type` 指向插件声明的值，请求就会通过插件 Provider 发起。
+`@LLMProvider` 声明插件提供新的 LLM Provider `client_type`，主程序把它注册到 LLM 客户端注册表。模型配置里 `api_providers[].client_type` 指向该值，请求就走插件 Provider，`LLMService` 和模型任务配置都不用改调用方式。
 
 ::: warning 双重声明必须一致
 LLM Provider 必须同时满足两处声明，缺一不可：
@@ -226,12 +226,12 @@ def create_plugin():
     "repository": "https://github.com/example/mai-llm-provider"
   },
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
-    "min_version": "2.0.0",
-    "max_version": "2.9.99"
+    "min_version": "2.22.0",
+    "max_version": "2.22.99"
   },
   "capabilities": [],
   "llm_providers": [

@@ -4,43 +4,71 @@ title: Basic Usage
 
 # Basic Usage
 
+This page answers first-use questions: whether it costs money, which model to pick, how many bots one instance runs, which platforms are supported, and what to do first.
+
 ## Does MaiBot cost money?
 
-MaiBot is open-source software and does not charge a software license fee. Running it usually involves LLM, vision, or embedding services, whose pricing is determined by each provider.
+The MaiBot program itself is free and open source. Running it calls LLM, vision, or embedding services, and those providers set the price.
 
-Usage depends on speaking frequency, context length, enabled features, and model pricing. Lowering frequency, choosing suitable models, and disabling unused features can reduce costs.
+Cost depends on speaking frequency, context length, enabled features, and model pricing. Lower the frequency, pick cheaper models, and switch off features you do not use.
 
-## Which model should I use?
+## Which model should I pick?
 
-There is no single best model. Check whether the Planner can reason and call tools reliably, whether the Replyer produces the desired writing quality, whether vision models accept images, and whether memory uses an embedding model. Also consider price, latency, stability, and regional availability.
+Pick by task, not by benchmark ranking:
 
-See [Model Configuration](../manual/configuration/model-config.md). Avoid relying on a fixed model ranking that can quickly become outdated.
+- **Planner** — Needs reliable reasoning and tool calling; it decides when Mai speaks and which tool runs.
+- **Replyer** — Decides the wording of the final reply. Choose one whose writing style fits.
+- **Vision model** — Must accept image input; used for image understanding and emoji analysis.
+- **Embedding** — Long-term memory semantic search depends on it. Without one, memory search stops working.
 
-## Can one MaiBot serve multiple chats?
+Task-by-task guidance lives in [Model Configuration](../manual/configuration/model-config.md).
 
-Yes. Which groups and private chats are accepted is decided centrally by the **MaiBot main program's adapter policy**; everything is allowed by default. There are two entry points:
+## Can one MaiBot run several bots?
 
-- **WebUI** — **Adapter Settings** under the "Configuration" group in the sidebar (`/adapter-management`): the "Global default rules" card at the top sets the default action for group and private chats, and selecting an adapter opens an **Allow/deny rules** tab where you list the group / user IDs to receive or block (edits autosave);
-- **Config file** — `config/adapter_policy.toml`: put fallback rules in `[defaults.group]` / `[defaults.private]` and per-instance `allow_ids` / `deny_ids` under `[[adapters]]` entries.
+Yes. A workspace can register multiple bots. Each bot is its own process and directory with independent config, data, and plugins, while WebUI shares one entry point and one login.
+
+Create, start, and stop bots from the Bot management page in WebUI, or from the CLI:
+
+::: code-group
+
+```bash [Multiple bots ~vscode-icons:file-type-shell~]
+maibot host list --directory <workspace>                    # List registered bots
+maibot host create-bot --directory <workspace> --name helper # Create a bot
+maibot host start --directory <workspace> --bot-id <bot_id>  # Start and mark as desired-running
+```
+
+:::
+
+Three things to watch: all bots share one Python environment; a cloned bot inherits the same platform accounts, so change them before starting; providers and API keys are maintained once under common settings, while task models stay per bot. See [Multiple bots](../manual/multi-bot-host.md).
+
+## Can one MaiBot serve several chats?
+
+Yes. Which groups and private chats are accepted is decided centrally by the adapter policy of the main program, and everything is allowed by default. Two entry points:
+
+- **WebUI** — "Configuration → Adapter settings" (`/adapter-management`). The global default rules card sets the default action for groups and private chats; select an adapter and fill group / user IDs under the allow-deny tab. Edits save automatically.
+- **Config file** — `config/adapter_policy.toml`. Fallback rules live in `[defaults.group]` / `[defaults.private]`; each `[[adapters]]` entry sets `allow_ids` / `deny_ids`.
 
 See [Adapter Management](../manual/webui/adapter-management.md).
 
 ## Which platforms are supported?
 
-Platform support is provided by adapters. QQ has two routes:
+Support depends on the adapters you install:
 
-- **Local client login** — install the **Unified QQ Connector** (plugin name `MaiBot-SnowLuma-Adapter`) and log in your own QQ account; one plugin supports both SnowLuma and NapCat clients;
-- **Open platform bot** — install the **QQ Official Bot** adapter and apply for an AppID + AppSecret on the QQ Open Platform; no QQ client login is required.
+- **QQ local client** — OneBot Adapter. Log in your own QQ account; it supports NapCat and other OneBot v11 implementations.
+- **QQ official bot** — QQ Open Platform bot adapter. Apply for AppID + AppSecret and connect directly; no QQ client login needed.
+- **Built-in adapters** — Telegram and WeChat ClawBot, ready without installing extra plugins.
+- **Community adapters** — Email, iMessage, QQ voice call.
 
-Email, QQ Voice Call, iMessage, and other community adapters are available as well. Actual capabilities depend on the installed adapter version. See [Connect Platforms](../manual/adapters/index.md) for selection and installation.
+See [Connect Platforms](../manual/adapters/index.md).
 
-## What should I do before first use?
+## What should I do on first run?
 
-Start with the smallest working configuration and verify the message path before enabling long-term memory, plugins, and advanced features. Read logs, record component versions, and avoid changing several unrelated settings at once.
+Get the smallest path working first: one LLM provider, one model that replies, and one adapter, verified by receiving a reply in a group. Then enable long-term memory, plugins, and the desktop pet one at a time.
+
+Change one category of settings per round and verify before moving on, so failures stay traceable.
 
 ## What should I include when asking for help?
 
-Include the operating system, MaiBot version, deployment method, adapter version, complete error log, relevant configuration, and reproduction steps. Remove API keys, access tokens, cookies, and other secrets before sharing anything.
+Operating system, MaiBot version, deployment method (source / Docker / uv / one-key package), adapter and plugin versions, the complete error log, relevant configuration, and reproduction steps.
 
-See [Getting Help](/en/faq/getting-help) for the full self-check list and the issue template.
-
+Remove API keys, access tokens, and cookies before posting. The full checklist is in [Getting Help](./getting-help.md).

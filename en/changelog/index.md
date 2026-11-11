@@ -5,24 +5,59 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 # Changelog
 
-## 1.4.0 (unreleased)
+Feature changes and fixes for each release, newest first. The current release is 1.4.3.
 
-### Core
+::: timeline 2026-11-08
+### Core [1.4.3]
+* Chat: create, copy, and switch dynamic reply rule groups, and disable rules individually within a group.
+* MaiBot starts even when the model configuration is incomplete, and you can finish it in the WebUI.
+* Plugins get two new hooks, before the chat sticker cache and before automatic candidate sticker registration, so a plugin can skip either step.
+* Memory: sticker images load for the current bot in multi-instance mode.
+* Logs: the bot process console log moves to the instance temporary directory.
 
-- Create, switch, start, stop, rename, clone, and archive bots. Each bot has its own chats, plugin settings, and data. Model providers and web services are managed in shared settings.
-- Import a bot from 1.3.19, transfer its data, or upgrade online from a Git or uv tool installation. Migration backs up existing data first.
-- WeChat ClawBot supports QR sign-in for multiple accounts, text and image direct messages, and voice transcripts. The built-in QQ Official and Telegram adapters migrate existing settings and data during upgrades.
-- Chat supports Creative Mode, experimental Super Creative Mode, and commands to pause or resume replies. Focus shares context across chats. Stickers can be matched by mood or visual content, and existing stickers are tagged and indexed in batches.
-- Typo settings migrate to the built-in Mai Toolbox plugin. Command management covers `/pm`, including operator permissions, disabling, and aliases.
-- Plugin access can be scoped to users and chats. Within the same major version, plugins whose supported version ceiling is one minor release behind can load in compatibility mode.
-- The standalone Tauri desktop pet can sign in to a local or remote WebUI and supports screen reading, to-dos, reminders, and exploration. The Android pet includes a floating character, chat, to-dos, and exploration history.
+### WebUI [1.10.3]
+* Clicking the top of the sidebar returns to the home page, and the bot switcher moves to the bottom of the sidebar.
+:::
 
-### WebUI 1.10.0
+::: timeline 2026-11-08
+### Core [1.4.2]
+* Docker validates mount directories at startup and blocks stale mount paths with a clear message.
+* Fixed an interaction between wait and message debounce.
 
-- The Mai Observation layout is enabled by default. Add, remove, reorder, and resize home cards, and view reasoning and replies from the same turn together.
-- Help has dedicated conversations, conversation history, docs and plugin search, and diagnostics using redacted logs and reasoning records. Plugin installation requests require confirmation, and plugin configuration writes require authorization for the current turn.
-- Manage models by provider and assign them to bot tasks. Test reasoning controls and leave the API Key blank for services without authentication, such as a local Ollama instance.
-- Fixed HTTP 400 responses behind domain-based reverse proxies and a connection screen that could stall on some mobile browsers.
+### WebUI [1.10.2]
+* The home page shows the desktop pet, and Mai Observation polish covers several screens.
+:::
+
+::: timeline 2026-11-07
+### Core [1.4.1]
+* Removed the experimental computer sandbox feature.
+* Fixed one-key package updates failing because of a wrong path.
+
+### WebUI [1.10.1]
+* Fixed several display issues.
+:::
+
+::: timeline 2026-11-07
+### Core [1.4.0]
+* Multi-instance: run several bots inside one MaiBot, each with its own configuration, data, and plugins. Create, switch, start, stop, rename, clone, and archive them.
+* Import a bot from 1.3.19, transfer its data, or upgrade online. Migration backs up existing data first.
+* WeChat ClawBot supports QR sign-in for multiple accounts, text and image direct messages, and voice transcripts. The QQ Official and Telegram adapters are built in, and upgrade migrates their settings and data.
+* Chat supports Creative Mode and experimental Super Creative Mode, with pause and resume. Focus shares context across chats.
+* Stickers use two-dimensional tags and match by mood or visual content; existing stickers are tagged and indexed in batches.
+* Typo correction moves into the built-in Mai Toolbox plugin, and its settings migrate automatically. `/pm` joins command management with operator permissions, disabling, and aliases.
+* Plugin commands can be scoped to users and chats. Within the same major version, plugins one minor release behind can load in compatibility mode.
+* The desktop pet supports remote connections on Windows and Android, and exposes more interfaces to plugins.
+* Desktop pets: the Tauri build signs in to a local or remote WebUI and supports screen reading, to-dos, reminders, and exploration. The Android build adds a floating character, chat, to-dos, and exploration history.
+* Models and Git: configure and test local or intranet model services, and clone or update intranet Git repositories directly.
+* Statistics: the statistics page is rebuilt and much faster, the legacy HTML report is removed, and detailed statistics live in the WebUI.
+
+### WebUI [1.10.0]
+* The Mai Observation layout is on by default. Add, remove, reorder, and resize home cards, and view the reasoning and reply of the same turn together.
+* The help assistant is an agent that understands MaiBot. It supports dedicated conversations, history, docs and plugin search, and diagnostics from redacted logs and reasoning records. Installing a plugin asks for confirmation, and writing plugin configuration asks for per-turn authorization.
+* Models are managed by provider and assigned to bots in the task split panel. Test the reasoning switch, and leave the API Key blank for unauthenticated services such as a local Ollama.
+* Fixed HTTP 400 behind domain-based reverse proxies and a connection screen that stalled on some mobile browsers.
+:::
+
 
 ::: timeline 2026-10-29
 ### Main program [1.3.19]
@@ -306,7 +341,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 * Better on phones, plus a batch of display and functional fixes.
 
-### Configuration changes
+### Configuration changes [1.3.4]
 
 * `model_config.toml`: `[model_task_config.expression_use]` is renamed to `[model_task_config.fast_model]`. If you had models listed there, enter them again under `fast_model` after upgrading; if not, nothing to do.
 
@@ -346,7 +381,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 ::: timeline 2026-10-04
 
-### Main program
+### Main program [1.3.2]
 
 * Added the **dynamic** chat trigger mode, more precise than necessity-based replies: it estimates the reply likelihood of each message batch and adjusts the threshold dynamically so the reply count stays close to the configured reply frequency.
 
@@ -382,7 +417,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 * Avatars now come uniformly from the adapter avatar interface; a placeholder avatar is shown when an adapter does not implement it, and the old `data/avatar/qq/` cache is no longer read.
 
-### Configuration changes
+### Configuration changes [1.3.2]
 
 * `bot_config.toml`: `reply_necessity` (necessity trigger) in `[chat.reply_timing].reply_trigger_mode` has been replaced by `dynamic`, migrated automatically on upgrade.
 
@@ -408,7 +443,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 * Fixed being unable to change the embedding model in the WebUI.
 
-### Main program
+### Main program [1.3.1]
 
 * No more fallback for vision embedding models: when an image embedding model is unavailable, MaiBot no longer silently switches to another model.
 
@@ -416,7 +451,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 ::: timeline 2026-09-26
 
-### Main program
+### Main program [1.3.0]
 
 * Fixed punctuation-less long text caused by reply splitting; sentence separators are restored when segments are joined.
 
@@ -428,7 +463,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 * Improved compatibility with adapter plugins; adapter plugins can use MaiBot's built-in allow/deny lists directly.
 
-* The SnowLuma adapter must be updated to the latest version: the allow/deny lists must be re-configured after upgrading.
+* The OneBot adapter must be updated to the latest version: the allow/deny lists must be re-configured after upgrading.
 
 ### Webui [1.7.5]
 
@@ -462,7 +497,7 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 * Fixed Fake-IP resolution in the plugin market.
 
-### Configuration changes
+### Configuration changes [1.3.0]
 
 * `model_config.toml`: the per-task `slow_threshold` (slow-request warning threshold) has been removed; the field is ignored and cleaned up when loading old configs.
 

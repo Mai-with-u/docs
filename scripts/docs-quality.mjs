@@ -95,8 +95,10 @@ const headingId = (raw) => {
 
 const idsOf = (p) => {
   const set = new Set()
-  for (const l of lines(p)) {
-    const m = l.replace(/\r$/, '').match(/^#{1,6}\s+(.*)$/)
+  // 同 C1：代码块里的 "# 注释" 不是标题，扫 text 行才能和渲染结果一致。
+  for (const t of scan(p)) {
+    if (t.kind !== 'text') continue
+    const m = t.raw.replace(/\r$/, '').match(/^#{1,6}\s+(.*)$/)
     if (m) set.add(headingId(m[1]))
   }
   return set
@@ -247,8 +249,16 @@ const en = mdFiles('en')
 }
 
 // A6 可达性：页面必须出现在侧边栏或至少有一个入链
+// 站点根入口（zh/index.md、en/index.md）本身就是入口，不参与孤儿判定。
+// sidebar 只认真正的 `link: '...'` 声明，避免注释里出现同形字符串造成假通过。
 {
-  const sidebar = ['zh', 'en'].map((l) => readFileSync(join(ROOT, `.vitepress/sidebar/${l}.ts`), 'utf-8')).join('\n')
+  const sidebarLinks = new Set(
+    ['zh', 'en'].flatMap((l) =>
+      [...readFileSync(join(ROOT, `.vitepress/sidebar/${l}.ts`), 'utf-8').matchAll(/\blink:\s*'([^']+)'/g)].map(
+        (m) => m[1]
+      )
+    )
+  )
   const inbound = new Map()
   for (const p of [...zh, ...en]) {
     for (const m of readFileSync(p, 'utf-8').matchAll(/\]\(([^)\s#]+\.md)?[^)\s]*\)/g)) {
@@ -266,14 +276,15 @@ const en = mdFiles('en')
       .replace(/^(zh|en)\//, '')
       .replace(/(^|\/)index\.md$/, '$1')
       .replace(/\.md$/, '')
+    if (body === '') continue // 站点根入口（zh/index.md、en/index.md）
     const asLink = (isEn ? '/en/' : '/') + body
     const devCanonical = body.startsWith('develop/') && isEn // 英文开发文档挂在 /develop/*
     const alt = devCanonical ? '/' + body : asLink
     const inSidebar =
-      sidebar.includes(`'${asLink}'`) ||
-      sidebar.includes(`'${asLink}/'`) ||
-      sidebar.includes(`'${asLink.replace(/\/$/, '')}'`) ||
-      (devCanonical && sidebar.includes(`'${alt}'`))
+      sidebarLinks.has(asLink) ||
+      sidebarLinks.has(asLink + '/') ||
+      sidebarLinks.has(asLink.replace(/\/$/, '')) ||
+      (devCanonical && sidebarLinks.has(alt))
     if (!inSidebar && !inbound.get(p)) v.push(`${r} 孤儿页（不在 sidebar 且无入链）`)
   }
   add('A6 无孤儿页（sidebar 或入链可达）', 'gate', v)
@@ -420,10 +431,65 @@ const haveSdk = existsSync(SDK)
 }
 
 // B5 文档示例里声明的插件能力名必须是 Host 真正注册的能力
+//
+// registry.py 里的能力名有三种写法，都要展开成具体名字再比对，否则会把真正
+// 注册过的能力误判成「未注册」：
+//   1. register_capability("webui.claim_upload", ...)        字面量
+//   2. for action in ("show", "hide"):                       循环 + 元组字面量
+//        register_capability(f"desktop_pet.{action}", ...)
+//   3. for action in desktop_pet.ANIMATION_ACTIONS:          循环 + 模块常量
+//        register_capability(f"desktop_pet.{action}", ...)
+function collectCapabilityNames(maiBotDir) {
+  const capDir = join(maiBotDir, 'src/plugin_runtime/capabilities')
+  const reg = readFileSync(join(capDir, 'registry.py'), 'utf-8')
+  const names = new Set([...reg.matchAll(/"([a-z_][\w]*\.[\w.]+)"/g)].map((m) => m[1]))
+
+  /** 字面量里的字符串（元组 / 列表都适用） */
+  const literals = (text) => [...text.matchAll(/"([^"]*)"/g)].map((m) => m[1])
+
+  /** 解析 module.CONST = (...) ，模块文件与 registry.py 同目录 */
+  const readConst = (ref) => {
+    const dot = ref.lastIndexOf('.')
+    const file = join(capDir, ref.slice(0, dot) + '.py')
+    if (!existsSync(file)) return []
+    const decl = readFileSync(file, 'utf-8').match(
+      new RegExp('^\\s*' + ref.slice(dot + 1) + '\\s*(?::[^=]+)?=\\s*\\(([\\s\\S]*?)\\)', 'm')
+    )
+    return decl ? literals(decl[1]) : []
+  }
+
+  let loopVar = null
+  let loopValues = []
+  for (const line of reg.split('\n')) {
+    const header = line.match(/^\s*for\s+(\w+)\s+in\s+(.+?):\s*$/)
+    if (header) {
+      const [, name, source] = header
+      loopValues = source.startsWith('(') || source.startsWith('[')
+        ? literals(source)
+        : /^\w+(\.\w+)+$/.test(source)
+          ? readConst(source)
+          : []
+      loopVar = loopValues.length > 0 ? name : null
+      continue
+    }
+    if (!loopVar || !/\S/.test(line)) continue
+    // 循环体内的 f-string：f"desktop_pet.{action}"
+    for (const m of line.matchAll(new RegExp('f"([^"]*)\\{(\\w+)\\}([^"]*)"', 'g'))) {
+      if (m[2] !== loopVar) continue
+      for (const value of loopValues) names.add(m[1] + value + m[3])
+    }
+    // 循环体内直接注册裸变量名
+    if (new RegExp('register_capability\\(\\s*' + loopVar + '\\s*,').test(line)) {
+      for (const value of loopValues) names.add(value)
+    }
+  }
+  return names
+}
+
+// B5 文档示例里声明的插件能力名必须是 Host 真正注册的能力（续）
 if (haveMaiBot) {
   const v = []
-  const reg = readFileSync(join(MAIBOT, 'src/plugin_runtime/capabilities/registry.py'), 'utf-8')
-  const known = new Set([...reg.matchAll(/"(\w+\.[\w.]+)"/g)].map((m) => m[1]))
+  const known = collectCapabilityNames(MAIBOT)
   const seen = new Set()
   for (const p of [...zh, ...en]) {
     const src = readFileSync(p, 'utf-8')
@@ -448,8 +514,10 @@ if (haveMaiBot) {
   const v = []
   for (const p of [...zh, ...en]) {
     const seen = new Map()
-    for (const l of lines(p)) {
-      const m = l.replace(/\r$/, '').match(/^#{1,6}\s+(.*)$/)
+    // 走 scan()：代码围栏里的 "# 注释" 不是标题，直接用 lines() 会造出假重复。
+    for (const t of scan(p)) {
+      if (t.kind !== 'text') continue
+      const m = t.raw.replace(/\r$/, '').match(/^#{1,6}\s+(.*)$/)
       if (!m) continue
       const s = headingId(m[1])
       seen.set(s, (seen.get(s) || 0) + 1)

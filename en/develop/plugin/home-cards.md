@@ -4,7 +4,7 @@ title: Home Cards
 
 # Home Cards
 
-Plugins can add extension cards to the WebUI home page with the SDK `@HomeCard` decorator. Cards are registered while the plugin is loaded and disappear automatically when the plugin is disabled, unloaded, or reloaded.
+`@HomeCard` adds an extension card to the WebUI home page. Cards are registered while the plugin is loaded and disappear when it is disabled, unloaded, or reloaded.
 
 ## Basic Example
 

@@ -49,8 +49,8 @@ title: 插件接入
   "author": { "name": "you", "url": "https://github.com/you" },
   "license": "MIT",
   "urls": { "repository": "https://github.com/you/hello" },
-  "host_application": { "min_version": "1.3.0", "max_version": "1.3.99" },
-  "sdk": { "min_version": "2.0.0", "max_version": "2.9.99" },
+  "host_application": { "min_version": "1.4.0", "max_version": "1.4.99" },
+  "sdk": { "min_version": "2.22.0", "max_version": "2.22.99" },
   "capabilities": ["send.text", "send.emoji", "config.get"],
   "i18n": { "default_locale": "zh-CN" }
 }
@@ -103,14 +103,14 @@ def create_plugin():
 
 三类接入面各占一个装饰器：`@Command` 管消息入口，`@Tool` 给模型用，`@HookHandler` 改流程内部数据。生命周期三个方法一个都不能少，否则运行时拒绝加载。
 
-Hook 是覆盖面最广的一类：22 个命名钩子分布在聊天、发送服务、表情、学习与推理流程上，支持阻塞（可改数据、可中止）与旁路观察两种模式，并带超时与熔断保护。钩子清单与返回契约见[插件开发文档 · Hook 处理器](/develop/plugin/hooks)。
+Hook 是覆盖面最广的一类：30 个命名钩子分布在聊天、发送服务、表情、学习、推理与桌宠事件上，支持阻塞（可改数据、可中止）与旁路观察两种模式，并带超时与熔断保护。钩子清单与返回契约见[插件开发文档 · Hook 处理器](/develop/plugin/hooks)。
 
 ## 插件的运行边界
 
 理解边界能省掉大量调试：
 
 ::: fields
-- **独立进程** — 第三方插件跑在 Runner 子进程里，主进程崩溃与插件崩溃互不牵连；单次 RPC 默认 30 秒超时，组件调用默认 60 秒。
+- **独立进程** — 第三方插件跑在 Runner 子进程里，主进程崩溃与插件崩溃互不牵连；阻塞 Hook 超时由 `plugin_runtime.hook_blocking_timeout_sec` 控制，默认 60 秒。
 - **不能 import 主程序** — 插件代码只能用 `maibot_sdk`，不能引用 `src.*`。需要的能力通过 `self.ctx` 的能力代理申请。
 - **能力要声明** — 能调哪些能力由 manifest 的 `capabilities` 列表决定，没声明就调用会被拒。
 - **数据有固定落点** — 插件专属目录是 `data/plugins/{插件 ID}` 与 `temp/plugins/{插件 ID}`，别写到别处。
@@ -123,11 +123,11 @@ Hook 是覆盖面最广的一类：22 个命名钩子分布在聊天、发送服
 插件能否装进当前麦麦，由 manifest 里两个区间决定：
 
 ::: fields
-- **`host_application`** — 宿主版本区间。低于下限直接拒绝；高于上限但主次版本相同则放行并告警，其余情况拒绝。
-- **`sdk`** — 插件 SDK 版本区间，不在区间内只告警，插件仍会加载。当前配套的 SDK 是 `maibot-plugin-sdk` 2.9 系列。
+- **`host_application`** — 宿主版本区间。低于下限直接拒绝；高于上限但主版本相同、次版本最多高 1 时放行并告警，其余情况拒绝。
+- **`sdk`** — 插件 SDK 版本区间，不在区间内只告警，插件仍会加载。主程序声明依赖 `maibot-plugin-sdk>=2.22.1`，以 MaiBot 仓库 `pyproject.toml` 为准；插件 SDK 与主程序分开升级，实际装到的 SDK 版本以运行环境为准。
 :::
 
-`max_version` 写已测试过的最高「主.次」版本加 `.99`，例如 `1.3.99`；不要写 `1.99.99`、`999.999.999` 这类没有对应真实版本的上限。
+`max_version` 写已测试过的最高「主.次」版本加 `.99`，例如 `1.4.99`；不要写 `1.99.99`、`999.999.999` 这类没有对应真实版本的上限。
 
 调试期可以用 `debug.force_plugin_compatibility` 临时跳过校验，但那是兜底手段——强行加载一个真的不兼容的插件，会在运行期报错。
 

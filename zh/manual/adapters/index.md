@@ -10,26 +10,26 @@ title: 接入平台
 
 QQ 有两条接入路线，按你的条件选一条即可：
 
-- **本地客户端登录** — 用你自己的 QQ 号登录（SnowLuma 或 NapCat），功能最全，**推荐统一 QQ 连接器**：一个插件同时支持两类客户端，连接后自动识别；
+- **本地客户端登录** — 用你自己的 QQ 号登录（NapCat 等 OneBot v11 实现），功能最全，**推荐 OneBot 适配器**：连接后自动识别对端实现；
 - **开放平台机器人** — 去 QQ 开放平台申请机器人（AppID + AppSecret），不需要登录任何 QQ 客户端。
 
 两条路线互不冲突，可以同时启用；开放平台路线还可以通过统一 ID 绑定与本地客户端路线共享数据。
 
 ::: tip 接入与访问策略
-QQ 可通过统一 QQ 连接器接入 SnowLuma 或 NapCat 客户端。群聊和私聊的访问范围由 MaiBot 的适配器策略（`config/adapter_policy.toml` 或 WebUI「适配器设置」）控制。
+QQ 可通过 OneBot 适配器接入 NapCat 等 OneBot v11 实现。群聊和私聊的访问范围由 MaiBot 的适配器策略（`config/adapter_policy.toml` 或 WebUI「适配器设置」）控制。
 :::
 
 ## 可用适配器一览
 
-**维护方标注** — 🏛️ 官方：`Mai-with-u` 组织维护；🌐 社区：第三方作者维护。
+**维护方标注** — 官方：`Mai-with-u` 组织维护；社区：第三方作者维护。
 
 ### QQ（本地客户端登录）
 
-- [QQ 本地客户端](./qq-local-client) — 🏛️ 官方维护。统一 QQ 连接器：登录你自己的 QQ 号，一个插件同时支持 SnowLuma / NapCat，连接后自动识别
+- [QQ 本地客户端](./qq-local-client) — 官方维护。OneBot 适配器：登录你自己的 QQ 号，支持 NapCat 等 OneBot v11 实现，连接后自动识别
 
 ### QQ（开放平台机器人）
 
-- [QQ 官方机器人](./qq-official) — 🏛️ 官方维护。AppID + AppSecret 直连 QQ 开放平台，支持单聊与群聊的文本、@、图片、表情
+- [QQ 官方机器人](./qq-official) — 官方维护。AppID + AppSecret 直连 QQ 开放平台，支持单聊与群聊的文本、@、图片、表情
 
 ### Telegram 与微信
 
@@ -39,9 +39,9 @@ QQ 可通过统一 QQ 连接器接入 SnowLuma 或 NapCat 客户端。群聊和�
 
 ### 邮件、iMessage 与语音通话
 
-- [邮件](./email) — 🌐 社区维护。IMAP 收信 + SMTP 回复，把专用机器人邮箱接入 MaiBot
-- [QQ 语音通话](./qq-voice-call) — 🌐 社区维护。为 QQ 增加实时语音通话入口，电话里的麦麦复用同一套人设与记忆
-- [iMessage](./imessage) — 🌐 社区维护。通过 Photon 云端服务接入 Apple iMessage，无需自备 Mac
+- [邮件](./email) — 社区维护。IMAP 收信 + SMTP 回复，把专用机器人邮箱接入 MaiBot
+- [QQ 语音通话](./qq-voice-call) — 社区维护。为 QQ 增加实时语音通话入口，电话里的麦麦复用同一套人设与记忆
+- [iMessage](./imessage) — 社区维护。通过 Photon 云端服务接入 Apple iMessage，无需自备 Mac
 
 ::: tip 社区适配器
 社区适配器由各自作者持续维护，安装前可以看一眼仓库的更新时间与 README，确认与当前 MaiBot 版本兼容。
@@ -51,7 +51,7 @@ QQ 可通过统一 QQ 连接器接入 SnowLuma 或 NapCat 客户端。群聊和�
 
 适配器通常要配置两类连接：
 
-- **消息平台 → 适配器** — 例如 SnowLuma / NapCat 登录 QQ 并把消息推给适配器；开放平台机器人则需先在 QQ 开放平台申请账号。
+- **消息平台 → 适配器** — 例如 NapCat 登录 QQ 并把消息推给适配器；开放平台机器人则需先在 QQ 开放平台申请账号。
 - **适配器 → MaiBot** — 插件版适配器一般不需要额外配置这一层，只有独立版才需要。
 
 具体怎么申请平台账号、填哪些地址和 Token，见各适配器文档。想**自己写一个适配器**（接入我们还没覆盖的平台），那是开发话题，见[适配器接入](/develop/adapters/)。
@@ -60,7 +60,7 @@ QQ 可通过统一 QQ 连接器接入 SnowLuma 或 NapCat 客户端。群聊和�
 
 新适配器接入后，第一件事是确认**放行范围**：MaiBot 主程序在 `config/adapter_policy.toml` 里有一套统一的群聊 / 私聊访问策略（默认全部放行），WebUI 的适配器设置提供可视化编辑。**先在策略里放行一个测试群和一个测试用户，再测试收发**；排查「没反应」时，这一层是第一现场，入口见 [适配器管理](../webui/adapter-management.md)。
 
-统一 QQ 连接器与 QQ 官方机器人适配器均不带内置聊天名单，放行范围只看这一层。
+OneBot 适配器与 QQ 官方机器人适配器均不带内置聊天名单，放行范围只看这一层。
 
 ## 验证与排错
 

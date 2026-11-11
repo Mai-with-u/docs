@@ -14,12 +14,13 @@ MaiBot provides two WebSocket services with different message formats, so first 
 
 **API server (Additional API Server)** — must be enabled explicitly. Each message carries an extra envelope (`msg_id`, `type`, `meta`, `payload`), and it supports multiple connections, ACK confirmation, and resend after a reconnect.
 
-::: endpoint WS /ws (Legacy)
-The connection endpoint of the legacy message server. The address comes from `maim_message.ws_server_host` and `maim_message.ws_server_port` in `config/bot_config.toml`, defaulting to `ws://127.0.0.1:8000/ws`.
+::: endpoint WS /maim/{bot_id}/ws (Legacy)
+The legacy connection endpoint, served on the Host's HTTP port. The `bot_id` in the path selects the bot. Locally the default is `ws://127.0.0.1:8001/maim/<bot_id>/ws`.
 
 ::: fields
+- **`bot_id`** — required. Must be a 32-character hex bot ID registered with the Host; an unknown or not-yet-ready bot rejects the connection rather than connecting you to a different one.
 - **Handshake header `platform`** — required. The platform name, which decides what platform the message belongs to; when omitted, the library writes `unknown` and MaiBot cannot route it.
-- **Handshake header `authorization`** — validated only when `maim_message.auth_token` is non-empty; the value is the **raw token**, with no `Bearer` parsing.
+- **Handshake header `authorization`** — the **raw token** from that bot's `maim_message.auth_token` list, with no `Bearer` parsing; an empty list rejects every connection.
 - **Authentication failure** — the server disconnects with close code `1008` (reason `无效的令牌`, "invalid token").
 - **One connection per platform** — only the newest connection is kept for a given `platform`; the old one is pushed out with close code `1000` (reason `新的连接已建立`, "a new connection has been established").
 - **Heartbeat** — protocol-level WebSocket PING/PONG; there is no JSON heartbeat message. The server sends one every 30 seconds and disconnects after 10 seconds without a response.
@@ -27,15 +28,15 @@ The connection endpoint of the legacy message server. The address comes from `ma
 :::
 :::
 
-::: endpoint WS /ws (API)
-The connection endpoint of the API server. The address comes from `maim_message.api_server_host` and `maim_message.api_server_port`, defaulting to `ws://0.0.0.0:8090/ws`. You must first set `maim_message.enable_api_server` to `true`.
+::: endpoint WS /maim/{bot_id}/api (API)
+The API connection endpoint, on the same Host port as the legacy one with the last path segment set to `api`. The target bot must set `maim_message.enable_api_server` to `true`.
 
 ::: fields
-- **`x-apikey`** — the API Key, which can go in a request header or in the query string `?api_key=`. **The query string wins**.
+- **`x-apikey`** — the API Key, which can go in a request header or in the query string `?api_key=`. **The query string wins**; it must appear in that bot's `maim_message.api_server_allowed_api_keys`.
 - **`x-platform`** — the platform name; `?platform=` is supported the same way, and the query string wins.
 - **`x-uuid`** — the connection identifier; the server generates one if you don't pass it. Use it to tell multiple connections on the same platform apart.
-- **Authentication failure** — close code `1000`, with an explanation in the reason.
-- **Allowlist** — an empty `maim_message.api_server_allowed_api_keys` means **no validation**; the default listen address is `0.0.0.0`, so always populate the allowlist before exposing it.
+- **Authentication failure** — close code `1008` (reason `API Key 无效`, "invalid API key").
+- **Empty list rejects connections** — an empty `api_server_allowed_api_keys` admits no connection at all.
 - **Heartbeat** — also protocol-level PING/PONG, at uvicorn's default interval.
 :::
 :::

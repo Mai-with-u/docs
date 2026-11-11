@@ -17,10 +17,10 @@ EULA 全文：https://docs.maibot.chat/about/EULA
 1. 操作系统（Windows / Linux / macOS）
 2. 安装方案选择(问用户)：
    - **方案 A：仅 MaiBot** — 只安装核心，通过 WebUI http://127.0.0.1:8001/ 对话
-   - **方案 B：MaiBot + 统一 QQ 连接器** — 登录自己的 QQ 号收发消息（推荐，全平台）。使用**统一 QQ 连接器**（仓库 `MaiBot-SnowLuma-Adapter`）连接 SnowLuma 或 NapCat 客户端。
+   - **方案 B：MaiBot + OneBot 适配器** — 登录自己的 QQ 号收发消息（推荐，全平台）。使用**OneBot 适配器**（仓库 `MaiBot-SnowLuma-Adapter`）连接 NapCat 等 OneBot v11 实现。
    - **方案 C：MaiBot + QQ 官方机器人适配器** — 在 QQ 开放平台申请机器人，用 AppID + AppSecret 直连，不需要登录任何 QQ 客户端
 3. 提前说明所选方案的前提：
-   - 方案 B：需要先部署一个 QQ 客户端（SnowLuma 或 NapCat）并登录机器人小号、开启正向 WebSocket 服务器；搭建 QQ 机器人有被风控或封禁的风险，务必提醒用户使用小号
+   - 方案 B：需要先部署 NapCat 等 OneBot v11 客户端并登录机器人小号、开启正向 WebSocket 服务器；搭建 QQ 机器人有被风控或封禁的风险，务必提醒用户使用小号
    - 方案 C：需要先到 QQ 开放平台（https://q.qq.com/）完成开发者入驻、创建机器人并取得 AppID 与 AppSecret；想用群聊时，还需群主把该机器人的「机器人可获取的群聊消息范围」设为「获取群内全部消息」
 4. 提醒用户：运行本程序即表示同意 EULA（https://docs.maibot.chat/about/EULA）
 
@@ -89,23 +89,20 @@ Windows 后台运行没有交互控制台时，在实例 `config/bot_config.toml
 
 跳过此步骤，用户可以开始通过 WebUI 对话。
 
-### 方案 B：MaiBot + 统一 QQ 连接器
+### 方案 B：MaiBot + OneBot 适配器
 
-⚠️ **重要提醒**：搭建 QQ 机器人可能导致账号被风控或封禁，务必使用小号！
+**重要提醒**：搭建 QQ 机器人可能导致账号被风控或封禁，务必使用小号！
 
-1. 准备 QQ 客户端（二选一，两者都由统一 QQ 连接器支持）：
-   - SnowLuma：https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter
-   - NapCat：https://doc.napneko.icu/
-   登录机器人小号，并开启客户端的**正向 WebSocket 服务器**，默认监听 `ws://127.0.0.1:3001`
-2. 安装统一 QQ 连接器（二选一）：
-   - 推荐：WebUI → 插件扩展 → 插件市场，搜索「统一 QQ 连接器」→ 安装
+1. 准备 QQ 客户端：NapCat（https://doc.napneko.icu/）。登录机器人小号，并开启客户端的**正向 WebSocket 服务器**，默认监听 `ws://127.0.0.1:3001`
+2. 安装 OneBot 适配器（二选一）：
+   - 推荐：WebUI → 插件扩展 → 插件市场，搜索「OneBot 适配器」→ 安装
    - 手动方式（在 MaiBot 实例目录执行）：`git clone https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter.git plugins/MaiBot-SnowLuma-Adapter`
 3. 启用插件：WebUI → 插件扩展 → 找到 `MaiBot-SnowLuma-Adapter` → 点击启用（等价于把 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 里的 `[plugin] enabled` 设为 `true`）
 4. 配置连接：编辑 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 的 `[client]` 节，与客户端设置保持一致：
 
 ```toml
 [client]
-client_type = "auto"   # 连接建立后自动判定对端是 SnowLuma 还是 NapCat，保持 auto 即可
+client_type = "auto"   # auto 连接后自动判定对端类型，保持 auto 即可
 server = "127.0.0.1"   # 客户端地址，同机填回环地址
 port = 3001            # 必须与客户端正向 WebSocket 端口一致
 token = ""             # 客户端开启鉴权时，填相同的访问令牌

@@ -24,7 +24,7 @@ The prompt itself is a plain-text guide hosted on the documentation site (curren
 
 ## What the AI Will Walk You Through
 
-1. **Ask two things** — your operating system, and whether you want QQ connected. There are two QQ routes: the **Unified QQ Connector** (log in your own QQ account, recommended) or the **QQ Official Bot** (AppID + AppSecret, no client login needed);
+1. **Ask two things** — your operating system, and whether you want QQ connected. There are two QQ routes: the **OneBot Adapter** (log in your own QQ account, recommended) or the **QQ Official Bot** (AppID + AppSecret, no client login needed);
 2. **Check the environment** — at least 2 GB of RAM and 2 GB of free disk space. Install uv, which downloads Python 3.13 for the tool installation. Prepare Git for source deployment or manual plugin downloads;
 3. **Install and start** — install MaiBot from PyPI, initialize an instance directory, configure models, and start the application;
 4. **Connect QQ** (optional) — install the adapter for the chosen route, fill in the connection details, and set the allow scope;
@@ -53,11 +53,12 @@ maibot run
 
 :::
 
-On first start, type **同意** (agree) in the terminal to accept the user agreement; the terminal then prints the WebUI login Token (also stored in `data/webui.json`). Open http://127.0.0.1:8001/, paste the Token, and follow the setup wizard to configure at least one LLM model.
+On first start, type **同意** (agree) in the terminal to accept the user agreement; the terminal then prints the WebUI address and a temporary login password (also stored in the `access_token` field of the workspace `host/webui.json`). Open http://127.0.0.1:8001/, paste the password, and follow the setup wizard to configure at least one LLM model.
 
 ## Two Routes to QQ
 
-- **SnowLuma QQ Connector** — repository `MaiBot-SnowLuma-Adapter`. Log in a bot alt account with a SnowLuma or NapCat client and enable its forward WebSocket server. See [SnowLuma QQ Connector](../adapters/qq-local-client.md) for the full steps;
+- **OneBot Adapter** — repository `MaiBot-SnowLuma-Adapter`. Log in a bot alt account with NapCat or another OneBot v11 implementation and enable its forward WebSocket server. See [QQ Local Client](../adapters/qq-local-client.md) for the full steps;
+- **QQ Official Bot** — apply for a bot on the [QQ Open Platform](https://q.qq.com/) and connect directly with AppID + AppSecret, with no QQ client required online; see [QQ Official Bot](../adapters/qq-official.md) for the full steps.
 
 Both routes need an **allow scope**: inbound access is controlled by MaiBot's adapter policy, which allows everything by default. Configure it in the WebUI under "配置管理 → 适配器设置" (Adapter Settings, `/adapter-management`) or in `config/adapter_policy.toml`. To serve only specific groups, write:
 

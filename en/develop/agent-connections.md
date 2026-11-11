@@ -25,6 +25,40 @@ acp_command = "dsh"   # On Windows use dsh.cmd or the program's absolute path
 
 `acp_command` takes the program only — arguments go into `acp_args` (used by `custom` mode only), and `acp_env` overrides the child process environment, including the `PATH` used to locate the program.
 
+## Connection Fields
+
+Every field lives under `[agent]` in `bot_config.toml` and takes effect after a restart.
+
+**`enabled`** — `false`. Enables the external Agent running alongside normal chat.
+
+**`connection`** — `dsh`, one of `dsh` / `dsh_desktop` / `custom`. `dsh` appends `--profile acp`; `dsh_desktop` connects to a running desktop app; `custom` is for any other ACP program.
+
+**`desktop_manifest`** — empty. Bridge file read in `dsh_desktop` mode; empty uses `~/.dsh/maibot-desktop.json`, see [dsh Desktop](#dsh-desktop).
+
+**`acp_command`** — `dsh`. The external Agent program or absolute path, not a whole shell command; on Windows `dsh.cmd` works.
+
+**`acp_args`** — empty list. Used by `custom` mode only, one argument per entry; `{mcp_port}` is replaced with this connection's tool-service port.
+
+**`acp_cwd`** — empty. Directory on the MaiBot host where the ACP program (or `ssh`) starts; empty uses `data/agent/workspace` and stays fixed while a session is restored.
+
+**`acp_remote_cwd`** — empty. An existing absolute path on the remote host, passed through verbatim without being created or expanded locally.
+
+**`acp_env`** — empty. Extra or overriding environment variables for the child process, for example `DSH_HOME`.
+
+**`acp_model`** — empty. Empty uses the external Agent's own model configuration; otherwise the value must be one its model options publish.
+
+**`acp_timeout`** — `60` seconds. Wait time for handshake, session restore, and cancel acknowledgement; it does not cap task duration.
+
+**`mcp_port`** — `0`. `0` auto-assigns a loopback port; one port serves one connection.
+
+**`planner_enabled`** — `false`. Master switch for the external Planner; turning it off keeps `planner_sessions`.
+
+**`planner_sessions`** — empty list. Real chat stream `session_id` values; an empty list enables no chat stream.
+
+**`allow_users`** — empty list. Private-chat users allowed to command the Agent, formatted `platform:user_id`, for example `qq:123456`.
+
+**`allow_groups`** — empty list. Groups allowed to command the Agent, formatted `platform:group_id`. When both allow lists are empty there is no restriction; filling either one restricts access to matched chats.
+
 ## Letting Specific Chats Use the External Planner
 
 You can skip `enabled` entirely: turn on `planner_enabled` and put the `session_id` of the chats to take over into `planner_sessions`; the main Planner of those chats goes through ACP.
@@ -121,7 +155,7 @@ The external Agent's text is streamed through `session/update` into the executio
 
 The normal stop reason is `end_turn`. Other reasons (such as `refusal` or `max_tokens`) and model request errors returned by dsh keep whatever output arrived, clear the in-flight marker, and report a single-round failure without pausing the queue; the source chat receives an internal notification with the task number and the original error. Switching models does not trigger a retry — send "continue" or a new request to re-enter the same session.
 
-Pauses survive restarts. Fault pauses recorded by older versions can be lifted by a new user request or from the WebUI; system input never clears them. Manual pauses always require recovery in the WebUI, and receipts for hand-offs during a pause state clearly that the task was only queued.
+Pauses survive restarts. Fault pauses can be lifted by a new user request or from the WebUI; system input never clears them. Manual pauses always require recovery in the WebUI, and receipts for hand-offs during a pause state clearly that the task was only queued.
 
 ## Verification and Troubleshooting
 

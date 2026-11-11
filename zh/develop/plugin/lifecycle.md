@@ -4,7 +4,7 @@ title: 生命周期
 
 # 生命周期
 
-MaiBot 插件有三个生命周期方法：`on_load()`、`on_unload()` 和 `on_config_update()`。SDK 强制要求所有插件实现这三个方法，否则 Runner 会拒绝加载。
+插件必须有 `on_load()`、`on_unload()`、`on_config_update()` 三个生命周期方法，缺一个 Runner 就拒绝加载。
 
 ## create_plugin() 工厂函数
 

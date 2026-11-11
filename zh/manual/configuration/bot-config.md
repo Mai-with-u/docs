@@ -11,7 +11,7 @@ titleTemplate: :title · 配置
 所有配置都能在 WebUI 里点点鼠标完成（默认 `http://127.0.0.1:8001`），效果与编辑文件一致。见 [WebUI 配置管理](/manual/webui/config-management)。
 :::
 
-保存文件后大多数设置**热重载**立即生效；改 `[maim_message]`、`[http]` 的监听地址或端口、`[mcp]` 服务器连接、`[plugin_runtime]` 的 IPC、`[log]` 的事件循环看门狗、`[debug]` 的终端输入与强制插件兼容时需要重启 MaiBot。完整规则见 [配置概览](./index.md#改了会立即生效吗)。
+保存文件后大多数设置**热重载**立即生效；监听地址、端口、TLS 与访问防护在 `host/config.toml`，改完要重启宿主。完整规则见 [配置概览](./index.md#改了会立即生效吗)。
 
 ## 快速上手
 
@@ -33,7 +33,7 @@ platforms = []            # 其他平台的备用账号，格式 platform:账号
 :::
 
 ::: warning qq_account 要和适配器登录的 QQ 一致
-使用统一 QQ 连接器时，`qq_account` 必须与适配器登录的 QQ 号完全一致，否则麦麦会把自己的消息当成别人的。适配器正常上报身份时这两个字段只是备用值，但保持一致永远是对的。详见 [统一 QQ 连接器](../adapters/qq-local-client.md)。
+使用 OneBot 适配器时，`qq_account` 必须与适配器登录的 QQ 号完全一致，否则麦麦会把自己的消息当成别人的。适配器正常上报身份时这两个字段只是备用值，但保持一致永远是对的。详见 [OneBot 适配器](../adapters/qq-local-client.md)。
 :::
 
 ### 捏人设
@@ -70,22 +70,28 @@ multiple_probability = 0  # 按概率随机换成上面的备用风格；0 = 不
 talk_value = 1.0             # 群聊发言频率：越小越安静，0.3~0.5 明显话少
 private_reply_paused = false # 暂停所有私聊回复：true = 私聊只收消息不回复
 inevitable_at_reply = true   # 被 @ 时尽量回复
-mentioned_bot_reply = false  # 消息提到麦麦名字时是否更容易回复
+mentioned_bot_reply = true   # 消息提到麦麦名字时更容易回复
 ```
 
 :::
 
-想让麦麦按群、按时段分别调整频率，用 `talk_value_rules`。例如，将 QQ 群 123456 在夜间的发言频率调到 0.8：
+想让麦麦按群、按时段分别调整频率，用动态发言规则组。例如，把 QQ 群 123456 在夜间的发言频率调到 0.3：
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[[chat.reply_timing.talk_value_rules]]
+[chat.reply_timing.talk_rule_groups]
+active_group = "夜间"
+
+[[chat.reply_timing.talk_rule_groups.groups]]
+name = "夜间"
+
+[[chat.reply_timing.talk_rule_groups.groups.rules]]
 platform = "qq"
 item_id = "123456"
 rule_type = "group"
 time = "23:00-02:00"
-value = 0.8
+value = 0.3
 ```
 
 :::
@@ -194,15 +200,15 @@ multiple_probability = 0  # [进阶] 每次回复按此概率临时注入一条�
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat]
+creative_mode = true             # 用单次构建的 Prompt 激发表达多样性，减少 AI 刻板句式；关闭可能提高缓存命中率
 enable_reply_at = true           # 允许麦麦在回复开头 @ 人；要不要 @ 由模型看聊天内容决定
 max_context_size = 50            # 群聊回复参考最近多少条消息；越大越懂上下文，也更耗 token
 max_private_context_size = 75    # 私聊参考的最近消息数量
-context_compaction_summary_max_chars = 6000  # [进阶] 滚动状态摘要的最大字符数（1000~8000），由 utils 模型生成
 ```
 
 :::
 
-上下文快满时，麦麦会用 utils 模型把更早的对话压成一段滚动状态摘要，始终随 Planner 上下文发送；`context_compaction_summary_max_chars` 控制摘要长度。聊天回想与长期记忆由 A_Memorix 负责，见 [A_Memorix 配置](./amemorix-config.md)。
+上下文快满时，麦麦会自动把更早的对话压缩成状态摘要，始终随 Planner 上下文发送；摘要长度由程序内置策略决定，没有对应配置项。聊天回想与长期记忆由 A_Memorix 负责，见 [A_Memorix 配置](./amemorix-config.md)。
 
 #### 什么时候发言
 
@@ -216,7 +222,7 @@ planner_message_steering = false           # 快速反应模式：思考/输出/
 talk_value = 1                             # 群聊发言频率：0~1，越小越安静
 private_reply_paused = false               # 暂停所有私聊回复：true = 私聊只收消息并维护历史，不进入思考
 private_reply_pause_rules = []             # 按平台与用户单独覆盖全局私聊暂停设置
-mentioned_bot_reply = false                # 消息提到麦麦名字时更容易回复
+mentioned_bot_reply = true                 # 消息提到麦麦名字时更容易回复
 inevitable_at_reply = true                 # 被 @ 时尽量回复
 no_action_backoff_base_seconds = 15        # 连续决定不回复后，下次检查前先等多久（秒）
 no_action_backoff_cap_seconds = 300        # [进阶] 退避等待的上限（秒）
@@ -226,17 +232,24 @@ no_action_backoff_bypass_pending_count = 6 # [进阶] 等待期间新消息达�
 
 :::
 
-`talk_value_rules` 为具体聊天设置发言频率。群聊未命中规则时使用总体发言频率。
+**动态发言规则组** — 发言频率按规则组管理：`active_group` 指定当前生效的组，组内规则按平台、聊天和时段匹配，没命中任何规则的聊天回落到 `talk_value`。规则组可以在 WebUI 里创建、复制和切换。
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[[chat.reply_timing.talk_value_rules]]
-platform = "qq"  # 平台
-item_id = "123456"  # 群号或用户 ID
-rule_type = "group"  # 群聊填 group，私聊填 private
-time = "23:00-02:00"  # 时段，支持跨夜；"*" 表示全天
-value = 0.8  # 发言频率
+[chat.reply_timing.talk_rule_groups]
+active_group = "夜间"    # 当前生效的规则组；默认只有一个名为"默认"的组
+
+[[chat.reply_timing.talk_rule_groups.groups]]
+name = "夜间"
+
+[[chat.reply_timing.talk_rule_groups.groups.rules]]
+enabled = true           # 关掉后规则保留但不参与匹配
+platform = "qq"          # 留空 = 不限定平台；"*" = 任意平台
+item_id = "123456"       # 留空 = 不限定聊天；"*" = 任意聊天
+rule_type = "group"      # group 群聊 / private 私聊
+time = "23:00-02:00"     # 留空为兜底，"*" 为全天，也支持跨夜时段
+value = 0.3              # 该规则下的发言频率：0 更安静，1 按正常频率
 ```
 
 :::
@@ -316,9 +329,8 @@ prompt = "这个群里说话要更简短。"
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [capabilities]
-files = false                          # 文件功能：聊天附件收发、保存与文本阅读；细节见「文件功能」
+files = false                          # 文件功能：聊天附件登记、文件工具、插件 SDK 与 WebUI 文件入口；细节见「文件」
 planner_subagent = false               # 子代理任务派发：给 Planner 提供 subagent 工具
-advanced_sub_agent = false             # 高级子代理：子代理后台运行，结论作为新消息送回（需先开启上一项）
 tool_result_condense = false           # 超长工具结果整理：超过阈值的工具结果先整理成结论再写入上下文
 tool_result_condense_threshold = 3000  # [进阶] 触发整理的字符数，最低 500
 ```
@@ -327,7 +339,7 @@ tool_result_condense_threshold = 3000  # [进阶] 触发整理的字符数，最
 
 **文件功能** — `files = true` 打开附件登记、模型文件工具、插件 SDK 文件接口和 WebUI 文件入口，统一控制这一整套能力；关闭后拒绝新的文件操作，已有原件不会被删除。文件大小、配额与传输参数在 `[files]` 段，见[服务与连接](#文件)。
 
-**子代理** — `planner_subagent = true` 给 Planner 提供 `subagent` 工具：把自包含的查询或整理任务交给子代理，子代理在独立上下文里多轮调用被授权的工具，只把结论交还。开启 `advanced_sub_agent = true` 后子代理转到后台，派发后立刻返回任务 ID，麦麦可以继续聊天；子代理结束时结论作为一条新消息送回并唤醒 Planner，同时提供 `subagent_status`（查看任务）和 `subagent_stop`（终止任务）。
+**子代理** — `planner_subagent = true` 给 Planner 提供 `subagent` 工具：把自包含的查询或整理任务交给子代理，子代理在独立上下文里后台多轮调用被授权的工具。派发后立即返回任务 ID，麦麦可以继续聊天；子代理结束时把结论作为一条新消息送回并唤醒 Planner，同时提供查看任务状态和终止任务的工具。
 
 **超长工具结果整理** — `tool_result_condense = true` 时，工具结果达到 `tool_result_condense_threshold` 字符（默认 3000，最低 500）会先交给子代理按 Planner 当前意图整理成结论，再写入上下文，减少后续每轮的上下文占用；代价是多一次模型请求。
 
@@ -339,7 +351,11 @@ tool_result_condense_threshold = 3000  # [进阶] 触发整理的字符数，最
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [experimental]
-passive_replyer = false   # 被动回复：Planner 不调用工具而输出正文时，将正文作为指导启动一次回复
+passive_replyer = false               # 被动回复：Planner 不调用工具而输出正文时，把正文当作自然语言指导启动一次回复
+reply_cache = false                   # 复用本轮 Planner 请求前缀，只追加创意回复内容，降低重复开销
+super_creative_mode = false           # 超级创意：Replyer 先用所选语言生成，再由同一模型翻回中文
+super_creative_language = "ja-JP"     # 超级创意使用的生成语言："ja-JP" / "ru-RU" / "fr-FR" / "zh-classical"
+desktop_pet_exploration_enabled = false  # 允许桌宠发起探索任务，并在主人聊天中复用探索经验
 
 focus_mode = false        # Focus：同组聊天共享一个持续思考的 Planner
 focus_on_private = false  # Focus 是否也作用于私聊
@@ -361,7 +377,7 @@ reaction_style = "lively"
 
 :::
 
-**丰富回复** — 回复可直接携带图片；回复时 @ 人由 [`[chat].enable_reply_at`](#上下文与回想) 控制，回复中的表情由 [`[emoji].use_new_send_logic`](#表情包) 控制。
+**丰富回复** — 回复可直接携带图片、引用、表情和 @：@ 人由 [`[chat].enable_reply_at`](#上下文与回想) 控制，表情发送由 `[model_task_config].emoji` 指定的模型挑选。
 
 **被动回复** — `passive_replyer = true` 时，Planner 不调用工具而直接输出正文，这段正文就作为自然语言指导启动一次回复：篇幅、表达偏好和插件相关需求直接写进指导，引用与附件由并行回复补充器编排。关闭时使用原有 `reply` 工具。切换从下一轮思考生效，Focus 不受影响。
 
@@ -506,13 +522,11 @@ no_file_result_retention_days = 30  # 图片删掉后识别结果再保留多久
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [emoji]
-use_new_send_logic = false # 新发送方式：思考模型直接看图挑表情包，跟在文字回复后面发；要求思考模型能识图
-emoji_send_num = 25        # [进阶] 每次从多少个候选里挑一张发送（不是一次发 25 张）
 max_reg_num = 64           # 最多保存多少个可用表情
 do_replace = true          # [进阶] 满额后用新表情替换旧表情；关闭则不再收集
 check_interval = 10        # 每隔多少分钟检查一次表情库
-steal_emoji = true         # 从聊天中自动收集别人发的表情
-max_emoji_size_mb = 5.0    # [进阶] 收集表情的大小上限；0 = 不限
+steal_emoji = true         # 定期扫描表情包目录并尝试注册候选表情；关闭后聊天表情仍会为识别而缓存
+max_emoji_size_mb = 5.0    # [进阶] 收集表情时允许的最大文件大小（MB）；0 = 不限
 content_filtration = false # [进阶] 只保存内容合适的表情
 
 [emoji.cache_cleanup]
@@ -523,6 +537,8 @@ no_file_record_retention_days = 30  # 文件删掉后描述记录再保留多久
 ```
 
 :::
+
+**选表情的模型** — 表情包由 `[model_task_config].emoji` 指定；留空时退回「planner 全视觉就用 planner，否则用 vlm」的选择逻辑。
 
 #### 语音识别
 
@@ -551,20 +567,29 @@ typing_speed = 1.0                   # [进阶] 模拟打字速度：0 最快 / 
 
 #### 中文错别字
 
+错别字由内置插件「麦麦小工具」负责，配置在它自己的 `config.toml` 里，不在 `bot_config.toml`：
+
 ::: code-group
 
-```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[chinese_typo]
-enable = true                       # 偶尔打错字，更像真人
-enable_correction_quote = true      # 纠正错别字时引用上一条包含错别字的消息
-correction_quote_probability = 1.0  # [进阶] 生成纠正消息时引用原消息的概率（0~1）
-error_rate = 0.01                   # [进阶] 单个字被替换成错字的概率（0~1）
-min_freq = 9                        # [进阶] 只对常见程度达到该值的字制造错字
-tone_error_rate = 0.1               # [进阶] 按相近声调制造错字的概率（0~1）
-word_replace_rate = 0.006           # [进阶] 整词被替换成错词的概率（0~1）
+```toml [plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
+[plugin]
+enabled = true                    # 启用麦麦小工具
+config_version = "1.0.0"          # 插件配置版本，由程序管理
+
+[typo]
+mode = "rule"                     # 生成模式："rule" 按拼音字频造错字 / "dictionary" 只用内置易混词对
+dictionary_probability = 0.1      # 仅词库模式：每次回复的错字概率
+enable_correction_quote = true    # 纠正错别字时引用上一条错字消息
+correction_quote_probability = 1.0  # [进阶] 生成纠正消息时引用原消息的概率
+error_rate = 0.01                 # [进阶] 仅规则模式：单字被替换成错字的概率
+min_freq = 9                      # [进阶] 仅规则模式：只对常见程度达到该值的字造错字
+tone_error_rate = 0.1             # [进阶] 仅规则模式：按相近声调造错字的概率
+word_replace_rate = 0.006         # [进阶] 仅规则模式：整词被替换成错词的概率
 ```
 
 :::
+
+插件配置热重载生效，改完不用重启主程序。
 
 #### 回复分割
 
@@ -596,69 +621,60 @@ enable_overflow_return_all = false # [进阶] 句子太多时保留完整回复�
 
 #### 消息服务
 
-`maim_message` 是供外部程序（适配器、第三方客户端）连接麦麦的消息服务。**改这里必须重启 MaiBot**：
+`[maim_message]` 只保留消息协议本身：
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [maim_message]
-ws_server_host = "127.0.0.1"  # 旧版 WebSocket 监听地址；不清楚保持默认
-ws_server_port = 8000         # 旧版 WebSocket 端口
-auth_token = []               # 旧版认证令牌列表；为空 = 不验证
-
-enable_api_server = false     # 新版 API Server：供外部程序调用麦麦
-api_server_host = "0.0.0.0"   # 新版监听地址；0.0.0.0 = 允许外部访问
-api_server_port = 8090        # 新版监听端口
-api_server_use_wss = false    # 是否使用加密 WebSocket
-api_server_cert_file = ""     # WSS 证书文件路径
-api_server_key_file = ""      # WSS 私钥文件路径
-api_server_allowed_api_keys = []  # 允许访问的 API Key 列表；为空 = 不限制
+enabled = true                    # 消息服务总开关；关闭后不启动旧版 WS 和新版 API，不影响插件式适配器
+auth_token = []                   # 经典协议的认证令牌；为空 = 拒绝所有连接
+enable_api_server = false         # 开启新版 API Server，供外部程序调用麦麦
+api_server_allowed_api_keys = []  # 新版 API 的 Key 白名单；为空 = 拒绝所有连接
 ```
 
 :::
+
+监听地址和端口不在这里。宿主只开一个 HTTP 端口（`host/config.toml` 的 `[webui].port`），外部适配器按路径区分目标 Bot：
+
+```text
+ws://<宿主地址>:<宿主端口>/maim/<bot_id>/ws     # 经典协议
+ws://<宿主地址>:<宿主端口>/maim/<bot_id>/api    # 新版 API，目标 Bot 还需 enable_api_server = true
+```
+
+`bot_id` 必须是 32 位十六进制字符串，协议段只能是 `ws` 或 `api`；路径不合法以 1008 关闭，Bot 不存在或未就绪以 1013 关闭。旧的根路径 `/ws`、`/api` 和独立端口都不再兼容。
 
 ::: warning 对公网开放前先加鉴权
-`api_server_host = "0.0.0.0"` 会把新版 API 暴露到所有网卡。对外提供服务务必配置 `api_server_allowed_api_keys`；启用 WSS 时 `secure_cookie` 一并打开。
+两个凭据列表为空时拒绝全部连接。对外提供服务必须配置 `auth_token` 或 `api_server_allowed_api_keys`。
 :::
 
-#### HTTP 服务
+#### 宿主网络
 
-文件传输与 WebUI 共用一套后端 HTTP 监听。**改这里必须重启 MaiBot**：
+浏览器访问地址、文件传输地址和登录 Cookie 归宿主配置管，不在 `bot_config.toml` 里，改完要重启宿主：
 
 ::: code-group
 
-```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[http]
-host = ["127.0.0.1", "::1"]  # 监听地址；允许外部访问改为 ["0.0.0.0", "::"]
-port = 8001                  # 文件传输与 WebUI 共用的端口
-```
-
-:::
-
-环境变量 `HTTP_HOST` 可追加监听地址；只更新了镜像、仍在使用 `WEBUI_HOST` 的 Docker 部署会被自动识别。`webui.enabled = false` 只关闭管理页面和管理接口，公共文件传输仍走这套监听。端口 `7999` 仅用于前端开发，不是 WebUI 入口。
-
-#### WebUI
-
-::: code-group
-
-```toml [bot_config.toml ~vscode-icons:file-type-toml~]
+```toml [host/config.toml ~vscode-icons:file-type-toml~]
 [webui]
-enabled = true            # 是否加载 WebUI 管理界面与管理接口
-mode = "production"       # "production" 日常使用 / "development" 调试
-webui_style = 2           # 界面风格：0 旧风格 / 1 未来复古风格 / 2 千禧风格
-
-anti_crawler_mode = "basic"  # 防爬虫："basic" 只记录 / "strict" / "loose" 拦截更多请求 / "false" 关闭
-allowed_ips = "127.0.0.1"    # 允许访问的 IP，逗号分隔，支持 CIDR 和通配符
-trusted_proxies = ""         # 可信反向代理 IP，逗号分隔
-trust_xff = false            # 是否信任 X-Forwarded-For 中的真实访客 IP
-secure_cookie = false        # 只在 HTTPS 下发送登录 Cookie；没有 HTTPS 不要开
-enforce_public_outbound_url = true  # 限制 WebUI 访问外部 URL，降低访问内网地址的风险
+enabled = true                    # 关掉后管理页面和管理接口都不响应；文件传输仍可用
+hosts = ["127.0.0.1", "::1"]      # 监听地址；远程访问改成 ["0.0.0.0"] 或加上服务器 IP
+port = 8001                       # 浏览器访问与文件传输共用的端口
+public_base_url = ""              # 外部客户端访问文件用的公开地址；留空用本机地址
+ssl_certfile = ""                 # HTTPS 证书路径，与 ssl_keyfile 必须同时填写
+ssl_keyfile = ""                  # HTTPS 私钥路径
+secure_cookie = false             # 只在 HTTPS 下发送登录 Cookie；没有 HTTPS 不要开
+anti_crawler_mode = "basic"       # 防爬虫："false" 关闭 / "basic" 只记录 / "loose" 宽松拦截 / "strict" 严格拦截
+allowed_ips = "127.0.0.1"         # 不受防爬虫限制的来源，逗号分隔，支持 CIDR 与通配符
+trusted_proxies = ""              # 信任的反向代理 IP；配合 trust_xff 使用
+trust_xff = false                 # 是否采用 X-Forwarded-For 里的真实访客 IP
 ```
 
 :::
 
-::: warning 监听地址与端口不在这一节
-`host` / `port` 已归入 `[http]`，改完要重启 MaiBot。允许外部访问时建议同时收紧 `allowed_ips`。
+环境变量 `HTTP_HOST` 可追加监听地址（旧名 `WEBUI_HOST` 仍兼容，Docker 依赖它监听容器网卡）。`enabled = false` 只关闭管理页面和管理接口，公共文件传输仍走这套监听。端口 `7999` 仅用于前端开发，不是 WebUI 入口。
+
+::: warning 界面风格与出站校验在 bot_config.toml
+`[webui]` 段在 `bot_config.toml` 里还有两个字段：`webui_style`（界面风格）与 `enforce_public_outbound_url`（限制 WebUI 访问内网 URL）。监听相关的字段只在 `host/config.toml`。
 :::
 
 #### 文件
@@ -674,51 +690,43 @@ max_storage_gib = 10           # 实例文件存储配额（GiB），含下载�
 max_text_mib = 8               # 文本解析上限（MiB）；更大的文件仍可收发与下载
 cache_days = 30                # 平台下载缓存最后访问后保留天数；本地上传与生成的原件不自动删除
 max_concurrent_transfers = 4   # 同时上传下载的数量上限
-transfer_timeout = 120         # 单次传输超时秒数
-transfer_base_url = ""         # QQ 客户端可访问的后端地址；留空使用 [http] 的本机地址
+transfer_timeout = 120         # 单次传输超时秒数；10~3600
 trusted_download_origins = []  # 允许下载的内网适配器来源，填精确的 http(s)://主机:端口
 ```
 
 :::
 
-**`transfer_base_url`** — QQ 客户端和主程序不在同一台机器时必填，填客户端能访问的 HTTP(S) 地址，并配好反向代理与防火墙。**`trusted_download_origins`** — 平台给出的下载地址落在内网时才需要，必须写精确来源，不接受通配符。
+**跨机访问** — QQ 客户端和主程序不在同一台机器时，把宿主配置的 `[webui].public_base_url` 填成客户端能访问的 HTTP(S) 地址，并配好反向代理与防火墙；这个字段统一给所有 Bot 生成文件链接。
+
+**`trusted_download_origins`** — 平台给出的下载地址落在内网时才需要，必须写精确来源，不接受通配符，也不要填用户可控制的服务。
 
 #### 桌宠
 
-桌宠内置在主程序里，仅支持 Windows。配置支持热重载，关闭即退出窗口：
+桌宠内置在主程序里，配置支持热重载，关闭即退出窗口：
 
 ::: code-group
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [desktop_pet]
-enabled = false              # 启用桌宠：在本机 Windows 桌面显示麦麦
-chat_tools_enabled = false   # 允许主人内部聊天查询其他聊天流并唤起传话
-skin_id = "builtin"          # 当前皮肤；builtin 为内置麦麦，可导入声明式皮肤包
+enabled = false                    # 启用本机桌宠，或接受远端桌宠连接
+mode = "local"                     # local 在本机 Windows 启动窗口 / remote 等待 Windows 客户端连接
+skin_id = "builtin"                # 当前皮肤 ID；builtin 为内置麦麦，支持热切换
+chat_tools_enabled = false         # 允许主人会话查询其他聊天流并唤起传话
+show_current_task = false          # 桌宠底部显示当前动作字幕；需先配好 fast_model
+proactive_wake_enabled = false     # 定期唤醒主人聊天流自主探索；会调用模型
+proactive_wake_interval_minutes = 30  # 唤醒间隔，1~1440 分钟
+screen_read_enabled = false        # 允许截图本机主屏交给聊天模型理解；默认关闭
+screen_read_interval_seconds = 10  # 变化帧投递间隔，2~3600 秒，每次最多 6 帧
+screen_sample_interval_seconds = 2 # 截图采样间隔，0.5~30 秒
+screen_change_threshold = 0.015    # 变化像素比例阈值；越低越敏感，0.015 表示 1.5%
 ```
 
 :::
 
-**`chat_tools_enabled`** — 只作用于桌宠和网页聊天室共用的 `internal / owner` 会话，普通群聊不会获得这两个工具，也不影响发送图片。
-
-#### 电脑
-
-`[computer]` 是共享沙盒电脑，与 `[agent]` 的外接连接彼此独立：
-
-::: code-group
-
-```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[computer]
-enabled = false            # 向 Planner、子 Agent 和外接 Agent 提供共享沙盒电脑与 WebUI 接管界面
-networking = true          # 允许沙盒联网；下次启动沙盒时生效
-memory_mb = 4096           # [进阶] 沙盒内存（MB），下次启动时生效
-startup_timeout = 120      # [进阶] 等待沙盒启动的超时秒数
-request_timeout = 60       # [进阶] 等待代理回复的超时秒数
-screenshot_max_edge = 1600 # [进阶] 截图最长边像素；0 表示原始分辨率
-```
-
-:::
-
-人工接管期间，所有自主输入都会被拒绝。无需启用外接 Agent 也能使用沙盒电脑。
+- **`mode`** — `local` 在本机开窗口；`remote` 等独立 Windows 客户端连过来，服务器可用 Linux。一次只接一台桌宠。
+- **`chat_tools_enabled`** — 只作用于桌宠和网页聊天室共用的 `internal / owner` 会话，普通群聊拿不到这两个工具，也不影响发送图片。
+- **`screen_read_*`** — 截图可能包含屏幕上的私人信息，默认关闭，也不授予鼠标键盘控制。
+- **`proactive_wake_*`** — 重启或修改桌宠配置后重新计时，不补跑离线期间错过的周期。
 
 #### MCP
 
@@ -739,7 +747,7 @@ enable = true  # 是否启用 MCP 工具接入能力
 
 #### Agent 连接
 
-`[agent]` 有两类用途，共用同一套 ACP 连接设置：与普通聊天并行运行的外接 Agent，以及让指定聊天流的 Planner 直接改用外部 Agent 决策（实验性）。模型与凭据都使用外部 Agent 自身配置。沙盒桌面归 `[computer]`，与本段无关。
+`[agent]` 有两类用途，共用同一套 ACP 连接设置：与普通聊天并行运行的外接 Agent，以及让指定聊天流的 Planner 直接改用外部 Agent 决策（实验性）。模型与凭据都使用外部 Agent 自身配置。
 
 ::: code-group
 
@@ -754,6 +762,12 @@ acp_cwd = ""                   # 启动外部进程的主机工作目录；留�
 acp_remote_cwd = ""            # [进阶] 远端会话已存在的绝对目录；留空使用本机工作目录
 desktop_manifest = ""          # [进阶] dsh Desktop 桥接文件；留空读取 ~/.dsh/maibot-desktop.json
 mcp_port = 0                   # [进阶] 工具回连端口；0 = 自动分配回环端口
+allow_users = []               # 私聊白名单，格式 platform:user_id；群聊无法按成员区分
+allow_groups = []              # 群聊白名单，格式 platform:group_id
+acp_args = []                  # [进阶] 仅自定义 ACP：逐项传参，{mcp_port} 替换为本次端口
+acp_env = {}                   # [进阶] 追加或覆盖外部进程环境变量
+acp_model = ""                 # [进阶] 外部 Agent 的模型选项值；留空用它自己的配置
+acp_timeout = 60               # [进阶] 握手、会话恢复与取消确认的等待秒数
 ```
 
 :::
@@ -854,10 +868,10 @@ library_log_levels = { aiohttp = "WARNING", PIL = "WARNING" }  # [进阶] 单独
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [debug]
-enable_console_input = true           # 在交互式终端中启用本地消息和指令输入（默认开启）
-show_maisaka_thinking = true          # 在日志或界面中显示麦麦的思考过程
+enable_console_input = true           # 在交互式终端中启用本地消息和指令输入
+show_maisaka_thinking = false         # 在终端显示思考过程大框；不影响推理记录保存与 WebUI 查看
 save_maisaka_reasoning = true         # 保存 Planner、工具调用及聊天回想的完整推理记录，供 WebUI 查看
-replyer_retro_prompt = false          # 按旧版（0.12.x）方式组织 Replyer 提示词，全部指令集中在一份模板里
+gemini_reply_compatibility = false    # 兼容回复正文中的显式思考标签与 Gemini 非标准分隔符
 force_plugin_compatibility = false    # 跳过插件声明的 Host/SDK 版本校验直接加载；开启后需重启生效
 keep_prompt_preview_json_base64 = false  # [进阶] Prompt 预览保留图片 base64；便于复现但占空间
 record_tool_structured_content = false   # [进阶] 保存工具返回的结构化内容；增加数据库体积
@@ -871,7 +885,7 @@ enable_llm_cache_stats = false           # [进阶] 记录模型 prompt cache �
 - **终端输入** — `enable_console_input` 默认开启：在交互式终端里可以直接输入普通消息，或用 `/clear`、`/pm`、`/offline`、`/online`、`/help` 等指令管理聊天和适配器，输入 `exit()` 关闭。非交互终端（systemd、nohup、`docker run` 不带 `-it`）只会多打一条 warning，不影响运行；改动需重启
 - **强制插件兼容** — `force_plugin_compatibility = true` 会跳过插件 manifest 声明的 Host/SDK 版本区间校验直接加载，**仅作临时兜底**，可能加载实际不兼容的插件；它只记一条 warning，且不影响插件市场的版本兼容性判断。开启后需重启
 - **`/clear` 指令** — `/clear` 是默认可用的内置命令；如需禁用，用 `[plugin].disabled_commands = ["core.clear"]`
-- **复古回复提示词** — `replyer_retro_prompt = true` 时按旧版（0.12.x）方式组织 Replyer 提示词：全部回复指令集中在一份完整模板里，整段作为一条 `user` 消息发送，历史对话渲染成纯文本填入模板占位符，不再发送图片 Item。群聊、"简短回复"、私聊和"私聊且回复麦麦自己"各用一套模板（`retro_replyer`、`retro_replyer_light`、`retro_private_replyer`、`retro_private_replyer_self`），它们在 **Prompt 管理**里以"高级"折叠展示，可以编辑和创建自定义版本。改动热重载生效
+- **推理记录** — `save_maisaka_reasoning` 保存 Planner、工具调用与聊天回想的完整推理，可在 WebUI 查看；`show_maisaka_thinking` 只在终端额外显示大框，两者独立
 
 #### 遥测
 
@@ -886,7 +900,7 @@ enable = true  # 发送匿名运行统计；关闭不影响正常使用
 
 #### 长期记忆
 
-A_Memorix 是独立的长记忆子系统，包含 12 个子段落，完整说明见 **[A_Memorix 配置详解](./amemorix-config.md)**。最简启用只需两行：
+A_Memorix 是独立的长记忆子系统，分为存储、集成、向量化、检索、阈值、过滤、Episode、人物画像、记忆演化、高级运行时与 Web 运维等多个子段落，完整说明见 **[A_Memorix 配置详解](./amemorix-config.md)**。最简启用只需两行：
 
 ::: code-group
 
@@ -919,11 +933,11 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 
 **启动时直接报错退出** — TOML 语法错误，或字段值非法（`ban_msgs_regex` 正则非法、关键词规则缺 `reaction`、`chat_prompts` 缺字段）。先用上面的命令定位语法问题；字段校验的错误信息会直接点名问题字段，改掉即可。
 
-**改了没生效** — 你改的段落可能属于「仅启动时生效」：`[http]` 与 `[maim_message]` 的监听地址和端口、`[plugin_runtime]` 的 IPC、`[log]` 的 `event_loop_watchdog_*`、`[debug]` 的 `enable_console_input` 与 `force_plugin_compatibility`。重启 MaiBot。其余段落看 [配置概览](./index.md#改了会立即生效吗)。
+**改了没生效** — 你改的段落可能属于「仅启动时生效」：`host/config.toml` 里的监听地址、端口、TLS 与访问防护、`[maim_message].enabled`、`[plugin_runtime]` 的 IPC、`[log]` 的 `event_loop_watchdog_*` 与 `memory_diagnostics_*`、`[debug]` 的 `enable_console_input` 与 `force_plugin_compatibility`。重启宿主。其余段落看 [配置概览](./index.md#改了会立即生效吗)。
 
-**麦麦不理人** — 依次检查：宿主适配器策略有没有放行这个群（见 [统一 QQ 连接器](../adapters/qq-local-client.md) 的「先加名单，再测试」）；`talk_value` 是否被调得过低；`qq_account` 与适配器登录的 QQ 是否一致。
+**麦麦不理人** — 依次检查：宿主适配器策略有没有放行这个群（见 [OneBot 适配器](../adapters/qq-local-client.md) 的「先加名单，再测试」）；`talk_value` 是否被调得过低；`qq_account` 与适配器登录的 QQ 是否一致。
 
-**麦麦刷屏话痨** — 调低 `talk_value`（如 0.3）；`response_splitter.max_sentence_num` 和 `max_split_num` 限制单次回复条数；注意 `emoji_send_num` 只是发送候选数，调小它不会减少发言频率。
+**麦麦刷屏话痨** — 调低 `talk_value`（如 0.3），或用发言规则组给这个群单独降频；`response_splitter.max_sentence_num` 和 `max_split_num` 限制单次回复条数。
 
 **手动加的字段被删掉** — 配置文件由程序自动升级，不存在或拼写错误的字段（如把 `max_context_size` 拼成 `max_context_len`）会在下次启动时被清理回默认值。先启动一次让程序生成/升级文件，再在生成的字段上改值。
 
@@ -934,5 +948,5 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 - 配置模型：[模型配置](./model-config.md)
 - 模型高级参数（思考模式等）：[模型额外参数](./model-extra-params.md)
 - 长期记忆详解：[A_Memorix 配置](./amemorix-config.md)
-- 连接 QQ：[统一 QQ 连接器](../adapters/qq-local-client.md)
+- 连接 QQ：[OneBot 适配器](../adapters/qq-local-client.md)
 - 在浏览器里改配置：[WebUI 配置管理](../webui/config-management.md)

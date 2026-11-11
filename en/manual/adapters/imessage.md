@@ -10,7 +10,7 @@ title: iMessage Adapter
 `MaiBot (plugin) ← local WebSocket 127.0.0.1:18763 → Node.js sidecar ← spectrum-ts SDK → Photon Cloud ←→ Apple iMessage`
 :::
 
-Adapter repository (🌐 community-maintained):
+Adapter repository (community-maintained):
 
 <Linkcard url="https://github.com/mayan613/MaiBot-iMessage-Adapter" title="MaiBot-iMessage-Adapter" description="mayan613's iMessage adapter plugin" />
 

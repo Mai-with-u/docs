@@ -4,42 +4,47 @@ title: About the Project
 
 # About the Project
 
-MaiBot (MaiSaka) is an interactive agent based on large language models. She tries to understand you and interact in a human style, creating a warm and authentic conversational experience.
+MaiBot (麦麦, also called MaiSaka) is an interactive agent built on large language models. She tries to understand you and talks to you the way a person would.
 
-- 💭 **Natural dialogue**: MaiBot varies the length of her replies and uses casual phrasing to simulate human conversation.
-- 🎭 **Joining group conversations**: She knows when to speak, how to read the room, when to join a conversation, and when to stay quiet.
-- 🧠 **MaiSaka becoming human**: In group conversations, MaiBot imitates how people around her speak, learns new slang and in-group language, and keeps evolving.
-- ❤️ **Always learning more about you**: Inspired by personality theory in psychology, MaiBot gradually builds an understanding of your preferences, traits, habits, and behavior style.
-- 🔌 **Plugin system**: Provides powerful APIs and an event system with virtually unlimited room for extension.
+## What she does
 
-## Design Philosophy
+- **Natural dialogue** — replies of varying length, not one long block of text.
+- **Group conversation** — she reads the room: speaks when she should, stays quiet when she shouldn't.
+- **Imitation and learning** — in group chats she picks up how people talk and works out new words and in-group slang on her own.
+- **Long-term understanding** — she builds up a picture of your details, preferences, and speaking style using personality theory from psychology.
+- **Plugin system** — an open API and event system with no fixed ceiling on what can be added.
 
-> **SengokuCola says:**
-> - This project originally started as a few extra features for the NiuNiu bot, but it kept growing until a full rewrite became inevitable. The goal was to create a "life form" active in QQ group chats, not a feature-complete bot, but something as human-like and real-feeling as possible.
-> - The core design principle is: "more lifelike, not merely better."
-> - If people truly want AI companionship, not everyone needs a perfect "helpful assistant" that solves every problem. Some people may want a life form that can make mistakes and has its own perceptions and thoughts.
+## Design philosophy
+
+> **SengokuCola:**
+>
+> This started as a few extra features for the NiuNiu bot, kept growing, and ended in a full rewrite. The goal was a "life form" in a QQ group chat — not a feature-complete bot, but something that feels genuinely present.
+>
+> The design principle is: most lifelike, rather than best.
+>
+> Someone who wants AI companionship may not want a perfect assistant that solves everything. What they may want is something that makes mistakes and has its own thoughts and feelings.
 
 > *Code is open, but the soul is yours.*
 
-## Related Projects
+## Related projects
 
-<Linkcard url="https://github.com/Mai-with-u/Amaidesu" title="Amaidesu" description="Let MaiBot stream on Bilibili" />
+<Linkcard url="https://github.com/Mai-with-u/Amaidesu" title="Amaidesu" description="Stream MaiBot on Bilibili" />
 
-<Linkcard url="https://github.com/MoFox-Studio/MoFox-Core" title="MoFox_Bot" description="Enhanced Fork based on MaiCore 0.10.0 — more stable and fun" />
+<Linkcard url="https://github.com/MoFox-Studio/MoFox-Core" title="MoFox_Bot" description="Enhanced fork of MaiCore 0.10.0, more stable and more fun" />
 
-<Linkcard url="https://github.com/Mai-with-u/Maicraft" title="MaiCraft" description="Let MaiBot play Minecraft with you (currently paused)" />
+<Linkcard url="https://github.com/Mai-with-u/Maicraft" title="MaiCraft" description="Play Minecraft with MaiBot (maintenance paused)" />
 
-## Open Source & License
+## Open source and license
 
-MaiBot is released under the **GPL-3.0** license. Please read the [End User License Agreement (EULA)](./EULA) and [Privacy Policy](./PRIVACY) before use. Please evaluate AI-generated content carefully.
+MaiBot is released under the **GPL-3.0** license. Read the [End User License Agreement (EULA)](./EULA) and the [Privacy Policy](./PRIVACY) before use, and evaluate AI-generated content carefully.
 
-::: warning Important
-MaiBot is an open-source project and is completely free to use. If you see anyone selling MaiBot, please be careful and avoid being scammed.
+::: warning
+MaiBot is open source and free to use. Be careful if you see anyone selling it.
 :::
 
-## Learn More
+## Further reading
 
-- [About This Docs](./about-docs) — how this documentation site is built and previewed locally
-- [Community Groups](./community) — join the groups to ask questions and hang out
-- [Acknowledgements & Links](./acknowledgements) — thanks to the projects and communities along the way
-- [Contribute to Docs](/en/contributing/) — found something wrong or missing? Fix it with us; the rules live here
+- [About this site](./about-docs) — how the site is built and previewed locally
+- [Community groups](./community) — join the groups to ask questions
+- [Acknowledgements and links](./acknowledgements) — the projects and communities along the way
+- [Contribute to the docs](/en/contributing/) — fix what's wrong or missing

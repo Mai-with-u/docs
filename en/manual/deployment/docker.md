@@ -4,6 +4,8 @@ title: Docker Deployment
 
 # Docker Deployment
 
+This page deploys MaiBot with Docker Compose: the compose file, directory mounts, port mappings, and logging in to the WebUI from inside the container.
+
 ## Prerequisites
 
 MaiBot Docker deployment requires Docker and Docker Compose, plus at least 2GB of available memory. It supports Linux, macOS, and Windows (via Docker Desktop). If you'd rather not write the compose files yourself, hand the [installation prompt](./installation-agent) to an AI assistant and let it follow the deployment flow for you.
@@ -109,7 +111,7 @@ The first launch will automatically generate configuration files.
 - **WebUI** — 18001 (mapped to 8001 inside the container)
 
 ::: warning
-The default `[http] host` is `127.0.0.1`, which inside a Docker container means only the container itself can access it. When deploying with Docker, set `HTTP_HOST=0.0.0.0` to open the listener.
+`[webui].hosts` in `host/config.toml` defaults to `["127.0.0.1", "::1"]`, which inside a Docker container means only the container itself can access it. The official image appends a listen address with `HTTP_HOST=0.0.0.0`; keep that environment variable in your own image too.
 :::
 
 ::: tip
@@ -204,15 +206,13 @@ After starting, MaiBot automatically launches the WebUI service. Open your brows
 http://本机IP:18001
 ```
 
-On first launch, the container log will print the WebUI login Token, like this:
+On first launch, the container log prints the WebUI address and a temporary login password, like this:
 
-```
-07-30 18:53:45 [WebUI] WebUI 配置文件不存在，正在创建: /MaiMBot/data/webui.json
-07-30 18:53:45 [WebUI] WebUI 配置已保存到: /MaiMBot/data/webui.json
-07-30 18:53:45 [WebUI] 新的 WebUI Token 已生成: QSwgc2Vu...
-07-30 18:53:45 [WebUI应用] 🔑 WebUI 登录 Token: 5YWz5rOo5Y+v5LmQ5Za1fiDlhbPms6jlj6/kuZDosKLosKLllrXvvIE=
-07-30 18:53:45 [WebUI应用] 💡 请使用此 Token 登录 WebUI
-07-30 18:53:45 [WebUI服务] 🌐 WebUI 服务器启动中...
+```text
+MaiBot 宿主已启动：/MaiMBot
+WebUI：http://127.0.0.1:8001/?token=...（登录链接一分钟内有效）
+WebUI 临时登录密码：QSwgc2VucGFp...
+可用 maibot host status/start/stop/restart 管理 Bot；Ctrl+C 关闭宿主。
 ```
 
 Use this command to view container logs:
@@ -225,7 +225,7 @@ docker compose logs core
 
 :::
 
-Copy the Token from the log and paste it into the browser login page to access WebUI. You can later view or modify the Token in `data/webui.json`.
+The container listens on `0.0.0.0`, so open the mapped port on the host address and paste the temporary password. The temporary password is stored in the `access_token` field of `host/webui.json` in the workspace; set a fixed password once in the WebUI to replace it.
 
 Once in WebUI, follow the configuration wizard to set up models and connect platforms.
 
@@ -250,10 +250,10 @@ For detailed steps on configuring models and connecting QQ, refer to [Model Conf
 - Confirm the container environment variable `HTTP_HOST=0.0.0.0` (the old `WEBUI_HOST` name still works)
 - On a cloud server, also allow port `18001` in the security group / firewall
 
-**Can't find the login Token?**
+**Can't find the login password?**
 
-- Filter the logs with `docker compose logs core | grep Token`
-- The Token is also stored in `data/webui.json` for direct viewing
+- Filter the logs with `docker compose logs core | grep 临时登录密码`
+- The temporary password is also stored in the `access_token` field of `host/webui.json` for direct viewing
 
 **Image pulls are slow?**
 

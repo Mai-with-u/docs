@@ -8,17 +8,17 @@ This page covers startup and access errors: configuration files and MCP settings
 
 ## Configuration File Not Found or Incorrect Format
 
-### Error Symptoms
+**What you may see**
+
 - MaiBot crashes immediately on startup
 - Terminal prints TOML parsing error, e.g. `Invalid TOML syntax`
 - Or reports a missing `[inner].version`, an invalid field type, or another configuration parsing error
 
-### Quick Self-Check Trio
-1️⃣ Do both `bot_config.toml` and `model_config.toml` exist in `config/`?
-2️⃣ Is the TOML syntax correct? Strings need quotes, numbers don't, booleans are lowercase
-3️⃣ Which file and field does the log identify? Do not reset both files at once
+**Check these first**
 
-### Solutions
+1. Do both `bot_config.toml` and `model_config.toml` exist in `config/`?
+2. Is the TOML syntax correct? Strings need quotes, numbers don't, booleans are lowercase
+3. Which file and field does the log identify? Do not reset both files at once
 
 **Method 1: Use WebUI if MaiBot still starts**
 
@@ -74,13 +74,13 @@ When an existing configuration is upgraded or rewritten, the code first moves it
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
-# ✅ Correct examples
+# Correct examples
 [bot]
 nickname = "麦麦"           # Strings need quotes
 port = 8001                 # Numbers don't need quotes
 enabled = true              # Booleans are lowercase
 
-# ❌ Incorrect examples
+# Incorrect examples
 [bot]
 nickname = 麦麦             # Error! No quotes
 port = "8001"              # Error! Numbers shouldn't have quotes
@@ -92,90 +92,93 @@ enabled = True             # Error! Should be lowercase true
 **Method 4: Online Validation**
 If you've manually edited the file and aren't sure about the format, use an [online TOML validator](https://toml.io/en/) to check.
 
-### Prevention Tips
-- 📝 **Use WebUI to modify configuration** — WebUI validates the format when saving
-- 💾 **Back up before modifying** — Back up `config/bot_config.toml` and `config/model_config.toml`
-- 🔍 **Make small changes** — Only modify a few lines at a time, test if startup works after saving
+**Prevent it next time**
+
+- **Use WebUI to modify configuration** — WebUI validates the format when saving
+- **Back up before modifying** — Back up `config/bot_config.toml` and `config/model_config.toml`
+- **Make small changes** — Only modify a few lines at a time, test if startup works after saving
 
 ## Port Occupied
 
-### Error Symptoms
+**What you may see**
+
 - Startup reports `OSError: [Errno 98] Address already in use`
 - Or `[Errno 10048]` (Windows)
-- Error log: `端口 8001 已被占用 (host=127.0.0.1)`
+- Host log: `WebUI 启动失败: 端口 8001 已被占用 (host=127.0.0.1)`
 
-### Quick Self-Check Trio
-1️⃣ Which process is occupying the port? Check in Task Manager / Activity Monitor
-2️⃣ Can you close the occupying process? End the occupying process in Task Manager
-3️⃣ Can you change MaiBot's port? Edit the configuration file to use another port
+**Check these first**
 
-### Solutions
+1. Which process is occupying the port? Check in Task Manager / Activity Monitor
+2. Can you close the occupying process? End the occupying process in Task Manager
+3. Can you change MaiBot's port? Edit the configuration file to use another port
 
 **Method 1: End the Occupying Process**
 Find the process occupying the port in Task Manager (Windows) or Activity Monitor (macOS) and end it. If you don't know which process is occupying it, simply restarting your computer can also free up the port.
 
 **Method 2: Change MaiBot's Port**
 
-Change only the service identified by the log. Do not copy both examples at once.
-
-If WebUI's default port `8001` is occupied:
+The listen address and port belong to the host config, not `bot_config.toml`. If WebUI's default port `8001` is occupied, edit `host/config.toml`:
 
 ::: code-group
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-# config/bot_config.toml
-[http]
-port = 8002             # Change to 8002 or another available port
+```toml [host/config.toml ~vscode-icons:file-type-toml~]
+[webui]
+port = 8002             # Change to 8002 or another port confirmed to be free
 ```
 
 :::
 
-If you actually use legacy `maim_message` and its default port `8000` is occupied:
+Ports `8001` and `8002` do not conflict. Port `8001` must not be reused for another service here because an external process already holds it.
 
-::: code-group
+External adapters now connect to the host's single HTTP port and are routed by a path that carries the Bot ID; there is no separate WebSocket listener port anymore.
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-# config/bot_config.toml
-[maim_message]
-ws_server_port = 18000  # Example; any port confirmed to be free is valid
-```
+Restart the host after changing a listening port so the service binds to the new value.
 
-:::
+**Prevent it next time**
 
-Ports `8001` and `8002` do not conflict. Port `8001` must not be suggested for another service in this scenario because an external process has already been confirmed to occupy it. The NapCat plugin adapter does not use `[maim_message]`.
-
-Restart MaiBot after changing a listening port so the service binds to the new value.
-
-### Prevention Tips
-- 📝 **Document port assignments** — Avoid multiple services using the same port
-- 🔄 **Check after restart** — Sometimes old processes aren't cleaned up, may need to manually end them after restart
-- 🔧 **Verify before changing** — Use system tools to confirm the target port is free instead of guessing from its number
+- **Document port assignments** — Avoid multiple services using the same port
+- **Check after restart** — Sometimes old processes aren't cleaned up, may need to manually end them after restart
+- **Verify before changing** — Use system tools to confirm the target port is free instead of guessing from its number
 
 ## WebUI Page Won't Open
 
-### Error Symptoms
+**What you may see**
+
 - Browser shows "This site can't be reached" or "Connection refused" when visiting `http://localhost:8001`
 - Page is blank or times out loading
 - MaiBot is running but WebUI won't open
 
-### Quick Self-Check Trio
-1️⃣ Did MaiBot really start successfully? Check the terminal for errors
-2️⃣ Is the browser address correct? Default is `http://localhost:8001`
-3️⃣ Is the firewall blocking it? Windows Firewall / antivirus software may be blocking
+**Check these first**
 
-### Solutions
+1. Did MaiBot really start successfully? Check the terminal for errors
+2. Is the browser address correct? Default is `http://localhost:8001`
+3. Is the firewall blocking it? Windows Firewall / antivirus software may be blocking
 
-**Step 1: Confirm MaiBot is Running**
-Check the terminal window where MaiBot is running, look for a log message like this:
+**Step 1: Confirm the host is running**
+When the terminal shows these two lines, both the host and WebUI are up:
+
+```text
+MaiBot 宿主已启动：/path/to/workspace
+WebUI：http://127.0.0.1:8001（登录链接一分钟内有效）
 ```
-WebUI 服务器 启动成功: http://127.0.0.1:8001
-```
-If you don't see this, MaiBot hasn't fully started yet. Resolve the startup error first.
 
-**Step 2: Check Address and Port**
-- Default address: `http://127.0.0.1:8001` (recommend using 127.0.0.1 instead of localhost)
-- If you changed the port, use your modified port
-- If deploying on a remote server, replace `127.0.0.1` with the server's IP
+Missing them means startup failed earlier. Fix the startup error first.
+
+**Step 2: Check the listen address and port**
+These live in the host config `host/config.toml`, not `bot_config.toml`:
+
+::: code-group
+
+```toml [host/config.toml ~vscode-icons:file-type-toml~]
+[webui]
+hosts = ["127.0.0.1", "::1"]  # Loopback only by default; add the server IP or "0.0.0.0" for remote access
+port = 8001                   # Browser access port
+allowed_ips = "127.0.0.1"     # Allowed source IPs, comma separated, CIDR and wildcards supported
+```
+
+:::
+
+With only `127.0.0.1` in `hosts`, any access from another machine fails. Docker deployments add a listen address through the `HTTP_HOST=0.0.0.0` environment variable.
 
 **Step 3: Check Firewall**
 - **Windows**: Open "Windows Security" → "Firewall & network protection" → "Allow an app through firewall", ensure Python is allowed
@@ -185,24 +188,25 @@ If you don't see this, MaiBot hasn't fully started yet. Resolve the startup erro
 **Step 4: Check if Port is Occupied**
 If the port is taken by another program, WebUI won't start. Refer to [Port Occupied](#port-occupied) for checking port occupancy.
 
-### Prevention Tips
-- 🖥️ **Check logs after startup** — Open the browser only after seeing "WebUI server started successfully"
-- 🔧 **Always use 127.0.0.1** — More stable than localhost, avoids DNS resolution issues
-- 🛡️ **Temporarily disable firewall** — If you're sure it's safe, temporarily disable the firewall for testing
+**Prevent it next time**
+
+- **Check logs after startup** — Open the browser only after seeing the "WebUI：http://..." line
+- **Always use 127.0.0.1** — More stable than localhost, avoids DNS resolution issues
+- **Temporarily disable firewall** — If you're sure it's safe, temporarily disable the firewall for testing
 
 ## MCP Configuration Error
 
-### Error Symptoms
+**What you may see**
+
 - Startup reports `MCP 服务器 {name} 使用 stdio 时必须填写 command`
 - Or `MCP 服务器 {name} 使用 streamable_http 时必须填写 url`
 - Or log shows `MCP server xxx failed to connect`
 
-### Quick Self-Check Trio
-1️⃣ Is the server address correct? Check `mcp.servers[].url` or `command` field
-2️⃣ Does the Token/Secret match? Confirm `bearer_token` matches the MCP server
-3️⃣ Is the MCP service running? Confirm the server has started and is accessible
+**Check these first**
 
-### Solutions
+1. Is the server address correct? Check `mcp.servers[].url` or `command` field
+2. Does the Token/Secret match? Confirm `bearer_token` matches the MCP server
+3. Is the MCP service running? Confirm the server has started and is accessible
 
 **Step 1: Check MCP Configuration**
 ::: code-group
@@ -254,17 +258,17 @@ node /path/to/mcp-server/index.js
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
-# ❌ Error example 1: stdio mode missing command
+# Error example 1: stdio mode missing command
 [[mcp.servers]]
 transport = "stdio"
 command = ""              # Error! Must specify startup command
 
-# ❌ Error example 2: HTTP mode missing url
+# Error example 2: HTTP mode missing url
 [[mcp.servers]]
 transport = "streamable_http"
 url = ""                  # Error! Must specify HTTP endpoint
 
-# ❌ Error example 3: Bearer auth missing Token
+# Error example 3: Bearer auth missing Token
 [mcp.servers.authorization]
 mode = "bearer"
 bearer_token = ""         # Error! Must specify Token
@@ -272,25 +276,26 @@ bearer_token = ""         # Error! Must specify Token
 
 :::
 
-### Prevention Tips
-- 📋 **Check each config item** — Refer to the MCP server documentation to confirm parameters
-- 🔍 **Test before deploying** — Use `curl` to test connectivity before configuring in MaiBot
-- 📝 **Document Token changes** — Update MaiBot configuration synchronously when Token changes
+**Prevent it next time**
+
+- **Check each config item** — Refer to the MCP server documentation to confirm parameters
+- **Test before deploying** — Use `curl` to test connectivity before configuring in MaiBot
+- **Document Token changes** — Update MaiBot configuration synchronously when Token changes
 
 ## WebUI Login Failed / Token Expired
 
-### Error Symptoms
+**What you may see**
+
 - Opening WebUI page automatically redirects back to login page
 - After pasting the Token, prompts "Login failed" or "Invalid Token"
 - API requests return `401 Unauthorized` error
 - Browser console shows `Token expired` or `Invalid session`
 
-### Quick Self-Check Trio
-1️⃣ **Clear browser cache** — Cookie/LocalStorage may have expired or become corrupted
-2️⃣ **Check if the Token is correct** — Confirm uppercase/lowercase, special characters, and that no extra space was copied
-3️⃣ **Check WebUI service status** — Confirm the service is running and hasn't been restarted
+**Check these first**
 
-### Solutions
+1. **Clear browser cache** — Cookie/LocalStorage may have expired or become corrupted
+2. **Check if the Token is correct** — Confirm uppercase/lowercase, special characters, and that no extra space was copied
+3. **Check WebUI service status** — Confirm the service is running and hasn't been restarted
 
 **Method 1: Clear Cookies and Re-login**
 ::: code-group
@@ -305,58 +310,48 @@ bearer_token = ""         # Error! Must specify Token
 
 :::
 
-**Method 2: Restart WebUI Service**
-::: code-group
-
-```bash [Bash ~vscode-icons:file-type-shell~]
-# After changing the Token in data/webui.json, restart the service
-# Docker deployment
-docker restart maibot
-
-# Source deployment
-# First stop the current process (Ctrl+C), then restart
-uv run bot.py
-```
-
-:::
-
-**Method 3: Verify the Login Token**
-The WebUI login Token is stored in the `access_token` field of `data/webui.json`, not in `bot_config.toml`:
+**Method 2: Verify the login password**
+The WebUI password lives in `access_token` of `host/webui.json`, not in `bot_config.toml`:
 
 ::: code-group
 
-```json [JSON ~vscode-icons:file-type-json~]
+```json [host/webui.json ~vscode-icons:file-type-json~]
 {
   "access_token": "your-access-token-here",
-  "token_source": "configured"
+  "token_source": "configured",
+  "first_setup_completed": true
 }
 ```
 
 :::
 
-Restart MaiBot after changing the Token for it to take effect. The terminal also prints the current Token on every startup — just copy that one. The Token generated on first launch is temporary; replacing it with your own fixed Token is more convenient.
+`token_source = "temporary"` means the password is still temporary: it is **regenerated on every host restart** and reprinted in the terminal log. Set your own password during first-time setup; `token_source` then becomes `configured` and stops changing across restarts.
 
-> ⚠️ **Note**: The browser keeps the Token in the `maibot_session` Cookie as its login state, so changing the Token invalidates all logged-in sessions and requires re-login.
+**Method 3: Clear the browser login state**
+The browser stores the session in a `maibot_host_session_*` cookie. Changing the password, restarting the host, or signing out revokes every session, so you must log in again. Manually: F12 → Application → Cookies, delete that cookie, then refresh.
 
-### Prevention Tips
-- **Switch to a fixed Token** — After first launch, replace the temporary Token with your own and pin it in `data/webui.json`
-- **Don't change the Token frequently** — Otherwise you'll have to re-login each time
-- **Use browser bookmarks** — Save the page after logging in to avoid re-entering the Token
+A session lasts 8 hours, and restarting the host does not extend it.
+
+**Prevent it next time**
+
+- **Set a fixed password during first-time setup** — The temporary password changes on every restart, and digging it out of the log is tedious
+- **Do not change the password often** — Every change signs out all existing sessions
+- **Bookmark the WebUI address** — Once the port is fixed, save a bookmark instead of hunting for it each time
 
 ## Git Operation Failed (WebUI)
 
-### Error Symptoms
+**What you may see**
+
 - Knowledge base sync / Git mirror operation fails in WebUI
 - Log shows `Git clone failed` or `Permission denied`
 - SSH Key verification fails with `Host key verification failed`
 - Git LFS files are too large causing timeout
 
-### Quick Self-Check Trio
-1️⃣ **First check network** — Can you access GitHub/Gitee?
-2️⃣ **Try a public repository** — Does a repo that doesn't require login work?
-3️⃣ **Is the repository too large?** — Large files can cause timeout
+**Check these first**
 
-### Solutions
+1. **First check network** — Can you access GitHub/Gitee?
+2. **Try a public repository** — Does a repo that doesn't require login work?
+3. **Is the repository too large?** — Large files can cause timeout
 
 **Step 1: Confirm Network Connectivity**
 Check if you can open GitHub or Gitee websites. If not, there's a network issue — resolve that first.
@@ -367,7 +362,8 @@ If you get a permission error (Permission denied), try a public repository (one 
 **Step 3: Adjust Git Timeout**
 Git mirror sources are maintained in WebUI's "Git Mirror" page, and settings such as the timeout are configured together with each mirror source — not in `bot_config.toml`. For large repositories, increase the timeout for that mirror source in WebUI, or exclude the large files/directories you don't need synced.
 
-### Prevention Tips
+**Prevent it next time**
+
 - **Test with a public repository first** — Switch to a private repo only after confirming sync works
 - **Avoid large files** — Don't put large binary files in the repository
 

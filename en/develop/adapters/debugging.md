@@ -37,14 +37,16 @@ Send a message and see whether the adapter receives an event:
 Problems at this stage leave clear signals on the MaiBot side:
 
 ::: fields
-- **`Connection refused`** — MaiBot's message server is not running, the address or port is wrong, or it only listens on `127.0.0.1` while the adapter runs elsewhere.
-- **Close code 1008 (invalid token)** — `auth_token` mismatch; the value is compared as a whole string, so do not add a `Bearer` prefix.
+- **`Connection refused`** — the Host is not running, the address or port is wrong, or it only listens on loopback while the adapter runs elsewhere.
+- **Close code 1008 (`必须指定有效的 Bot ID 和协议路径`)** — the path is not `/maim/<32-hex bot_id>/ws` or `/maim/<bot_id>/api`, or the bot ID is not 32 hex characters.
+- **Close code 1008 (`无效的令牌` / `API Key 无效`)** — `auth_token` / `api_server_allowed_api_keys` mismatch; credentials are compared as whole strings, so no `Bearer` prefix, and an empty list rejects every connection.
+- **Close code 1013 (`Bot 不存在、未启动或尚未就绪` / `此 Bot 的消息协议未启用或已停止`)** — the bot ID resolves, but that bot is not running, or it disabled `maim_message.enabled` (the API protocol also needs `enable_api_server`).
 - **Close code 1000 (a new connection was established)** — a second connection for the same `platform` pushed this one out.
 - **Connects and then drops quickly, reconnecting repeatedly** — heartbeat timeout (the server sends a PING every 30 seconds and disconnects after 10 seconds without a response); it can also mean the adapter blocked its event loop and never answered the PONG.
 :::
 
-::: tip Confirm the port is actually open first
-Container deployments hit this trap most often: `docker-compose.yml` does not map the message server port by default, so it is only reachable inside the container. Either map the port, or put the adapter and MaiBot on the same network and let them reach each other by service name.
+::: tip Confirm the Host port is actually open first
+Container deployments hit this trap most often: `docker-compose.yml` maps the Host's WebUI port only, so the `/maim/...` path is reachable only where that port is mapped. Either map the port, or put the adapter and the Host on the same network and let them reach each other by service name.
 :::
 
 ## Stage 4: Did MaiBot Receive It?
@@ -110,7 +112,7 @@ Batch version: pass a `targets` array in the request body (at most 200 entries).
 
 :::
 
-After subscribing you first receive a `snapshot` (the most recent logs), then each new log arrives as `event: entry`. The connection needs a one-time handshake token from `GET /api/webui/ws-token` first.
+After subscribing you first receive a `snapshot` (the most recent logs), then each new log arrives as `event: entry`. The WebSocket connects straight to the Host proxy with the already-authenticated browser session, so no temporary token is needed.
 
 **Rehearse without a platform** — the `maim_message` repository has a mock adapter implementation (`mock_napcat_adapter`) and a set of self-check scripts under `others/`, so you can exercise the whole protocol chain without a real platform account. They exist for the library's own tests, but they are ideal as a "fake adapter" for verifying the MaiBot side.
 

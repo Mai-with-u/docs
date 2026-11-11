@@ -4,7 +4,7 @@ title: 配置管理
 
 # 配置管理
 
-MaiBot 插件支持声明式的配置管理机制，通过 `PluginConfigBase` 和 `Field` 定义强类型配置模型，Runner 会自动生成默认配置、补齐缺失字段，并向 WebUI 暴露可渲染的配置 Schema。
+用 `PluginConfigBase` 和 `Field` 声明强类型配置，Runner 自动生成默认配置、补齐缺失字段，并向 WebUI 暴露可渲染的 Schema。
 
 ## 配置生成与存储
 

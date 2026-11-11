@@ -4,7 +4,7 @@ title: Tool Component
 
 # Tool Component
 
-`@Tool` is the most core component type in the MaiBot plugin system. It allows plugins to expose callable tool functions to the LLM, enabling the LLM to proactively call external capabilities during the reasoning process—such as searching knowledge bases, querying databases, calling external APIs, etc.
+`@Tool` exposes callable functions to the LLM, which decides during reasoning when to call them — searching a knowledge base, querying a database, hitting an external API.
 
 ## Decorator Signature
 
@@ -46,7 +46,7 @@ Each Tool can declare its own `platforms`. The Host filters tool visibility, sea
 
 Identifiers are trimmed, lowercased, and deduplicated. Empty identifiers, non-string elements, and other types raise an error. Restrictions combine with `chat_scope` and `allowed_session`; executing a restricted tool requires a matching platform context. This is component metadata excluded from the tool parameter Schema, so the LLM cannot change it through invocation arguments.
 
-The Host must support platform filtering; older Hosts ignore this field. Plugins should also validate the Host-injected `platform` for operations that depend on platform permissions.
+Filtering happens on the Host; plugins should also validate the Host-injected `platform` for operations that depend on platform permissions.
 
 ::: code-group
 

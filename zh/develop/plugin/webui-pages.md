@@ -6,7 +6,7 @@ title: WebUI 页面
 
 在插件目录提供 `webui.json`，就能把数据与操作接入 WebUI。简单页面使用预置组件，复杂界面自行编写 HTML/CSS/JS，两种页面都通过本插件的静态 `@API` 调用业务。
 
-本文对应 `schema_version: 2` 的开发中协议，需要配套的主程序与 dashboard；只升级 Python SDK 不会更新页面协议。两种模式可以在同一插件中混用：
+`schema_version: 2` 仍是开发中协议，需要配套的主程序与 dashboard；只升级 Python SDK 不会更新页面协议。两种模式可以在同一插件中混用：
 
 ::: fields
 - **`declarative` 预置组件** — 概览、简单设置、表格单行操作；插件负责组件声明、数据、业务 API，宿主负责布局样式、表单、查询刷新、确认和详情
@@ -21,7 +21,7 @@ title: WebUI 页面
 
 开发时同步部署主程序与 dashboard。在 MaiBot 源码仓库构建 `dashboard` 后，启动前设置 `MAIBOT_WEBUI_USE_LOCAL_DASHBOARD=1` 使用 `dashboard/dist`；源码变化不会自动更新默认安装的 `maibot-dashboard` 包。前端开发服务固定使用 7999 端口。
 
-- `schema_version: 2`。v1 声明明确拒绝，不自动转换已移除的组件或字段。
+- `schema_version: 2`。其他值直接报错，不做任何自动转换。
 - `required_capabilities` 可声明 `declarative_basic`、`custom_pages`、`image_upload`、`structured_arguments`。后三项分别在使用 HTML、图片上传、数组/对象参数时必填。注册表返回服务端能力，dashboard 也核对自身支持；单个扩展不兼容不会阻断其他扩展。
 - MaiBot 自动将声明的页面加入侧栏。
 - 图标仅接受 `puzzle`、`chart`、`settings`、`database`、`list`。宿主生成 `/extensions/{plugin_id}/{page_id}`，插件不能覆盖内置路由。
@@ -295,7 +295,7 @@ try {
 
 绑定的是上传别名 library，宿主从声明解析其 action。允许确认；参数在确认前复制，文件接收前后均检查 API 状态和参数。
 
-插件在 `_manifest.json` 的 `capabilities` 中声明 `webui.claim_upload`；使用包含 `ctx.webui.claim_upload()` 的 SDK（2.11.0+）。WebUI 的 `required_capabilities` 检查前端功能，manifest 的 `capabilities` 授权 Python SDK 调用，两者分别校验。
+插件在 `_manifest.json` 的 `capabilities` 中声明 `webui.claim_upload`。WebUI 的 `required_capabilities` 检查前端功能，manifest 的 `capabilities` 授权 Python SDK 调用，两者分别校验。
 
 将接收方法放进已经实现生命周期的 `MaiBotPlugin` 子类：
 
@@ -334,19 +334,19 @@ HTML 以 `sandbox="allow-scripts"` 运行，保留不透明来源，不开放 sa
 
 这些边界保护宿主来源和接口权限，不是恶意插件的完整隔离环境。iframe 自身导航仍可能发出网络请求，导航后的停止处理不能撤回已发出的请求；任意 JavaScript 的死循环或内存耗尽也可能影响浏览器标签页。Python 插件进程不是操作系统沙箱。不要把 CSP 或停止按钮解释为完整的数据防泄漏/资源隔离保证。
 
-## 声明迁移
+## 声明规则
 
-`schema_version` 描述 WebUI 声明格式，与 manifest 的 `manifest_version`、SDK 版本和 API 的 `version` 分别管理。v1 最早定义于 2026 年 10 月 3 日的 [3507afcf 提交](https://github.com/Mai-with-u/MaiBot/commit/3507afcf6e8351664810868be59340cbaf4deb2e)，当时模型字段为 `schema_version: Literal[1] = 1`；本文的 v2 对应这次职责与协议收敛。
+`schema_version` 描述 WebUI 声明格式，与 manifest 的 `manifest_version`、SDK 版本和 API 的 `version` 分别管理；声明格式只认 `2`。
 
-必须同时更新主程序、dashboard 和插件声明。已有 v1 会得到明确迁移错误；仅把数字改为 2 不能恢复已移除的组件。
+**页模式** — 每页必须归入 `declarative` 或 `custom`。预置页只放基础布局、单行详情与标量表单，复杂交互写成 HTML。
 
-1. 设置 schema_version: 2，区分 declarative/custom；file_upload 改为 image_upload，移除 interactive_controls。使用结构化参数时声明 structured_arguments。
-2. 预置页移除 repeat/item 上下文、gallery、upload、checkbox、多选、跨页选中、clear_selection、button.detail、动态 button.value、select.presentation 及旧组件专有字段。保留基础布局、单行详情与标量表单，复杂交互迁到 HTML。
-3. HTML 页移除 content、组件式 arguments、auto_refresh、poll_interval_seconds；用自身脚本管理界面。按需要选择 document/viewport 布局。
-4. 业务失败不再靠 result.success=false 触发宿主异常；API 抛错或由 HTML 解释结果。navigate_page/navigate_params 不触发跳转，改用显式 maibot.navigate(pageId, state)。
-5. 图片上传使用 uploads 别名，业务参数必须真实符合声明，upload_id 留给宿主注入；支持宿主确认。
+**参数** — 用数组或对象参数时声明 `structured_arguments`；图片上传用 `uploads` 别名，业务参数必须真实符合声明，`upload_id` 留给宿主注入。
 
-宿主不为旧插件名称、旧业务结果或失效声明增加专门 API 和兼容分支。
+**失败语义** — 业务失败由 API 抛错或在 HTML 里解释结果，宿主不看 `result.success`。页面跳转用显式 `maibot.navigate(pageId, state)`。
+
+**布局** — HTML 页用自身脚本管理界面，全屏或超长界面选 viewport 布局。
+
+宿主不为插件名称、业务结果或失效声明增加兼容分支：声明不合法就注册失败。
 
 ## 验证与排错
 

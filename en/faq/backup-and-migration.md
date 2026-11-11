@@ -4,65 +4,74 @@ title: Backup and Migration
 
 # Backup and Migration
 
-## What should I back up before migration or reinstallation?
+This page covers moving your data: which directories to back up, how to export and restore, and how to re-register a Bot on a new machine.
 
-At minimum, back up:
+## What must I back up before migrating or reinstalling?
 
-**`data/`** — Databases, memory, emojis, and runtime data.
+Copy four directories whole:
 
-**`config/`** — Bot, model, and other main configuration.
+- **`config/`** — Every setting: `bot_config.toml`, `model_config.toml`, `adapter_policy.toml`, `builtin_plugins/`.
+- **`host/`** — Host settings `config.toml`, Bot registry `registry.sqlite3`, shared model catalog `model_catalog.toml`, WebUI credentials `webui.json`.
+- **`data/`** — Database, long-term memory, files, emoji cache.
+- **`plugins/`** — Installed third-party plugins with their config and data.
 
-**`plugins/`** — Installed plugins and plugin-local configuration or data.
+Losing `host/webui.json` means resetting the WebUI password; losing `host/registry.sqlite3` means re-registering every bot in the workspace from its directory. Anything an adapter or one-key package stores outside the MaiBot directory needs a separate backup too.
 
-Also back up adapter or package settings stored outside the MaiBot directory. The `plugins` directory is not inside `config`.
+## Export from the WebUI data page
 
-To skip copying whole directories by hand, use the one-click WebUI export; see "Exporting with the WebUI Data Management page" below.
+Sidebar → "Advanced tools → Data management" (`/data-transfer`). Export runs as a background task with live progress and downloads as a zip when done. `config` + `data` are always included; the other two are optional:
 
-## Exporting with the WebUI Data Management page
+**`plugins`** — Installed plugins with their config and data.
 
-Export a zip from the WebUI **Data Management** page: open **Advanced Tools → Data Management** in the sidebar (URL `/data-transfer`). Export runs as an async job with live progress; when it finishes, download the zip straight from the browser. `config` + `data` are always included, and the remaining two parts are opt-in:
+**`logs`** — Runtime logs.
 
-**`plugins`** — optional; includes installed plugins together with their in-directory configuration and data.
+The archive carries a `manifest.json` recording export time, MaiBot version, and per-section file counts. Import restores by the four sections `config` / `data` / `plugins` / `logs`.
 
-**`logs`** — optional; includes runtime logs.
+### Export history and the 24-hour window
 
-The archive contains a `manifest.json` (export time, MaiBot version, and per-part file statistics). On import, the backend restores the `config` / `data` / `plugins` / `logs` parts you select.
+Below the export card is the history list showing filename, size, completion time, and the exact timestamp the file is kept until.
 
-### Export history and 24-hour retention
+- Archives live in a server temp directory and are kept for **24 hours**; each download click restarts the clock.
+- Within that window you can download again after refreshing or restarting MaiBot — history persists in the temp directory.
+- After expiry the row shows "File expired or deleted" and the download button is disabled.
+- Deleting while a task is exporting or downloading returns 409; retry after it finishes.
 
-Below the export card sits the **Export History** list: each row shows the filename, archive size, completion time, and "Retained until &lt;time&gt;".
+### What is not included
 
-- Archives live only in the server temp directory and are **retained for 24 hours**; each download restarts the clock.
-- Within that window you can **re-download after refreshing the page or restarting MaiBot** — history records persist in the temp directory and are restored when you reopen the page.
-- Past the retention window the file is cleaned up automatically, the row shows "File expired or deleted", and the download button is disabled.
-- **Delete** removes a single record and its archive. If the job is still exporting or downloading, deletion returns 409; wait until it settles and retry.
+Runtime locks such as `data/.a_memorix_runtime_writer.lock`, and the `data/prompt_imgs/` inference preview directory — copy that one manually. Cancelling an export deletes the partial archive too.
 
-### What is never archived
+## How do I migrate to another machine?
 
-- The memory runtime locks `data/.a_memorix_runtime_writer.lock` and `data/a-memorix/.a_memorix_runtime_writer.lock`; on Windows, reading them under lock also raises PermissionError.
-- The reasoning preview image directory `data/prompt_imgs/`; copy that directory manually if you want it backed up.
-- Partial output: cancelling an export deletes the half-written archive too. The task becomes `cancelled` and never gains a download entry.
+1. Stop the host, adapters, and launcher.
+2. Back up the whole workspace directory and note the current version.
+3. Install the same or a newer MaiBot version and runtime on the target machine.
+4. Put `config`, `host`, `data`, `plugins`, and `bots` back into the workspace.
+5. Check absolute paths, ports, file permissions, and network addresses.
+6. Watch the config upgrade, database migration, and plugin load logs on startup.
 
-## How do I move MaiBot to another device or directory?
+Delete the old copy only after the new location works. When restoring a WebUI zip, the backend validates the manifest and rejects symlinks, `..` traversal, and top-level directories outside the allowlist before unpacking.
 
-1. Stop MaiBot, adapters, and launchers.
-2. Back up the complete directory and record the current version.
-3. Prepare a compatible version and runtime at the destination.
-4. Restore `data`, `config`, `plugins`, and external adapter settings.
-5. Check absolute paths, ports, permissions, and network addresses.
-6. Start and review configuration upgrades, database migrations, and plugin logs.
+## `maibot host adopt` vs. copying the directory
 
-Remove the old copy only after the new location is verified.
+`adopt` registers an existing instance into the workspace without converting data:
 
-When restoring from a WebUI-exported archive, the bundled `manifest.json` already records the export time, MaiBot version, and per-part file statistics. On import the backend validates the manifest and restores the `config` / `data` / `plugins` / `logs` parts, rejecting symlinks, `..` path traversal, and top-level directories outside the whitelist before unpacking.
+- **`--mode register`** — Register the path only; the directory stays where it is. Zero cost.
+- **`--mode move`** — Rename the directory into `bots/<id>/` on the same filesystem; cross-device moves are refused. Steps are recorded in `host/migrations/<bot_id>.json`, so re-running the same command after an interruption resumes.
 
-## Why does a restored backup fail to start?
+Copying a directory by hand writes no registry entry, so the workspace will not know the bot. Use `adopt` for existing instances — see [Multiple bots](../manual/multi-bot-host.md#adopting-an-existing-instance).
 
-Check version compatibility, configuration upgrades, database migration failures, plugin compatibility, file permissions, and stale absolute paths. Never delete a database or overwrite the original backup without making another copy first.
+## Restored a backup and it will not start
 
-## Why is a local model URL rejected as non-public?
+Check in order: source and target version compatibility, whether config needs upgrading, whether database migration failed, whether plugins support the current version, and whether permissions and absolute paths still resolve.
 
-This is the WebUI outbound URL safety check. After confirming that the target is a trusted local or private-network model service, you can disable `enforce_public_outbound_url`. Doing so permits private addresses and reduces protection against server-side request forgery.
+Never delete the database or overwrite the original backup without an additional copy.
 
-For Docker or remote services, use a model-service address reachable from the environment running MaiBot.
+## A local model is blocked as a non-public address
 
+That is the WebUI outbound URL check (`[webui].enforce_public_outbound_url`, default `true`). Once you have confirmed the target is a trusted local or LAN service, turn it off under common settings in WebUI.
+
+Disabling it lets WebUI reach LAN addresses and also weakens server-side request forgery protection. If the model service runs in Docker or on another device, point MaiBot at an address reachable from its own environment.
+
+## Does restoring a read-only backup corrupt host settings?
+
+No. Importing a user-mode backup restores only the bot's own business configuration. Host listen addresses, credentials, and retention policy in `host/config.toml` are never overwritten from a backup package, and the shared model catalog is merged rather than replaced. The host owns those; they do not travel with a single bot.

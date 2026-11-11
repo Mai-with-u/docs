@@ -8,17 +8,17 @@ This page covers runtime anomalies and data problems: the bot not replying to me
 
 ## Bot Not Replying to Messages
 
-### Error Symptoms
+**What you may see**
+
 - Message has been sent to the platform (QQ group / private chat)
 - Bot has no response at all
 - No errors in logs, but still no reply
 
-### Quick Self-Check Trio
-1️⃣ Check the backend terminal output — did it show a message received prompt?
-2️⃣ Was a rule matched? Check if keyword/intent rules cover this message
-3️⃣ Is the LLM configuration correct? Confirm API Key and model configuration are correct (refer to [API Key Error / Insufficient Balance](/en/faq/troubleshooting-model#api-key-error-insufficient-balance))
+**Check these first**
 
-### Solutions
+1. Check the backend terminal output — did it show a message received prompt?
+2. Was a rule matched? Check if keyword/intent rules cover this message
+3. Is the LLM configuration correct? Confirm API Key and model configuration are correct (refer to [API Key Error / Insufficient Balance](/en/faq/troubleshooting-model#api-key-error-insufficient-balance))
 
 **Step 1: Check Terminal Output**
 Restart MaiBot and observe the terminal logs, see if there are:
@@ -71,24 +71,25 @@ curl https://api.deepseek.com/v1/chat/completions \
 
 :::
 
-### Prevention Tips
-- 📊 **Monitor logs** — Regularly check logs, handle anomalies promptly
-- 🧪 **Test new rules** — Test whether a rule works after adding it
-- 📝 **Document configuration changes** — Record changes after modifying reply rules
+**Prevent it next time**
+
+- **Monitor logs** — Regularly check logs, handle anomalies promptly
+- **Test new rules** — Test whether a rule works after adding it
+- **Document configuration changes** — Record changes after modifying reply rules
 
 ## Database Error
 
-### Error Symptoms
+**What you may see**
+
 - Runtime reports `DatabaseError` or `OperationalError`
 - Startup prompts database migration failed
 - Log shows `database is locked` or `disk I/O error`
 
-### Quick Self-Check Trio
-1️⃣ Check if multiple MaiBot instances are running simultaneously connecting to the same database
-2️⃣ Check if disk space is full (open file manager to check)
-3️⃣ Confirm `data/MaiBot.db` file permissions are correct (readable and writable)
+**Check these first**
 
-### Solutions
+1. Check if multiple MaiBot instances are running simultaneously connecting to the same database
+2. Check if disk space is full (open file manager to check)
+3. Confirm `data/MaiBot.db` file permissions are correct (readable and writable)
 
 **Step 1: Resolve Database Locking**
 
@@ -112,24 +113,25 @@ If you suspect database corruption (e.g., after a sudden power outage):
 
 Open the `logs/` folder and delete unneeded old log files. If disk space is critically low, also check other directories for large files.
 
-### Prevention Tips
+**Prevent it next time**
+
 - Avoid running multiple MaiBot instances simultaneously connecting to the same database file
 - Regularly back up `data/MaiBot.db` (recommended weekly)
 - Configure log rotation to prevent log files from filling up the disk
 
 ## Emoji System Error
 
-### Error Symptoms
+**What you may see**
+
 - Sending emoji commands has no effect
 - Emoji registration fails, logs report exceeding the quantity limit
-- Emoji registration fails because the `data/emojis/` directory is unwritable
+- Emoji registration fails because the `data/emoji/` directory is unwritable
 
-### Quick Self-Check Trio
-1️⃣ Check whether `[emoji]`'s `content_filtration` is filtering too aggressively
-2️⃣ Confirm whether `[emoji]`'s `emoji_send_num` / `max_reg_num` are set too low
-3️⃣ Ensure `data/emojis/` directory is writable (correct permissions)
+**Check these first**
 
-### Solutions
+1. Check whether `[emoji]`'s `content_filtration` is filtering too aggressively
+2. Confirm whether `[emoji]`'s `max_reg_num` / `max_emoji_size_mb` are set too low
+3. Confirm the emoji directory is writable, and that a VLM is configured (without one, recognition and registration are skipped entirely)
 
 **Step 1: Adjust Emoji Filtering Rules**
 
@@ -146,41 +148,43 @@ content_filtration = false   # Temporarily disable filtering to check if it's a 
 
 **Step 3: Check Directory Permissions**
 
-Ensure the `data/emojis/` directory is writable. If permissions are wrong, right-click and set read/write permissions in the file manager.
+Ensure the `data/emoji/` directory is writable. If permissions are wrong, right-click and set read/write permissions in the file manager.
 
 **Step 4: Adjust Emoji Quantity Limit**
 
-If prompted that the registration quantity has exceeded the limit:
+When registration reports the quantity limit, raise `max_reg_num`; when a single file is rejected as too large, raise `max_emoji_size_mb`:
 
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 [emoji]
-emoji_send_num = 25          # Number of candidates sent at once (1-64)
-max_reg_num = 64             # Maximum number of registered emojis
-do_replace = true            # Replace old emojis when limit is reached
+max_reg_num = 64             # Maximum number of usable emojis
+do_replace = true            # Replace old emojis when full; disable to stop collecting
+max_emoji_size_mb = 5.0      # Size limit per emoji file in MB; 0 = unlimited
+check_interval = 10          # Minutes between emoji pool checks
 ```
 
 :::
 
-### Prevention Tips
+**Prevent it next time**
+
 - Enable `content_filtration` cautiously to avoid false filtering of normal emojis
-- Regularly clean the `data/emojis/` directory, remove unused emojis
+- Regularly clean the `data/emoji/` directory, remove unused emojis
 - Set a reasonable `max_reg_num` to avoid taking up too much storage space
 
 ## Memory System Error
 
-### Error Symptoms
+**What you may see**
+
 - Bot replies "I don't remember" or "No relevant information found"
 - Log reports long-term memory loading failed
 - Memory added but cannot be retrieved
 
-### Quick Self-Check Trio
-1️⃣ Run the index rebuild in WebUI's "Memory" page (paragraph and vector each have their own entry)
-2️⃣ Check whether the `data/a-memorix/` directory is writable and intact
-3️⃣ Confirm `plugin.enabled` under `[a_memorix]` is `true`
+**Check these first**
 
-### Solutions
+1. Run the index rebuild in WebUI's "Memory" page (paragraph and vector each have their own entry)
+2. Check whether the `data/a-memorix/` directory is writable and intact
+3. Confirm `plugin.enabled` under `[a_memorix]` is `true`
 
 **Step 1: Rebuild Memory Index**
 
@@ -216,25 +220,26 @@ enabled = true                 # Master switch for the long-term memory system; 
 
 If newly added memories cannot be retrieved, first run the vector rebuild in WebUI's "Memory" page. If that still doesn't work, back up `data/a-memorix/`, stop MaiBot, delete the directory and let the system recreate it (historical memories must be restored from the backup).
 
-### Prevention Tips
+**Prevent it next time**
+
 - Periodically check memory index status in WebUI and rebuild promptly when retrieval fails
 - Back up the `data/a-memorix/` directory — it's the only storage location for long-term memory
 - Use WebUI's memory management features; don't manually edit files inside `data/a-memorix/`
 
 ## Log Files Too Large / Disk Space Full
 
-### Error Symptoms
+**What you may see**
+
 - System running slowly or crashing
 - Log rotation fails with `No space left on device`
 - Disk usage 100%, cannot write new files
 - MaiBot startup fails, prompting database locked or write failure
 
-### Quick Self-Check Trio
-1️⃣ **Check disk space** — Open file manager to see how much space is left
-2️⃣ **Check log file size** — See how large the `logs/` folder is
-3️⃣ **Check log level** — `DEBUG` level generates a large amount of logs
+**Check these first**
 
-### Solutions
+1. **Check disk space** — Open file manager to see how much space is left
+2. **Check log file size** — See how large the `logs/` folder is
+3. **Check log level** — `DEBUG` level generates a large amount of logs
 
 **Step 1: Clean Up Log Files**
 Open the `logs/` folder and delete unneeded old log files. Generally, only the last few days of logs need to be kept — previous ones can be deleted directly.
@@ -262,7 +267,8 @@ Log rotation and cleanup are enabled by default; adjust these three values to co
 **Step 4: If Still Not Working, Use a Different Drive**
 If the current disk is indeed too small, consider moving MaiBot's logs and data directories to a larger disk.
 
-### Prevention Tips
+**Prevent it next time**
+
 - **Use INFO level in production** — Avoid excessive DEBUG logs
 - **Configure log rotation** — Limit log file size and count
 - **Regular cleanup** — Set up crontab to automatically clean old logs weekly
@@ -271,17 +277,18 @@ If the current disk is indeed too small, consider moving MaiBot's logs and data 
 
 ## Person/User System Data Anomaly
 
-### Error Symptoms
+**What you may see**
+
 - User profile loading fails in WebUI, shows blank or error
 - Character card information lost, previously set personality/background is gone
 - When binding accounts, prompts "User already exists" or "Foreign key constraint failed"
 
-### Quick Self-Check Trio
-1️⃣ Did you directly modify the SQLite database file?
-2️⃣ Is the JSON format of character cards in `data/persons/` folder correct?
-3️⃣ Are there multiple MaiBot instances accessing the same database simultaneously?
+**Check these first**
 
-### Solutions
+1. Did you directly modify the SQLite database file?
+2. Is the JSON format of character cards in `data/persons/` folder correct?
+3. Are there multiple MaiBot instances accessing the same database simultaneously?
+
 **Rebuild the Person Index**
 When character card information is abnormal, first refresh or rebuild the index in WebUI's person/user management page.
 
@@ -310,10 +317,11 @@ cp data/MaiBot.db data/MaiBot.db.bak
 
 :::
 
-### Prevention Tips
-- 🖥️ **Use WebUI for management** — Don't modify the database file directly
-- 💾 **Back up regularly** — `data/persons/` and `data/MaiBot.db` are important
-- 🔒 **Avoid concurrent access** — Don't start multiple MaiBot instances connecting to the same database
+**Prevent it next time**
+
+- **Use WebUI for management** — Don't modify the database file directly
+- **Back up regularly** — `data/persons/` and `data/MaiBot.db` are important
+- **Avoid concurrent access** — Don't start multiple MaiBot instances connecting to the same database
 
 ## Related
 

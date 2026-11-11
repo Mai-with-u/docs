@@ -4,7 +4,7 @@ title: LLMProvider Component
 
 # LLMProvider Component
 
-`@LLMProvider` is used to declare that a plugin provides a new LLM Provider `client_type`. The main program will register this `client_type` into the LLM client registry, so existing `LLMService` and model task configurations do not need to change their invocation method—as long as the `api_providers[].client_type` in the model configuration points to the value declared in the plugin, the request will be initiated via the plugin Provider.
+`@LLMProvider` declares a new LLM Provider `client_type` and registers it in the LLM client registry. Point `api_providers[].client_type` in the model config at that value and requests go through the plugin Provider — `LLMService` and model task configs keep their invocation unchanged.
 
 ::: warning Both Declarations Must Match
 An LLM Provider must satisfy both of the following declarations; neither can be omitted:
@@ -226,12 +226,12 @@ Below is a complete minimum viable plugin, including the manifest declaration an
     "repository": "https://github.com/example/mai-llm-provider"
   },
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
-    "min_version": "2.0.0",
-    "max_version": "2.9.99"
+    "min_version": "2.22.0",
+    "max_version": "2.22.99"
   },
   "capabilities": [],
   "llm_providers": [

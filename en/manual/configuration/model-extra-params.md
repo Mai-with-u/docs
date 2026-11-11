@@ -653,7 +653,7 @@ When the same parameter exists in multiple places, the effective priority is:
 
 ## Quick Parameter Reference
 
-### OpenAI-compatible APIs
+### OpenAI-compatible APIs Reference
 
 - **`thinking`** — thinking-mode control, contains `type`. `enabled` for Zhipu/Kimi, `adaptive` for MiniMax, `auto` for Doubao, `disabled` to turn off
 - **`enable_thinking`** — boolean thinking switch. Applies to Alibaba Cloud Bailian, SiliconFlow
@@ -667,7 +667,7 @@ When the same parameter exists in multiple places, the effective priority is:
 - **`query`** — custom URL query parameters. Applies to all
 - **`body`** — custom request-body fields. Applies to all
 
-### Gemini Native API
+### Gemini Native API Reference
 
 - **`thinking_config`** — thinking configuration, contains `thinking_budget` or `thinking_level`. Applies to the whole Gemini family
 - **`thinking_budget`** — thinking budget (-1 auto / 0 off / N specified). Applies to Gemini 2.5

@@ -12,7 +12,7 @@ title: QQ Voice Call Adapter
 The adapter does not connect to QQ directly: it polls the bridge status endpoint on the local loopback, and audio travels through virtual PulseAudio devices. The bridge only listens on loopback and authenticates the status/control endpoints with a Bearer Token. The repository does not ship QQ, NapCat, or `libAVSDKPlugin.so`.
 :::
 
-Adapter repository (🌐 community-maintained):
+Adapter repository (community-maintained):
 
 <Linkcard url="https://github.com/ClaudiaGardner/maibot-qq-voice-call" title="maibot-qq-voice-call" description="ClaudiaGardner's QQ voice call adapter plugin" />
 

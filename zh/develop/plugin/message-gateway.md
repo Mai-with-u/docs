@@ -4,7 +4,7 @@ title: 消息网关
 
 # 消息网关
 
-`@MessageGateway` 装饰器用于声明消息网关组件，实现 MaiBot 与外部消息平台（如 QQ、邮件等）的双向消息路由。消息网关是平台适配器的核心组件，负责出站消息发送和入站消息注入。
+`@MessageGateway` 声明消息网关：MaiBot 与外部消息平台的双向消息路由，负责出站发送与入站注入。以插件形式接平台时，它就是适配器的核心组件。
 
 ## 装饰器签名
 
@@ -321,7 +321,7 @@ stateDiagram-v2
 ## 平台字段说明
 
 - **`platform`** `str` — 目标平台名称（如 `"qq"`、`"email"`、`"webhook"`）
-- **`protocol`** `str` — 协议或实现名称（如 `"napcat"`、`"snowluma"`、`"email"`）
+- **`protocol`** `str` — 协议或实现名称（如 `"napcat"`、`"onebot"`、`"email"`）
 - **`account_id`** `str` — 机器人账号 ID（如 `"10001"`、`"bot#1234"`）
 - **`scope`** `str` — 路由作用域（如 `"primary"`、`"default"`）
 
@@ -338,6 +338,5 @@ stateDiagram-v2
 
 按示例声明网关就绪后，注入一条具有相同 `platform/account_id/scope` 的消息，确认 `route_message()` 返回 `True`。随后把消息的 `account_id` 改为未声明账号，确认 Host 拒绝消息，且平台账号列表没有新增记录。
 
-- **出现旧版归属格式 WARNING** — 把账号与作用域移到消息顶层，移除 `additional_config` 和 `route_metadata` 中的身份字段。该兼容路径将在下个版本移除。
 - **消息归属未由网关声明** — 对比消息和 `update_state()` 的三个字段；作用域也必须一致，不要通过入站消息反向修改网关身份。
 - **缺少明确的 account_id** — 填写网关已声明的机器人账号，不要填写发送者 ID 或将空字符串交给旧字段兜底。

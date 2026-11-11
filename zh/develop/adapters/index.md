@@ -4,23 +4,28 @@ title: 适配器接入
 
 # 适配器接入
 
-**适配器（Adapter）把 MaiBot 接进一个聊天平台，它不在 MaiBot 进程里跑。** 典型形态是一个独立 Python 进程：一边连平台（登录 QQ、连 Telegram、收邮件），另一边用 WebSocket 连到 MaiBot 的消息服务器。MaiBot 本体不含任何平台逻辑，只认一套统一消息格式。
+**适配器（Adapter）把 MaiBot 接进一个聊天平台。** MaiBot 本体不含任何平台逻辑，只认一套统一消息格式，剩下的活全由适配器翻译。
 
-本页帮你选路线、认骨架；具体协议与代码见[消息协议参考](./protocol.md)与[编写一个适配器](./build.md)。
+本页帮你选路线、认骨架；报文细节见[消息协议参考](./protocol.md)，动手实现见[编写一个适配器](./build.md)。
 
-## 先选一条实现路线
+## 五条接入路线
 
-MaiBot 支持两种"适配器"，按你的场景二选一：
+按「平台已经有现成适配器」还是「自己写」分两类。现成路线装上就能用，安装步骤在[接入平台](/manual/adapters/)；自建路线从本页往下读。
 
-**外部独立适配器进程** — 单独部署、单独升级，进程崩了不影响麦麦本体；可以跨语言（只要能说 WebSocket + 那套 JSON）。QQ、Telegram、邮件等平台适配器都走这条。适合：正式对接一个平台。
+**OneBot 适配器** — 官方维护的插件，登录你自己的 QQ 号，支持 NapCat 等 OneBot v11 实现，连上后自动识别对端是哪一种实现。要完整 QQ 功能就用它。
 
-**插件网关（[`@MessageGateway`](/develop/plugin/message-gateway)）** — 把收发消息写进一个 MaiBot 插件里，由插件运行时托管生命周期，跟着麦麦一起启停；只能写 Python。适合：轻量平台、内部系统、你已经有一个插件想顺便收发消息。
+**官方机器人（QQ 开放平台）** — 官方维护的插件，用 AppID + AppSecret 直连 QQ 开放平台，不用登录任何 QQ 客户端。不需要自己挂 QQ 时选它。
 
-两条路线最终都汇入同一套路由与策略，可以并存；同一个平台也可以先跑外部适配器、后期改成插件网关。
+**内置 Telegram 适配器** — 主程序自带（`src/plugins/built_in/telegram_adapter`），在 WebUI 填 `bot_token` 即可启停，支持论坛话题、贴纸、语音、引用与转发。
 
-::: tip 官方适配器
-官方维护的适配器（统一 QQ 连接器、QQ 官方机器人等）都以**插件**形态分发，安装与启用见[接入平台](/manual/adapters/)。外部独立进程路线主要用于自研适配器或跨语言实现。
-:::
+**内置微信 ClawBot 适配器** — 主程序自带（`src/plugins/built_in/weixin_clawbot_adapter`），走微信 iLink / ClawBot，支持多账号扫码绑定，适用范围是 ClawBot 私聊。
+
+**自建适配器** — 平台没被覆盖时自己写。两种形态，最终汇入同一套路由与策略，也可以并存：
+
+- **外部独立进程** — 单独部署单独升级，进程崩了不影响麦麦本体，可以跨语言（只要能说 WebSocket + 那套 JSON）。协议见[消息协议参考](./protocol.md)，实现见[编写一个适配器](./build.md)。
+- **插件网关（[`@MessageGateway`](/develop/plugin/message-gateway)）** — 把收发写进一个插件，由插件运行时托管生命周期，跟着麦麦一起启停，只能写 Python。适合轻量平台、内部系统，或你已经有一个插件想顺便收发消息。
+
+前四条路线都是插件形态，装完在插件设置里填连接信息；自建适配器才需要看本分区的协议与代码。
 
 ## 谁负责什么
 
@@ -76,36 +81,30 @@ flowchart LR
 
 ## 两套 WebSocket 服务怎么选
 
-MaiBot 同时提供两套消息服务器，都挂在同一个端口体系下，路径都是 `/ws`：
+主程序不再监听独立的消息端口，两个协议都挂在宿主（Host）的同一个 HTTP 端口上，靠路径里的 Bot ID 区分目标 Bot：
 
-**经典消息服务器（Legacy）** — 默认开启，`maim_message.ws_server_host:ws_server_port`，默认 `127.0.0.1:8000`。握手头 `platform` + `authorization`，一个平台只能有一条连接。现有适配器绝大多数走这条。
+**经典消息服务器（Legacy）** — 默认开启，连 `ws://<宿主地址>:<宿主端口>/maim/<bot_id>/ws`，凭据是该 Bot 的 `maim_message.auth_token`。握手头 `platform` + `authorization`，一个平台只能有一条连接。现有适配器绝大多数走这条。
 
-**API 服务器（Additional API Server）** — 默认关闭，需要把 `maim_message.enable_api_server` 打开，监听 `api_server_host:api_server_port`（默认 `0.0.0.0:8090`）。握手用 `x-apikey` / `x-platform` / `x-uuid`，支持多连接与 API Key 白名单，报文外层多一个信封（`ver` / `msg_id` / `type` / `meta` / `payload`），并带 ACK 与断线重发。
+**API 服务器（Additional API Server）** — 默认关闭，需要把该 Bot 的 `maim_message.enable_api_server` 打开，连 `ws://<宿主地址>:<宿主端口>/maim/<bot_id>/api`，凭据是 `api_server_allowed_api_keys`。握手用 `x-apikey` / `x-platform` / `x-uuid`，支持多连接与 API Key 白名单，报文外层多一个信封（`ver` / `msg_id` / `type` / `meta` / `payload`），并带 ACK 与断线重发。
 
-::: warning 开 API 服务器前先设白名单
-`api_server_host` 默认是 `0.0.0.0`，而 `api_server_allowed_api_keys` 为空表示**不校验**。要开这个服务，先填白名单，或把它绑回 `127.0.0.1`。
+::: warning 空凭据列表拒绝全部连接
+`auth_token` 与 `api_server_allowed_api_keys` 为空时，该协议拒绝所有连接。要开哪个协议，先把对应的凭据列表填上。
 :::
 
-## 现成适配器
+## 自建适配器用到的库
 
-优先用别人写好的；确认它支持你当前的 MaiBot 版本再装：
-
-<Linkcard url="https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter" title="统一 QQ 连接器" description="官方维护：登录自己的 QQ，同时支持 SnowLuma / NapCat 客户端" logo="/title_img/mai.png" />
-
-<Linkcard url="https://github.com/Mai-with-u/MaiBot-QQ-Adapter" title="QQ 官方机器人" description="官方维护：AppID + AppSecret 直连 QQ 开放平台" logo="/title_img/mai.png" />
-
-<Linkcard url="https://github.com/Mai-with-u/MaiBot-Telegram-Adapter" title="Telegram 适配器" description="官方维护：把麦麦接进 Telegram 群与私聊" logo="/title_img/mai.png" />
+自己写适配器时套 `maim_message`，省掉 WebSocket 握手、统一格式序列化和回执处理：
 
 <Linkcard url="https://github.com/Mai-with-u/maim_message" title="maim_message" description="统一消息格式与 WebSocket 通信库，写适配器必装" logo="/title_img/mai.png" />
 
-安装与配置这些适配器属于使用范畴，见[接入平台](/manual/adapters/)；本页之后的内容是**自己写一个**。
+现成适配器的安装与配置见[接入平台](/manual/adapters/)；本页之后的内容都是**自己写一个**。
 
 ## 接入前你要准备什么
 
 - **平台侧能力** — 能拿到消息事件、能调发送接口。通常是平台官方 SDK、OneBot 实现或私有协议库。
 - **Python 3.10+** — 用官方 `maim_message` 库能省掉全部协议细节；其他语言需要自己实现 WebSocket 与 JSON 结构。
-- **MaiBot 的地址与令牌** — 本机部署就是 `ws://127.0.0.1:8000/ws`；配置了 `auth_token` 就要带上同样的字符串。
-- **一个不冲突的平台名** — 例如 `telegram`、`discord`；不要占用 `webui`，它是 MaiBot 内部使用的平台名。
+- **宿主地址、Bot ID 与令牌** — 本机部署是 `ws://127.0.0.1:8001/maim/<bot_id>/ws`，Bot ID 在 WebUI 的 Bot 管理里能看到；`auth_token` 里配了什么就带什么。
+- **一个不冲突的平台名** — 例如 `telegram`、`discord`。`webui`、`internal`、`bot_console`、`maisaka_cli` 由主程序占用。
 
 ## 接下来
 
@@ -117,9 +116,9 @@ MaiBot 同时提供两套消息服务器，都挂在同一个端口体系下，�
 
 ## 验证与排错
 
-最小验证：启动 MaiBot → 启动适配器 → 往平台发一条消息，MaiBot 控制台应出现入站日志并回复。
+**验收动作** — 启动 MaiBot，再启动适配器，往平台发一条消息：MaiBot 控制台出现入站日志并回复，说明收发都通了。
 
-- **适配器启动即报连接失败** — 九成是把 `ws_server_host` 留在 `127.0.0.1` 却从容器/另一台机器连；改 `config/bot_config.toml` 的 `maim_message.ws_server_host` 为 `0.0.0.0` 并放行端口。
+- **适配器启动即报连接失败** — 地址少写了 Bot ID、用的是旧根路径 `/ws`，或宿主只监听回环地址却从容器/另一台机器连。确认 `ws://<宿主>:<端口>/maim/<bot_id>/ws`，再检查宿主监听地址与端口放行。
 - **连上了但 MaiBot 没反应** — 先看平台名是否与访问策略里的记录一致，再看 `adapter_policy.toml` 是否放行了该群 / 该用户。
 - **回复发不出去** — 检查出站驱动是否被插件网关抢占，或私聊缺 `platform_io_target_user_id`；详见[适配器排错](./debugging.md)。
 - **反复被顶下线** — 同一个 `platform` 同时跑了两条经典连接，停掉多余的那个。

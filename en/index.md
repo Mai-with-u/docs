@@ -1,6 +1,6 @@
 ---
 layout: home
-description: MaiBot documentation — deployment, configuration, plugin development and WebUI guides.
+description: MaiBot documentation — deployment, configuration, plugin development, and WebUI guides.
 
 hero:
   name: MaiBot
@@ -20,7 +20,5 @@ hero:
       text: GitHub
       link: https://github.com/Mai-with-u/MaiBot
 ---
-
-<AuroraBackground />
 
 <HomeSections />

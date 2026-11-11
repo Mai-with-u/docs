@@ -20,8 +20,9 @@ logger = logging.getLogger("my-adapter")
 
 # ---- 只改这一段 ----------------------------------------------------------
 PLATFORM = "myplatform"  # 平台名：全局唯一，不要用 webui / bot_console
-MAIBOT_WS_URL = "ws://127.0.0.1:8000/ws"  # 对应 maim_message.ws_server_host / port
-MAIBOT_TOKEN = ""  # 与 maim_message.auth_token 中的某一项完全一致
+BOT_ID = "0123456789abcdef0123456789abcdef"  # 目标 Bot 的 ID，32 位十六进制，见 maibot host list
+MAIBOT_WS_URL = f"ws://127.0.0.1:8001/maim/{BOT_ID}/ws"  # 宿主监听地址 + 端口 + Bot ID
+MAIBOT_TOKEN = ""  # 该 Bot 消息协议配置里的访问令牌
 SELF_ID = "bot_1"  # 本适配器实例的账号标识，用于多账号路由
 # --------------------------------------------------------------------------
 

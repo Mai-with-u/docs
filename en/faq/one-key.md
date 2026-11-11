@@ -20,13 +20,11 @@ Do not move only a similarly named subdirectory because layouts differ between p
 
 ## Why does the bundled NapCat connection fail?
 
-One-click packages are normally used together with a SnowLuma / NapCat client, which connects to MaiBot through the **Unified QQ Connector** (`MaiBot-SnowLuma-Adapter`). When the connection fails, follow the steps in [Adapter Connections](/en/faq/adapters) under "Why can't the Unified QQ Connector reach SnowLuma / NapCat?".
+One-click packages are normally used together with a NapCat client, which connects to MaiBot through the **OneBot Adapter** (repository `MaiBot-SnowLuma-Adapter`). First confirm the adapter is enabled in the WebUI **Plugin Management**, and that NapCat is logged in and listening on a forward WebSocket server.
 
-## Why does SnowLuma fail after switching the package's client from NapCat?
+Then check the `[client]` section of `plugins/MaiBot-SnowLuma-Adapter/config.toml`: `server` / `port` must target NapCat's listener, `token` must match its access token, and `client_type` should stay `auto`.
 
-Confirm the Unified QQ Connector is enabled (`MaiBot-SnowLuma-Adapter` enabled in the WebUI **Plugin Management**) and that SnowLuma is logged in and listening on a forward WebSocket server. Then check the `[client]` section of `plugins/MaiBot-SnowLuma-Adapter/config.toml`: `server` / `port` must target SnowLuma's listener, `token` must match its access token, and `client_type` should stay `auto` (or be pinned to `snowluma`).
-
-One connector supports both client types, so there is no need to swap plugins—editing `[client]` is enough. See [Unified QQ Connector](../manual/adapters/qq-local-client.md).
+Port and token are the usual culprits: NapCat's WebSocket port is often changed from `3001`, and both sides must change together; when auth is on, `token` must match exactly. Keep `127.0.0.1` on the same machine, and use the real IP plus firewall rules across containers or devices. Start NapCat first and MaiBot second, then check whether the adapter reports a connection in the log. For the full check order see [Adapter Connections](/en/faq/adapters) under "Why can't the OneBot Adapter reach NapCat?"; for field details see [OneBot Adapter](../manual/adapters/qq-local-client.md).
 
 ::: info Source note
 The one-click-package question categories on this page were adapted from the community [Quick FAQ / Community Tutorial](https://www.kdocs.cn/l/ctOGhVv6L8Yq). Metadata from the July 12, 2026 export identifies 池雨 as the creator and 无为青年 as the modifier. This page keeps only general steps that can be verified against the current documentation.

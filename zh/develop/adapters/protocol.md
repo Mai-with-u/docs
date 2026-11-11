@@ -4,7 +4,7 @@ title: 消息协议参考
 
 # 消息协议参考
 
-**MaiBot 只认一套统一消息格式，适配器的全部工作就是把平台消息翻译成它、再把回复翻译回去。** 这一页是写适配器时的对照表：连接怎么握、报文长什么样、字段哪些必填、哪些地方会静默失败。
+**MaiBot 只认一套统一消息格式，适配器的全部工作就是把平台消息翻译成它、再把回复翻译回去。** 下面是写适配器时的对照表：怎么握手、报文长什么样、哪些字段必填、哪些地方会静默失败。
 
 MaiBot 同时提供两套 WebSocket 服务，报文格式不同，先确认你要接哪一套。
 
@@ -14,12 +14,13 @@ MaiBot 同时提供两套 WebSocket 服务，报文格式不同，先确认你�
 
 **API 服务器（Additional API Server）** — 需要显式开启。报文外面多一层信封（`msg_id`、`type`、`meta`、`payload`），支持多连接、ACK 确认与断线重发。
 
-::: endpoint WS /ws（经典）
-经典消息服务器的连接端点。地址取自 `config/bot_config.toml` 的 `maim_message.ws_server_host` 与 `maim_message.ws_server_port`，默认 `ws://127.0.0.1:8000/ws`。
+::: endpoint WS /maim/{bot_id}/ws（经典）
+经典消息服务器的连接端点，挂在宿主（Host）的 HTTP 端口上，路径里的 `bot_id` 决定连哪个 Bot。本机默认 `ws://127.0.0.1:8001/maim/<bot_id>/ws`。
 
 ::: fields
+- **`bot_id`** — 必填。必须是宿主登记的 32 位十六进制 Bot ID；未知或未就绪的 Bot 会拒绝连接，不会改连其他 Bot。
 - **握手头 `platform`** — 必填。平台名，决定消息归属哪个平台；缺省时库会写成 `unknown`，MaiBot 侧无法路由。
-- **握手头 `authorization`** — 仅在 `maim_message.auth_token` 非空时校验；值是**令牌原文**，不做 `Bearer` 解析。
+- **握手头 `authorization`** — 值是该 Bot `maim_message.auth_token` 列表里的**令牌原文**，不做 `Bearer` 解析；列表为空时拒绝全部连接。
 - **认证失败** — 服务端以关闭码 `1008`（原因 `无效的令牌`）断开。
 - **同平台唯一** — 同一个 `platform` 只保留最新一条连接，旧连接被关闭码 `1000`（原因 `新的连接已建立`）顶掉。
 - **心跳** — WebSocket 协议层 PING/PONG，没有 JSON 心跳报文。服务端 30 秒发一次、10 秒无响应即断开。
@@ -27,15 +28,15 @@ MaiBot 同时提供两套 WebSocket 服务，报文格式不同，先确认你�
 :::
 :::
 
-::: endpoint WS /ws（API）
-API 服务器的连接端点，地址取自 `maim_message.api_server_host` 与 `maim_message.api_server_port`，默认 `ws://0.0.0.0:8090/ws`。需要先把 `maim_message.enable_api_server` 设为 `true`。
+::: endpoint WS /maim/{bot_id}/api（API）
+API 服务器的连接端点，与经典协议同一个宿主端口，路径末段换成 `api`。目标 Bot 需要把 `maim_message.enable_api_server` 设为 `true`。
 
 ::: fields
-- **`x-apikey`** — API Key，可放请求头，也可放查询串 `?api_key=`。**查询串优先**。
+- **`x-apikey`** — API Key，可放请求头，也可放查询串 `?api_key=`。**查询串优先**；必须命中该 Bot 的 `maim_message.api_server_allowed_api_keys`。
 - **`x-platform`** — 平台名，同样支持 `?platform=`，查询串优先。
 - **`x-uuid`** — 连接标识，不传则服务端生成。用它区分同平台的多条连接。
-- **认证失败** — 关闭码 `1000`，原因里带说明。
-- **白名单** — `maim_message.api_server_allowed_api_keys` 为空表示**不校验**；默认监听 `0.0.0.0`，对外暴露前务必先填白名单。
+- **认证失败** — 关闭码 `1008`（原因 `API Key 无效`）。
+- **空名单拒绝连接** — `api_server_allowed_api_keys` 为空时不放行任何连接。
 - **心跳** — 同为协议层 PING/PONG，间隔走 uvicorn 默认值。
 :::
 :::

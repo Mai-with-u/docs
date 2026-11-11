@@ -4,7 +4,7 @@ title: API Reference
 
 # API Reference
 
-MaiBot plugins access 23 capability proxies through `self.ctx` (`PluginContext`). All capability calls are automatically forwarded to the Host over RPC, and the SDK unwraps the results for you; `ctx.paths` and `ctx.logger` are context helper objects injected by the Runner.
+MaiBot plugins access 24 capability proxies through `self.ctx` (`PluginContext`). All capability calls are automatically forwarded to the Host over RPC, and the SDK unwraps the results for you; `ctx.paths` and `ctx.logger` are context helper objects injected by the Runner.
 
 ::: code-group
 
@@ -30,6 +30,7 @@ self.ctx.maisaka    # Maisaka context and proactive tasks
 self.ctx.webui      # Claim WebUI upload tokens
 self.ctx.files      # File transfer, upload, and text reading
 self.ctx.web        # Web search and page fetching
+self.ctx.market     # Read-only plugin market queries (search, detail, README)
 self.ctx.internal_chat  # Internal chat (the pet and web room share it)
 self.ctx.personality    # Global personality query and switching
 self.ctx.desktop_pet    # Pet control, animation, and extension buttons
@@ -758,7 +759,7 @@ Manifest example:
 
 ## WebUI Upload Claims
 
-`ctx.webui.claim_upload(upload_id)` claims a host-staged image into the plugin's persistent `uploads/` directory. It returns `path`, `sha256`, and `upload_id`. Requires SDK 2.11.0+, a host supporting the `image_upload` capability, and manifest capability `webui.claim_upload`.
+`ctx.webui.claim_upload(upload_id)` claims a host-staged image into the plugin's persistent `uploads/` directory. It returns `path`, `sha256`, and `upload_id`. The manifest must declare the `webui.claim_upload` capability.
 
 ::: code-group
 
@@ -777,7 +778,7 @@ Tokens must belong to the claiming plugin, expire after one hour, and can be cla
 
 ## internal_chat — Internal Chat
 
-The web chat room and the desktop pet share one owner session: platform `internal`, user `owner`. Plugins use these capabilities to recognize that session and speak for the owner. Requires SDK 2.17.0+.
+The web chat room and the desktop pet share one owner session: platform `internal`, user `owner`. Plugins use these capabilities to recognize that session and speak for the owner.
 
 - `await internal_chat.identity()` — returns `{platform, user_id}` for recognizing the session and messages Mai sends to the owner
 - `await internal_chat.send(text)` — deliver one message (1–2000 characters) as the owner; the message is attributed to the plugin, carries no protected-command privileges, may trigger a Mai reply, and enters the chat history
@@ -796,7 +797,7 @@ Manifest capabilities: `internal_chat.identity`, `internal_chat.send`.
 
 ## personality — Personality {#personality}
 
-Read the global personality library and switch by name, affecting every session. Requires SDK 2.20.0+; older SDKs can call the same Host capabilities via `ctx.call_capability(...)`.
+Read the global personality library and switch by name, affecting every session.
 
 - `await personality.list()` — returns `{"profiles": [profile, ...]}`
 - `await personality.get_current()` — returns the current profile; `name` is an empty string when it is not in the library
@@ -816,7 +817,7 @@ A profile object contains `name`, `personality`, `behavior_style`, `reply_style`
 
 ## desktop_pet — Desktop Pet
 
-Control the built-in pet and offer buttons in its extension menu. Requires SDK 2.17.0+ (control), 2.18.0+ (animation), 2.21+ (buttons); older SDKs can use `ctx.call_capability(...)`. Every method requires the matching `desktop_pet.*` capability in the manifest.
+Control the built-in pet and offer buttons in its extension menu. Every method requires the matching `desktop_pet.*` capability in the manifest.
 
 - `await desktop_pet.status()` — returns `enabled`, `supported`, `running`, `ready`, `visible`, `error`
 - `await desktop_pet.show()` / `hide()` — show or hide the window; hiding does not exit the process, and `show()` never bypasses the user's enable switch
@@ -835,13 +836,13 @@ if state["ready"]:
 
 :::
 
-Animation (SDK 2.18.0+): `get_skin()`, `list_animations()`, `play_animation(name, repeat=1)`, `play_event(event)`, `stop_animation(playback_id)`, `animation_status(playback_id)`. A receipt means the window accepted the playback; a plugin's new action replaces its previous one, and one call runs at most 30 seconds.
+Animation: `get_skin()`, `list_animations()`, `play_animation(name, repeat=1)`, `play_event(event)`, `stop_animation(playback_id)`, `animation_status(playback_id)`. A receipt means the window accepted the playback; a plugin's new action replaces its previous one, and one call runs at most 30 seconds.
 
-Extension buttons (SDK 2.21+): declare a `desktop_pet_buttons` list on the plugin class (`DesktopPetButton` objects or dicts, at most 10) and implement the two async methods `get_desktop_pet_button_states()` and `on_desktop_pet_button_click(button_id)`; callbacks are capped at 8 seconds. The pet-side events are listed in the [Hook reference](./hooks.md).
+Extension buttons: declare a `desktop_pet_buttons` list on the plugin class (`DesktopPetButton` objects or dicts, at most 10) and implement the two async methods `get_desktop_pet_button_states()` and `on_desktop_pet_button_click(button_id)`; callbacks are capped at 8 seconds. The pet-side events are listed in the [Hook reference](./hooks.md).
 
 ## files — Files
 
-Read and write the current chat's attachments while the Host dispatches a tool call. Requires SDK 2.17.0+ with the matching `files.*` capabilities declared; the file scope comes from real chat authorization — plugins cannot pick a chat by submitting a `session_id`, and scheduled tasks or calls without chat context are refused.
+Read and write the current chat's attachments while the Host dispatches a tool call. Declare the matching `files.*` capabilities in the manifest; the file scope comes from real chat authorization — plugins cannot pick a chat by submitting a `session_id`, and scheduled tasks or calls without chat context are refused.
 
 - `await files.list(offset=0)` — list the current chat's files
 - `await files.read_text(file_ref, offset=0, limit=12000, encoding="utf-8-sig")` — paginated text reading
@@ -863,12 +864,32 @@ See file settings in [Bot Configuration](/en/manual/configuration/bot-config#fil
 
 ## web — Web
 
-Reuses the unified web service's configuration and validation to give plugins search and page fetching. Requires a Host that supports it plus the `web.search` / `web.fetch` capabilities in the manifest; older SDKs call `ctx.call_capability("web.search", ...)` and receive the raw `{success, result}`.
+Reuses the unified web service's configuration and validation to give plugins search and page fetching. Declare the `web.search` / `web.fetch` capabilities in the manifest.
 
 - `web.search` — web search; arguments match the unified service's `web_search` tool
 - `web.fetch` — page fetching; arguments match the `web_fetch` tool
 
 Results are full structured payloads with `service` and `retrieved_at`; payloads above the 500,000-character transfer limit raise an error — narrow the query. Web service configuration is described in [Model Config](/en/manual/configuration/model-config).
+
+## market — Plugin Market
+
+Read-only market queries that reuse the info source and cache the Host is configured with. The manifest must declare `market.search`, `market.get_detail`, and `market.get_readme` separately.
+
+- `await market.search(query="", category="", page=1, limit=20, sort_by="name", compatible_only=False, include_manifest=False, include_stats=False, force_refresh=False)` — returns `plugins`, pagination, `source`, `features`, and `cache`; at most 50 entries per page. `sort_by` accepts `name`, `downloads`, `likes`, `rating`, plus the four 7-day / 30-day growth fields; statistical sorting requires an info source that provides stats and raises otherwise.
+- `await market.get_detail(plugin_id, force_refresh=False)` — returns `plugin`, `releases`, and compatibility; `plugin_id` accepts an exact ID, a name, or a registered repository URL.
+- `await market.get_readme(plugin_id, max_chars=8000, prefer_local=True, branch="main", force_refresh=False)` — reads the README, checking locally first and hitting the registered repository as needed; `max_chars` ranges from 500 to 20000 and only the given branch's `README.md` is read.
+
+::: code-group
+
+```python [Python ~vscode-icons:file-type-python~]
+found = await self.ctx.market.search(query="lint", limit=5, compatible_only=True)
+for plugin in found["plugins"]:
+    self.ctx.logger.info("%s %s", plugin["id"], plugin["name"])
+```
+
+:::
+
+`id` is the manifest ID and `marketplace_id` is the market registry ID. Network, data, or unsupported-info-source errors are raised directly, with no silent fallback.
 
 ## paths — Runtime Paths
 

@@ -8,17 +8,17 @@ This page covers model calls and rule matching: invalid API keys or insufficient
 
 ## API Key Error / Insufficient Balance
 
-### Error Symptoms
+**What you may see**
+
 - Bot completely unresponsive
 - Backend log shows `401 Unauthorized` / `402 Payment Required` / `403 Forbidden`
 - Log prompts `API key is invalid` or `Insufficient balance`
 
-### Quick Self-Check Trio
-1️⃣ Is the API Key filled in correctly? Check `api_key` field in `model_config.toml`
-2️⃣ Is the account balance sufficient? Log into the API provider's dashboard to check balance
-3️⃣ Is the model name correct? Check if `model_identifier` is in the provider's supported model list
+**Check these first**
 
-### Solutions
+1. Is the API Key filled in correctly? Check `api_key` field in `model_config.toml`
+2. Is the account balance sufficient? Log into the API provider's dashboard to check balance
+3. Is the model name correct? Check if `model_identifier` is in the provider's supported model list
 
 **Step 1: Check API Key Configuration**
 ::: code-group
@@ -54,13 +54,13 @@ curl https://api.deepseek.com/v1/models \
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
-# ✅ Correct example
+# Correct example
 [[models]]
 model_identifier = "deepseek-chat"   # Must be a model name supported by the API provider
 name = "deepseek-chat"
 api_provider = "DeepSeek"
 
-# ❌ Incorrect example
+# Incorrect example
 [[models]]
 model_identifier = "gpt-4"           # DeepSeek does not support GPT-4!
 api_provider = "DeepSeek"
@@ -68,24 +68,25 @@ api_provider = "DeepSeek"
 
 :::
 
-### Prevention Tips
-- 🔑 **Don't commit Keys to Git** — Use environment variables or local configuration files
-- 💰 **Set up balance alerts** — Enable low-balance email notifications in the API dashboard
-- 📊 **Monitor usage** — Regularly check token consumption
+**Prevent it next time**
+
+- **Don't commit Keys to Git** — Use environment variables or local configuration files
+- **Set up balance alerts** — Enable low-balance email notifications in the API dashboard
+- **Monitor usage** — Regularly check token consumption
 
 ## Network Timeout / Connection Failure
 
-### Error Symptoms
+**What you may see**
+
 - LLM request returns `APIConnectionError` or `TimeoutError` after being unresponsive for a long time
 - Log shows `Connection refused`, `Connection reset`, or `Read timed out`
 - Bot completely unresponsive, but local features work normally
 
-### Quick Self-Check Trio
-1️⃣ Test network connectivity (`curl -v https://api.deepseek.com`)
-2️⃣ Try a different network (e.g., switch to mobile hotspot)
-3️⃣ Confirm the `timeout` parameter isn't too small (recommended 60–120 seconds)
+**Check these first**
 
-### Solutions
+1. Test network connectivity (`curl -v https://api.deepseek.com`)
+2. Try a different network (e.g., switch to mobile hotspot)
+3. Confirm the `timeout` parameter isn't too small (recommended 60–120 seconds)
 
 **Step 1: Test Network Connectivity**
 
@@ -138,7 +139,8 @@ api_key = "sk-your-backup-key"
 
 :::
 
-### Prevention Tips
+**Prevent it next time**
+
 - Set reasonable `timeout` (60–120 seconds) and `max_retry` (2–3, counting the first request)
 - Try a different network when your network is unstable (e.g., switch to mobile hotspot)
 - Configure multiple API providers as backups to avoid single points of failure
@@ -146,18 +148,18 @@ api_key = "sk-your-backup-key"
 
 ## Invalid Regular Expression
 
-### Error Symptoms
+**What you may see**
+
 - Startup or saving configuration reports `re.error: bad escape` etc.
 - Log prompts `Invalid regex pattern` or `正则表达式编译失败`
 - Keyword rules / message filtering don't work
 - Configuration page shows "Save failed: regex syntax error"
 
-### Quick Self-Check Trio
-1️⃣ **Check special character escaping** — Whether `\.` `\*` `\+` etc. special characters have backslashes
-2️⃣ **Check bracket matching** — Whether `()` `[]` `{}` are properly paired
-3️⃣ **Use online tool to test** — Verify the regex with regex101.com
+**Check these first**
 
-### Solutions
+1. **Check special character escaping** — Whether `\.` `\*` `\+` etc. special characters have backslashes
+2. **Check bracket matching** — Whether `()` `[]` `{}` are properly paired
+3. **Use online tool to test** — Verify the regex with regex101.com
 
 **Method 1: Use Online Regex Testing Tool**
 ```text
@@ -199,107 +201,74 @@ ban_words = ["天气", "气温", "温度"]
 
 :::
 
-> 💡 **Tip**: Regex in TOML files requires double backslashes `\\` for escaping because `\` itself is a TOML escape character.
+> **Tip**: Regex in TOML files requires double backslashes `\\` for escaping because `\` itself is a TOML escape character.
 
-### Prevention Tips
+**Prevent it next time**
+
 - **Prefer keyword matching** — Simple scenarios don't need regex
 - **Test complex regex separately** — Validate on regex101.com first before putting it into config
 - **Add explanatory comments** — Add comments next to regex to describe what it matches, making maintenance easier
 
 ## Keyword Rule Configuration Error
 
-### Error Symptoms
-- Message matches the wrong reply rule
-- Rule doesn't take effect at all, bot doesn't reply
-- Priority conflicts, high-priority rules override low-priority ones
-- Mixed Chinese/English punctuation causing matching failure
+**What you may see**
 
-### Quick Self-Check Trio
-1️⃣ **Check rule priority** — Higher `priority` rules override lower ones
-2️⃣ **Confirm rule is enabled** — Is `enabled = true` set?
-3️⃣ **Test punctuation** — Full-width / half-width symbol differences can affect matching
+- Startup fails with `关键词规则必须至少包含keywords或regex中的一个`
+- Or `关键词规则必须包含reaction`
+- Or `无效的正则表达式`
+- A message matches a rule but the reply shows no effect from the reaction prompt
 
-### Solutions
+**Check these first**
 
-**Step 1: Check Keyword Rule Configuration**
+1. Does every rule set at least one of `keywords` or `regex`?
+2. Is `reaction` filled in? It is required, not optional metadata.
+3. Does the regex compile under Python's `re` syntax?
+
+**Step 1: Use the fields the rule class actually has**
+`KeywordRuleConfig` has exactly three fields. There is no `priority` or `enabled` switch:
+
 ::: code-group
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-# Edit config/bot_config.toml
+```toml [config/bot_config.toml ~vscode-icons:file-type-toml~]
 [keyword_reaction]
 
-# Pure keyword rules
+# Keyword-only rule: triggers when any keyword is found
 [[keyword_reaction.keyword_rules]]
 keywords = ["你好", "hello", "嗨"]
-regex = []
-reaction = "你好呀！有什么可以帮你的吗？"
-priority = 10                    # Priority, higher number = higher priority
-enabled = true                   # Ensure rule is enabled
+reaction = "The other side is greeting; answer in a casual tone"
 
-# Pure regex rules
+# Regex-only rule: regex uses Python re syntax
 [[keyword_reaction.regex_rules]]
-keywords = []
-regex = ["(早安 | 早上好 | 早 [上啊].*)"]
-reaction = "早上好！今天又是美好的一天~"
-priority = 20
-enabled = true
+regex = ["^早(上|安)[~！!]"]
+reaction = "The other side says good morning; keep the reply short"
 
-# Keyword + regex mixed rules
+# Keywords and regex can coexist; either match triggers
 [[keyword_reaction.keyword_rules]]
 keywords = ["天气"]
-regex = ["(今天 | 明天 | 后天).*(天气 | 气温 | 温度)"]
-reaction = "让我看看天气预报..."
-priority = 15
-enabled = true
+regex = ["(今天|明天|后天).*(天气|气温|温度)"]
+reaction = "The other side asks about weather; ask for the city first"
 ```
 
 :::
 
-**Step 2: Adjust Priorities**
-::: code-group
+`reaction` is a prompt for Mai, not a message sent verbatim. Capture groups in `regex` are substituted into matching placeholders in `reaction`.
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-# Priority examples:
-# priority = 30 — Highest priority (exact match)
-# priority = 20 — Medium priority (regex match)
-# priority = 10 — Default priority (normal keywords)
-# priority = 1  — Lowest priority (fallback rule)
+**Step 2: When several rules match**
+Every matching rule appends its `reaction` in configuration order, and the combined list goes to the Planner. There is no priority field and no "higher priority overrides lower" behavior.
 
-# Ensure important rules have higher priority than general rules
-[[keyword_reaction.keyword_rules]]
-keywords = ["帮助", "help"]
-reaction = "我可以帮你..."
-priority = 30                    # High priority, ensure preferential matching
+To scope guidance to one chat, use `[chat.reply_style].chat_prompts`; keyword rules have no scoping fields.
 
-[[keyword_reaction.keyword_rules]]
-keywords = ["吗", "呢", "吧"]     # General question words, lower priority
-reaction = "这个嘛..."
-priority = 5
-```
+**Step 3: Debug "no effect"**
+- Check the match window: rules apply to the latest message and recent context, not to old history.
+- Full-width and half-width punctuation differ. `你好，` and `你好,` are two different keywords; list both if you need both.
+- A bad regex raises `无效的正则表达式` at startup instead of failing silently.
 
-:::
+**Prevent it next time**
 
-**Step 3: Test Punctuation Differences**
-::: code-group
+- **Prefer keywords over regex** — Keyword matching is plain substring matching: readable, and it cannot fail to compile
+- **Validate regex on regex101.com with Python syntax** before pasting it into config
+- **Write `reaction` as an instruction, not a script** — "keep the reply short" outperforms a hardcoded line
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-# Full-width punctuation (Chinese input method)
-keywords = ["你好，", "你好,"]   # Different commas
-
-# Half-width punctuation (English input method)
-keywords = ["hello,", "hello!"]
-
-# Recommended to configure both types of punctuation
-keywords = ["你好，", "你好,", "hello", "hello!"]
-```
-
-:::
-
-### Prevention Tips
-- **Add comments to rules** — Comment the purpose next to each rule
-- **Hierarchical priority management** — Exact match > Regex match > Normal keywords > Fallback rule
-- **Test rules regularly** — Send test messages in the group to verify matching
-- **Use debug mode** — Enable `DEBUG` logging to see the actual matching chain
 
 ## Related
 

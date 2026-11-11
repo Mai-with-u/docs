@@ -67,7 +67,7 @@ maibot run
 
 :::
 
-On first launch, read and confirm the agreements as prompted. Open `http://127.0.0.1:8001/`, enter the temporary token printed in the terminal, set a permanent access password, and complete the initial setup. Open "麦麦聊天" (Chat with MaiBot) and send a greeting asking what one plus one equals. Confirm that a reply arrives. See [WebUI Login & Settings](/en/manual/webui/) for login instructions.
+On first launch, read and confirm the agreements as prompted. Open `http://127.0.0.1:8001/`, enter the temporary login password printed in the terminal, set a permanent access password, and complete the initial setup. Open "麦麦聊天" (Chat with MaiBot) and send a greeting asking what one plus one equals. Confirm that a reply arrives. See [WebUI Login & Settings](/en/manual/webui/) for login instructions.
 
 For QQ and other platforms, follow [Connect Platforms](/en/manual/adapters/) to install an adapter. Third-party plugins live in the instance's `plugins` directory.
 
@@ -131,6 +131,6 @@ maibot run --directory "/path/to/existing/MaiBot"
 
 - **Command not found**: Run `uv tool update-shell` and open a new terminal. See the [uv tools guide](https://docs.astral.sh/uv/guides/tools/).
 - **Instance not initialized**: Run `maibot init` in the instance directory. When starting elsewhere, pass `--directory` pointing to that same directory.
-- **Port occupied**: In the instance's `config/bot_config.toml`, set `[http] port` to a free port such as `18001`. If the message service's `8000` port is also occupied, set `maim_message.ws_server_port` to `18000`. Restart and visit the new WebUI port.
+- **Port occupied**: Set `[webui].port` in the workspace's `host/config.toml` to a free port such as `18001`, then restart the host and visit the WebUI on the new port. With multiple workspaces, give each one its own port.
 - **No Windows console when running in the background**: Set `enable_console_input` to `false` in the instance configuration's `[debug]` section, restart, and chat through the WebUI.
 - **Login works but no reply arrives**: Check the instance's `logs` and your API keys, model identifiers, and task assignments. See [Model Config](/en/manual/configuration/model-config).

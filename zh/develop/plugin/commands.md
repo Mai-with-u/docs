@@ -4,7 +4,7 @@ title: Command 组件
 
 # Command 组件
 
-`@Command` 是基于正则匹配的命令组件。当用户发送的消息匹配到某个 Command 的正则模式时，MaiBot 会调度执行对应的 Command 处理函数。
+`@Command` 用正则匹配触发。用户消息命中某个 Command 的 `pattern`，MaiBot 就调度它的处理函数。
 
 ## 装饰器签名
 
@@ -253,7 +253,7 @@ class AdminPlugin(MaiBotPlugin):
     async def handle_status(self, **kwargs):
         """查看系统状态"""
         stream_id = kwargs["stream_id"]
-        await self.ctx.send.text("系统运行正常 ✅", stream_id)
+        await self.ctx.send.text("系统运行正常", stream_id)
         return True, "系统运行正常", 1
 
     @Command("echo", pattern=r"^/echo\s+(?P<text>.+)$")

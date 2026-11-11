@@ -109,18 +109,16 @@ uv run bot.py
 http://本机IP:8001
 ```
 
-首次启动时，终端会打印出 WebUI 的登录 Token，类似于这样：
+首次启动时，终端会打印 WebUI 地址和临时登录密码，类似于这样：
 
-```
-07-30 18:53:45 [WebUI] WebUI 配置文件不存在，正在创建: /MaiMBot/data/webui.json
-07-30 18:53:45 [WebUI] WebUI 配置已保存到: /MaiMBot/data/webui.json
-07-30 18:53:45 [WebUI] 新的 WebUI Token 已生成: QSwgc2Vu...
-07-30 18:53:45 [WebUI应用] 🔑 WebUI 登录 Token: QSwgc2VucGFp77yBQ2lhbGxv772eKOKIoOODu8+JPCAp4oyS4piF
-07-30 18:53:45 [WebUI应用] 💡 请使用此 Token 登录 WebUI
-07-30 18:53:45 [WebUI服务] 🌐 WebUI 服务器启动中...
+```text
+MaiBot 宿主已启动：/MaiMBot
+WebUI：http://127.0.0.1:8001/?token=...（登录链接一分钟内有效）
+WebUI 临时登录密码：QSwgc2VucGFp...
+可用 maibot host status/start/stop/restart 管理 Bot；Ctrl+C 关闭宿主。
 ```
 
-复制日志中的 Token，在浏览器登录页面粘贴即可进入 WebUI。后续可以在 `data/webui.json` 中查看或修改 Token。
+点日志里的链接可直接进入 WebUI，也可以打开 http://127.0.0.1:8001 粘贴临时密码登录。临时密码由程序生成，保存在 `host/webui.json` 的 `access_token` 字段；想换成固定的密码，在 WebUI 里设置一次即可。
 
 进入 WebUI 后，跟随配置向导完成模型配置和平台连接即可。
 
@@ -128,7 +126,7 @@ http://本机IP:8001
 
 ## 验证与排错
 
-**验证** — 启动后终端打印 WebUI 地址与登录 Token；浏览器打开 `http://localhost:8001` 能登录，并在终端输入一句话能得到回复。
+**验证** — 启动后终端打印 WebUI 地址与临时登录密码；浏览器打开 `http://localhost:8001` 能用它登录，并在终端输入一句话能得到回复。
 
 **`uv: command not found`** — 运行 `source $HOME/.local/bin/env`，或重新打开一个终端。
 

@@ -86,16 +86,16 @@ After starting, MaiBot automatically launches the WebUI service. Open your brows
 http://localhost:8001
 ```
 
-On first launch, the terminal will print the WebUI login Token, like this:
+On first launch, the terminal prints the WebUI address and a temporary login password, like this:
 
-```
-07-30 18:53:45 [WebUI] WebUI 配置已保存到: /MaiMBot/data/webui.json
-07-30 18:53:45 [WebUI] 新的 WebUI Token 已生成: QSwgc2Vu...
-07-30 18:53:45 [WebUI应用] 🔑 WebUI 登录 Token: QSwgc2VucGFp77yBQ2lhbGxv772eKOKIoOODu8+JPCAp4oyS4piF
-07-30 18:53:45 [WebUI应用] 💡 请使用此 Token 登录 WebUI
+```text
+MaiBot 宿主已启动：/MaiMBot
+WebUI：http://127.0.0.1:8001/?token=...（登录链接一分钟内有效）
+WebUI 临时登录密码：QSwgc2VucGFp...
+可用 maibot host status/start/stop/restart 管理 Bot；Ctrl+C 关闭宿主。
 ```
 
-Copy the Token from the log and paste it into the browser login page to access WebUI. You can later view or modify the Token in `data/webui.json`.
+Click the link in the log to enter the WebUI directly, or open http://127.0.0.1:8001 and paste the temporary password. The program generates that password and stores it in the `access_token` field of `host/webui.json`; set a fixed password once in the WebUI to replace it.
 
 Once in WebUI, follow the configuration wizard to set up models and connect platforms.
 
@@ -103,7 +103,7 @@ For detailed steps on configuring models and connecting to QQ, see [Model Config
 
 ## Verification and Troubleshooting
 
-**Verify** — after startup the terminal prints the WebUI address and login Token; open `http://localhost:8001`, log in, and send a line in the terminal to get a reply.
+**Verify** — after startup the terminal prints the WebUI address and a temporary login password; open `http://localhost:8001`, log in with it, and send a line in the terminal to get a reply.
 
 **`uv: command not found`** — reopen PowerShell, or add `%USERPROFILE%\.local\bin` to PATH as the uv installer suggests.
 

@@ -28,7 +28,6 @@ const routes = computed<IntegrationRoute[]>(() => {
 <template>
   <div class="ir-grid">
     <a v-for="route in routes" :key="route.key" class="ir-card" :href="linkPrefix + route.link">
-      <span class="ir-icon" aria-hidden="true">{{ route.icon }}</span>
       <span class="ir-category">{{ route.category }}</span>
       <span class="ir-title">{{ route.title }}</span>
       <span class="ir-intent">{{ route.intent }}</span>
@@ -69,11 +68,6 @@ const routes = computed<IntegrationRoute[]>(() => {
   border-color: var(--vp-c-brand-1);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-}
-
-.ir-icon {
-  font-size: 22px;
-  line-height: 1;
 }
 
 .ir-category {

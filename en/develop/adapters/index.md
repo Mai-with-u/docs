@@ -4,23 +4,28 @@ title: Adapter Integration
 
 # Adapter Integration
 
-**An adapter connects MaiBot to a chat platform, and it does not run inside the MaiBot process.** The typical shape is a standalone Python process: on one side it talks to the platform (logging into QQ, connecting to Telegram, receiving email), and on the other side it connects to MaiBot's message server over WebSocket. MaiBot itself contains no platform logic—it only understands one unified message format.
+**An adapter connects MaiBot to a chat platform.** MaiBot itself carries no platform logic and understands exactly one unified message format; the adapter does the translation.
 
-This page helps you pick a route and get oriented on the skeleton; for the protocol details and code, see [Message Protocol Reference](./protocol.md) and [Writing an Adapter](./build.md).
+This page helps you pick a route and get oriented on the skeleton; for the wire format see [Message Protocol Reference](./protocol.md), and for implementation see [Writing an Adapter](./build.md).
 
-## Pick an Implementation Route First
+## Five Integration Routes
 
-MaiBot supports two kinds of "adapter"—pick the one that fits your scenario:
+Ready-made routes install and go; their setup lives in [Connect Platforms](/en/manual/adapters/). The self-built route is what the rest of this section covers.
 
-**Standalone external adapter process** — deployed and upgraded on its own, so a process crash leaves the MaiBot core untouched; it can be written in any language (as long as it speaks WebSocket + that JSON). Platform adapters for QQ, Telegram, email, and the like all take this route. Best for: a production integration with one platform.
+**OneBot Adapter** — an officially maintained plugin that logs in your own QQ account and supports NapCat and other OneBot v11 implementations, detecting the peer implementation on connect. Pick it for the full QQ feature set.
 
-**Plugin gateway ([`@MessageGateway`](/en/develop/plugin/message-gateway))** — you implement send and receive inside a MaiBot plugin, the plugin runtime manages its lifecycle, and it starts and stops together with Mai; Python only. Best for: lightweight platforms, internal systems, or a plugin you already have that should also handle messages.
+**Official bot (QQ Open Platform)** — an officially maintained plugin that talks to the QQ Open Platform directly with AppID + AppSecret, with no QQ client to host. Pick it when you don't want to keep a QQ account online.
 
-Both routes end up in the same routing and policy layer, and they can coexist; you can also run a platform on an external adapter first and switch it to a plugin gateway later.
+**Built-in Telegram adapter** — shipped with the core (`src/plugins/built_in/telegram_adapter`); set `bot_token` in the WebUI and toggle it. Supports forum topics, stickers, voice, quotes, and forwards.
 
-::: tip Which route do the official adapters take today?
-The officially maintained adapters (Unified QQ Connector, QQ Official Bot, etc.) are all distributed as **plugins** — installation and enabling are covered in [Connect Platforms](/en/manual/adapters/). The standalone-process route is mainly for self-built adapters or non-Python implementations.
-:::
+**Built-in WeChat ClawBot adapter** — shipped with the core (`src/plugins/built_in/weixin_clawbot_adapter`); goes through WeChat iLink / ClawBot, supports multi-account QR binding, and covers ClawBot private chats.
+
+**Self-built adapter** — write one when a platform isn't covered. Two shapes, both landing in the same routing and policy layer, and they can coexist:
+
+- **Standalone process** — deployed and upgraded on its own, so a crash leaves MaiBot untouched; any language works as long as it speaks WebSocket and that JSON. Wire format in [Message Protocol Reference](./protocol.md), implementation in [Writing an Adapter](./build.md).
+- **Plugin gateway ([`@MessageGateway`](/en/develop/plugin/message-gateway))** — send and receive inside a plugin, with the plugin runtime owning its lifecycle so it starts and stops with Mai; Python only. Good for lightweight platforms, internal systems, or a plugin you already have that should also carry messages.
+
+The first four routes ship as plugins — install them and fill in the connection details. Only the self-built route needs the protocol and code pages below.
 
 ## Who Does What
 
@@ -76,36 +81,30 @@ For how to fill in every field — and which ones break the pipeline when missin
 
 ## Choosing Between the Two WebSocket Services
 
-MaiBot ships two message servers at the same time, both under the same port scheme and both on the path `/ws`:
+Bot processes no longer listen on a message port of their own. Both protocols hang off the Host's single HTTP port, and the Bot ID in the path picks the target bot:
 
-**Legacy message server** — enabled by default, `maim_message.ws_server_host:ws_server_port`, defaulting to `127.0.0.1:8000`. The handshake headers are `platform` + `authorization`, and a platform may have only one connection. The vast majority of existing adapters use this one.
+**Legacy message server** — enabled by default at `ws://<host>:<port>/maim/<bot_id>/ws`, authenticated with that bot's `maim_message.auth_token`. The handshake headers are `platform` + `authorization`, and a platform may have only one connection. The vast majority of existing adapters use this one.
 
-**API server (Additional API Server)** — disabled by default; turn on `maim_message.enable_api_server`. It listens on `api_server_host:api_server_port` (default `0.0.0.0:8090`). The handshake uses `x-apikey` / `x-platform` / `x-uuid`; it supports multiple connections and an API Key allowlist, wraps every message in an extra envelope (`ver` / `msg_id` / `type` / `meta` / `payload`), and provides ACKs plus resend after a reconnect.
+**API server (Additional API Server)** — disabled by default; enable that bot's `maim_message.enable_api_server` and connect to `ws://<host>:<port>/maim/<bot_id>/api`, authenticated with `api_server_allowed_api_keys`. The handshake uses `x-apikey` / `x-platform` / `x-uuid`; it supports multiple connections and an API Key allowlist, wraps every message in an extra envelope (`ver` / `msg_id` / `type` / `meta` / `payload`), and provides ACKs plus resend after a reconnect.
 
-::: warning Set the allowlist before enabling the API server
-`api_server_host` defaults to `0.0.0.0`, and an empty `api_server_allowed_api_keys` means **no validation**. To enable this service, populate the allowlist first, or bind it back to `127.0.0.1`.
+::: warning Empty credential lists reject every connection
+When `auth_token` or `api_server_allowed_api_keys` is empty, that protocol refuses all connections. Fill in the matching list before turning a protocol on.
 :::
 
-## Ready-Made Adapters
+## The Library Used for Self-Built Adapters
 
-Prefer one that someone else has already written; confirm it supports your current MaiBot version before installing:
-
-<Linkcard url="https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter" title="Unified QQ Connector" description="Officially maintained: log in your own QQ account, supporting both SnowLuma and NapCat clients" logo="/title_img/mai.png" />
-
-<Linkcard url="https://github.com/Mai-with-u/MaiBot-QQ-Adapter" title="QQ Official Bot" description="Officially maintained: connect straight to the QQ Open Platform with AppID + AppSecret" logo="/title_img/mai.png" />
-
-<Linkcard url="https://github.com/Mai-with-u/MaiBot-Telegram-Adapter" title="Telegram Adapter" description="Officially maintained: bring Mai into Telegram groups and private chats" logo="/title_img/mai.png" />
+Wrap `maim_message` to skip the WebSocket handshake, unified-format serialization, and receipt handling:
 
 <Linkcard url="https://github.com/Mai-with-u/maim_message" title="maim_message" description="The unified message format and WebSocket communication library—required for writing an adapter" logo="/title_img/mai.png" />
 
-Installing and configuring these adapters is a usage topic, covered in [Connect Platforms](/en/manual/adapters/); everything after this point on the page is about **writing your own**.
+Installing and configuring ready-made adapters is a usage topic, covered in [Connect Platforms](/en/manual/adapters/); everything after this point is about **writing your own**.
 
 ## What You Need Before You Start
 
 - **Platform-side capability** — you can receive message events and call a send API. Usually this is the platform's official SDK, an OneBot implementation, or a private protocol library.
 - **Python 3.10+** — the official `maim_message` library saves you from every protocol detail; in another language you implement the WebSocket and JSON structures yourself.
-- **MaiBot's address and token** — for a local deployment this is `ws://127.0.0.1:8000/ws`; if `auth_token` is configured, send the exact same string.
-- **A platform name that doesn't collide** — for example `telegram` or `discord`; don't take `webui`, which is a platform name MaiBot uses internally.
+- **Host address, bot ID, and token** — for a local deployment this is `ws://127.0.0.1:8001/maim/<bot_id>/ws`, and the bot ID is shown in the WebUI's bot management; send whatever `auth_token` holds.
+- **A platform name that doesn't collide** — for example `telegram` or `discord`. The core reserves `webui`, `internal`, `bot_console`, and `maisaka_cli`.
 
 ## Next Steps
 
@@ -117,9 +116,9 @@ Installing and configuring these adapters is a usage topic, covered in [Connect 
 
 ## Verify and Troubleshoot
 
-Minimal verification: start MaiBot → start the adapter → send one message on the platform; MaiBot's console should show an inbound log entry and a reply.
+**Verification** — start MaiBot, then the adapter, then send a message on the platform: MaiBot's console shows an inbound log entry and a reply, which means both directions work.
 
-- **The adapter reports a connection failure the moment it starts** — nine times out of ten `ws_server_host` is still `127.0.0.1` while you connect from a container or another machine; set `maim_message.ws_server_host` in `config/bot_config.toml` to `0.0.0.0` and open the port.
+- **The adapter reports a connection failure the moment it starts** — the URL is missing the bot ID, it still uses the old root path `/ws`, or the host only listens on loopback while you connect from a container or another machine. Verify `ws://<host>:<port>/maim/<bot_id>/ws`, then check the host listen address and port reachability.
 - **Connected, but MaiBot doesn't react** — first check whether the platform name matches the records in the access policy, then check whether `adapter_policy.toml` allows that group / user.
 - **Replies never go out** — check whether the outbound driver was taken over by a plugin gateway, or whether a private chat is missing `platform_io_target_user_id`; see [Adapter Debugging](./debugging.md) for details.
 - **Repeatedly kicked offline** — two legacy connections are running under the same `platform`; stop the extra one.

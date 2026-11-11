@@ -6,6 +6,8 @@ title: 文档编写特性
 
 编写者注：本页收录本站用到的**非 VitePress 原生**的插件特性，这些特性需要编写者在 Markdown 中写特定语法才能触发。VitePress 原生的 custom container（`::: tip` / `::: warning` 等）、代码块行号高亮等特性请参见 [VitePress 官方文档](https://vitepress.dev/guide/markdown)；代码片段导入本站也已启用，见下文「代码片段导入」。
 
+本站已迁到 **VitePress 2**（`2.0.0-alpha.21`）。正文写法没有变，只有少数站点配置项和主题 API 改了名，集中在 [VitePress 2 写法差异](#vitepress-2-写法差异) 一节，写内容时不用管，改站点配置时先看那里。
+
 本页遵守[参与文档站](./)里的硬规则：**内容页禁止使用 Markdown 表格**，请用定义列表或 `::: fields` 容器；索引页可以按需使用表格。
 
 ## Mermaid 图表
@@ -161,8 +163,8 @@ platform = "qq"
 
 code-group 标签要写成 `[标签文字 ~iconify图标名~]`，显式给出图标，**不要依赖关键词自动匹配**：
 
-- ❌ ` ```toml [配置] ` — 无图标
-- ✅ ` ```toml [配置 ~vscode-icons:file-type-toml~] ` — 显式图标
+- 错误：` ```toml [配置] ` — 无图标
+- 正确：` ```toml [配置 ~vscode-icons:file-type-toml~] ` — 显式图标
 
 图标名从 [Iconify](https://icon-sets.iconify.design/) 获取，常用：`vscode-icons:file-type-toml`、`vscode-icons:file-type-python`、`vscode-icons:file-type-json`、`vscode-icons:file-type-shell`、`vscode-icons:file-type-git`、`logos:docker-icon`。
 
@@ -304,6 +306,43 @@ Mermaid 流程图（` ```mermaid `）用于渲染图表，` ```mmd ` 用于展�
 - `#region名` 可以只导入文件中 `# region 名` 与 `# endregion 名` 之间的片段；
 - `{1,3-5}` 是高亮行号；
 - 文件路径写错会在构建时报错，这是有意的——它同时充当示例代码的存在性校验。
+
+## VitePress 2 写法差异
+
+站点已升级到 VitePress 2。**正文写法完全兼容**——下面这些问题只在改站点配置、主题组件或自定义 Markdown 插件时才会碰到。逐条都是实测踩过的，不是推测。
+
+### 站点配置项改名 / 移除
+
+- **`markdown.headers` 保留原样** — 值仍是 `{ level: [2, 3, 4] }`，含义不变（精确层级列表，不是区间）。它决定右侧「本页目录」的条目，漏配或写成区间语义会让目录变空。
+- **`markdown.codeCopyButtonTitle` → `markdown.codeCopyButton.tooltipText`** — 本站没用到，改配置时别照着 1.x 的写法抄。
+- **`markdown.attrs` 的选项改名** — 现在是 `left` / `right` / `allowed`。
+- **`metaChunk` 已移除** — 1.x 的 `metaChunk: true` 在 2.x 里是未知选项，直接删掉即可，页面元数据会自动拆分成独立 chunk。
+- **`markdown.anchor` 改用 [@mdit/plugin-anchor](https://github.com/mdit-vue/mdit-vue) 的参数类型** — 自定义锚点插件的签名要跟着改。
+
+### 主题 API 变化
+
+- **`router.onAfterRouteChanged` → `router.onAfterRouteChange`** — 1.x 里两个名字都认（后者优先），2.x 只认新的。写成旧名不会报错，但回调永远不触发；本站用它收尾 nprogress 进度条，写错的表现是「进度条跑到一半停住」。
+- **`useData().hash` 已移除** — 需要当前锚点就自己读 `useRoute().hash`，或者监听 `hash` 变化。
+- **`enhanceApp` 的 `router` 仍然可用**，其余签名未变。
+
+### 依赖与 peer 版本
+
+- **`vue` 要显式写进 `package.json`** — VitePress 2 依赖 Vue 3.5.43+，`@nolebase/ui` 的 peer 也卡在同一版本线上；自己写一行 `vue` 能钉住版本，避免安装出两份 Vue 导致 `useData()` 拿到空数据。
+- **`@nolebase/*` 插件必须升到 2.21.x** — 2.18.x 的 peer 声明是 `^1`，装在 2.x 上会解析到错误的 vitepress 类型。
+- **`vitepress-plugin-mermaid` 的 peer 仍写着 `^1`，但实际可用** — 构建与渲染实测正常，所以本站继续用它；升级依赖时留意它的 peer 警告，但不必因此换方案。
+
+### 样式层
+
+- **默认排版改用 `rem`** — 2.x 的 `vp-doc` 样式把 `28px / 48px / 24px` 这类绝对值换成了 `1.75rem / 3rem / 1.5rem`。根字号仍是 `16px`，所以视觉结果一致；但如果站点将来改了根字号，正文排版会整体系数缩放。
+- **逻辑属性替换物理属性** — `margin-left` / `padding-left` / `border-left` 换成了 `padding-inline-start` / `border-inline-start` 等。自定义 CSS 里做覆盖时，用逻辑属性写才能覆盖到。
+- **`.vp-code` 类不再挂在 `<pre>` 上** — 代码块现在是 `<pre class="shiki shiki-themes ...">`，需要给代码块写样式请用 `div[class*='language-']` 或 `pre.shiki` 选择器。
+- **`.VPNavBarMenu` 系列类名保留** — 但组件内部结构改成了 `VPNavMenu`（桌面端仍带 `VPNavBarMenu` 兼容类），给导航栏写样式前先看编译后的 DOM。
+- **社交图标改为 Iconify 图标** — `icon: 'github'` 会被解析成 `simple-icons:github`；自定义 SVG 图标仍可用 `{ svg: '...' }` 形式。
+
+### 构建期
+
+- **本地 import 要写扩展名** — Vite 8 的原生配置加载器要求配置里的相对 import 带 `.ts` 后缀（`'./sidebar/zh.ts'`）。不写仍能构建，但会有警告。
+- **Node.js 要求 22+** — 本站 CI 用的是 Node 24。
 
 ## 注册的 Vue 组件
 

@@ -12,7 +12,7 @@ title: QQ Official Bot Adapter
 The adapter exchanges the AppID + AppSecret for an access_token, then requests a gateway address from the QQ OpenAPI (`https://api.bot.qq.com` by default) and connects outbound. All connections are initiated by the adapter—no public callback URL is required, and the `[maim_message]` config section is not used.
 :::
 
-Adapter repository (🏛️ officially maintained):
+Adapter repository (officially maintained):
 
 <Linkcard url="https://github.com/Mai-with-u/MaiBot-QQ-Adapter" title="MaiBot-QQ-Adapter" description="MaiBot's officially maintained QQ official bot adapter plugin, connecting directly to the QQ Open Platform" logo="/title_img/mai.png" />
 
@@ -46,24 +46,34 @@ Config file: `config/builtin_plugins/qq_official_adapter/config.toml`. You can a
 
 ```toml [config.toml ~vscode-icons:file-type-toml~]
 [plugin]
-enabled = true            # Enable the adapter; must be true to connect
-config_version = "0.4.1"  # Config structure version; usually leave it alone
+enabled = true             # Enable the adapter; must be true to connect
+config_version = "0.4.15"  # Config structure version, managed by the program
 
 [qq_official]
 app_id = "AppID shown on the open platform"
 app_secret = "AppSecret paired with the AppID"
 api_base_url = "https://api.bot.qq.com"  # QQ Open Platform API address; usually leave it alone
-reconnect_delay_sec = 5.0                # Reconnect delay after a disconnect (sec)
-unified_account_id = ""   # Optional: unified account ID (e.g. the NapCat bot QQ number); set it to share chat streams with other qq adapters
-assign_admin_ids = []     # Optional: users allowed to run binding commands (unified ID or OpenID); empty means no restriction
+unified_account_id = ""    # Linked QQ number: chat streams belong to this ID and share context with other qq adapters
+silent_user_sync = true    # Match QQ numbers, nicknames, and group cards against the linked account silently in bound groups; requires the linked QQ number
+snowluma_identity_only = false  # While the official connection is ready, let the linked account collect identity only, avoiding double sending
 
 [mute]
-enabled = true            # Enable the mute tool; see "LLM tools"
-allowed_groups = []       # Groups where muting is allowed (unified group number or group_openid); empty means no restriction
+enabled = true             # Enable the set_mute tool; see "LLM tools"
+allowed_groups = []        # Groups where muting is allowed (unified group number or group_openid); empty means no restriction
+admin_users = []           # Mute protection list (unified QQ number or OpenID); listed users are never muted
+min_duration = 60          # Shortest mute duration in seconds
+max_duration = 2592000     # Longest mute duration in seconds; the official cap is 30 days
 
 [recall]
-enabled = true            # Enable the recall_message tool
-allowed_groups = []       # Groups where recalling is allowed (unified group number or group_openid); empty means no restriction; private chats are exempt
+enabled = true             # Enable the recall_message tool
+allowed_groups = []        # Groups where recalling is allowed (unified group number or group_openid); empty means no restriction; private chats are exempt
+
+[filter]
+ignore_other_bots = true   # Ignore messages sent by other bots
+
+[advanced]
+show_debug_info = false    # Log each message as active or passive sending; passive sending also shows the target message ID and reply index
+reconnect_delay_sec = 5.0  # Reconnect delay after a disconnect in seconds, 1~300
 ```
 
 :::
@@ -87,7 +97,7 @@ The adapter reports its identity to MaiBot automatically once connected: it uses
 
 ## Unified ID binding commands
 
-OpenIDs on the QQ Open Platform are not interchangeable with real QQ numbers. To attribute messages to real QQ numbers (sharing data with the Unified QQ Connector), send binding commands in a chat:
+OpenIDs on the QQ Open Platform are not interchangeable with real QQ numbers. To attribute messages to real QQ numbers (sharing data with the OneBot Adapter), send binding commands in a chat:
 
 - **`/assign_group_id <group number>`** — binds the current group's `group_openid` to the given group number; available in group chats;
 - **`/assign_id <QQ number>`** — binds the sender's OpenID to the given QQ number;
@@ -123,7 +133,7 @@ When tool settings are absent or `allowed_groups` is empty, the tools are enable
 
 ## Avatar API (for developers)
 
-Provides the public API `adapter.avatar.get` (version `1`), using the same [avatar protocol](/en/develop/adapters/avatar-api) as the Unified QQ Connector. Parameters are `platform`, `target_id`, and `target_type` (`user` or `group`, defaulting to `user`), and it accepts `account_id` and `scope` passed by the host.
+Provides the public API `adapter.avatar.get` (version `1`), using the same [avatar protocol](/en/develop/adapters/avatar-api) as the OneBot Adapter. Parameters are `platform`, `target_id`, and `target_type` (`user` or `group`, defaulting to `user`), and it accepts `account_id` and `scope` passed by the host.
 
 - Numeric QQ numbers and group numbers return an avatar URL and `expires_in = 86400`; images are downloaded and cached by the host uniformly;
 - When an OpenID has been bound to a real numeric ID via `/assign_id` or `/assign_group_id`, the bound value is used to look up the avatar;

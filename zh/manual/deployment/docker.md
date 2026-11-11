@@ -4,6 +4,8 @@ title: Docker 部署
 
 # Docker 部署
 
+这页用 Docker Compose 部署 MaiBot：编排文件怎么写、目录怎么挂、端口怎么映射、容器里怎么登录 WebUI。
+
 ## 准备工作
 
 MaiBot Docker 部署需要 Docker 和 Docker Compose，以及至少 2GB 可用内存。支持 Linux、macOS 以及 Windows（通过 Docker Desktop）。不想自己写编排文件的话，也可以把[安装提示词](./installation-agent)交给 AI 助手，让它照着部署流程代劳。
@@ -109,7 +111,7 @@ docker compose up -d
 - **WebUI** — 18001（映射到容器内 8001）
 
 ::: warning
-`[http] host` 的默认值是 `127.0.0.1`，在 Docker 容器内这意味着只有容器自身能访问。Docker 部署时务必用 `HTTP_HOST=0.0.0.0` 放开监听。
+`host/config.toml` 的 `[webui].hosts` 默认是 `["127.0.0.1", "::1"]`，在 Docker 容器内这意味着只有容器自身能访问。官方镜像通过 `HTTP_HOST=0.0.0.0` 追加监听地址，自建镜像也要保留这个环境变量。
 :::
 
 ::: tip
@@ -204,15 +206,13 @@ docker run -d \
 http://本机IP:18001
 ```
 
-首次启动时，容器日志中会打印出 WebUI 的登录 Token，类似于这样：
+首次启动时，容器日志中会打印 WebUI 地址和临时登录密码，类似于这样：
 
-```
-07-30 18:53:45 [WebUI] WebUI 配置文件不存在，正在创建: /MaiMBot/data/webui.json
-07-30 18:53:45 [WebUI] WebUI 配置已保存到: /MaiMBot/data/webui.json
-07-30 18:53:45 [WebUI] 新的 WebUI Token 已生成: QSwgc2Vu...
-07-30 18:53:45 [WebUI应用] 🔑 WebUI 登录 Token: 5YWz5rOo5Y+v5LmQ5Za1fiDlhbPms6jlj6/kuZDosKLosKLllrXvvIE=
-07-30 18:53:45 [WebUI应用] 💡 请使用此 Token 登录 WebUI
-07-30 18:53:45 [WebUI服务] 🌐 WebUI 服务器启动中...
+```text
+MaiBot 宿主已启动：/MaiMBot
+WebUI：http://127.0.0.1:8001/?token=...（登录链接一分钟内有效）
+WebUI 临时登录密码：QSwgc2VucGFp...
+可用 maibot host status/start/stop/restart 管理 Bot；Ctrl+C 关闭宿主。
 ```
 
 用以下命令查看容器日志：
@@ -225,7 +225,7 @@ docker compose logs core
 
 :::
 
-复制日志中的 Token，在浏览器登录页面粘贴即可进入 WebUI。后续可以在 `data/webui.json` 中查看或修改 Token。
+容器内监听的是 `0.0.0.0`，直接用宿主机地址加映射端口访问，粘贴临时密码登录。临时密码保存在工作区 `host/webui.json` 的 `access_token` 字段；想换成固定的密码，在 WebUI 里设置一次即可。
 
 进入 WebUI 后，跟随配置向导完成模型配置和平台连接即可。
 
@@ -250,10 +250,10 @@ docker compose logs core
 - 确认容器环境变量 `HTTP_HOST=0.0.0.0`（旧的 `WEBUI_HOST` 也兼容）
 - 云服务器还要在安全组 / 防火墙放行 `18001` 端口
 
-**找不到登录 Token？**
+**找不到临时登录密码？**
 
 - 用 `docker compose logs core | grep Token` 过滤日志
-- Token 同时保存在 `data/webui.json`，可直接查看
+- 临时密码同时保存在 `host/webui.json` 的 `access_token` 字段，可直接查看
 
 **镜像拉取很慢？**
 

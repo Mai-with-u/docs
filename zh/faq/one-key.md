@@ -20,13 +20,11 @@ title: 一键包
 
 ## 一键包中的 NapCat 连接失败怎么办？
 
-一键包通常配合 SnowLuma / NapCat 客户端使用，客户端通过**统一 QQ 连接器**（`MaiBot-SnowLuma-Adapter`）接入 MaiBot。连接失败时，按[适配器连接](./adapters.md)中「统一 QQ 连接器为什么连不上 SnowLuma / NapCat」的步骤排查即可。
+一键包通常配合 NapCat 客户端使用，客户端通过 **OneBot 适配器**（仓库 `MaiBot-SnowLuma-Adapter`）接入 MaiBot。先确认适配器已在 WebUI 的**插件管理**里启用，NapCat 已登录并监听正向 WebSocket。
 
-## 把一键包客户端从 NapCat 换成 SnowLuma 后连接失败怎么办？
+再核对 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 的 `[client]` 节：`server` / `port` 指向 NapCat 的监听地址，`token` 与 NapCat 的访问令牌一致，`client_type` 保持 `auto`。
 
-确认统一 QQ 连接器已启用：WebUI 的**插件管理**里 `MaiBot-SnowLuma-Adapter` 处于启用状态，SnowLuma 已登录并监听正向 WebSocket。然后核对 `plugins/MaiBot-SnowLuma-Adapter/config.toml` 的 `[client]` 节：`server` / `port` 指向 SnowLuma 的监听地址，`token` 与 SnowLuma 的访问令牌一致，`client_type` 保持 `auto`（也可显式写成 `snowluma`）。
-
-一个连接器同时支持两类客户端，切换时不用换插件，改 `[client]` 配置即可。详见[统一 QQ 连接器](../manual/adapters/qq-local-client.md)。
+端口和令牌最容易出错：NapCat 的 WebSocket 端口常改成 `3001` 以外的值，改完两端要一起改；开了鉴权时 `token` 必须完全一致。同机保持 `127.0.0.1`，跨容器或跨设备换成实际 IP 并放行防火墙。顺序上先启动 NapCat、再启动 MaiBot，然后看日志里适配器是否已连接。完整排查顺序见[适配器连接](./adapters.md)中「OneBot 适配器为什么连不上 NapCat」，字段说明见[OneBot 适配器](../manual/adapters/qq-local-client.md)。
 
 ::: info 内容来源
 本页的一键包问题分类参考了社区协作文档[《麦麦教程-常见问题速查/社区教程》](https://www.kdocs.cn/l/ctOGhVv6L8Yq)。2026 年 7 月 12 日导出版本的页面信息显示创建者为池雨、修改者为无为青年；本站仅保留能够按当前文档确认的通用步骤。

@@ -4,54 +4,53 @@ title: Frequently Asked Questions
 
 # Frequently Asked Questions
 
-Browse questions by topic. If the log already contains a specific error or status code, go directly to [Error Troubleshooting](./error-troubleshooting.md).
+Browse by topic, or jump straight to [Error Troubleshooting](./error-troubleshooting.md) when the log already carries an error code.
 
-## Categories
+## Browse by category
 
-**[Basic Usage](./basic-usage.md)** — Costs, supported platforms, first steps, and asking for help.
+**[Basic Usage](./basic-usage.md)** — Cost, model choice, multiple bots, supported platforms, first run.
 
-**[Deployment and Startup](./deployment.md)** — Startup failures, configuration files, ports, and WebUI access.
+**[Deployment and Startup](./deployment.md)** — Startup failures, config files, port conflicts, WebUI access, Docker mounts.
 
-**[One-click Package](./one-key.md)** — Installation paths, user data, instance migration, and bundled adapters.
+**[One-key Package](./one-key.md)** — Install paths, user data, instance migration, switching clients.
 
-**[Adapter Connections](./adapters.md)** — the unified QQ connector, the QQ official bot, and the access policy.
+**[Adapter Connections](./adapters.md)** — OneBot Adapter, QQ official bot, built-in Telegram and WeChat adapters.
 
-**[Chat and Replies](./chat-and-reply.md)** — Speaking frequency, self-replies, consecutive messages, and reply splitting.
+**[Chat and Replies](./chat-and-reply.md)** — Speaking-rate groups, message debouncing, self-replies, reply speed.
 
-**[Models and APIs](./models-and-api.md)** — API keys, model identifiers, vision models, and embeddings.
+**[Models and APIs](./models-and-api.md)** — API keys, unauthenticated providers, LAN models, vision models, embeddings.
 
-**[Memory and Learning](./memory-and-learning.md)** — Long-term memory, relation vectors, incorrect memories, expressions, and jargon.
+**[Memory and Learning](./memory-and-learning.md)** — Long-term memory, image memory, relation vectors, expressions and jargon.
 
-**[Plugin Issues](./plugins.md)** — Plugin activation, command conflicts, downloads, and diagnosis.
+**[Plugin Issues](./plugins.md)** — Enabling plugins, command permissions, downloads and versions, custom pages.
 
-**[Backup and Migration](./backup-and-migration.md)** — What to back up, migration steps, and restore checks.
+**[Backup and Migration](./backup-and-migration.md)** — What to back up, export and import, migration, restore checks.
 
 ## Troubleshooting
 
-Enter the page that matches the error topic; when the log already contains a specific error code or keyword, use the quick reference on the overview page to jump straight there.
+When the log already contains a status code or keyword, use the quick reference on the overview page to jump to the matching section.
 
-**[Error Troubleshooting Overview](/en/faq/error-troubleshooting)** — error code quick reference, keyword index, and the troubleshooting flowchart.
+**[Error Troubleshooting Overview](/en/faq/error-troubleshooting)** — HTTP status codes, keyword index, and the troubleshooting flowchart.
 
-**[Startup and Access Troubleshooting](/en/faq/troubleshooting-startup)** — configuration files, MCP, ports, WebUI access and login, Git operations.
+**[Startup and Access Troubleshooting](/en/faq/troubleshooting-startup)** — Config files, MCP, ports, WebUI access and login, Git operations.
 
 **[Model and Rule Troubleshooting](/en/faq/troubleshooting-model)** — API keys, network timeouts, regular expressions, keyword rules.
 
-**[Runtime and Data Troubleshooting](/en/faq/troubleshooting-runtime)** — missing replies, databases, emojis, memory, disk space, data anomalies.
+**[Runtime and Data Troubleshooting](/en/faq/troubleshooting-runtime)** — Missing replies, database, emojis, memory, disk space, data anomalies.
 
-**[Plugin and Adapter Troubleshooting](/en/faq/troubleshooting-plugins-adapters)** — plugin loading failures, adapter connections and reconnects.
+**[Plugin and Adapter Troubleshooting](/en/faq/troubleshooting-plugins-adapters)** — Plugin load failures, adapter connections and reconnects.
 
-**[Getting Help](/en/faq/getting-help)** — self-checks before asking, the issue checklist, community channels, and how to export logs.
+**[Getting Help](/en/faq/getting-help)** — Self-checks, issue checklist, community channels, and log export.
 
-## Quick checks
+## Collect these before asking
 
-1. Record the MaiBot, package, and adapter versions.
-2. Keep the complete log around the failure, not only its last line.
-3. Note recent configuration, model, or plugin changes.
-4. Follow the relevant category or search [Error Troubleshooting](./error-troubleshooting.md).
-5. When requesting help, include versions, sanitized logs, relevant settings, and reproduction steps.
+1. Versions of MaiBot, WebUI, adapters, and plugins.
+2. The complete log around the failure, not just the last line.
+3. Configuration, models, and plugins you changed recently.
+4. Reproduction steps: what you did from startup to the error.
+
+Most questions can be resolved in one round with these four items. The full checklist lives in [Getting Help](./getting-help.md).
 
 ## Sources
 
-Some answers were adapted from the community-maintained document [MaiBot Tutorial — Quick FAQ / Community Tutorial](https://www.kdocs.cn/l/ctOGhVv6L8Yq). Thanks to all the authors for their support of MaiBot!
-
-The content was reorganized, corrected, and verified against the current MaiBot configuration and code.
+Some answers were adapted from the community document [MaiBot Tutorial — Quick FAQ](https://www.kdocs.cn/l/ctOGhVv6L8Yq). Thanks to all authors. The content here has been checked against the current MaiBot configuration and source.

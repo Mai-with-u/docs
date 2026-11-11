@@ -8,17 +8,17 @@ title: 模型与规则错误排查
 
 ## API Key 错误/余额不足
 
-### 错误现象
+**可能看到的现象**
+
 - 机器人完全无回复
 - 后端日志出现 `401 Unauthorized` / `402 Payment Required` / `403 Forbidden`
 - 日志提示 `API key is invalid` 或 `Insufficient balance`
 
-### 快速自查三连
-1️⃣ API Key 填对了吗？检查 `model_config.toml` 中 `api_key` 字段
-2️⃣ 账户余额够吗？登录 API 提供商后台查看余额
-3️⃣ 模型名对吗？检查 `model_identifier` 是否在提供商支持列表内
+**先自查这几点**
 
-### 解决方案
+1. API Key 填对了吗？检查 `model_config.toml` 中 `api_key` 字段
+2. 账户余额够吗？登录 API 提供商后台查看余额
+3. 模型名对吗？检查 `model_identifier` 是否在提供商支持列表内
 
 **步骤 1：检查 API Key 配置**
 ::: code-group
@@ -54,13 +54,13 @@ curl https://api.deepseek.com/v1/models \
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
-# ✅ 正确示例
+# 正确示例
 [[models]]
 model_identifier = "deepseek-chat"   # 必须是 API 商支持的模型名
 name = "deepseek-chat"
 api_provider = "DeepSeek"
 
-# ❌ 错误示例
+# 错误示例
 [[models]]
 model_identifier = "gpt-4"           # DeepSeek 不支持 GPT-4！
 api_provider = "DeepSeek"
@@ -68,24 +68,25 @@ api_provider = "DeepSeek"
 
 :::
 
-### 预防建议
-- 🔑 **Key 不要提交到 Git** — 用环境变量或本地配置文件
-- 💰 **设置余额提醒** — 在 API 后台设置低余额邮件通知
-- 📊 **监控用量** — 定期检查 Token 消耗情况
+**避免复发**
+
+- **Key 不要提交到 Git** — 用环境变量或本地配置文件
+- **设置余额提醒** — 在 API 后台设置低余额邮件通知
+- **监控用量** — 定期检查 Token 消耗情况
 
 ## 网络超时/连接失败
 
-### 错误现象
+**可能看到的现象**
+
 - LLM 请求长时间无响应后报 `APIConnectionError` 或 `TimeoutError`
 - 日志显示 `Connection refused`、`Connection reset` 或 `Read timed out`
 - 机器人完全无回复，但本地功能正常
 
-### 快速自查三连
-1️⃣ 测试网络通不通（`curl -v https://api.deepseek.com`）
-2️⃣ 换个网络试试（比如切换手机热点）
-3️⃣ 确认 `timeout` 参数不是太小（建议 60-120 秒）
+**先自查这几点**
 
-### 解决方案
+1. 测试网络通不通（`curl -v https://api.deepseek.com`）
+2. 换个网络试试（比如切换手机热点）
+3. 确认 `timeout` 参数不是太小（建议 60-120 秒）
 
 **步骤 1：测试网络连通性**
 
@@ -138,7 +139,8 @@ api_key = "sk-your-backup-key"
 
 :::
 
-### 预防建议
+**避免复发**
+
 - 设置合理的 `timeout`（60-120 秒）和 `max_retry`（2-3，含第一次请求）
 - 网络不稳定时换个网络试试（如切换手机热点）
 - 配置多个 API 提供商做备份，避免单点故障
@@ -146,18 +148,18 @@ api_key = "sk-your-backup-key"
 
 ## 正则表达式无效
 
-### 错误现象
+**可能看到的现象**
+
 - 启动或保存配置时报 `re.error: bad escape` 等错误
 - 日志提示 `Invalid regex pattern` 或 `正则表达式编译失败`
 - 关键词规则/消息过滤不生效
 - 配置页面提示「保存失败：正则语法错误」
 
-### 快速自查三连
-1️⃣ **检查特殊字符转义** — `\.` `\*` `\+` 等特殊字符是否加了反斜杠
-2️⃣ **检查括号闭合** — `()` `[]` `{}` 是否成对出现
-3️⃣ **使用在线工具测试** — 用 regex101.com 验证正则是否正确
+**先自查这几点**
 
-### 解决方案
+1. **检查特殊字符转义** — `\.` `\*` `\+` 等特殊字符是否加了反斜杠
+2. **检查括号闭合** — `()` `[]` `{}` 是否成对出现
+3. **使用在线工具测试** — 用 regex101.com 验证正则是否正确
 
 **方法一：使用在线正则测试工具**
 ```text
@@ -199,107 +201,74 @@ ban_words = ["天气", "气温", "温度"]
 
 :::
 
-> 💡 **提示**：TOML 文件中正则表达式需要双反斜杠 `\\` 转义，因为 `\` 本身是 TOML 的转义字符。
+> **提示**：TOML 文件中正则表达式需要双反斜杠 `\\` 转义，因为 `\` 本身是 TOML 的转义字符。
 
-### 预防建议
+**避免复发**
+
 - **优先用关键词匹配** — 简单场景不需要正则
 - **复杂正则单独测试** — 先在 regex101.com 验证再填入配置
 - **添加注释说明** — 在正则旁边注释匹配的内容，方便后续维护
 
 ## 关键词规则配置错误
 
-### 错误现象
-- 消息匹配到错误的回复规则
-- 规则完全不生效，机器人不回复
-- 优先级冲突，高优先级规则覆盖低优先级
-- 中英文标点混用导致匹配失败
+**可能看到的现象**
 
-### 快速自查三连
-1️⃣ **检查规则优先级** — `priority` 高的规则会覆盖低的
-2️⃣ **确认规则已启用** — `enabled = true` 是否设置
-3️⃣ **测试标点符号** — 全角/半角符号差异会影响匹配
+- 启动时报 `关键词规则必须至少包含keywords或regex中的一个`
+- 或 `关键词规则必须包含reaction`
+- 或 `无效的正则表达式`
+- 消息命中了规则，但回复里看不出反应提示的效果
 
-### 解决方案
+**先自查这几点**
 
-**步骤一：检查关键词规则配置**
+1. 每条规则是不是至少填了 `keywords` 或 `regex`？
+2. `reaction` 填了吗？它是必填项，不是可选说明
+3. 正则能在 Python 的 `re` 语法下编译通过吗？
+
+**步骤 1：按规则类的真实字段写**
+`KeywordRuleConfig` 只有三个字段，没有 `priority`、`enabled` 之类的开关：
+
 ::: code-group
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-# 编辑 config/bot_config.toml
+```toml [config/bot_config.toml ~vscode-icons:file-type-toml~]
 [keyword_reaction]
 
-# 纯关键词规则
+# 纯关键词规则：keywords 命中任意一个即触发
 [[keyword_reaction.keyword_rules]]
 keywords = ["你好", "hello", "嗨"]
-regex = []
-reaction = "你好呀！有什么可以帮你的吗？"
-priority = 10                    # 优先级，数字越大优先级越高
-enabled = true                   # 确保规则已启用
+reaction = "对方在打招呼，用日常语气回应"
 
-# 纯正则规则
+# 纯正则规则：regex 用 Python re 语法
 [[keyword_reaction.regex_rules]]
-keywords = []
-regex = ["(早安 | 早上好 | 早 [上啊].*)"]
-reaction = "早上好！今天又是美好的一天~"
-priority = 20
-enabled = true
+regex = ["^早(上|安)[~！!]"]
+reaction = "对方在问早，简短回应即可"
 
-# 关键词 + 正则混合规则
+# 关键词和正则可以同时写，任一命中都触发
 [[keyword_reaction.keyword_rules]]
 keywords = ["天气"]
-regex = ["(今天 | 明天 | 后天).*(天气 | 气温 | 温度)"]
-reaction = "让我看看天气预报..."
-priority = 15
-enabled = true
+regex = ["(今天|明天|后天).*(天气|气温|温度)"]
+reaction = "对方在问天气，先问清城市再回答"
 ```
 
 :::
 
-**步骤二：调整优先级**
-::: code-group
+`reaction` 是给麦麦看的提示，不会原样当成消息发出去。`regex` 里可以用捕获组，`reaction` 中对应位置会被匹配内容替换。
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-# 优先级示例：
-# priority = 30 — 最高优先级（精确匹配）
-# priority = 20 — 中等优先级（正则匹配）
-# priority = 10 — 默认优先级（普通关键词）
-# priority = 1  — 最低优先级（兜底规则）
+**步骤 2：多条规则同时命中的行为**
+所有命中的规则会按配置顺序把 `reaction` 依次追加到提示里，最后一起交给 Planner 参考。没有优先级字段，也没有「高优先级覆盖低优先级」的机制。
 
-# 确保重要规则的优先级高于通用规则
-[[keyword_reaction.keyword_rules]]
-keywords = ["帮助", "help"]
-reaction = "我可以帮你..."
-priority = 30                    # 高优先级，确保优先匹配
+想让引导只在该聊天下生效，配 `[chat.reply_style].chat_prompts`，关键词规则本身没有作用域字段。
 
-[[keyword_reaction.keyword_rules]]
-keywords = ["吗", "呢", "吧"]     # 通用疑问词，优先级放低
-reaction = "这个嘛..."
-priority = 5
-```
+**步骤 3：排查「没反应」**
+- 确认匹配范围：规则只看最新消息和近期聊天内容，很久以前的发言不会触发。
+- 全角与半角标点有区别，`你好，` 和 `你好,` 是两条不同的关键词；要两种都生效就都写进去。
+- 正则写错会在启动时直接抛 `无效的正则表达式`，不会静默失效。
 
-:::
+**避免复发**
 
-**步骤三：测试标点符号差异**
-::: code-group
+- **能写关键词就别写正则** — 关键词是子串匹配，人眼可读、不会编译失败
+- **正则先在 regex101.com 用 Python 语法验证** — 再贴进配置
+- **`reaction` 写成指令而不是台词** — 写「简短回应即可」比写死一句回复效果好
 
-```toml [TOML ~vscode-icons:file-type-toml~]
-# 全角标点（中文输入法）
-keywords = ["你好，", "你好,"]   # 逗号不同
-
-# 半角标点（英文输入法）
-keywords = ["hello,", "hello!"]
-
-# 建议同时配置两种标点
-keywords = ["你好，", "你好,", "hello", "hello!"]
-```
-
-:::
-
-### 预防建议
-- **规则命名加注释** — 在规则旁边注释用途
-- **优先级分层管理** — 精确匹配 > 正则匹配 > 普通关键词 > 兜底规则
-- **定期测试规则** — 在群里发送测试消息验证匹配效果
-- **使用调试模式** — 打开 `DEBUG` 日志查看实际匹配链路
 
 ## 相关
 

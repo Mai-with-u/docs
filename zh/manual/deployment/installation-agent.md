@@ -24,7 +24,7 @@ title: AI 助手安装
 
 ## AI 会带你走的流程
 
-1. **问清两件事** — 你的操作系统，以及要不要接 QQ。接 QQ 有两条路线：**统一 QQ 连接器**（登录自己的 QQ 号，推荐）或 **QQ 官方机器人**（AppID + AppSecret，不用登录任何客户端）；
+1. **问清两件事** — 你的操作系统，以及要不要接 QQ。接 QQ 有两条路线：**OneBot 适配器**（登录自己的 QQ 号，推荐）或 **QQ 官方机器人**（AppID + AppSecret，不用登录任何客户端）；
 2. **检查环境** — 内存与磁盘可用空间都要 ≥ 2 GB，安装 uv；工具安装使用 Python 3.13，由 uv 下载，源码部署或手动下载插件时再准备 Git；
 3. **安装并启动** — 从 PyPI 安装 MaiBot，初始化实例目录，配置模型，再启动主程序；
 4. **接入 QQ**（可选）— 按所选路线安装适配器、填连接信息、设置放行范围；
@@ -53,11 +53,11 @@ maibot run
 
 :::
 
-第一次启动要在终端输入 **同意** 确认用户协议，随后终端会打印 WebUI 登录 Token（也保存在 `data/webui.json`）。打开 http://127.0.0.1:8001/ 粘贴 Token 登录，跟着配置向导至少配好一个 LLM 模型。
+第一次启动要在终端输入 **同意** 确认用户协议，随后终端会打印 WebUI 地址与临时登录密码（密码同时保存在工作区 `host/webui.json` 的 `access_token` 字段）。打开 http://127.0.0.1:8001/ 粘贴密码登录，跟着配置向导至少配好一个 LLM 模型。
 
 ## 接 QQ 的两条路线
 
-- **SnowLuma QQ 连接器** — 仓库 `MaiBot-SnowLuma-Adapter`，再用 SnowLuma 或 NapCat 客户端登录机器人小号并开启正向 WebSocket。详细步骤见[SnowLuma QQ 连接器](../adapters/qq-local-client.md)；
+- **OneBot 适配器** — 仓库 `MaiBot-SnowLuma-Adapter`，再用 NapCat 等 OneBot v11 实现登录机器人小号并开启正向 WebSocket。详细步骤见[QQ 本地客户端](../adapters/qq-local-client.md)；
 - **QQ 官方机器人** — 在 [QQ 开放平台](https://q.qq.com/)申请机器人，用 AppID + AppSecret 直连，不需要任何 QQ 客户端在线；详细步骤见 [QQ 官方机器人](../adapters/qq-official.md)。
 
 两条路线都要设置**放行范围**：入站放行由 MaiBot 的适配器策略控制，默认全部放行，入口是 WebUI「配置管理 → 适配器设置」（`/adapter-management`）或 `config/adapter_policy.toml`。想只服务指定群时，写入：

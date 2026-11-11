@@ -4,7 +4,7 @@ title: 事件处理器
 
 # 事件处理器
 
-`@EventHandler` 是用于订阅消息和工作流事件的组件装饰器。与 `@HookHandler` 的命名 Hook 点机制不同，`@EventHandler` 基于固定的 `EventType` 枚举值订阅事件，适合在消息处理流程的特定阶段进行拦截或观察。
+`@EventHandler` 按固定的 `EventType` 枚举订阅消息与工作流事件。与 `@HookHandler` 的命名 Hook 点机制不同，适合在消息处理流程的特定阶段进行拦截或观察。
 
 ## 装饰器签名
 

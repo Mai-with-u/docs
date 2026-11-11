@@ -4,11 +4,9 @@ title: Hook Handler
 
 # Hook Handler
 
-`@HookHandler` is a component decorator in MaiBot's plugin system for subscribing to **named Hook points**. The main program triggers named Hooks at key execution points, and all plugin handlers subscribed to that Hook are scheduled to execute according to fixed rules, thereby achieving message interception, rewriting, and observation.
+`@HookHandler` subscribes a method to a **named Hook point**. The Host fires named Hooks at fixed execution points and schedules every subscribed handler by a fixed order, which is how plugins intercept, rewrite, and observe MaiBot's flow.
 
-::: warning WorkflowStep Removed
-`WorkflowStep` has been replaced by `@HookHandler` in SDK 2.0. Old code still using `WorkflowStep` will raise `RuntimeError` at runtime. This is a non-backward-compatible change — you must migrate to `@HookHandler`.
-:::
+`WorkflowStep` is gone — calling it raises `RuntimeError`. Subscribe to the same checkpoint with `@HookHandler`.
 
 ## Decorator Signature
 
@@ -204,59 +202,62 @@ class SendInterceptorPlugin(MaiBotPlugin):
 
 ## Built-in Hook List
 
-The following are all the Hook points registered in the Host runtime center table — 29 in total. Each Hook notes whether abort (terminating the call chain) and parameter modification (changing the kwargs received by subsequent handlers) are allowed.
-
-::: warning The list follows what the Host actually registers
-The list follows what the current Host actually registers — 29 Hooks. The plugin SDK documentation additionally lists 3 Hooks that are not registered yet (`emoji.register.after_build_emotion`, `jargon.query.before_search`, `jargon.query.after_search`) — **subscribing to them fails plugin registration**, so treat the list below as authoritative.
-:::
+The Host registers 30 Hook points at startup; each one notes whether abort (terminating the call chain) and parameter modification (changing the kwargs received by subsequent handlers) are allowed. Subscribing to a name that is not registered fails plugin registration outright.
 
 ### Chat Message Chain
 
-- **`chat.receive.before_process`** — Before the inbound message runs `SessionMessage.process()` — abort allowed ✅ · param changes allowed ✅
+- **`chat.receive.before_process`** — Before the inbound message runs `SessionMessage.process()` — abort allowed · param changes allowed
 
   Use this hook to annotate image context: image/emoji entries in the message dictionary's `raw_message` carry `binary_data_base64` when media is available; forwarded content is nested under `data[].content`. A blocking handler can return `modified_kwargs={"message": updated_message}` and add `{"type":"text","data":"Recognition hint"}` after the corresponding image. Move synchronous inference to a thread or separate process and bound the total duration; continue the original message on timeout or failure. Model scores are not calibrated correctness probabilities. This hook does not require collecting chat images into a training dataset.
-- **`chat.receive.after_process`** — After the inbound message completes lightweight preprocessing — abort allowed ✅ · param changes allowed ✅
+- **`chat.receive.after_process`** — After the inbound message completes lightweight preprocessing — abort allowed · param changes allowed
 
 ### Command Execution Chain
 
-- **`chat.command.before_execute`** — After the command matches successfully and before actual execution — abort allowed ✅ · param changes allowed ✅
-- **`chat.command.after_execute`** — After command execution ends — abort allowed ❌ · param changes allowed ✅
+- **`chat.command.before_execute`** — After the command matches successfully and before actual execution — abort allowed · param changes allowed
+- **`chat.command.after_execute`** — After command execution ends — abort not allowed · param changes allowed
 
 ### Emoji Chain
 
-- **`emoji.maisaka.before_select`** — Before Maisaka selects an emoji — abort allowed ✅ · param changes allowed ✅
-- **`emoji.maisaka.after_select`** — After Maisaka has selected an emoji — abort allowed ✅ · param changes allowed ✅
-- **`emoji.register.after_build_description`** — After the emoji pack description is generated — abort allowed ✅ · param changes allowed ✅
+- **`emoji.receive.before_cache`** — A chat emoji missed the cache and is about to be written — abort allowed · param changes not supported
+
+  Receives `emoji_hash`, `binary_data_base64`, `session_id`. Aborting skips caching and built-in recognition for that emoji.
+- **`emoji.maintenance.before_register`** — Before a scheduled maintenance pass registers a candidate emoji — abort allowed · param changes not supported
+
+  Receives `file_name`, `file_size`. Aborting skips only the current candidate; the scan continues.
+- **`emoji.register.after_build_description`** — After the vision model generates the emoji description — abort allowed · param changes allowed
+
+  Receives `emoji`, `description`, `image_format`. Mutating the kwargs rewrites the description; aborting discards this description run.
 
 ### Jargon Chain
 
-- **`jargon.extract.before_persist`** — Before a jargon entry is written to the database — abort allowed ✅ · param changes allowed ✅
-- **`jargon.inference.before_finalize`** — Before a jargon inference result is written back — abort allowed ✅ · param changes allowed ✅
+- **`jargon.extract.before_persist`** — Before a jargon entry is written to the database — abort allowed · param changes allowed
+- **`jargon.inference.before_finalize`** — Before a jargon inference result is written back — abort allowed · param changes allowed
 
 ### Expression Chain
 
-- **`expression.select.before_select`** — Before an expression is selected — abort allowed ✅ · param changes allowed ✅
-- **`expression.select.after_selection`** — After expression selection completes — abort allowed ✅ · param changes allowed ✅
-- **`expression.learn.after_extract`** — After expression learning parses the candidates — abort allowed ✅ · param changes allowed ✅
-- **`expression.learn.before_upsert`** — Before an expression is written to the database — abort allowed ✅ · param changes allowed ✅
+- **`expression.select.before_select`** — Before an expression is selected — abort allowed · param changes allowed
+- **`expression.select.after_selection`** — After expression selection completes — abort allowed · param changes allowed
+- **`expression.learn.after_extract`** — After expression learning parses the candidates — abort allowed · param changes allowed
+- **`expression.learn.before_upsert`** — Before an expression is written to the database — abort allowed · param changes allowed
 
 ### Send Service Chain
 
-- **`send_service.after_build_message`** — After the outbound `SessionMessage` is built — abort allowed ✅ · param changes allowed ✅
-- **`send_service.before_send`** — Before calling Platform IO to send — abort allowed ✅ · param changes allowed ✅
-- **`send_service.after_send`** — After the send process completes — abort allowed ❌ · param changes allowed ❌
+- **`send_service.after_build_message`** — After the outbound `SessionMessage` is built — abort allowed · param changes allowed
+- **`send_service.before_send`** — Before calling Platform IO to send — abort allowed · param changes allowed
+- **`send_service.after_send`** — After the send process completes — abort not allowed · param changes not supported
 
 ### Maisaka Planner Chain
 
-- **`maisaka.planner.before_request`** — Before the Maisaka planner requests the model — abort allowed ❌ · param changes allowed ✅
-- **`maisaka.planner.after_response`** — After Maisaka receives the model response — abort allowed ❌ · param changes allowed ✅
+- **`maisaka.planner.before_request`** — Before the Maisaka planner requests the model — abort not allowed · param changes allowed
+- **`maisaka.planner.after_response`** — After Maisaka receives the model response — abort not allowed · param changes allowed
 
 ### Maisaka Replyer Chain
 
-- **`maisaka.replyer.before_request`** — Before the Maisaka replyer sends the model request; can read or rewrite this call's `reply_tool_args` — abort allowed ✅ · param changes allowed ✅
-- **`maisaka.replyer.before_model_request`** — After the Maisaka replyer builds the final `items` and before the model request; can rewrite the actual message list sent to the model — abort allowed ✅ · param changes allowed ✅
-- **`maisaka.replyer.after_response`** — After the Maisaka replyer receives the model response; can rewrite the reply or request regeneration — abort allowed ✅ · param changes allowed ✅
-- **`maisaka.reply.before_post_process`** — Before text post-processing of the final visible reply; can rewrite the body or adjust post-processing for this reply only — abort allowed ✅ · param changes allowed ✅
+- **`maisaka.replyer.before_request`** — Before the Maisaka replyer sends the model request; can read or rewrite this call's `reply_tool_args` — abort allowed · param changes allowed
+- **`maisaka.replyer.before_model_request`** — After the Maisaka replyer builds the final `items` and before the model request; can rewrite the actual message list sent to the model — abort allowed · param changes allowed
+- **`maisaka.replyer.after_response`** — After the Maisaka replyer receives the model response; can rewrite the reply or request regeneration — abort allowed · param changes allowed
+- **`maisaka.reply.before_post_process`** — Before text post-processing of the final visible reply; can rewrite the body or adjust post-processing for this reply only — abort allowed · param changes allowed
+- **`maisaka.reply.after_split`** — After the final reply has been split and before segment limits and merging apply; can edit the ordered text segments — abort not allowed · param changes allowed
 
 `reply_tool_args` remains visible in the expression selection chain, `maisaka.replyer.before_request`, and `maisaka.replyer.after_response`. It contains extra reply tool arguments other than the internal `msg_id`, `_reply_id`, and `_plugin_reply_prompt` parameters; modifications returned from `before_request` continue to later replyer hooks.
 
@@ -403,18 +404,17 @@ Observe mode handler return values are ignored — no need to return a control d
 
 ### Cancel an Operation with a Reason
 
-To prevent a reply or send, return `action="abort"` with a specific reason in `custom_result.reason`.
-The SDK's optional `HookResult` annotation describes this protocol; the runtime value remains a plain dictionary.
+To prevent a reply or send, return `action="abort"` with a specific reason in `custom_result.reason`. The return value is a plain dictionary.
 
 ::: code-group
 
 ```python [Python ~vscode-icons:file-type-python~]
-from maibot_sdk import HookHandler, HookResult
+from maibot_sdk import HookHandler
 from maibot_sdk.types import HookMode
 
 
 @HookHandler("maisaka.replyer.before_request", mode=HookMode.BLOCKING)
-async def guard_reply(self, request_type="", reply_message_id="", **kwargs) -> HookResult:
+async def guard_reply(self, request_type="", reply_message_id="", **kwargs) -> dict:
     if request_type == "maisaka.replyer" and not reply_message_id:
         return {
             "action": "abort",
@@ -435,7 +435,7 @@ rewrites and `retry` in the same return value; dispatch ends after the first eff
 - **Before generation** — `maisaka.replyer.before_request` / `before_model_request` cancel this generation before the model request, without model retries, switching, or failure penalties.
 - **After generation** — `maisaka.replyer.after_response` / `maisaka.reply.before_post_process` cancel this reply, stopping further regeneration, post-processing, and sending.
 - **Before sending** — `send_service.after_build_message` / `before_send` cancel the current message; receipts for already delivered segments are retained and later segments stop.
-- **Emoji selection** — `emoji.maisaka.before_select` / `after_select` cancel this emoji send.
+- **Emoji cache and registration** — `emoji.receive.before_cache` skips caching and recognition for that emoji; `emoji.maintenance.before_register` skips the current candidate; `emoji.register.after_build_description` cancels this description run.
 - **Expression selection** — `expression.select.before_select` / `after_selection` skip only expression selection. Reply generation may continue; the reason is retained in selection results and generation metrics.
 - **Receiving, commands, and learning** — Stop the corresponding message processing, command, jargon write, or emoji registration. Logs retain the handler and reason; expression learning also records the reason in its status.
 
@@ -475,33 +475,6 @@ sequenceDiagram
     HD-->>Host: Return final result
 ```
 
-## Migration Guide: WorkflowStep → HookHandler
-
-- **`@WorkflowStep(stage="pre_process")`** → **`@HookHandler("chat.receive.before_process")`** — Use named Hook points instead of fixed stages
-- **`blocking=True`** → **`mode=HookMode.BLOCKING`** — Parameter name change
-- **`observe=True`** → **`mode=HookMode.OBSERVE`** — Parameter name change
-- **`priority=10`** → **`order=HookOrder.EARLY`** — Changed to three-tier enum
-
-::: danger
-Calling `WorkflowStep(...)` directly now immediately raises `RuntimeError` — there is no compatibility mapping. You must manually replace all `@WorkflowStep` with `@HookHandler`.
-:::
-
-::: code-group
-
-```python [Python ~vscode-icons:file-type-python~]
-# Old code (SDK 1.x) — no longer works
-@WorkflowStep(stage="pre_process", blocking=True)
-async def on_pre_process(self, **kwargs):
-    ...
-
-# New code (SDK 2.0)
-@HookHandler("chat.receive.before_process", mode=HookMode.BLOCKING)
-async def on_pre_process(self, **kwargs):
-    ...
-```
-
-:::
-
 ## Verify and Troubleshoot
 
 **Verification** — reload the plugin, then trigger the chain once (for example, have the bot receive a message so `chat.receive.before_process` fires): the Runner log shows your handler's output and the message is modified or aborted as expected, which means the hook name, mode, and return value are all correct.
@@ -509,5 +482,5 @@ async def on_pre_process(self, **kwargs):
 - **Plugin registration fails** — the Host validates declarations at registration time: `hook` must be a name from the built-in list, and one wrong word (such as `chat.receive.before_processing`) fails registration, with the offending component named in the log.
 - **You declared `ErrorPolicy.ABORT` for a Hook that does not allow abort** — `send_service.after_send`, `chat.command.after_execute`, and `maisaka.planner.*` do not allow abort, so that declaration fails registration; drop the policy or subscribe to a Hook that allows abort.
 - **Your `modified_kwargs` changes are ignored** — return values are honored only in `mode=HookMode.BLOCKING`; `OBSERVE` handlers run concurrently in the background and their `modified_kwargs` and `abort` requests are discarded.
-- **The plugin raises `RuntimeError` after upgrading to SDK 2.0** — it still contains `@WorkflowStep`, which SDK 2.0 removed with no compatibility mapping; migrate to `@HookHandler` (`blocking=True` → `mode=HookMode.BLOCKING`, `priority=10` → `order=HookOrder.EARLY`).
+- **The plugin raises `RuntimeError` while loading** — it still contains `@WorkflowStep`, which was removed with no compatibility mapping. Switch to `@HookHandler` on the same checkpoint and rename the parameters to `mode` / `order`.
 - **Handlers run in an order you did not expect** — sorting is mode → order → origin → plugin ID → handler name: built-in plugins always precede third-party ones, and `HookOrder.EARLY` only moves you ahead within the same mode.

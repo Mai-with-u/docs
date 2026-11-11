@@ -6,10 +6,10 @@ import llmstxt from 'vitepress-plugin-llms'
 import timeline from 'vitepress-markdown-timeline'
 import { groupIconMdPlugin, groupIconVitePlugin } from 'vitepress-plugin-group-icons'
 import type { Token, Options } from 'markdown-it'
-import { nav as zhNav, sidebar as zhSidebar } from './sidebar/zh'
-import { nav as enNav, sidebar as enSidebar } from './sidebar/en'
-import { countWord, extractDescription } from './theme/utils/functions'
-import maiContainers from './markdown/containers'
+import { nav as zhNav, sidebar as zhSidebar } from './sidebar/zh.ts'
+import { nav as enNav, sidebar as enSidebar } from './sidebar/en.ts'
+import { countWord, extractDescription } from './theme/utils/functions.ts'
+import maiContainers from './markdown/containers.ts'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -176,7 +176,7 @@ export default defineConfig({
       }
     },
   },
-  metaChunk: true,
+  // 注：VitePress 1.x 的 metaChunk 选项在 2.x 已移除，不再需要（页面元数据自动拆分）。
   vite: {
     plugins: [
       groupIconVitePlugin({

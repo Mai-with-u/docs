@@ -3,7 +3,7 @@ title: Manifest
 ---
 # Manifest System
 
-Every MaiBot plugin must include a `_manifest.json` file in its root directory to declare the plugin's metadata, version compatibility, dependencies, and capability requirements. The `ManifestValidator` on the Host side strictly validates this file before loading.
+Every plugin needs a `_manifest.json` in its root declaring metadata, version compatibility, dependencies, and capability requirements. The Host-side `ManifestValidator` validates it strictly before loading.
 
 ::: tip Plugin metadata and runtime configuration
 - `_manifest.json`: Declares the plugin ID, version, dependencies, and capabilities and is validated and managed by the Host
@@ -36,14 +36,15 @@ Below is a complete Manifest example:
     "issues": "https://github.com/developer/my-plugin/issues"
   },
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
-    "min_version": "1.0.0",
-    "max_version": "2.9.99"
+    "min_version": "2.22.0",
+    "max_version": "2.22.99"
   },
   "dependencies": [],
+  "changelog": "CHANGELOG.md",
   "plugin_type": "tool",
   "display": {
     "icon": {
@@ -65,7 +66,7 @@ Below is a complete Manifest example:
 ## Required Fields
 
 - **`manifest_version`** `2` — Manifest protocol version, currently fixed at `2`
-- **`id`** `string` — Unique plugin identifier, formatted as lowercase letters/numbers, separated by dots or hyphens (e.g., `com.author.plugin`)
+- **`id`** `string` — Unique plugin identifier built from letters, digits, and underscores, split by dots or hyphens (e.g., `com.author.plugin`). The validator does not require lowercase — the official plugin `Mai-with-u.qq-adapter` is mixed case; the plugin market and official plugins just use lowercase by convention.
 - **`version`** `string` — Plugin version number, must be a strict three-part semantic version (e.g., `1.0.0`)
 - **`name`** `string` — Plugin display name
 - **`description`** `string` — Plugin description
@@ -134,6 +135,12 @@ Online URLs are not allowed as plugin icons. Local icons only support `.png`, `.
 - **`documentation`** · Optional — Plugin documentation URL
 - **`issues`** · Optional — Plugin issue reporting URL
 
+### changelog Update Log
+
+- **`changelog`** · Optional — Location of the update log, in one of two forms: a URL starting with `http://` / `https://`, or a relative path to a `.md` file inside the plugin directory (e.g., `CHANGELOG.md`)
+
+Absolute paths, paths containing `..`, and files without the `.md` suffix are rejected by the validator. When the field is omitted, a locally installed plugin falls back to a file named `changelog.md` at the plugin root (case-insensitive, so `CHANGELOG.md` counts); the plugin market detail page only reads the path declared here.
+
 ### host_application / sdk Version Range
 
 Both share the same structure, declaring a closed interval:
@@ -142,8 +149,8 @@ Both share the same structure, declaring a closed interval:
 
 ```json [JSON ~vscode-icons:file-type-json~]
 {
-  "min_version": "1.0.0",
-  "max_version": "1.3.99"
+  "min_version": "1.4.0",
+  "max_version": "1.4.99"
 }
 ```
 
@@ -158,11 +165,11 @@ Both share the same structure, declaring a closed interval:
 
 The two failure modes are not symmetric:
 
-- **Host out of range** — if the current Host is above `max_version` but shares its major and minor version, the plugin **still loads** with a warning only (patch-level tolerance); every other mismatch is recorded as an error and the plugin is blocked
+- **Host out of range** — if the current Host is above `max_version` while the major version matches and the minor version is at most 1 higher, the plugin **still loads** with a warning only. Anything higher is an error and the plugin is blocked; below `min_version` is always an error
 - **SDK out of range** — recorded as a warning regardless of direction, and the plugin **still loads**. Installation, updates, and Runner connections are not blocked by the SDK range; actual compatibility is decided by runtime behavior
 
 ::: danger max_version must be an explicit upper bound
-Set `max_version` to the highest major.minor version you have actually tested, followed by `.99` — for example `1.3.99` if you verified on 1.3, or `1.2.99` for 1.2. Patch releases within that minor version are accepted, and when MaiBot moves to the next minor version you re-test before widening the bound.
+Set `max_version` to the highest major.minor version you have actually tested, followed by `.99` — for example `1.4.99` if you verified on 1.4, or `1.5.99` for 1.5. Patch releases within that minor version (`1.4.10`, `1.4.37`) fall inside the range and raise nothing; a bound of `1.4.0` would warn on every patch release. Advancing one minor version (`1.5.x`) is let through by the compatibility window with a warning, which gives you time to re-test.
 
 Do not write `1.99.99`, `999.999.999`, or any other bound that does not correspond to a real version: it amounts to declaring no upper bound, and the plugin gets loaded on versions it was never verified against.
 :::
@@ -172,12 +179,12 @@ Do not write `1.99.99`, `999.999.999`, or any other bound that does not correspo
 ```json [JSON ~vscode-icons:file-type-json~]
 {
   "host_application": {
-    "min_version": "1.3.0",
-    "max_version": "1.3.99"
+    "min_version": "1.4.0",
+    "max_version": "1.4.99"
   },
   "sdk": {
-    "min_version": "2.0.0",
-    "max_version": "2.9.99"
+    "min_version": "2.22.0",
+    "max_version": "2.22.99"
   }
 }
 ```
@@ -195,8 +202,8 @@ Do not write `1.99.99`, `999.999.999`, or any other bound that does not correspo
 Declares the LLM Provider capabilities provided by the plugin, for proxy invocation by other plugins via `ctx.llm`.
 
 - **`client_type`** · Required — Unique identifier for the Provider, must exactly match the value declared in the `@LLMProvider` decorator
-- **`name`** · Required — Display name for the Provider
-- **`description`** · Optional — Functional description of the Provider
+- **`name`** · Optional · Defaults to an empty string — Display name for the Provider
+- **`description`** · Optional · Defaults to an empty string — Functional description of the Provider
 - **`version`** · Optional · Default `"1.0.0"` — Version number of the Provider
 
 ::: warning Dual Declaration Requirement
@@ -339,7 +346,7 @@ The index order follows uv's own semantics: indexes that are not `default = true
 The Manifest Validator (`ManifestValidator`) adopts Pydantic strict mode. The main validation rules include:
 
 - **No Extra Fields**: Fields not declared in `_manifest.json` are not allowed.
-- **ID Format**: Must match `^[a-z0-9]+(?:[.-][a-z0-9]+)+$` (e.g., `com.example.my-plugin`).
+- **ID Format**: Must match `^[A-Za-z0-9_]+(?:[.-][A-Za-z0-9_]+)+$` — letters, digits, and underscores split into at least two segments by dots or hyphens (e.g., `com.example.my-plugin`). Lowercase is not enforced; `Mai-with-u.qq-adapter` is valid.
 - **Version Format**: Must be a three-part `X.Y.Z` format.
 - **URL Format**: Must start with `http://` or `https://`.
 - **No Self-Dependency**: The plugin cannot depend on itself in `dependencies`.
@@ -349,8 +356,8 @@ The Manifest Validator (`ManifestValidator`) adopts Pydantic strict mode. The ma
 
 Both `host_application` and `sdk` are judged by the same validation entry point, with results split into error and warning tiers:
 
-- **Host above `max_version` with the same major.minor** — warning; the plugin loads normally (patch-level tolerance)
-- **Host out of range in any other case** — error; the plugin is blocked from loading
+- **Host above `max_version` with the same major version and at most 1 higher minor** — warning; the plugin loads normally
+- **Host out of range in any other case** — error; the plugin is blocked from loading (below `min_version`, two or more minor versions higher, or a different major version)
 - **SDK out of range** — warning; the plugin loads normally, and the log records the declared SDK range and the current SDK version
 
 The handshake-time check of the Runner's own SDK version (fixed range `[1.0.0, 2.99.99]`) is independent of the two tiers above: it is not declared by the manifest and is not affected by "Force Plugin Compatibility".
@@ -379,8 +386,8 @@ python -m json.tool _manifest.json
 :::
 
 - **`extra fields not permitted`** — the validator runs Pydantic in strict mode and rejects any field outside the declared structure: remove custom comment or scratch fields.
-- **Format errors on `id`, `version`, or `author`** — `id` must match `^[a-z0-9]+(?:[.-][a-z0-9]+)+$` (lowercase, at least one `.` or `-`), `version` and both range bounds must be strict `X.Y.Z`, and `author` must be a `{ name, url }` object whose `url` starts with `http://` or `https://`.
-- **The plugin is blocked as version-incompatible** — a Host mismatch is an error unless major and minor match (patch-level tolerance); an SDK mismatch only logs a warning and does not block loading. Once you have tested on the new version, raise the Host `max_version` to that version's major.minor plus `.99` (for example `1.4.99`), or enable "Force plugin compatibility" for triage — it needs a MaiBot restart and skips version ranges only.
+- **Format errors on `id`, `version`, or `author`** — `id` must match `^[A-Za-z0-9_]+(?:[.-][A-Za-z0-9_]+)+$` (letters, digits, and underscores, with at least one `.` or `-` splitting it into two segments; case is not restricted), `version` and both range bounds must be strict `X.Y.Z`, and `author` must be a `{ name, url }` object whose `url` starts with `http://` or `https://`.
+- **The plugin is blocked as version-incompatible** — a Host mismatch is an error unless the major version matches and the minor is at most 1 higher; an SDK mismatch only logs a warning and does not block loading. Once you have tested on the new version, raise the Host `max_version` to that version's major.minor plus `.99` (for example `1.4.99`), or enable "Force plugin compatibility" for triage — it needs a MaiBot restart and skips version ranges only.
 - **A local `display.icon` does not render or is rejected** — with `type="local"`, `value` must be a relative path inside the plugin directory ending in `.png`, `.jpg`, `.jpeg`, `.webp`, or `.svg`; online URLs are never allowed, and absolute paths, `..`, and symbolic links are refused. A failed load falls back to `fallback`.
 - **The log reports a dependency or `llm_providers` conflict** — no self-dependency, duplicate declaration, or circular dependency, and each `client_type` must match its `@LLMProvider` declaration exactly; when two plugins declare the same `client_type`, both are blocked.
 - **`ffmpeg not installed or executable not found` at runtime** — the plugin is calling a system command from the host PATH. Depend on a `python_package` that bundles a static binary (for example `imageio-ffmpeg`) and preflight it in `on_load()`; the official Docker image does not preinstall media tools.

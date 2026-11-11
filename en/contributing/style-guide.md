@@ -4,59 +4,82 @@ title: Documentation Style Guide
 
 # Documentation Style Guide
 
-::: tip One-line manifesto
-**Readers come with a problem; we give them the answer directly: conclusion first, then steps, then troubleshooting — like a friend walking them through it, not a manual reciting parameters.**
-:::
+The goal of this site is one sentence long: **readers arrive with a question and should find a usable answer on one screen.** The writing and layout follow the [DeepSeek API docs](https://api-docs.deepseek.com/zh-cn/): a single sentence on what the feature does, then a config or command you can copy, parameters as a definition list, long material folded into `::: details`, and a closing section with verification and troubleshooting only.
 
-Before writing any page, read the manifesto above, then follow the rules below. For syntax-level conventions (code groups, icons, Linkcard, no tables), see [Markdown Features](./markdown-features).
+For syntax-level conventions (code groups, icons, Linkcard, containers, no tables), see [Markdown Features](./markdown-features).
 
-## Four Iron Rules
+## Page skeleton
 
-1. **Lead with the conclusion** — Open the page with one or two sentences saying what problem this page solves and who it is for. Never open with "This article will introduce…".
-2. **Every step must be actionable** — Every value in the steps must be concrete: ports, paths, default values, button names, token names. Avoid vague instructions like "set as needed" or "configure appropriately".
-3. **End with troubleshooting** — tutorial and guide pages end with a "Verify and Troubleshoot" section: one executable verification step plus 2–5 common failure scenarios and their fixes. Reference pages (such as `api-reference`, `manifest`) are encouraged but not required to have one; index pages, FAQ, legal and meta pages do not need it.
-4. **Headings are just words** — Headings contain only the heading text itself, in the page language: no numbering, dashes, or bracketed code names ("1. Tell Mai Who It Is — [bot]" ✗ → "Tell Mai Who It Is" ✓). Put ownership details in the body or code-group labels so the "On this page" outline stays clean and scannable.
+1. **H1 is the name and nothing else** — no numbering, dashes, or bracketed code names. Put ownership details in the body or code-group labels so the "On this page" outline stays scannable.
+2. **One-sentence lead** — one or two sentences on what the feature lets the reader do. The most important information follows immediately: a command, a config block, or a short capability list.
+3. **H2 per task** — each H2 resolves one thing. Don't cut the page into "introduction / parameters / notes" boilerplate.
+4. **Parameters as a definition list** — each entry reads "name — default / accepted values / purpose". Whole config blocks stay in copyable code blocks.
+5. **Fold the long material** — full examples, edge cases, and derivations go into `::: details`.
+6. **Close with verification and troubleshooting** — tutorials and how-to guides get one executable check plus 2–5 common failures. Reference pages, index pages, FAQ, legal and meta pages don't need one.
 
-## Identify the Page Type First
-
-Before writing, decide which type this page is and follow its skeleton:
+Page types and skeletons:
 
 **Tutorial** (doing something for the first time) — Goal → Prerequisites → Numbered steps → Verification
 **How-to guide** (doing a specific thing) — Conclusion → Steps or options → Troubleshooting
-**Reference** (looking up parameters) — Definition list, field by field: name — default value, purpose
+**Reference** (looking up parameters) — Definition list, field by field: name — default, purpose
 **Concept** (understanding how it works) — Analogy → Diagram → Glossary
 
-## Tone
+## Voice
 
-- Address the reader as "you", never "the user"
-- Give direct commands: "Install NapCat", "Edit `config/bot_config.toml`" — not "you may consider"
-- Place warnings where they matter in the body, not stacked at the top of the page
-- Lead with the positive: say what the reader gains first, mention risks afterwards
-- If one sentence suffices, don't use two
+- Address the reader as "you", never "the user".
+- Give direct commands: "Run `pnpm docs:build`", "Set `host` to `0.0.0.0`" — not "you may consider".
+- One sentence per idea. Cut every adjective that carries nothing.
+- No exclamation marks, no emoji, no "simple", "easy", or "one click" marketing language.
+- Keep technical terms in English (API, Token, Hook, Plugin, WebUI, Adapter, Prompt, JSON, TOML). Don't translate them, don't quote them.
+- Explain a proper noun the first time it appears; never again.
+- Put a warning where it takes effect, not stacked at the top of the page.
 
-## Config Display: Code Block + Comments
+## Never do this
 
-For config-like content (plugin settings, config files, environment variables), **prefer a complete config template with inline comments** over item-by-item definition lists:
+1. **Narrate what's visible on screen** — skip "click the button in the top right, then pick the first item". Write only what the reader can't see: defaults, consequences, prerequisites.
+2. **Version annotations** — no "supported since 1.4.0", "older versions don't have this", "new in this release". Describe the current version as it is.
+3. **"Not A, but B"** — and its mirror, "A, not non-A". Delete any contrast that adds no information.
+4. **Vague instructions** — no "configure as appropriate" or "set it depending on your needs". Give a concrete value or explain how to choose one.
 
-- **Copy-ready** — give the full config (all sections, all fields); readers copy it and edit the commented spots
-- **Comments cover three things** — the field's purpose, its default value, and caveats (e.g. "must be greater than 0", "must match NapCat's setting")
-- **Omitted field = default value** — showing every field in the template makes defaults visible and adjustable at a glance
-- Definition lists are still fine for **expanding a single tricky field**, but full configs always go in a code block
-- Follow the markdown-features code-group convention, with `~vscode-icons:file-type-toml~` tags
+## Config display: whole template plus inline comments
 
-## Sidebar Rules
+Give a **complete config template** with every field present and commented, so the reader copies it and edits only the marked lines:
 
-The sidebar follows the same manifesto as pages: readers must be able to **find the right entry at a glance**.
+- **Complete and copyable** — include every section and field; an omitted field means the default
+- **Comments cover three things** — purpose, default value, and constraints ("must be greater than 0", "match the NapCat setting")
+- A single error-prone field can get a definition-list entry after the template, but whole configs always use a code block
+- Follow the code-group conventions in [Markdown Features](./markdown-features), with `~vscode-icons:file-type-toml~` in the label
 
-- **Grouping** — When a section has ≥5 sibling entries that readers can classify, group them. Group names state the distinguishing dimension, e.g. QQ grouped by route: "Local Client Login" / "Open Platform Bot". Avoid catch-all names like "Other" or "Misc"
-- **Entry naming** — `Name — distinguishing description`: describe what it is, who it is for, or its highlight — not "docs about X". When the name alone is self-explanatory (e.g. "Database", "Bot Config"), no description is needed
-- **Overview entry** — Each section's first item is the overview page, named "X Overview" (zh: X 概览)
-- **Mirror symmetry** — zh/en groups, entries, and order must correspond one-to-one; zh is authoritative. New pages must be added to both sidebars
-- **Positive wording** — Consistent with page tone: write "officially recommended", not "available (in testing)"
+## Sidebar rules
 
-## Style Anchors (searchable online)
+The sidebar follows the same standard as the pages: a reader must **spot the right entry at a glance**.
 
-When unsure, look up these well-known sources to align:
+- **Grouping** — group siblings when there are five or more and they fall into recognisable categories. Name the grouping dimension, such as splitting QQ by access route into "local client login" and "official platform bot"; never use catch-alls like "Other" or "Misc".
+- **Entry naming** — `Name — what sets it apart`: describe what it is, who it's for, what makes it special. Don't write "the docs for X". Drop the description when the name already distinguishes it.
+- **Overview entry** — the first entry of every section is the overview page, named "X Overview" (zh: X 概览).
+- **Mirrored structure** — zh and en share groups, entries, and order, with zh as the source of truth.
+- **Positive wording** — "officially recommended", not "available (in testing)".
 
-- Structure: **Diátaxis** (diataxis.fr) — the four-way split of tutorials / how-to guides / reference / concept
-- Tone: **Stripe Docs** (stripe.com/docs) and the **Google developer documentation style guide** (developers.google.com/style) — Voice & Tone sections
+## Style anchors
+
+- Layout and rhythm: **DeepSeek API docs** (api-docs.deepseek.com/zh-cn)
+- Structure: **Diátaxis** (diataxis.fr) — tutorial / how-to / reference / explanation
+- Voice: **Stripe docs** and the Voice & Tone chapters of the **Google developer documentation style guide**
+
+## Verification
+
+Run both from the repository root after editing:
+
+::: code-group
+
+```bash [Build ~vscode-icons:file-type-shell~]
+pnpm docs:build
+```
+
+```bash [Quality check ~vscode-icons:file-type-shell~]
+node scripts/docs-quality.mjs
+```
+
+:::
+
+The build validates dead links, container pairing, and snippet paths, and generates `llms.txt`. The quality script additionally checks zh/en symmetry, page skeleton, and the three writing bans.

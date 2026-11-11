@@ -5,7 +5,9 @@ titleTemplate: :title · Model Configuration
 
 # Model Configuration
 
-`model_config.toml` Configure the "AI brain" for Maimai — deciding which LLM models to use for different components, and how to connect to API providers.
+`model_config.toml` configures Mai's "AI brain" — which LLM model each component uses, and how to reach the API providers.
+
+The file has two layers: providers (`[[api_providers]]`), models (`[[models]]`), and web services (`[web.services.*]`) live in the **workspace's `host/model_catalog.toml`** and are shared by every Bot; each Bot's `config/model_config.toml` keeps only task assignments (`[model_task_config.*]`), task parameters, and the selected web service. The sections below describe the content by topic; the WebUI writes each part to the right file.
 
 The minimum startup requires only one LLM model and one API provider (both `models` and `api_providers` must not be empty). Full functionality also requires a VLM model (for image recognition) and an embedding model (for memory search).
 
@@ -41,11 +43,12 @@ retry_interval = 4                         # [Optional] Retry interval in second
 
 **Key Points:**
 
-- **Required**: `name` (provider name), `base_url` (endpoint URL), `api_key` (key, except when `auth_type = "none"`)
+- **Required**: `name` (provider name), `base_url` (endpoint URL), `api_key` (key; leave `api_key` empty or set `auth_type = "none"` to send without authentication)
 - **Authentication**: Default `bearer` works for most providers. Other options are `header` / `query` / `none`
 - **Client**: Default is `openai`. For Google Gemini use `"gemini"`, see [Model Extra Params](./model-extra-params.md#gemini-native-api)
 - **Responses API**: For providers supporting the OpenAI Responses protocol (e.g. DeepSeek v4 flash web search) use `"openai_responses"`, see [Model Extra Params](./model-extra-params.md#responses-api)
 - **Timeout & Retry**: `timeout` defaults to 120s and `retry_interval` to 4s. `max_retry` defaults to 3 and counts **total requests**, the first one included — so 3 means up to 2 more tries after a failure, and 0 or 1 means no retry
+- **Services without auth**: for Ollama, vLLM, intranet gateways and other services that do not check a key, leave `api_key` empty or set `auth_type = "none"`; when the service runs on another machine, point `base_url` at an address reachable from where MaiBot runs
 - See comments above for other fields, all have reasonable default values
 
 
@@ -57,6 +60,7 @@ Each `[[models]]` block defines a specific LLM model, linked to an API provider.
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 [[models]]
+model_type = "llm"                           # [Required] Model type: llm / embedding / image_embedding
 model_identifier = "deepseek-v4-flash"       # [Required] Model identifier provided by the API provider
 name = "deepseek-v4-flash"                   # [Required] Model name, must be used in model_task_config
 api_provider = "deepseek"                    # [Required] Corresponds to the provider name configured in api_providers
@@ -64,7 +68,6 @@ price_in = 1.0                               # [Optional] Input price (the non-c
 price_out = 2.0                              # [Optional] Output price, unit: CNY/M token
 cache_price_in = 0.0                         # [Optional] Cache-hit input price: 0 means hits are free; left empty in WebUI it resolves to the input price
 price_periods = []                           # [Optional] Time-based price list, see "Time-Based Pricing" below
-# cache = false                              # [Deprecated] Legacy compatibility field, no longer participates in any billing logic
 # temperature = 0.7                          # [Optional] Model-level temperature, overrides temperature in task config
 # max_tokens = 4096                          # [Optional] Model-level max token count, overrides max_tokens in task config
 # send_temperature = true                    # [Optional] Whether to send the MaiBot-managed temperature, true by default; set to false to stop sending model/task temperatures
@@ -77,8 +80,9 @@ extra_params = {}                            # [Optional] Extra parameters, see 
 
 **Key Points:**
 
-- **Required**: `model_identifier` (API identifier), `name` (custom name), `api_provider` (associated provider)
-- **Pricing**: `price_in` / `price_out` used for statistics, unit is CNY/million tokens. The cache-hit price is decided by `cache_price_in`: set it to `0` for free hits, and the non-hit portion is billed at `price_in`; the legacy `cache` field is deprecated, and whether a provider returns cache usage is auto-detected from the response
+- **Required**: `model_type` (model type), `model_identifier` (API identifier), `name` (custom name), `api_provider` (associated provider)
+- **Model type**: `llm` for ordinary chat models, `embedding` for text embeddings, `image_embedding` for image embeddings. When an old config lacks the field, the upgrade fills it in from the model name and task assignments
+- **Pricing**: `price_in` / `price_out` used for statistics, unit is CNY/million tokens. The cache-hit price is decided by `cache_price_in`: set it to `0` for free hits, and the non-hit portion is billed at `price_in`; whether a provider returns cache usage is auto-detected from the response
 - **Time-Based Pricing**: when a provider bills by time slot, use `price_periods` to override the default unit prices, see "Time-Based Pricing" below
 - **Model-level Override**: `temperature` / `max_tokens` can override task config; if not set, task defaults are used
 - **Temperature Send Switch**: `send_temperature` defaults to `true`; set it to `false` (or turn off "Send temperature parameter" in the WebUI model advanced settings) to stop MaiBot from sending any MaiBot-managed temperature for this model (model-level, task-level, and extra parameters), compatible with models that reject this parameter
@@ -278,16 +282,6 @@ selection_strategy = "random"                 # [Optional] Model selection strat
 hard_timeout = 240.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [mid_memory (chat recall) ~vscode-icons:file-type-toml~]
-# [Optional] Chat recall: compresses clipped chat history into a summary. Falls back to fast_model when empty, and to utils when fast_model is also empty.
-[model_task_config.mid_memory]
-model_list = []                               # [Optional] Model name list (→ falls back to fast_model → utils)
-max_tokens = 8192                             # [Optional] Maximum output token count
-temperature = 0.7                             # [Optional] Model temperature
-selection_strategy = "random"                 # [Optional] Model selection strategy
-hard_timeout = 180.0                          # [Optional] Hard timeout (seconds)
-```
-
 ```toml [learner (learning) ~vscode-icons:file-type-toml~]
 # [Optional] Learning model: expression learning and jargon learning. Falls back to utils when empty.
 [model_task_config.learner]
@@ -297,7 +291,7 @@ hard_timeout = 120.0                          # [Optional] Hard timeout (seconds
 ```
 
 ```toml [fast_model (quick small tasks) ~vscode-icons:file-type-toml~]
-# [Optional] Fast model: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences. Choose a model that responds quickly. Falls back to utils when empty; chat recall also falls back here when empty.
+# [Optional] Fast model: small jobs that need an answer right away, such as picking expressions and splitting replies into sentences. Choose a model that responds quickly. Falls back to utils when empty.
 [model_task_config.fast_model]
 model_list = []                               # [Optional] List of model names (→ falls back to utils)
 max_tokens = 8192                             # [Optional] Maximum output token count
@@ -370,20 +364,14 @@ A provider can be saved with an empty model list. Configure its name, API URL, a
 
 When `model_list` for some tasks is empty, other tasks are automatically reused:
 
-```
-         ┌────────────┐
-         │ fast_model │◄──── mid_memory (falls back when empty)
-         └────────────┘
-              │
-              │ falls back when empty
-              ▼
-         ┌──────────┐
-         │  utils   │◄──── learner (falls back when empty)
-         └──────────┘
+```text
+fast_model empty → use utils
+learner    empty → use utils
 
-memory · emoji · vlm · voice · embedding · image_embedding → No automatic fallback when empty, caller will skip or throw an error
+memory · emoji · vlm · voice · embedding · image_embedding
+  → no automatic fallback when empty; the caller skips the task or raises
 
-emoji special logic: emoji has model -> use emoji, planner is full visual -> use planner, otherwise -> use vlm
+emoji special logic: emoji has a model → use emoji; planner is fully visual → use planner; otherwise → use vlm
 ```
 
 **Two special rules for embedding models**: `embedding` and `image_embedding` **ignore `selection_strategy`** and always take the first available model in `model_list` order — this keeps the vector space consistent and never rotates between models; in WebUI these two tasks are also rendered as **single-select model pickers**. When `image_embedding` is left empty, image memory directly shows "model unavailable" and does not fall back to the text embedding model.
@@ -392,5 +380,5 @@ emoji special logic: emoji has model -> use emoji, planner is full visual -> use
 
 - Advanced model parameters (thinking mode, reasoning intensity): [Model Extra Params](./model-extra-params.md)
 - Configure the bot: see [Bot Configuration](./bot-config.md)
-- Connect to QQ: [Unified QQ Connector](../adapters/qq-local-client.md)
+- Connect to QQ: [OneBot Adapter](../adapters/qq-local-client.md)
 - Manage WebUI: [WebUI Configuration Management](../webui/config-management.md)
