@@ -112,7 +112,9 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: '命令管理', link: '/manual/webui/command-management' },
       { text: '聊天管理', link: '/manual/webui/chat-management' },
       { text: '记忆管理', link: '/manual/webui/memory-management' },
+      { text: '学习管理', link: '/manual/webui/learning' },
       { text: '统计与观察', link: '/manual/webui/statistics' },
+      { text: '日志', link: '/manual/webui/logs' },
       { text: '文件与附件', link: '/manual/webui/files' },
       { text: '数据管理', link: '/manual/webui/data-management' },
     ]

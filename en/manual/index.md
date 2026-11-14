@@ -50,7 +50,7 @@ Once that works, send MaiBot a message. A reply means both the model and the pla
 
 **[Connect platforms](./adapters/)** — Adapter selection and setup: QQ, Telegram, WeChat ClawBot, email, iMessage, voice calls.
 
-**[WebUI](./webui/)** — Login, editing config, chat and observation, statistics, file management, data migration.
+**[WebUI](./webui/)** — Login, editing config, chat and observation, learning, statistics, logs, file management, data migration.
 
 **[Plugins](./plugins/)** — Install, enable, and update plugins from the plugin market.
 
