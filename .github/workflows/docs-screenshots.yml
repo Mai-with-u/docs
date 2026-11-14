@@ -1,0 +1,150 @@
+# 改动页面截图
+#
+# 每次 push 到 main（含 PR 合并）后，找出本次改动涉及的文档页面，
+# 用 Playwright 渲染整页截图，然后：
+#   1. 作为 artifact 上传（保留 30 天，含 gallery.html 离线相册）
+#   2. 强制推送到 docs-screenshots 分支，README 内嵌全部截图
+#   3. 在该提交下发表评论，内嵌部分截图，供所有人审阅
+name: Docs Page Screenshots
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      base:
+        description: 对比基线（留空则使用 HEAD^）
+        required: false
+        type: string
+
+concurrency:
+  group: docs-screenshots-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  PLAYWRIGHT_VERSION: '1.64.1'
+
+jobs:
+  screenshots:
+    name: Render changed pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build docs
+        run: pnpm docs:build
+
+      - name: Resolve changed files
+        id: changed
+        env:
+          EVENT_BEFORE: ${{ github.event.before }}
+          INPUT_BASE: ${{ inputs.base }}
+        run: |
+          BASE="${INPUT_BASE:-$EVENT_BEFORE}"
+          if [ -z "$BASE" ] \
+            || [ "$BASE" = "0000000000000000000000000000000000000000" ] \
+            || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null \
+            || ! git merge-base --is-ancestor "$BASE" HEAD; then
+            BASE="$(git rev-parse HEAD^ 2>/dev/null || true)"
+          fi
+
+          if [ -n "$BASE" ]; then
+            git diff --name-only --diff-filter=ACMR "$BASE" HEAD > .changed-files.txt
+          else
+            git ls-tree -r --name-only HEAD > .changed-files.txt
+          fi
+
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          echo "对比基线：${BASE:-（空仓库）}"
+          echo "改动文件 $(wc -l < .changed-files.txt) 个"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Install Playwright
+        run: |
+          npm install --prefix "$RUNNER_TEMP/playwright" --no-save --no-package-lock --no-fund --no-audit "playwright@${PLAYWRIGHT_VERSION}"
+          "$RUNNER_TEMP/playwright/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Render changed pages
+        env:
+          PLAYWRIGHT_PATH: ${{ runner.temp }}/playwright/node_modules/playwright
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          node scripts/docs-screenshots.mjs \
+            --changed .changed-files.txt \
+            --out .screenshots \
+            --sha "$GITHUB_SHA" \
+            --base "${{ steps.changed.outputs.base }}" \
+            --repo "$GITHUB_REPOSITORY"
+
+      - name: Upload screenshots artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-screenshots-${{ github.sha }}
+          path: .screenshots
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Publish screenshots branch
+        id: publish
+        run: |
+          COUNT=$(node -e "console.log(require('./.screenshots/manifest.json').pages.length)" 2>/dev/null || echo 0)
+          echo "pages=$COUNT" >> "$GITHUB_OUTPUT"
+
+          if [ "$COUNT" = "0" ]; then
+            echo "本次没有改动页面，跳过截图分支发布"
+            exit 0
+          fi
+
+          cd .screenshots
+          git init -q
+          git checkout -q -b docs-screenshots
+          git add -A
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -qm "screenshots: ${GITHUB_SHA:0:7}"
+          git push -q --force \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            docs-screenshots
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment screenshots on commit
+        if: steps.publish.outputs.pages != '0'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          jq -Rs '{body: .}' .screenshots/comment.md > .screenshots/comment.json
+          gh api --method POST \
+            "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" \
+            --input .screenshots/comment.json

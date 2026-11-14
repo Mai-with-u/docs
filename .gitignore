@@ -150,6 +150,10 @@ package-lock.json
 .sisyphus
 .omo
 
+# 改动页面截图产物（CI 生成）
+.screenshots/
+.changed-files.txt
+
 # Python 字节码（质量脚本的 py_compile 检查可能产生）
 __pycache__/
 *.pyc
