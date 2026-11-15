@@ -46,6 +46,8 @@ Feature changes and fixes for each release, newest first. The current release is
 * Stickers use two-dimensional tags and match by mood or visual content; existing stickers are tagged and indexed in batches.
 * Typo correction moves into the built-in Mai Toolbox plugin, and its settings migrate automatically. `/pm` joins command management with operator permissions, disabling, and aliases.
 * Plugin commands can be scoped to users and chats. Within the same major version, plugins one minor release behind can load in compatibility mode.
+* The plugin runtime drops support for the legacy Action component; old plugins must migrate to Tool components.
+* Dynamic speaking rules lose the master switch, global wildcard, and default fallback.
 * The desktop pet supports remote connections on Windows and Android, and exposes more interfaces to plugins.
 * Desktop pets: the Tauri build signs in to a local or remote WebUI and supports screen reading, to-dos, reminders, and exploration. The Android build adds a floating character, chat, to-dos, and exploration history.
 * Models and Git: configure and test local or intranet model services, and clone or update intranet Git repositories directly.
