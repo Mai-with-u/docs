@@ -211,6 +211,8 @@ ban_words = ["天气", "气温", "温度"]
 
 ## Keyword Rule Configuration Error
 
+Keyword reactions now belong to the built-in Mai Tools (Chinese typo) plugin and are no longer written into `bot_config.toml`. Old configuration is migrated into the plugin at startup, and the `[keyword_reaction]` section in `bot_config.toml` stops participating in runtime afterwards.
+
 **What you may see**
 
 - Startup fails with `关键词规则必须至少包含keywords或regex中的一个`
@@ -224,26 +226,27 @@ ban_words = ["天气", "气温", "温度"]
 2. Is `reaction` filled in? It is required, not optional metadata.
 3. Does the regex compile under Python's `re` syntax?
 
-**Step 1: Use the fields the rule class actually has**
-`KeywordRuleConfig` has exactly three fields. There is no `priority` or `enabled` switch:
+**Step 1: Write rules in the plugin configuration**
+Keywords and regex share one `rules` list, and each rule decides which field it matches on; `enabled` is a plugin-level switch, not a per-rule one:
 
 ::: code-group
 
-```toml [config/bot_config.toml ~vscode-icons:file-type-toml~]
+```toml [config/builtin_plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
 [keyword_reaction]
+enabled = true          # When off, no keyword rule matches
 
 # Keyword-only rule: triggers when any keyword is found
-[[keyword_reaction.keyword_rules]]
+[[keyword_reaction.rules]]
 keywords = ["你好", "hello", "嗨"]
 reaction = "The other side is greeting; answer in a casual tone"
 
 # Regex-only rule: regex uses Python re syntax
-[[keyword_reaction.regex_rules]]
+[[keyword_reaction.rules]]
 regex = ["^早(上|安)[~！!]"]
 reaction = "The other side says good morning; keep the reply short"
 
 # Keywords and regex can coexist; either match triggers
-[[keyword_reaction.keyword_rules]]
+[[keyword_reaction.rules]]
 keywords = ["天气"]
 regex = ["(今天|明天|后天).*(天气|气温|温度)"]
 reaction = "The other side asks about weather; ask for the city first"
@@ -251,7 +254,7 @@ reaction = "The other side asks about weather; ask for the city first"
 
 :::
 
-`reaction` is a prompt for Mai, not a message sent verbatim. Capture groups in `regex` are substituted into matching placeholders in `reaction`.
+`reaction` is a prompt for Mai, not a message sent verbatim. Capture groups in `regex` are substituted into the matching `[name]` placeholders in `reaction`.
 
 **Step 2: When several rules match**
 Every matching rule appends its `reaction` in configuration order, and the combined list goes to the Planner. There is no priority field and no "higher priority overrides lower" behavior.
@@ -259,6 +262,7 @@ Every matching rule appends its `reaction` in configuration order, and the combi
 To scope guidance to one chat, use `[chat.reply_style].chat_prompts`; keyword rules have no scoping fields.
 
 **Step 3: Debug "no effect"**
+- Check the plugin is enabled: `enabled` under `[plugin]` is `true`, and `[keyword_reaction].enabled` is also `true`.
 - Check the match window: rules apply to the latest message and recent context, not to old history.
 - Full-width and half-width punctuation differ. `你好，` and `你好,` are two different keywords; list both if you need both.
 - A bad regex raises `无效的正则表达式` at startup instead of failing silently.
@@ -268,7 +272,6 @@ To scope guidance to one chat, use `[chat.reply_style].chat_prompts`; keyword ru
 - **Prefer keywords over regex** — Keyword matching is plain substring matching: readable, and it cannot fail to compile
 - **Validate regex on regex101.com with Python syntax** before pasting it into config
 - **Write `reaction` as an instruction, not a script** — "keep the reply short" outperforms a hardcoded line
-
 
 ## Related
 

@@ -73,6 +73,9 @@ price_periods = []                           # [可选] 分时价格列表，见
 # send_temperature = true                    # [可选] 是否发送 MaiBot 管理的 temperature，默认 true；设为 false 后模型/任务温度均不发送
 force_stream_mode = false                    # [可选] 强制流式输出模式，模型不支持非流式输出时设为 true
 visual = false                               # [可选] 是否为多模态模型（支持视觉输入）
+max_images = 0                               # [可选] 单次请求的图片数量上限（含长图切片）；0 = 不限制，超限时保留最近的图片
+image_max_side = 8000                        # [可选] 图片长边上限（像素），超限按比例缩小、长截图分段；默认 8000
+image_min_side = 1                           # [可选] 图片短边下限（像素），小图等比例放大；默认 1，不得大于 image_max_side
 extra_params = {}                            # [可选] 额外参数，详见 模型额外参数
 ```
 
@@ -87,6 +90,9 @@ extra_params = {}                            # [可选] 额外参数，详见 �
 - **模型级覆盖**：`temperature` / `max_tokens` 可覆盖任务配置，不设则使用任务默认值
 - **温度发送开关**：`send_temperature` 默认 `true`；设为 `false`（对应 WebUI 模型高级设置中关闭"发送 temperature 参数"）后，MaiBot 不再向该模型发送任何由它管理的 temperature（模型级、任务级与附加参数中的温度），兼容不接受该参数的模型
 - **视觉**：`visual = true` 表示支持图像输入，用于 `vlm` 任务
+- **图片数量上限**：`max_images` 默认 `0`，表示单次请求不限图片数；超限时保留最近的图片，更早的换成占位文字，长图切片各算一张
+- **图片长边上限**：`image_max_side` 默认 `8000` 像素，长边超限的图片等比例缩小；超长截图按段切开，每段不超过该值，段与段之间保留重叠
+- **图片短边下限**：`image_min_side` 默认 `1` 像素，短边不足的小图等比例放大；放大后会顶破长边上限时改为补边，内容不丢。取值大于 `image_max_side` 时校验失败，报 `图片最小边长不得超过最大边长`
 - **`extra_params`**：服务商特有参数（思考模式、推理强度等），详见 [模型额外参数](./model-extra-params.md)
 
 
@@ -300,16 +306,6 @@ selection_strategy = "balance"                # [可选] 模型选择策略
 hard_timeout = 120.0                          # [可选] 硬超时（秒）
 ```
 
-```toml [emoji（表情包选择） ~vscode-icons:file-type-toml~]
-# [可选] 表情包选择：从候选表情包中选出合适的一张发送。
-# 选择优先级：emoji 有模型→用 emoji，planner 全视觉→用 planner，否则→用 vlm
-# 替换旧表情的决策：优先用 emoji，未配置时用 planner
-[model_task_config.emoji]
-model_list = []                               # [可选] 模型名称列表
-max_tokens = 8192                             # [可选] 最大输出 token 数
-hard_timeout = 120.0                          # [可选] 硬超时（秒）
-```
-
 ```toml [vlm（看图） ~vscode-icons:file-type-toml~]
 # [强烈建议] 看图说话：理解图片内容。需 visual=true 的多模态模型。
 [model_task_config.vlm]
@@ -368,10 +364,8 @@ hard_timeout = 60.0                           # [可选] 硬超时（秒）
 fast_model 留空 → 改用 utils
 learner    留空 → 改用 utils
 
-memory · emoji · vlm · voice · embedding · image_embedding
+memory · vlm · voice · embedding · image_embedding
   → 留空不自动回退，调用方跳过或报错
-
-emoji 特殊逻辑：emoji 有模型 → 用 emoji；planner 全视觉 → 用 planner；否则 → 用 vlm
 ```
 
 **嵌入模型的两个特殊规则**：`embedding` 与 `image_embedding` 会**忽略 `selection_strategy`**，始终按 `model_list` 顺序取第一个可用模型——这是为了保证向量空间一致，不会在多个模型之间轮换；WebUI 里这两个任务也呈现为**单选模型**。`image_embedding` 留空时图片记忆直接显示"模型不可用"，不会回退到文本嵌入模型。

@@ -69,7 +69,7 @@ The three prompts each cover one thing:
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_timing]
-talk_value = 1.0             # Group talk frequency: lower is quieter; 0.3~0.5 is notably quiet
+talk_value = 1.0             # Group viewing frequency: base probability per batch of entering the Planner; 0.3~0.5 is notably quiet
 private_reply_paused = false # Pause all private replies: true = private chats only receive and store messages
 inevitable_at_reply = true   # Try to reply when @-mentioned
 mentioned_bot_reply = true   # Reply more easily when a message mentions Mai's name
@@ -77,7 +77,7 @@ mentioned_bot_reply = true   # Reply more easily when a message mentions Mai's n
 
 :::
 
-Use speaking-rate rule groups to set a frequency for a specific chat and time window. For example, drop QQ group 123456 to 0.3 overnight:
+Use dynamic viewing rule groups to set a viewing probability for a specific chat and time window. For example, drop QQ group 123456 to 0.3 overnight:
 
 ::: code-group
 
@@ -202,15 +202,20 @@ multiple_probability = 0  # [Advanced] Chance to temporarily inject one alternat
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat]
-creative_mode = true             # Build the prompt once per reply to keep expression varied and cut stock AI phrasing; disabling may raise cache hit rate
 enable_reply_at = true           # Let Mai @-mention people at the start of a reply; the model decides when
-max_context_size = 50            # How many recent messages a group reply considers; more context costs more tokens
-max_private_context_size = 75    # Recent messages considered for private replies
+max_context_size = 50            # How many recent messages a group reply considers, 30~300; more context costs more tokens
+max_private_context_size = 75    # Recent messages considered for private replies, 30~300
+use_token_limit = false          # Groups switch to the actual input token usage returned by the model for context trimming, instead of a message count
+max_context_tokens = 128000      # Trim old history once group input reaches this token count, 16000~1000000
+private_use_token_limit = false  # Same switch for private chats
+private_max_context_tokens = 128000  # Token trimming threshold for private chats, 16000~1000000
 ```
 
 :::
 
-When the context is nearly full, Mai compresses the older conversation into a state summary and always sends it with the Planner context. Summary length comes from a built-in policy with no setting. Chat recall and long-term memory are handled by A_Memorix, see [A_Memorix Configuration](./amemorix-config.md).
+When the context is nearly full, Mai compresses the older conversation into a state summary and always sends it with the Planner context. Summary length comes from a built-in policy with no setting.
+
+With the token limit on, `max_context_size` / `max_private_context_size` no longer set a message count; trimming is triggered by the actual input token usage returned in the model response instead. Usage comes from the response, so a single request can exceed the threshold. Chat recall and long-term memory are handled by A_Memorix, see [A_Memorix Configuration](./amemorix-config.md).
 
 #### When to Speak
 
@@ -221,20 +226,16 @@ When the context is nearly full, Mai compresses the older conversation into a st
 message_debounce_mode = "natural"          # Group message debouncing: off / fast / natural / steady
 private_message_debounce_mode = "natural"  # Private message debouncing, independent of the group mode
 planner_message_steering = false           # Quick reaction mode: new messages during thinking/output/wait immediately join and restart reasoning
-talk_value = 1                             # Group talk frequency: 0~1, lower is quieter
+talk_value = 1                             # Group viewing frequency: base probability per batch of entering the Planner; 0 never looks, 1 uses the full probability
 private_reply_paused = false               # Pause all private replies: true = private chats only receive and store messages, without thinking
 private_reply_pause_rules = []             # Per-platform and per-user overrides of the global private pause
 mentioned_bot_reply = true                 # Reply more easily when a message mentions Mai's name
 inevitable_at_reply = true                 # Try to reply when @-mentioned
-no_action_backoff_base_seconds = 15        # After consecutive no-reply decisions, how long to wait before the next check (seconds)
-no_action_backoff_cap_seconds = 300        # [Advanced] Upper bound of the backoff wait (seconds)
-no_action_backoff_start_count = 2          # [Advanced] Start slowing down after this many consecutive no-replies
-no_action_backoff_bypass_pending_count = 6 # [Advanced] Re-process immediately once this many new messages pile up; 0 = never bypass by count
 ```
 
 :::
 
-**Speaking-rate rule groups** — `active_group` selects the group in effect; rules inside it match on platform, chat, and time window, and chats matching no rule fall back to `talk_value`. Create, copy, and switch groups in WebUI.
+**Dynamic viewing rule groups** — viewing probability is managed in rule groups: `active_group` selects the group in effect; rules inside it match on platform, chat, and time window, and chats matching no rule fall back to `talk_value`. Create, copy, and switch groups in WebUI.
 
 ::: code-group
 
@@ -251,7 +252,7 @@ platform = "qq"          # Empty = any platform; "*" = any platform
 item_id = "123456"       # Empty = any chat; "*" = any chat
 rule_type = "group"      # group / private
 time = "23:00-02:00"     # Empty = fallback, "*" = all day, overnight windows supported
-value = 0.3              # Rate under this rule: 0 is quieter, 1 is the normal rate
+value = 0.3              # External viewing probability under this rule, 0 to 1; 0 never looks proactively
 ```
 
 :::
@@ -260,10 +261,10 @@ value = 0.3              # Rate under this rule: 0 is quieter, 1 is the normal r
 
 - **`off`** — keeps the original wait logic, including the short wait after a new message interrupts processing
 - **`fast`** — quiet 1 s, active 3 s; same sender continuing 1 s, different sender 0.5 s. Misses split follow-ups more easily
-- **`natural` (default)** — quiet 2 s, active 5 s; same sender continuing 2 s, different sender 0.5 s
-- **`steady`** — quiet 4 s, active 7 s; same sender continuing 4 s, different sender 2 s. Gives follow-ups more time, but also waits longer when none arrive
+- **`natural` (default)** — groups: quiet 2.5 s, active 6 s, same sender continuing 2.5 s, different sender 1 s; private: quiet 2 s, active 5 s, continuing 2 s
+- **`steady`** — groups: quiet 5 s, active 9 s, same sender continuing 5 s, different sender 3 s; private: quiet 4 s, active 7 s, continuing 4 s. Gives follow-ups more time, but also waits longer when none arrive
 
-A batch is the messages merged and sent to the Planner together. If the previous effective message is more than 30 seconds old (or there is no history), the chat is quiet; otherwise it is active. Continuation and sender changes compare only with the immediately previous message. A batch opened by a bare image waits at least 4 seconds, and stickers inside a batch cannot extend the wait. Each batch waits at most 8 seconds from the first message actually received, or at most 1 second after an @ mention or name mention. A mode change applies from the next effective message; choosing Off ends an in-progress fixed-rule wait. Private chats only have the quiet and continuation rhythms, with no sender-change rule.
+A batch is the messages merged and sent to the Planner together. If the previous effective message is more than 30 seconds old (or there is no history), the chat is quiet; otherwise it is active. Continuation and sender changes compare only with the immediately previous message. A batch opened by a bare image waits at least 4 seconds and later messages still recompute by the continuation rule; stickers inside a batch cannot extend the wait but can end it early. Counted from the first message actually received, a group batch waits at most 8, 10, or 12 seconds for fast, natural, and steady, and a private batch at most 8 seconds; an @ mention or name mention caps a group batch at 1, 2, or 3.5 seconds, consecutive mentions take the earliest cap, and a private mention ends the wait immediately. Caps take priority over every other waiting rule. A mode change applies from the next effective message and does not reset the batch or mention caps; choosing Off ends an in-progress fixed-rule wait. A private chat only has you and Mai, so sender changes never come into play.
 
 **Pausing private replies** — with `private_reply_paused = true`, all private chats only receive messages and maintain history without entering thinking; `private_reply_pause_rules` overrides the global setting per platform and user, and can also be toggled per chat stream in the WebUI or set back to follow the global setting:
 
@@ -354,7 +355,6 @@ The whole section is advanced; everything is off by default — opt in per featu
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [experimental]
 passive_replyer = false               # Passive reply: when the Planner outputs text without calling tools, the text guides one reply
-reply_cache = false                   # Reuse this round's Planner request prefix and append only the creative reply, cutting repeated cost
 super_creative_mode = false           # Super creative: the Replyer first writes in the chosen language, then the same model translates back to Chinese
 super_creative_language = "ja-JP"     # Language used for super creative generation: "ja-JP" / "ru-RU" / "fr-FR" / "zh-classical"
 desktop_pet_exploration_enabled = false  # Let the desktop pet start exploration tasks and reuse what it learned in the owner's chat
@@ -362,7 +362,7 @@ desktop_pet_exploration_enabled = false  # Let the desktop pet start exploration
 focus_mode = false        # Focus: chats in the same group share one continuously thinking Planner
 focus_on_private = false  # Whether Focus also applies to private chats
 focus_chat_whitelist = [] # Focus whitelist; empty = all chats matching the type switches may enter
-focus_groups = []         # Focus sharing groups: same group shares the Planner and full context, different groups do not preempt
+focus_groups = []         # Focus groups: same group shares the Planner and full context, different groups do not preempt
 
 [experimental.group_attention_drift]
 enabled = false                   # Group attention drift: more easily drawn to new topics, memes, and contrast
@@ -385,7 +385,7 @@ reaction_style = "lively"
 
 **Attention drift** — group and private chats each have a full set of settings; the switch, level, anchor policy, and reaction style are independent. `drift_level` sets the drift amplitude (`subtle` most restrained, `wild` most active), `anchor_policy` how strongly the topic is pulled back, and `reaction_style` the density of short reactions and interjections.
 
-**Focus** — `focus_mode = true` lets chats in the same group share one continuously thinking Planner: all messages enter a shared context, tools address a target through `session_id`, sessions collaborate, waits are unified, and an @ mention wakes the thinking early. `focus_groups` splits chats into sharing groups that do not preempt each other; unmatched chats each form their own group. `focus_chat_whitelist` limits which chats enter Focus; empty means all chats matching the type switches may enter.
+**Focus** — `focus_mode = true` lets chats in the same group share one continuously thinking Planner: all messages enter a shared context, tools address a target through `session_id`, sessions collaborate, waits are unified, and an @ mention wakes the thinking early. `focus_groups` splits chats into groups that do not preempt each other; unmatched chats each form their own group. `focus_chat_whitelist` limits which chats enter Focus; empty means all chats matching the type switches may enter.
 
 **Learning rules are not in this section** — expression and jargon learning scopes are configured in `[expression].learning_list` / `[jargon].learning_list`; see [Learning Systems](#learning-systems). The old `[experimental]` learning fields have been removed.
 
@@ -403,16 +403,19 @@ ban_msgs_regex = []         # Filter messages by regex; invalid regex fails conf
 
 #### Keyword Reactions
 
-When a keyword or regex matches, Mai receives an extra **reaction prompt**, used as an instruction for generating a reply:
+When a keyword or regex matches, Mai receives an extra **reaction prompt**, used as an instruction for generating a reply. This belongs to the built-in Mai Tools (Chinese typo) plugin and is written in the plugin configuration, not `bot_config.toml`:
 
 ::: code-group
 
-```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[[keyword_reaction.keyword_rules]]
+```toml [config/builtin_plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
+[keyword_reaction]
+enabled = true                 # Plugin-level switch; when off, no rule matches
+
+[[keyword_reaction.rules]]
 keywords = ["早上好"]          # Match any one to trigger; at least one of keywords/regex is required
 reaction = "现在是早晨，愉快地打招呼"  # Required: the reaction hint shown to Mai
 
-[[keyword_reaction.regex_rules]]
+[[keyword_reaction.rules]]
 regex = ["^早(上|安)[~！!]"]   # For complex text rules, Python re syntax
 reaction = "对方在问早，简短回应即可"
 ```
@@ -421,7 +424,9 @@ reaction = "对方在问早，简短回应即可"
 
 **Key points:**
 
-- Every rule must satisfy all of: at least one of `keywords`/`regex` present, `reaction` filled, and all regexes valid — otherwise startup fails.
+- Keywords and regex now share one `rules` list, and each rule decides whether it matches on `keywords` or `regex`
+- Every rule must satisfy all of: at least one of `keywords`/`regex` present, `reaction` filled, and all regexes valid — otherwise startup fails
+- The legacy `[keyword_reaction]` section in `bot_config.toml` is migrated into the plugin configuration at startup and stops participating in runtime after that
 
 ### Learning Systems
 
@@ -448,7 +453,7 @@ learning_blacklist = []               # Sources to skip, matched exactly by plat
 
 **Key points:**
 
-- **`use_vector_expression`** — expression selection has two modes: `false` fast (default), which injects a weighted random pick directly without an extra model call; `true` fine, which uses expression intent and embedding recall followed by LLM filtering, and needs an embedding model. The retro reply mode does not use expression selection.
+- **`use_vector_expression`** — expression selection has two modes: `false` fast (default), which injects a weighted random pick directly without an extra model call; `true` fine, which uses expression intent and embedding recall followed by LLM filtering, and needs an embedding model. The Mai Replier adapter does not enable expression selection.
 - **`expression_checked_only`** — defaults to `false`, so expressions you have not curated are used as well; set it to `true` if Mai should only use expressions you have reviewed
 - **`learning_list`** — each rule covers one scope: `use` controls whether learned content is used, `learn` whether learning continues, and `type` accepts `"group"`/`"private"`. There are three ways to write the scope, and the most specific one wins:
   - **A specific chat** — fill in `item_id` (group number or user ID); `platform` is optional
@@ -562,6 +567,7 @@ The master switch for typo generation and response splitting:
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [response_post_process]
 enable_response_post_process = true  # Master switch; off disables both typos and splitting
+remove_bracket_content = true        # Strip brackets and the Chinese text inside them; off keeps bracketed action asides, protected kaomoji are unaffected
 typing_speed = 1.0                   # [Advanced] Simulated typing speed: 0 fastest / 1 default / 2 slower (0~2)
 ```
 
@@ -573,7 +579,7 @@ Typos are handled by the built-in "Mai's Toolkit" plugin and configured in that 
 
 ::: code-group
 
-```toml [plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
+```toml [config/builtin_plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
 [plugin]
 enabled = true                    # Enable Mai's Toolkit
 config_version = "1.0.0"          # Plugin config version, managed by the program
@@ -940,7 +946,7 @@ Then watch the log or the WebUI: once the file is saved, a successful config-rel
 
 **Mai ignores people** — check in order: does the host adapter policy allow this group (see "Add the allow scope first, then test" in the [OneBot Adapter](/en/manual/adapters/qq-local-client)); is `talk_value` set too low; does `qq_account` match the adapter's logged-in QQ.
 
-**Mai floods the chat** — lower `talk_value` (e.g. 0.3), or use a speaking-rate rule group to lower this one chat's rate; `response_splitter.max_sentence_num` and `max_split_num` cap the messages in a single reply.
+**Mai floods the chat** — lower `talk_value` (e.g. 0.3), or use a dynamic viewing-rate rule group to lower this one chat's rate; `response_splitter.max_sentence_num` and `max_split_num` cap the messages in a single reply.
 
 **Manually added fields disappear** — the config file is upgraded by the program, and unknown or misspelled fields (e.g. `max_context_size` misspelled as `max_context_len`) are cleaned back to defaults on the next start. Launch once to let the program generate/upgrade the file, then edit the generated fields.
 

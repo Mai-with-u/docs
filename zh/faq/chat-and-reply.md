@@ -12,10 +12,9 @@ title: 聊天与回复
 
 影响回复倾向的开关：
 
-- **`[chat.reply_timing].talk_value`** — 群聊发言频率，0 最安静，1 按正常频率。
+- **`[chat.reply_timing].talk_value`** — 群聊查看频率，每批消息进入 Planner 的基础概率；0 不主动查看，1 每批都查看。
 - **`[chat.reply_timing].inevitable_at_reply`** — 被 @ 时尽量回复，默认开启。
 - **`[chat.reply_timing].mentioned_bot_reply`** — 消息提到名字时更容易回复。
-- **`no_action_backoff_*`** — 连续几次不回复后自动放慢检查节奏，来新消息会提前唤醒。
 
 改完观察一段时间再决定下一步，不要一次调好几个值。
 
@@ -23,9 +22,9 @@ title: 聊天与回复
 
 按范围从大到小调：
 
-**整体频率** — 调 `[chat.reply_timing].talk_value`，0.3~0.5 明显话少。
+**整体频率** — 调 `[chat.reply_timing].talk_value`，0.3~0.5 明显话少。这个值是每批消息进入 Planner 的概率，不等于实际回复比例：麦麦真的开始一轮思考后，连续几次查看的概率会往上走，静默一段时间后重新按基础概率判定。
 
-**单个群或时段** — 用动态发言规则组。当前生效的组由 `[chat.reply_timing.talk_rule_groups].active_group` 指定，组内规则按平台、群号、时段匹配：
+**单个群或时段** — 用动态查看规则组。当前生效的组由 `[chat.reply_timing.talk_rule_groups].active_group` 指定，组内规则按平台、群号、时段匹配：
 
 ::: code-group
 
@@ -41,7 +40,7 @@ platform = "qq"          # 留空 = 不限定平台
 item_id = "123456"       # 留空 = 不限定聊天
 rule_type = "group"      # group 群聊 / private 私聊
 time = "23:00-02:00"     # 留空为兜底，"*" 表示全天
-value = 0.3              # 这个群这个时段更安静
+value = 0.3              # 这个群这个时段的外部查看概率，0 不主动查看
 ```
 
 :::
@@ -54,7 +53,7 @@ value = 0.3              # 这个群这个时段更安静
 
 先确认适配器是否把机器人自己发出的消息又当成入站消息送回来，并检查适配器里填的机器人 QQ 号是否正确。
 
-再检查插件是否拦截并重发了消息、`[message_receive]` 的过滤规则、以及发言频率设置。链路正常但 Planner 仍然反复回复自己时，换一个 Planner 模型对比一次；不要只凭这个现象断定模型有质量问题。
+再检查插件是否拦截并重发了消息、`[message_receive]` 的过滤规则、以及查看频率设置。链路正常但 Planner 仍然反复回复自己时，换一个 Planner 模型对比一次；不要只凭这个现象断定模型有质量问题。
 
 ## 连续发多条消息，为什么只处理了前一条？
 
@@ -62,8 +61,10 @@ value = 0.3              # 这个群这个时段更安静
 
 - **`off`** — 不合并，沿用原有等待逻辑。
 - **`fast`** — 安静 1 秒、活跃 3 秒，响应最快，容易漏接分段补充。
-- **`natural`** — 默认档，安静 2 秒、活跃 5 秒。
-- **`steady`** — 安静 4 秒、活跃 7 秒，给补充消息留更多时间。
+- **`natural`** — 默认档，安静 2.5 秒、活跃 6 秒。
+- **`steady`** — 安静 5 秒、活跃 9 秒，给补充消息留更多时间。
+
+整批上限按档位递增：快速 8 秒、自然 10 秒、沉稳 12 秒；被 @ 或提及时分别最多等 1 秒、2 秒、3.5 秒。
 
 想要消息一到就打断当前思考并重新推理，开 `[chat.reply_timing].planner_message_steering`（快速反应模式，只作用于群聊）。
 
@@ -73,7 +74,7 @@ value = 0.3              # 这个群这个时段更安静
 
 常见原因按影响排序：
 
-- `max_context_size` / `max_private_context_size` 太大，每轮塞进去的消息过多。
+- `max_context_size` / `max_private_context_size` 太大，每轮塞进去的消息过多；改用 Token 上限（`use_token_limit` + `max_context_tokens`）可以按实际输入用量裁切。
 - 模型本身响应慢，或服务商排队。
 - 开了「超长工具结果整理」（`[capabilities].tool_result_condense`）会多一次模型请求。
 - 插件 Hook 阻塞，看 `[plugin_runtime].hook_blocking_timeout_sec` 附近有没有告警。

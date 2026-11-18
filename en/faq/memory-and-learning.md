@@ -47,7 +47,7 @@ Not necessarily. Results distinguish **exact hash matches** (identical content) 
 
 ## Can image memory leak across chats?
 
-Image retrieval and text retrieval **share the same chat-stream scope resolution**: by default only the current chat stream is searched, global sharing follows the global rules when enabled, and configured sharing groups see each other. Chat streams that do not share memory cannot see each other's images, matching the boundary for text memory.
+Image retrieval and text retrieval **share the same chat-stream scope resolution**: by default only the current chat stream is searched, global sharing follows the global rules when enabled, and chats inside the same sharing group see each other. Chat streams that do not share memory cannot see each other's images, matching the boundary for text memory.
 
 ## Are emoji remembered?
 

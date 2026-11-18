@@ -22,12 +22,14 @@ Workspace layout:
     config.toml         Host config: listen address, cookies, public URL
     model_catalog.toml  Shared providers, API keys, models, web services
     webui.json          WebUI login credentials
-    sessions.sqlite3    Login sessions
+    sessions.sqlite3    Login session digests and login source
     run.lock            Host runtime lease
     control.json        Control channel address and credentials
   bots/<bot_id>/
     config/ data/ logs/ plugins/ temp/
 ```
+
+The host handles all WebUI login. A fixed-password login uses a Cookie valid for 7 days: within that window you are signed in automatically after closing the browser or restarting the host, checking login state does not extend the Cookie, and an expired or cleared Cookie means signing in again. The browser stores only a random ticket; `sessions.sqlite3` stores only a digest bound to the current password plus the login source. Signing out revokes the current session; changing or resetting the password revokes every session. Temporary passwords and the one-minute single-use login link still expire when the host restarts. Upgrading keeps unexpired sessions; expired ones need a fresh sign-in.
 
 ## Managing bots
 

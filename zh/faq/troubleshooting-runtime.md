@@ -31,22 +31,24 @@ title: 运行与数据错误排查
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
-# 检查关键词规则
-[[keyword_reaction.keyword_rules]]
+# config/builtin_plugins/chinese_typo/config.toml
+[keyword_reaction]
+enabled = true                  # 插件级开关，关闭后所有规则都不匹配
+
+[[keyword_reaction.rules]]
 keywords = ["你好", "hello"]    # 确保包含你发送的消息
 reaction = "你好呀！"
-enabled = true                  # 确保规则启用
 ```
 
 :::
 
-**步骤 3：检查发言频率**
+**步骤 3：检查查看频率**
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 # config/bot_config.toml
 [chat.reply_timing]
-talk_value = 1                  # 群聊发言意愿（0-1），越小越安静；默认 1
+talk_value = 1                  # 群聊查看频率（0-1），每批消息进入 Planner 的基础概率；默认 1
 private_reply_paused = false    # 私聊暂停回复：确认不是 true
 ```
 

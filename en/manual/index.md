@@ -60,7 +60,7 @@ Once that works, send MaiBot a message. A reply means both the model and the pla
 
 **[Personality](./personality.md)** — Keep several profiles, import JSON, and hot-swap between them.
 
-**[Chat scenes](./chat-scenes.md)** — Talk-rule groups, quick reaction, Focus, and reply templates.
+**[Chat scenes](./chat-scenes.md)** — Viewing frequency, dynamic viewing-rule groups, debouncing, Focus, and one-off schedules.
 
 **[Files](./files.md)** — Send, receive, save, and read chat attachments.
 

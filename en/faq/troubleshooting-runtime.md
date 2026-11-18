@@ -31,22 +31,24 @@ If all of these appear, MaiBot itself is fine — it might be a platform permiss
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
-# Check keyword rules
-[[keyword_reaction.keyword_rules]]
+# config/builtin_plugins/chinese_typo/config.toml
+[keyword_reaction]
+enabled = true                  # Plugin-level switch; when off, no rule matches
+
+[[keyword_reaction.rules]]
 keywords = ["你好", "hello"]    # Make sure it includes the message you sent
 reaction = "你好呀！"
-enabled = true                  # Make sure the rule is enabled
 ```
 
 :::
 
-**Step 3: Check Speech Frequency**
+**Step 3: Check Viewing Frequency**
 ::: code-group
 
 ```toml [TOML ~vscode-icons:file-type-toml~]
 # config/bot_config.toml
 [chat.reply_timing]
-talk_value = 1                  # Group talk willingness (0-1); lower is quieter. Default 1
+talk_value = 1                  # Group viewing rate (0-1), the base probability a batch reaches the Planner. Default 1
 private_reply_paused = false    # Private replies paused: make sure this is not true
 ```
 

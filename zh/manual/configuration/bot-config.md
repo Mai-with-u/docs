@@ -67,7 +67,7 @@ multiple_probability = 0  # 按概率随机换成上面的备用风格；0 = 不
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat.reply_timing]
-talk_value = 1.0             # 群聊发言频率：越小越安静，0.3~0.5 明显话少
+talk_value = 1.0             # 群聊查看频率：每批消息进入 Planner 的基础概率，0.3~0.5 明显话少
 private_reply_paused = false # 暂停所有私聊回复：true = 私聊只收消息不回复
 inevitable_at_reply = true   # 被 @ 时尽量回复
 mentioned_bot_reply = true   # 消息提到麦麦名字时更容易回复
@@ -75,7 +75,7 @@ mentioned_bot_reply = true   # 消息提到麦麦名字时更容易回复
 
 :::
 
-想让麦麦按群、按时段分别调整频率，用动态发言规则组。例如，把 QQ 群 123456 在夜间的发言频率调到 0.3：
+想让麦麦按群、按时段分别调整查看概率，用动态查看规则组。例如，把 QQ 群 123456 在夜间的查看概率调到 0.3：
 
 ::: code-group
 
@@ -200,15 +200,20 @@ multiple_probability = 0  # [进阶] 每次回复按此概率临时注入一条�
 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [chat]
-creative_mode = true             # 用单次构建的 Prompt 激发表达多样性，减少 AI 刻板句式；关闭可能提高缓存命中率
 enable_reply_at = true           # 允许麦麦在回复开头 @ 人；要不要 @ 由模型看聊天内容决定
-max_context_size = 50            # 群聊回复参考最近多少条消息；越大越懂上下文，也更耗 token
-max_private_context_size = 75    # 私聊参考的最近消息数量
+max_context_size = 50            # 群聊回复参考最近多少条消息，取值 30~300；越大越懂上下文，也更耗 token
+max_private_context_size = 75    # 私聊参考的最近消息数量，取值 30~300
+use_token_limit = false          # 群聊改用模型返回的实际输入 Token 用量触发上下文裁切，不再按消息条数限制
+max_context_tokens = 128000      # 群聊输入达到此 Token 数后裁切旧历史，取值 16000~1000000
+private_use_token_limit = false  # 私聊同样改用 Token 用量触发裁切
+private_max_context_tokens = 128000  # 私聊的 Token 裁切阈值，取值 16000~1000000
 ```
 
 :::
 
-上下文快满时，麦麦会自动把更早的对话压缩成状态摘要，始终随 Planner 上下文发送；摘要长度由程序内置策略决定，没有对应配置项。聊天回想与长期记忆由 A_Memorix 负责，见 [A_Memorix 配置](./amemorix-config.md)。
+上下文快满时，麦麦会自动把更早的对话压缩成状态摘要，始终随 Planner 上下文发送；摘要长度由程序内置策略决定，没有对应配置项。
+
+打开 Token 上限后，`max_context_size` / `max_private_context_size` 就不再决定消息条数，改由模型响应里返回的实际输入 Token 用量触发裁切。用量来自模型响应，单次请求可能超过阈值。聊天回想与长期记忆由 A_Memorix 负责，见 [A_Memorix 配置](./amemorix-config.md)。
 
 #### 什么时候发言
 
@@ -219,20 +224,16 @@ max_private_context_size = 75    # 私聊参考的最近消息数量
 message_debounce_mode = "natural"          # 群聊消息防抖：off 关闭 / fast 快速 / natural 自然 / steady 沉稳
 private_message_debounce_mode = "natural"  # 私聊消息防抖：档位与群聊独立
 planner_message_steering = false           # 快速反应模式：思考/输出/等待期间收到新消息立即接入并重新推理
-talk_value = 1                             # 群聊发言频率：0~1，越小越安静
+talk_value = 1                             # 群聊查看频率：每批消息进入 Planner 的基础概率，0 不主动查看，1 按满概率查看
 private_reply_paused = false               # 暂停所有私聊回复：true = 私聊只收消息并维护历史，不进入思考
 private_reply_pause_rules = []             # 按平台与用户单独覆盖全局私聊暂停设置
 mentioned_bot_reply = true                 # 消息提到麦麦名字时更容易回复
 inevitable_at_reply = true                 # 被 @ 时尽量回复
-no_action_backoff_base_seconds = 15        # 连续决定不回复后，下次检查前先等多久（秒）
-no_action_backoff_cap_seconds = 300        # [进阶] 退避等待的上限（秒）
-no_action_backoff_start_count = 2          # [进阶] 连续几次不回复后开始放慢检查
-no_action_backoff_bypass_pending_count = 6 # [进阶] 等待期间新消息达到几条就立刻重新处理；0 = 不按条数打断
 ```
 
 :::
 
-**动态发言规则组** — 发言频率按规则组管理：`active_group` 指定当前生效的组，组内规则按平台、聊天和时段匹配，没命中任何规则的聊天回落到 `talk_value`。规则组可以在 WebUI 里创建、复制和切换。
+**动态查看规则组** — 查看概率按规则组管理：`active_group` 指定当前生效的组，组内规则按平台、聊天和时段匹配，没命中任何规则的聊天回落到 `talk_value`。规则组可以在 WebUI 里创建、复制和切换。
 
 ::: code-group
 
@@ -249,7 +250,7 @@ platform = "qq"          # 留空 = 不限定平台；"*" = 任意平台
 item_id = "123456"       # 留空 = 不限定聊天；"*" = 任意聊天
 rule_type = "group"      # group 群聊 / private 私聊
 time = "23:00-02:00"     # 留空为兜底，"*" 为全天，也支持跨夜时段
-value = 0.3              # 该规则下的发言频率：0 更安静，1 按正常频率
+value = 0.3              # 该规则下的外部查看概率，取值 0 到 1；0 不主动查看
 ```
 
 :::
@@ -258,10 +259,10 @@ value = 0.3              # 该规则下的发言频率：0 更安静，1 按正�
 
 - **`off`（关闭）** — 沿用原有等待逻辑，包括被新消息打断后的短暂等待
 - **`fast`（快速）** — 安静 1 秒、活跃 3 秒；同一人续发 1 秒、换人 0.5 秒，更容易漏接分段补充
-- **`natural`（自然，默认）** — 安静 2 秒、活跃 5 秒；同一人续发 2 秒、换人 0.5 秒
-- **`steady`（沉稳）** — 安静 4 秒、活跃 7 秒；同一人续发 4 秒、换人 2 秒，给补充消息留更多时间，但没有补充时也更慢
+- **`natural`（自然，默认）** — 群聊安静 2.5 秒、活跃 6 秒，同一人续发 2.5 秒、换人 1 秒；私聊安静 2 秒、活跃 5 秒，续发 2 秒
+- **`steady`（沉稳）** — 群聊安静 5 秒、活跃 9 秒，同一人续发 5 秒、换人 3 秒；私聊安静 4 秒、活跃 7 秒，续发 4 秒，给补充消息留更多时间，但没有补充时也更慢
 
-一批指合并后一起送入判断的消息。上一条有效消息距今超过 30 秒（或没有历史）算安静，否则算活跃；续发与换人只和紧邻的上一条消息比较。裸图开启的新批次至少等 4 秒，批次内纯表情包不能延长等待；整批从第一条实际收到起最多等 8 秒，被 @ 或提及后最多等 1 秒。换档位从下一条有效消息起生效，选择关闭会结束正在进行的固定规则等待。私聊只有安静与续发两档节奏，没有换人判断。
+一批指合并后一起送入判断的消息。上一条有效消息距今超过 30 秒（或没有历史）算安静，否则算活跃；续发与换人只和紧邻的上一条消息比较。裸图开启的新批次至少等 4 秒，后续消息仍按续发规则重算；批次内纯表情包不能延长等待，但可以提前结束。整批从第一条实际收到起，群聊按快速、自然、沉稳分别最多等 8、10、12 秒，私聊一律 8 秒；被 @ 或提及时群聊分别最多等 1、2、3.5 秒，连续提及取最早上限，私聊提及直接结束等待。上限优先于其他等待规则。换档位从下一条有效消息起生效，不重置批次或提及上限；选择关闭会结束正在进行的固定规则等待。私聊只有你和麦麦两方，用不到换人判断。
 
 **私聊暂停** — `private_reply_paused = true` 后所有私聊只接收消息并维护历史，不进入思考；`private_reply_pause_rules` 按平台和用户单独覆盖全局设置，也可以在 WebUI 的聊天流设置中切换或恢复跟随全局：
 
@@ -352,7 +353,6 @@ tool_result_condense_threshold = 3000  # [进阶] 触发整理的字符数，最
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [experimental]
 passive_replyer = false               # 被动回复：Planner 不调用工具而输出正文时，把正文当作自然语言指导启动一次回复
-reply_cache = false                   # 复用本轮 Planner 请求前缀，只追加创意回复内容，降低重复开销
 super_creative_mode = false           # 超级创意：Replyer 先用所选语言生成，再由同一模型翻回中文
 super_creative_language = "ja-JP"     # 超级创意使用的生成语言："ja-JP" / "ru-RU" / "fr-FR" / "zh-classical"
 desktop_pet_exploration_enabled = false  # 允许桌宠发起探索任务，并在主人聊天中复用探索经验
@@ -360,7 +360,7 @@ desktop_pet_exploration_enabled = false  # 允许桌宠发起探索任务，并�
 focus_mode = false        # Focus：同组聊天共享一个持续思考的 Planner
 focus_on_private = false  # Focus 是否也作用于私聊
 focus_chat_whitelist = [] # Focus 白名单；留空 = 所有符合开关的聊天都可进入
-focus_groups = []         # Focus 共享组：同组共享 Planner 与完整上下文，不同组互不抢占
+focus_groups = []         # Focus 分组：同组共享 Planner 与完整上下文，不同组互不抢占
 
 [experimental.group_attention_drift]
 enabled = false                   # 群聊注意力漂移：更容易被新话题、梗、反差点吸引
@@ -383,7 +383,7 @@ reaction_style = "lively"
 
 **注意力漂移** — 群聊与私聊各有一套完整配置，开关、档位、回钩策略和短反应风格互不影响。`drift_level` 决定漂移幅度（`subtle` 最克制，`wild` 最活跃），`anchor_policy` 决定漂移后多强地拉回当前话题，`reaction_style` 决定短句与语气词的使用密度。
 
-**Focus** — `focus_mode = true` 让同组聊天共享一个持续思考的 Planner：全部消息共同进入上下文，工具通过 `session_id` 指定处理目标，跨会话协作、统一等待，被 @ 时提前唤醒。`focus_groups` 把聊天分成共享组，不同组互不抢占，未匹配的聊天各自成组；`focus_chat_whitelist` 限定哪些聊天进入 Focus，留空表示所有符合聊天类型开关的聊天都可进入。
+**Focus** — `focus_mode = true` 让同组聊天共享一个持续思考的 Planner：全部消息共同进入上下文，工具通过 `session_id` 指定处理目标，跨会话协作、统一等待，被 @ 时提前唤醒。`focus_groups` 把聊天分成组，不同组互不抢占，未匹配的聊天各自成组；`focus_chat_whitelist` 限定哪些聊天进入 Focus，留空表示所有符合聊天类型开关的聊天都可进入。
 
 **学习规则不在实验段** — 表达方式与黑话的学习范围由 `[expression].learning_list` / `[jargon].learning_list` 配置，详见[学习系统](#学习系统)；旧的 `[experimental]` 学习字段已移除。
 
@@ -401,16 +401,19 @@ ban_msgs_regex = []         # 按正则过滤消息；非法正则会导致配�
 
 #### 关键词反应
 
-命中关键词或正则后，给麦麦追加一段**反应提示**，作为生成回复的指令：
+命中关键词或正则后，给麦麦追加一段**反应提示**，作为生成回复的指令。这部分是内置插件「麦麦小工具」的配置，写在插件配置里，不在 `bot_config.toml`：
 
 ::: code-group
 
-```toml [bot_config.toml ~vscode-icons:file-type-toml~]
-[[keyword_reaction.keyword_rules]]
+```toml [config/builtin_plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
+[keyword_reaction]
+enabled = true                 # 插件级总开关，关闭后所有规则都不匹配
+
+[[keyword_reaction.rules]]
 keywords = ["早上好"]          # 命中任意一个即触发；至少填 keywords 或 regex 之一
 reaction = "现在是早晨，愉快地打招呼"  # 必填：命中后给麦麦的反应提示
 
-[[keyword_reaction.regex_rules]]
+[[keyword_reaction.rules]]
 regex = ["^早(上|安)[~！!]"]   # 适合复杂文本规则，Python re 语法
 reaction = "对方在问早，简短回应即可"
 ```
@@ -419,7 +422,9 @@ reaction = "对方在问早，简短回应即可"
 
 **要点：**
 
+- 关键词和正则现在是同一个 `rules` 列表，每条规则自己决定用 `keywords` 还是 `regex` 匹配
 - 每条规则必须同时满足：`keywords` 或 `regex` 至少填一个、`reaction` 必填、正则合法，否则启动报错
+- `bot_config.toml` 里的旧 `[keyword_reaction]` 节会在启动时自动迁入插件配置，之后不再参与运行时
 
 ### 学习系统
 
@@ -446,7 +451,7 @@ learning_blacklist = []               # 不学习的来源，按平台与用户 
 
 **要点：**
 
-- **`use_vector_expression`** — 表达选择分两档：`false` 快速（默认），加权随机抽取表达直接注入，不额外调用模型；`true` 精细，用表达意图与嵌入召回，再由 LLM 按语境筛选，需配置嵌入模型。复古回复不使用表达选择。
+- **`use_vector_expression`** — 表达选择分两档：`false` 快速（默认），加权随机抽取表达直接注入，不额外调用模型；`true` 精细，用表达意图与嵌入召回，再由 LLM 按语境筛选，需配置嵌入模型。Mai Replier 适配不启用表达选择。
 - **`expression_checked_only`** — 默认 `false`，即未经人工精选的表达也会参与；如果你只想让麦麦使用你审核过的表达，改为 `true`
 - **`learning_list`** — 每条规则管一个范围，`use` 控制是否使用已学内容，`learn` 控制是否继续学习，`type` 可选 `"group"` / `"private"`。范围有三种写法，越具体的越优先：
   - **指定聊天** — 填 `item_id`（群号或 QQ 号），`platform` 可填可不填
@@ -560,6 +565,7 @@ enable_asr = false  # 开启后把语音消息识别成文字再处理；需在 
 ```toml [bot_config.toml ~vscode-icons:file-type-toml~]
 [response_post_process]
 enable_response_post_process = true  # 总开关；关闭后错别字和回复分割都不生效
+remove_bracket_content = true        # 清理括号及其包裹的中文内容；关闭后保留括号动作描写，已保护的颜文字不受影响
 typing_speed = 1.0                   # [进阶] 模拟打字速度：0 最快 / 1 默认 / 2 更慢（0~2）
 ```
 
@@ -571,7 +577,7 @@ typing_speed = 1.0                   # [进阶] 模拟打字速度：0 最快 / 
 
 ::: code-group
 
-```toml [plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
+```toml [config/builtin_plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
 [plugin]
 enabled = true                    # 启用麦麦小工具
 config_version = "1.0.0"          # 插件配置版本，由程序管理
@@ -937,7 +943,7 @@ python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb')); pr
 
 **麦麦不理人** — 依次检查：宿主适配器策略有没有放行这个群（见 [OneBot 适配器](../adapters/qq-local-client.md) 的「先加名单，再测试」）；`talk_value` 是否被调得过低；`qq_account` 与适配器登录的 QQ 是否一致。
 
-**麦麦刷屏话痨** — 调低 `talk_value`（如 0.3），或用发言规则组给这个群单独降频；`response_splitter.max_sentence_num` 和 `max_split_num` 限制单次回复条数。
+**麦麦刷屏话痨** — 调低 `talk_value`（如 0.3），或用动态查看规则组给这个群单独降频；`response_splitter.max_sentence_num` 和 `max_split_num` 限制单次回复条数。
 
 **手动加的字段被删掉** — 配置文件由程序自动升级，不存在或拼写错误的字段（如把 `max_context_size` 拼成 `max_context_len`）会在下次启动时被清理回默认值。先启动一次让程序生成/升级文件，再在生成的字段上改值。
 

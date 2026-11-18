@@ -51,6 +51,10 @@ Runtime locks such as `data/.a_memorix_runtime_writer.lock`, and the `data/promp
 
 Delete the old copy only after the new location works. When restoring a WebUI zip, the backend validates the manifest and rejects symlinks, `..` traversal, and top-level directories outside the allowlist before unpacking.
 
+## I changed my QQ number — how do I bring the memory along?
+
+No full backup and restore needed. Use [Person migration](/en/manual/webui/person-migration) to merge the old ID's person profile and long-term memory into the new one, then point the adapter at the new ID. Historical messages and old sessions stay with the old number and are not moved.
+
 ## `maibot host adopt` vs. copying the directory
 
 `adopt` registers an existing instance into the workspace without converting data:

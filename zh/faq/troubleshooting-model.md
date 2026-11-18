@@ -211,6 +211,8 @@ ban_words = ["天气", "气温", "温度"]
 
 ## 关键词规则配置错误
 
+关键词反应现在是内置插件「麦麦小工具」的配置，不再写在 `bot_config.toml` 里。旧配置在启动时自动迁入插件，`bot_config.toml` 里的 `[keyword_reaction]` 节随后不再参与运行时。
+
 **可能看到的现象**
 
 - 启动时报 `关键词规则必须至少包含keywords或regex中的一个`
@@ -224,26 +226,27 @@ ban_words = ["天气", "气温", "温度"]
 2. `reaction` 填了吗？它是必填项，不是可选说明
 3. 正则能在 Python 的 `re` 语法下编译通过吗？
 
-**步骤 1：按规则类的真实字段写**
-`KeywordRuleConfig` 只有三个字段，没有 `priority`、`enabled` 之类的开关：
+**步骤 1：在插件配置里写规则**
+关键词和正则合并到同一个 `rules` 列表，每条规则自己决定用哪个字段匹配；`enabled` 是插件级总开关，不是单条规则的开关：
 
 ::: code-group
 
-```toml [config/bot_config.toml ~vscode-icons:file-type-toml~]
+```toml [config/builtin_plugins/chinese_typo/config.toml ~vscode-icons:file-type-toml~]
 [keyword_reaction]
+enabled = true          # 关闭后不再匹配任何关键词规则
 
 # 纯关键词规则：keywords 命中任意一个即触发
-[[keyword_reaction.keyword_rules]]
+[[keyword_reaction.rules]]
 keywords = ["你好", "hello", "嗨"]
 reaction = "对方在打招呼，用日常语气回应"
 
 # 纯正则规则：regex 用 Python re 语法
-[[keyword_reaction.regex_rules]]
+[[keyword_reaction.rules]]
 regex = ["^早(上|安)[~！!]"]
 reaction = "对方在问早，简短回应即可"
 
 # 关键词和正则可以同时写，任一命中都触发
-[[keyword_reaction.keyword_rules]]
+[[keyword_reaction.rules]]
 keywords = ["天气"]
 regex = ["(今天|明天|后天).*(天气|气温|温度)"]
 reaction = "对方在问天气，先问清城市再回答"
@@ -251,7 +254,7 @@ reaction = "对方在问天气，先问清城市再回答"
 
 :::
 
-`reaction` 是给麦麦看的提示，不会原样当成消息发出去。`regex` 里可以用捕获组，`reaction` 中对应位置会被匹配内容替换。
+`reaction` 是给麦麦看的提示，不会原样当成消息发出去。`regex` 里可以用捕获组，`reaction` 里的 `[名称]` 会替换为同名捕获组的内容。
 
 **步骤 2：多条规则同时命中的行为**
 所有命中的规则会按配置顺序把 `reaction` 依次追加到提示里，最后一起交给 Planner 参考。没有优先级字段，也没有「高优先级覆盖低优先级」的机制。
@@ -259,6 +262,7 @@ reaction = "对方在问天气，先问清城市再回答"
 想让引导只在该聊天下生效，配 `[chat.reply_style].chat_prompts`，关键词规则本身没有作用域字段。
 
 **步骤 3：排查「没反应」**
+- 确认插件已启用：`[plugin]` 下的 `enabled` 为 `true`，且 `[keyword_reaction].enabled` 也是 `true`。
 - 确认匹配范围：规则只看最新消息和近期聊天内容，很久以前的发言不会触发。
 - 全角与半角标点有区别，`你好，` 和 `你好,` 是两条不同的关键词；要两种都生效就都写进去。
 - 正则写错会在启动时直接抛 `无效的正则表达式`，不会静默失效。

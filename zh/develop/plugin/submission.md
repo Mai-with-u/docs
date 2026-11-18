@@ -17,3 +17,11 @@ title: 提交与发布插件
 ## 审核规则
 
 首次提交由 CI 校验，维护者批准后上架。新版本在每日同步时校验并审核，低风险版本自动收录，有风险或结论不确定时交给维护者。首次提交校验失败，按 Issue 提示修复后评论 `/recheck`。完整要求见[官方贡献指南](https://github.com/Mai-with-u/plugin-repo/blob/main/CONTRIBUTING.md)。
+
+## 验证与排错
+
+**验证**：在插件市场搜到自己的插件，能看到名称、简介和版本号；装到实例后插件页能加载出你的配置表单。
+
+- **Issue 里提示 manifest 校验失败** — 对照报错检查 `_manifest.json` 的必填字段和 `version` 三段式格式，改完评论 `/recheck` 重新触发。
+- **插件搜不到** — 确认第一个 GitHub Release 已经发布，且仓库地址与 manifest 里的 ID 对应。
+- **装了但配置表单是空的** — `config_model` 没有正确声明，或 `config.toml` 没有被 manifest 引用。

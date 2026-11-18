@@ -4,7 +4,7 @@ title: 在浏览器里改配置
 
 # 在浏览器里改配置
 
-「麦麦设置」（`/config/bot`）把 `bot_config.toml` 的全部配置节做成分节表单：改完自动保存，也可以手动保存、编辑源文件或管理共享组。
+「麦麦设置」（`/config/bot`）把 `bot_config.toml` 的全部配置节做成分节表单：改完自动保存，也可以手动保存、编辑源文件或管理相通组。
 
 ## 三种编辑方式
 
@@ -13,7 +13,7 @@ title: 在浏览器里改配置
 ::: fields
 - **详细设置** — 分节表单，覆盖 `bot_config.toml` 的所有配置节。不确定的选项悬停看说明。
 - **命令管理** — 插件命令与执行权限，见[命令管理](./command-management.md)。
-- **共享组设置** — 把多个聊天流编成一组，让它们共享表达方式、黑话或长期记忆。
+- **共享组设置** — 打开[相通组](./sharing-groups)管理页面，把多个聊天流编成一组，让它们共享表达方式、黑话或长期记忆。
 - **源文件编辑** — 直接编辑 `bot_config.toml` 原文，适合懂 TOML 的人。
 :::
 
@@ -25,17 +25,13 @@ title: 在浏览器里改配置
 
 手机宽度的屏幕上，栏目会排成一行可横滑的胶囊。
 
-## 共享组设置
+## 相通组
 
-共享组把多个聊天流编成一组，共享同一套学习成果：
+相通组把多个聊天流编成一组，共享同一套学习成果。组的增删改查在[相通组](./sharing-groups)页面，这里只给出入口。
 
-::: fields
-- **表达共享组** — 写入 `expression_groups`。
-- **黑话共享组** — 写入 `jargon_groups`。
-- **记忆共享组** — 写入 `a_memorix.shared_memory_groups`。
-:::
+配置文件里的 `expression_groups`、`jargon_groups`、`a_memorix.shared_memory_groups` 是旧字段：只在首次启动时导入一次，导入完成后不再参与运行时，页面上也不再提供它们的编辑控件。直接改配置文件不会覆盖已经导入的组。
 
-打开 `a_memorix.global_memory_sharing_enabled` 后，记忆共享组在页面上变为只读。
+打开 `a_memorix.global_memory_sharing_enabled` 后，记忆共享按全聊天规则处理。
 
 ## 模型管理
 
@@ -81,5 +77,5 @@ title: 在浏览器里改配置
 
 - **保存失败** — 看页面上的错误提示；字段值非法时后端会点名具体字段。也可以先做语法自检：`python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb'))"`。
 - **改了没生效** — 对照「改完生效的时机」：监听地址与端口、`[maim_message]`、`[plugin_runtime]`、看门狗需要重启宿主。
-- **共享组改了没反应** — 记忆共享组在 `a_memorix.global_memory_sharing_enabled` 打开时只读，需要先关掉总共享开关。
+- **相通组改了没反应** — 旧字段只在首次导入时读一次，之后以[相通组](./sharing-groups)页面里的数据库记录为准；在配置文件里改不会生效。
 - **源文件编辑保存后表单错乱** — 源文件里写坏了结构；用「手动保存」前的状态或配置副本回滚。

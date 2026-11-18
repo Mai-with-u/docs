@@ -330,7 +330,7 @@ The WebUI password lives in `access_token` of `host/webui.json`, not in `bot_con
 **Method 3: Clear the browser login state**
 The browser stores the session in a `maibot_host_session_*` cookie. Changing the password, restarting the host, or signing out revokes every session, so you must log in again. Manually: F12 → Application → Cookies, delete that cookie, then refresh.
 
-A session lasts 8 hours, and restarting the host does not extend it.
+A session is governed by a Cookie valid for 7 days, and restarting the host does not extend it; once the Cookie expires or is cleared, sign in again.
 
 **Prevent it next time**
 

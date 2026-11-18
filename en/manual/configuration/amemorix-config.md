@@ -128,13 +128,13 @@ targets = [
 
 :::
 
-- **`global_memory_sharing_enabled`** — Whether ordinary memory queries search across **all** chat streams. Disabled by default
-- **`shared_memory_groups`** — List of sharing groups; chat streams in the same group share memories with each other. Empty by default
+- **`global_memory_sharing_enabled`** — Legacy global sharing switch, used only for the first import into standalone sharing groups; manage it on the [Sharing groups](/en/manual/webui/sharing-groups) page afterwards. Disabled by default
+- **`shared_memory_groups`** — Legacy memory groups, used only for the first import into standalone sharing groups; manage them on the [Sharing groups](/en/manual/webui/sharing-groups) page afterwards. Empty by default
 
 **Impact of changes**:
 
 - Enabling `global_memory_sharing_enabled` is a **global opening**: any query from any group or private chat can hit memories from every chat stream. Private matters discussed in group A may be spoken out by MaiMai in group B. Don't enable it unless you explicitly want an omniscient bot
-- `shared_memory_groups` is the controlled middle ground: only streams in the same group see each other; everything outside the group stays isolated. Suitable for scenarios like "several groups of the same person"
+- `shared_memory_groups` is the controlled middle ground: only streams in the same group see each other; everything outside the group stays isolated. Suitable for scenarios like "several groups of the same person". For new setups, create groups on the [Sharing groups](/en/manual/webui/sharing-groups) page; the legacy `shared_memory_groups` only imports historical configuration once
 - These options only affect **retrieval scope**; writes are still attributed to the chat stream they came from
 - In `targets`, `item_id` takes the group number or user QQ number, `rule_type` is `group` or `private`; `item_id = "*"` matches any chat stream on that platform
 

@@ -16,7 +16,7 @@ title: 常见问题
 
 **[适配器连接](./adapters.md)** — OneBot 适配器、QQ 官方机器人、内置 Telegram 与微信适配器。
 
-**[聊天与回复](./chat-and-reply.md)** — 发言频率规则组、消息防抖、自我回复和回复速度。
+**[聊天与回复](./chat-and-reply.md)** — 查看频率规则组、消息防抖、自我回复和回复速度。
 
 **[模型与 API](./models-and-api.md)** — API Key、无鉴权服务、内网模型、视觉模型和 embedding。
 

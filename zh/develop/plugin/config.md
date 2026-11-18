@@ -112,7 +112,7 @@ Field(
 - **`default`** `Any` — 字段默认值
 - **`default_factory`** `Callable` — 默认值工厂函数，用于 `list`、`dict`、嵌套 `PluginConfigBase` 等可变类型
 - **`description`** `str` — 字段描述，WebUI 中显示为表单标签
-- **`json_schema_extra`** `dict` — 额外元数据，传递给 WebUI Schema 生成器。常用键: `placeholder`（输入框占位符文本）、`group`（UI 分组提示）
+- **`json_schema_extra`** `dict` — 额外元数据，传递给 WebUI Schema 生成器。常用键: `placeholder`（输入框占位符文本）、`group`（UI 分组提示）、`x-widget`（指定控件，`target` 渲染为群 / 用户多选，见[目标选择](./target-selector)）
 
 ### __ui_label__
 
@@ -165,6 +165,7 @@ class PluginSection(PluginConfigBase):
 
 - `placeholder`：输入框的占位符提示文本
 - `group`：WebUI 中的配置分组提示
+- `x-widget`：指定 WebUI 渲染的控件。设为 `target` 时，`List[目标模型]` 字段会渲染成搜索式多选，用户从宿主已知的群或用户里挑选，不用手抄 ID；模型定义与匹配规则见[目标选择](./target-selector)。
 
 ::: code-group
 

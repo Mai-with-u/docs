@@ -77,6 +77,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Chat Scenes', link: '/en/manual/chat-scenes' },
       { text: 'Files', link: '/en/manual/files' },
       { text: 'Desktop Pet', link: '/en/manual/desktop-pet' },
+      { text: 'Pet Installer', link: '/en/manual/desktop-pet-release' },
       { text: 'Internal Chat', link: '/en/manual/internal-chat' },
     ]
   },
@@ -102,6 +103,9 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'Statistics and Observation', link: '/en/manual/webui/statistics' },
       { text: 'Files and Attachments', link: '/en/manual/webui/files' },
       { text: 'Data Management', link: '/en/manual/webui/data-management' },
+      { text: 'Chat Migration', link: '/en/manual/webui/chat-migration' },
+      { text: 'Person Migration', link: '/en/manual/webui/person-migration' },
+      { text: 'Sharing Groups', link: '/en/manual/webui/sharing-groups' },
     ]
   },
 ]
@@ -146,6 +150,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
           { text: 'Manifest', link: '/en/develop/plugin/manifest' },
           { text: 'Lifecycle', link: '/en/develop/plugin/lifecycle' },
           { text: 'Configuration', link: '/en/develop/plugin/config' },
+          { text: 'Target Selection', link: '/en/develop/plugin/target-selector' },
         ]
       },
       {

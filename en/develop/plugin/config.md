@@ -112,7 +112,7 @@ Field(
 - **`default`** `Any` — Field default value
 - **`default_factory`** `Callable` — Default value factory function, used for mutable types like `list`, `dict`, nested `PluginConfigBase`, etc.
 - **`description`** `str` — Field description, displayed as a form label in the WebUI
-- **`json_schema_extra`** `dict` — Additional metadata passed to the WebUI Schema generator. Common keys: `placeholder` (input box placeholder text), `group` (UI grouping hint)
+- **`json_schema_extra`** `dict` — Additional metadata passed to the WebUI Schema generator. Common keys: `placeholder` (input box placeholder text), `group` (UI grouping hint), `x-widget` (widget to render; `target` turns a `List[target model]` field into a searchable multi-select, see [Target Selection](./target-selector.md))
 
 ### __ui_label__
 
@@ -165,6 +165,7 @@ class PluginSection(PluginConfigBase):
 
 - `placeholder`: Placeholder hint text for the input box
 - `group`: Configuration grouping hint in the WebUI
+- `x-widget`: The widget the WebUI renders. Set to `target` and a `List[target model]` field renders as a searchable multi-select where users pick from groups or users the host already knows instead of copying IDs; the model shape and matching rules live in [Target Selection](./target-selector.md).
 
 ::: code-group
 

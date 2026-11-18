@@ -31,7 +31,7 @@ The packaged client needs no Python, Node.js, Rust, or full MaiBot install. Wind
 
 :::
 
-The pet has no separate password box and never writes the password into local config. Host sessions last 8 hours and can be reused within that window; after expiry or revocation the WebUI login page reappears. The host must serve `/api/host/desktop-pet/session`, which reuses host session validation and returns 401 when unauthenticated.
+The pet has no separate password box and never writes the password into local config. A fixed-password login uses a Cookie valid for 7 days: reconnecting and host restarts reuse it within that window, and checking login state does not extend it. An expired or cleared Cookie, a revoked session, or a host auth state change sends the WebUI login page back. The host must serve `/api/host/desktop-pet/session`, which reuses host session validation and returns 401 when unauthenticated.
 
 If a reverse proxy such as Nginx enables HTTP Basic Auth, the native WebView may separately ask for the proxy credentials, and they are not guaranteed to be remembered. The tray menu offers **Open WebUI login** and **Change connection / screen authorization**.
 
@@ -75,6 +75,26 @@ Packs contain only JSON and static PNG/WebP and never execute scripts. A ZIP may
 - **`motion`** — `none`, `bob`, `sway`, `hop`, `shake`, `pulse`.
 - **State mapping** — `idle`, `thinking`, `talking`, and `dragging` must all be mapped explicitly and may reuse animations; optional events are `click`, `happy`, `error`, `greeting`.
 :::
+
+## Message sound and unread
+
+A local pet plays the selected sound when a new reply arrives — `wood` by default, about 0.34 seconds. Consecutive segmented replies notify once within a second, and loading history plays nothing. The orange dot at the pet's lower left marks unread replies; it clears once you open the chat and see the latest message, and stays while you sit at an older scroll position.
+
+**Message sound** options map to `desktop_pet.message_sound`:
+
+::: fields
+- **`wood`** — Wooden pop, the default.
+- **`bubbles`** — Soft bubbles.
+- **`bell`** — Warm bell.
+- **`water`** — Water drop.
+- **`off`** — Sound off.
+:::
+
+**Preview** plays the current choice right in the browser — no need to start the pet or wait for a new message; a saved choice applies from the next reply. Turning the sound off does not affect the unread dot.
+
+## Chat history
+
+Opening or reloading the pet reads the owner chat stream history. Scrolling up in the chat panel expands it step by step, and at the top it keeps loading earlier messages; browsing history never forces a jump back to the bottom for a new reply. **Reload desktop pet** stops the old pet process and restarts it with the current config, re-reads history, and clears an unsent draft.
 
 ## Rich chat
 
@@ -192,9 +212,10 @@ Plugin buttons all appear in the pet's puzzle-piece **Plugin extensions** menu, 
 
 **Verify** — Enable the desktop pet and restart the bot in local mode; the window appears. Say something in web chat and the pet shows the reply. Switch to **Remote** and have the client enter the host address and log in — it shows the same pet.
 
+- **The pet window hangs or goes blank** — Restart the pet from the WebUI: it rebuilds only the pet process and window, leaving the core process, chat streams, and login session untouched. Do not restart the whole Bot for this.
 - **No pet window** — Confirm `desktop_pet.enabled` is on. Local mode is Windows-only; use a remote client elsewhere.
 - **Remote client cannot connect** — Check that the run mode is Remote, the address and port are reachable, and the reverse proxy supports WebSocket Upgrade with long-lived connections.
-- **Login page keeps reappearing** — Host sessions last 8 hours and are invalidated on expiry or auth state changes; log in again.
+- **Login page keeps reappearing** — The login Cookie is valid for 7 days and is invalidated when it expires or is cleared, when the session is revoked, or when the host auth state changes; log in again.
 - **Todos do not fire on time** — Local mode cannot fire while the pet is closed or the machine sleeps and catches up afterwards; bot todos need an owner chat stream first.
 - **Skin switch fails** — Switching validates and decodes everything first and keeps the old appearance on failure; check that `skin.json` maps all four states and that IDs are not duplicated across sources.
 - **Screen reading stops by itself** — A capture or delivery failure stops it with a reason; restart by hand. Turning off read permission or restarting never resumes it automatically.

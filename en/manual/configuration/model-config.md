@@ -73,6 +73,9 @@ price_periods = []                           # [Optional] Time-based price list,
 # send_temperature = true                    # [Optional] Whether to send the MaiBot-managed temperature, true by default; set to false to stop sending model/task temperatures
 force_stream_mode = false                    # [Optional] Force stream output mode, set to true if the model does not support non-streaming output
 visual = false                               # [Optional] Whether it is a multimodal model (supports visual input)
+max_images = 0                               # [Optional] Max images per request (long-image segments included); 0 = unlimited, over the limit the most recent are kept
+image_max_side = 8000                        # [Optional] Long-side limit in pixels; oversized images are scaled down and long screenshots split; default 8000
+image_min_side = 1                           # [Optional] Short-side floor in pixels; small images are scaled up; default 1, must not exceed image_max_side
 extra_params = {}                            # [Optional] Extra parameters, see Model Extra Params
 ```
 
@@ -87,6 +90,9 @@ extra_params = {}                            # [Optional] Extra parameters, see 
 - **Model-level Override**: `temperature` / `max_tokens` can override task config; if not set, task defaults are used
 - **Temperature Send Switch**: `send_temperature` defaults to `true`; set it to `false` (or turn off "Send temperature parameter" in the WebUI model advanced settings) to stop MaiBot from sending any MaiBot-managed temperature for this model (model-level, task-level, and extra parameters), compatible with models that reject this parameter
 - **Vision**: `visual = true` indicates support for image input, used for `vlm` tasks
+- **Image count limit**: `max_images` defaults to `0`, meaning no cap per request; when a request carries more images the most recent ones are kept and earlier ones become placeholder text, and each long-image segment counts as one
+- **Long-side limit**: `image_max_side` defaults to `8000` pixels; images with a longer side are scaled down proportionally, and very long screenshots are split into segments that each stay within the limit with an overlap between neighbours
+- **Short-side floor**: `image_min_side` defaults to `1` pixel; images with a shorter side are scaled up proportionally, and when upscaling would break the long-side limit MaiBot pads the image instead so nothing is cropped. Setting it above `image_max_side` fails validation with `图片最小边长不得超过最大边长`
 - **`extra_params`**: Provider-specific parameters (thinking mode, reasoning intensity, etc.), see [Model Extra Params](./model-extra-params.md)
 
 
@@ -300,16 +306,6 @@ selection_strategy = "balance"                # [Optional] Model selection strat
 hard_timeout = 120.0                          # [Optional] Hard timeout (seconds)
 ```
 
-```toml [emoji (emoji selection) ~vscode-icons:file-type-toml~]
-# [Optional] Emoji selection: picks a fitting emoji from the candidates and sends it.
-# Selection priority: emoji has a model → use emoji; planner is fully visual → use planner; otherwise → use vlm
-# Replacing an old sticker: prefer the emoji task; use planner when unconfigured
-[model_task_config.emoji]
-model_list = []                               # [Optional] List of model names
-max_tokens = 8192                             # [Optional] Maximum output token count
-hard_timeout = 120.0                          # [Optional] Hard timeout (seconds)
-```
-
 ```toml [vlm (image understanding) ~vscode-icons:file-type-toml~]
 # [Strongly recommended] Image description: understands image content. Requires a multimodal model with visual=true.
 [model_task_config.vlm]
@@ -368,10 +364,8 @@ When `model_list` for some tasks is empty, other tasks are automatically reused:
 fast_model empty → use utils
 learner    empty → use utils
 
-memory · emoji · vlm · voice · embedding · image_embedding
+memory · vlm · voice · embedding · image_embedding
   → no automatic fallback when empty; the caller skips the task or raises
-
-emoji special logic: emoji has a model → use emoji; planner is fully visual → use planner; otherwise → use vlm
 ```
 
 **Two special rules for embedding models**: `embedding` and `image_embedding` **ignore `selection_strategy`** and always take the first available model in `model_list` order — this keeps the vector space consistent and never rotates between models; in WebUI these two tasks are also rendered as **single-select model pickers**. When `image_embedding` is left empty, image memory directly shows "model unavailable" and does not fall back to the text embedding model.

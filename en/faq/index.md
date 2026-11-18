@@ -16,7 +16,7 @@ Browse by topic, or jump straight to [Error Troubleshooting](./error-troubleshoo
 
 **[Adapter Connections](./adapters.md)** — OneBot Adapter, QQ official bot, built-in Telegram and WeChat adapters.
 
-**[Chat and Replies](./chat-and-reply.md)** — Speaking-rate groups, message debouncing, self-replies, reply speed.
+**[Chat and Replies](./chat-and-reply.md)** — Viewing-rate groups, message debouncing, self-replies, reply speed.
 
 **[Models and APIs](./models-and-api.md)** — API keys, unauthenticated providers, LAN models, vision models, embeddings.
 

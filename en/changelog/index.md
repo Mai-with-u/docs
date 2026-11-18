@@ -5,7 +5,68 @@ description: Feature updates, fixes, and configuration changes across MaiBot rel
 
 # Changelog
 
-Feature changes and fixes for each release, newest first. The current release is 1.4.3.
+Feature changes and fixes for each release, newest first. The current release is 1.4.6.
+
+::: timeline 2026-11-17
+### Core [1.4.6]
+* Chat: the main loop prompt and tool-call accuracy are tuned, and some duties moved to `fast_model`.
+* Chat: context can be capped by token count, trimming older history from the actual input usage.
+* Chat: group frequency is now viewing frequency, a base probability per message batch deciding whether the batch reaches the Planner.
+* Chat: the natural and steady debounce windows are relaxed.
+* Chat: chat frequency logic is rebuilt to keep conversations coherent while controlling overall message volume.
+* Desktop pet: schedule accuracy and wake logic are improved, with history browsing and restart from the WebUI.
+* Desktop pet: four reply sounds and an unread indicator are added.
+* Desktop pet: the Android and Windows remote connectors are updated.
+* Plugins: the QQ official adapter follows the new interface, reading group nicknames and using the matching group management endpoints.
+* Plugins: plugin configuration can declare searchable multi-select targets for groups and users.
+
+### WebUI [1.10.6]
+* Prompt editing supports side-by-side comparison.
+* Plugins can be updated directly again.
+* The classic layout and its switch entry are removed.
+* The instance loading state no longer disappears while you are on the plugin page.
+* Sidebar interaction is reworked.
+* WebUI login lasts longer.
+* Fixed the polling configuration of plugins that are not loaded.
+:::
+
+::: timeline 2026-11-14
+### Core [1.4.5]
+* Bracket stripping in post-processing can be configured separately.
+* Sticker selection avoids reusing the same sticker back to back.
+* Fixed a startup failure caused by the path argument.
+
+### WebUI [1.10.5]
+* Fixed inconsistent scrollbar styling in dark mode.
+* Fixed the WeChat adapter being unclickable.
+:::
+
+::: timeline 2026-11-14
+### Core [1.4.4]
+* Chat: a schedule can be set to wake the bot at a chosen time.
+* Chat: the Stop and Wait tools are merged.
+* Chat: fixed the bot neither stopping nor replying when no tool is called.
+* Chat: replies work normally when no target is set.
+* Chat: experimental chat stream migration is added.
+* Chat: a lightweight private chat mode lets a small model act as the Planner.
+* Chat: trailing non-standard tool calls load, raising the overall cache hit rate.
+* Chat: fixed WebUI login failing on some access paths.
+* Models: the maximum image count and image size bounds are configured per model.
+* Plugins: the QQ official adapter gains management tools and their API.
+* Plugins: keyword reactions move into a built-in plugin, and old configuration migrates automatically.
+* Plugin marketplace: an invalid version index or repository URL is logged and skipped instead of breaking the whole marketplace.
+* Desktop pet: proactive thinking is improved, and the pet can be locked and unlocked from its own settings screen.
+* Memory: knowledge import, embedding cache, and model assignment are optimized to cut duplicate extraction and model calls.
+* Memory: multi-recall and fact deduplication are improved, and the dual-pool mode no longer queries the stale vector pool.
+* Memory: summary validity and source attribution are checked more strictly.
+* Memory: retrieval results preview a limited length first, and the full text can be read in segments within the same session.
+* Fixed startup failures caused by file read and write handling.
+
+### WebUI [1.10.4]
+* The first-run guide is streamlined.
+* A sharing groups tab lists every sharing group.
+* Sidebar tabs fold and page better.
+:::
 
 ::: timeline 2026-11-08
 ### Core [1.4.3]

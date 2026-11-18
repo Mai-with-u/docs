@@ -330,7 +330,7 @@ WebUI 的登录密码保存在 `host/webui.json` 的 `access_token` 字段，不
 **方法三：清掉浏览器登录态**
 浏览器把登录态存在 `maibot_host_session_*` Cookie 里。改密码、重启宿主或点退出，旧会话全部失效，需要重新登录。手动清理：F12 → Application → Cookies，删掉同名 Cookie 后刷新。
 
-会话有效期固定 8 小时，重启宿主不延长。
+固定密码的登录态由 7 天有效期的 Cookie 维持，重启宿主不延长；Cookie 到期或被清除后需要重新登录。
 
 **避免复发**
 

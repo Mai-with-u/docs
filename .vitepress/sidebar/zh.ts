@@ -90,6 +90,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: '聊天场景', link: '/manual/chat-scenes' },
       { text: '文件功能', link: '/manual/files' },
       { text: '桌宠', link: '/manual/desktop-pet' },
+      { text: '桌宠安装包', link: '/manual/desktop-pet-release' },
       { text: '内部聊天', link: '/manual/internal-chat' },
     ]
   },
@@ -115,6 +116,9 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: '统计与观察', link: '/manual/webui/statistics' },
       { text: '文件与附件', link: '/manual/webui/files' },
       { text: '数据管理', link: '/manual/webui/data-management' },
+      { text: '聊天迁移', link: '/manual/webui/chat-migration' },
+      { text: '人物迁移', link: '/manual/webui/person-migration' },
+      { text: '相通组', link: '/manual/webui/sharing-groups' },
     ]
   },
 ]
@@ -159,6 +163,7 @@ const developSidebar: DefaultTheme.SidebarItem[] = [
           { text: 'Manifest', link: '/develop/plugin/manifest' },
           { text: '生命周期', link: '/develop/plugin/lifecycle' },
           { text: '配置', link: '/develop/plugin/config' },
+          { text: '目标选择', link: '/develop/plugin/target-selector' },
         ]
       },
       {

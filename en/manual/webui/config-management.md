@@ -13,7 +13,7 @@ The top tabs switch between **Detailed settings** and **Command management**; th
 ::: fields
 - **Detailed settings** — Sectioned forms covering every section of `bot_config.toml`. Hover an option to read its description.
 - **Command management** — Plugin commands and execution permissions; see [Command management](./command-management.md).
-- **Sharing groups** — Group several chat streams so they share expressions, slang, or long-term memory.
+- **Sharing group settings** — Opens the [Sharing groups](/en/manual/webui/sharing-groups) page: bundle several chat streams so they share expressions, slang, or long-term memory.
 - **Source editing** — Edit the raw `bot_config.toml`, for people comfortable with TOML.
 :::
 
@@ -27,15 +27,11 @@ On phone widths the sections become a horizontally scrollable row of pills.
 
 ## Sharing groups
 
-Sharing groups bundle several chat streams so they share one set of learned results:
+Sharing groups bundle several chat streams so they share one set of learned results. Create, edit, and delete them on the [Sharing groups](/en/manual/webui/sharing-groups) page; this section only points you there.
 
-::: fields
-- **Expression groups** — Written to `expression_groups`.
-- **Slang groups** — Written to `jargon_groups`.
-- **Memory groups** — Written to `a_memorix.shared_memory_groups`.
-:::
+`expression_groups`, `jargon_groups`, and `a_memorix.shared_memory_groups` in the configuration file are legacy fields: they are imported once at first startup, stop participating in runtime after that, and the page no longer offers controls for them. Editing the configuration file does not overwrite groups already imported.
 
-With `a_memorix.global_memory_sharing_enabled` on, memory groups become read-only on the page.
+With `a_memorix.global_memory_sharing_enabled` on, memory sharing is handled by all-chat rules.
 
 ## Model management
 
@@ -81,5 +77,5 @@ To tell: after saving, check the log for a successful config reload message; for
 
 - **Saving fails** — Read the error on the page; the backend names the offending field for invalid values. You can also syntax-check first: `python -c "import tomllib; tomllib.load(open('config/bot_config.toml','rb'))"`.
 - **A change has no effect** — Compare against "When changes take effect": listen addresses and ports, `[maim_message]`, `[plugin_runtime]`, and the watchdog need a host restart.
-- **Sharing groups do nothing** — Memory groups are read-only while `a_memorix.global_memory_sharing_enabled` is on; turn the global switch off first.
+- **Changing sharing groups does nothing** — Legacy fields are read only during the first import, and the database records on the [Sharing groups](/en/manual/webui/sharing-groups) page are authoritative afterwards; editing the configuration file has no effect.
 - **Forms look wrong after source editing** — The raw file broke the structure; roll back with the pre-save state or a saved config copy.

@@ -14,7 +14,7 @@ The WebUI has two panels for watching what happens: **home and detailed statisti
 - **Model calls** — Model, task, and duration for each request.
 - **Tokens and cost** — Distributed by model, task group, and time.
 - **Messages and uptime** — Sent and received counts plus running time.
-- **Cache** — Hits versus misses.
+- **Cache** — Hits versus misses. **Core cache** counts the hit rate of Planner tasks only, excluding Replyer and other tasks, so it isolates context reuse; **all cache** covers every task.
 :::
 
 Charts switch dimensions and the detail table expands; when there is no data the page shows "no data in the current window".

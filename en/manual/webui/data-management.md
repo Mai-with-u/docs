@@ -6,6 +6,8 @@ title: Data Management
 
 Data management packages config, data, plugins, and logs into a zip for download, or restores them from a zip. Open it from **Advanced tools → Data management** in the sidebar.
 
+The same page hosts two tabs that move a single chat stream: [Chat migration](/en/manual/webui/chat-migration) merges one chat history into another, and [Person migration](/en/manual/webui/person-migration) merges one person's profile and memory into another user ID.
+
 ## Export
 
 Pick a scope and start the export. Exports run in the background with one job at a time; the archive is staged in the system temp directory, expires automatically, and its retention is reset to 24 hours whenever a download starts or finishes.

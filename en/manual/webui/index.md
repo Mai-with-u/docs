@@ -26,7 +26,7 @@ Click the link in the log to go straight in, or open `http://127.0.0.1:8001/` an
 - **After saving** — The old password stops working immediately; sign in with the new password to continue the wizard.
 :::
 
-Login sessions last 8 hours. With a fixed password, a session survives a host restart and the original Cookie signs you back in automatically, but the restart does not extend expiry. Browsers store only a random ticket; the database stores a digest bound to the current password. Signing out revokes the current session; changing or resetting the password revokes every session, including other browsers.
+A fixed-password login uses a Cookie valid for 7 days. Within that window you are signed in automatically after closing the browser or restarting the host; checking login state does not extend the Cookie, and an expired or cleared Cookie means signing in again. The browser stores only a random ticket; the database stores a digest bound to the current password plus the login source. Signing out revokes the current session; changing or resetting the password revokes every session. Temporary passwords and the one-minute single-use login link still expire when the host restarts.
 
 On a remote machine where copying the password is awkward, run `maibot host open-webui --directory <workspace>` for a one-time login link valid for 60 seconds.
 
@@ -37,7 +37,7 @@ The WebUI organizes pages in a sidebar with these groups: Overview, Configuratio
 ::: fields
 - **Home** — Click the logo at the top of the sidebar to return home, which summarizes run state, usage, and shortcuts.
 - **Switch bot** — The entry point sits at the bottom of the sidebar. The selected bot is what config, chat, plugin, and resource pages read and write; when every bot is stopped you can still manage them here.
-- **Layout** — Choose **Classic** or **Mai Observation** under WebUI Settings → Appearance. Classic keeps the top bar and card home; Mai Observation drops the top bar, puts settings in the upper sidebar and all conversations below, and uses a run-state panel as home. Desktop widths only.
+- **Layout** — No top bar: settings sit in the upper sidebar and all conversations below, with a run-state panel as home. Desktop widths only.
 :::
 
 The other item at the bottom of the sidebar is the update entry, which shows a notice when a new version exists.
@@ -115,5 +115,5 @@ The update stops every bot first, keeps the registered desired states, and shuts
 - **The page will not open** — Confirm the host is running and printed its access address; check `[webui].enabled` in `host/config.toml` and whether the port is taken.
 - **Password rejected** — Temporary login passwords change on every start; use the one printed by this run and copy it without spaces or newlines.
 - **Locked out after setting a fixed password** — The old password dies immediately on save and other browsers are signed out; sign in with the new password. If all else fails, delete `host/webui.json` to reset.
-- **Signed out after a while** — Sessions last 8 hours and are invalidated on expiry or auth state changes; sign in again.
+- **Signed out after a while** — The Cookie is valid for 7 days and is invalidated on expiry, on being cleared, on session revocation, or on host auth state changes; sign in again.
 - **A listen-address change has no effect** — `[webui]` addresses and ports need a host restart; hot reload does not rebind listeners.

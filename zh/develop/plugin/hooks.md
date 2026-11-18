@@ -261,6 +261,22 @@ Host 启动时注册 30 个 Hook 点，每个都标明是否允许 abort（中�
 
 `reply_tool_args` 会在表达方式选择链、`maisaka.replyer.before_request` 和 `maisaka.replyer.after_response` 中保持可见。它包含 reply 工具里除内部参数 `msg_id`、`_reply_id`、`_plugin_reply_prompt` 外的额外参数；`before_request` 返回的 `reply_tool_args` 修改会继续传递给后续 replyer hook。
 
+#### 读取回复模板标识
+
+`maisaka.replyer.before_model_request` 的 `reply_tool_args["_replyer_prompt_profile"]` 给出本次回复使用的模板标识：
+
+::: fields
+- **`reply`** — 普通群聊、私聊回复模板。
+- **`mai_replier`** — Mai Replier 专用适配，群聊与私聊各有独立的 System / User 模板。
+- **`document`** — 插件长文能力 `maisaka.reply.generate` 的独立写作模板。
+:::
+
+该字段由主程序按本次实际选中的模型覆盖填充，只供读取，不能用它强制更换模板；插件指定模型、候选模型切换和重新生成都会按实际模型重新给出该标识。它只出现在 `reply_tool_args` 里，不会作为额外的顶层参数传给 Hook 处理函数。`before_request` 阶段实际模型尚未选定，读不到这个标识。
+
+模型请求前 Hook 拿到的是已经构建完成的模板，插件仍可以通过 `modified_kwargs["items"]` 改写。需要追加回复要求时优先用 `extra_prompt`。直接处理 Context Items 的插件要先识别模板标识：回复模板把聊天历史合并进 user 消息，所以不能假定每条历史发言都是独立 Item，也不能依赖某段固定提示词的位置；插件直接改写最终 Items 后，主程序不会在 Hook 之后删减插件内容。
+
+`maisaka.replyer.after_response` 的正文改写、输出 Item 改写、重试与重试原因保持原有协议；插件追加的要求和重生成约束在普通回复模板与 Mai Replier 模板中都会保留。
+
 #### 按单次回复控制文本后处理
 
 `maisaka.reply.before_post_process` 在最终回复已经确定、但尚未执行文本拆分和错别字注入时触发。阻塞模式处理器可以读取 `response`、`session_id`、`reply_message_id` 和 `reply_tool_args`，并修改以下字段：

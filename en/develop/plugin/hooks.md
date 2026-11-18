@@ -261,6 +261,22 @@ The Host registers 30 Hook points at startup; each one notes whether abort (term
 
 `reply_tool_args` remains visible in the expression selection chain, `maisaka.replyer.before_request`, and `maisaka.replyer.after_response`. It contains extra reply tool arguments other than the internal `msg_id`, `_reply_id`, and `_plugin_reply_prompt` parameters; modifications returned from `before_request` continue to later replyer hooks.
 
+#### Reading the reply template profile
+
+`reply_tool_args["_replyer_prompt_profile"]` on `maisaka.replyer.before_model_request` names the template used for this reply:
+
+::: fields
+- **`reply`** — The regular group and private reply template.
+- **`mai_replier`** — The Mai Replier adapter, with separate System / User templates for group and private chats.
+- **`document`** — The standalone writing template of the `maisaka.reply.generate` long-form capability.
+:::
+
+The host overwrites this field from the model actually selected for this attempt. Read it only — it cannot force a different template. Choosing a model from a plugin, switching candidates, and regenerating all produce the identifier again from the actual model. It lives inside `reply_tool_args` only and is never passed to handlers as a separate top-level argument. At `before_request` the actual model is not chosen yet, so the identifier is not available there.
+
+The pre-request hook sees an already built template but can still rewrite it through `modified_kwargs["items"]`. Prefer `extra_prompt` to append reply requirements. Plugins that handle Context Items directly must check the profile first: the reply template merges chat history into a user message, so do not assume each past message is its own Item, and do not rely on the position of any fixed prompt paragraph. When a plugin rewrites the final Items, the host does not trim plugin content after the hook.
+
+`maisaka.replyer.after_response` keeps its existing protocol for body rewrite, output Item rewrite, retry, and retry reason; plugin requirements and regeneration constraints survive in both the regular reply template and the Mai Replier template.
+
 #### Controlling Text Post-Processing Per Reply
 
 `maisaka.reply.before_post_process` runs after the final reply has been selected but before text splitting and Chinese typo injection. A blocking handler can read `response`, `session_id`, `reply_message_id`, and `reply_tool_args`, and can modify these fields:

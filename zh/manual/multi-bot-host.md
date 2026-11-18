@@ -22,12 +22,14 @@ MaiBot 的唯一启动入口是宿主（Host）。宿主启动时按工作区目
     config.toml          宿主配置：监听地址、Cookie、公开地址
     model_catalog.toml   共享供应商、API Key、模型与联网服务
     webui.json           WebUI 登录凭据
-    sessions.sqlite3     登录会话
+    sessions.sqlite3     登录会话摘要与登录来源
     run.lock             宿主运行租约
     control.json         控制通道地址与凭据
   bots/<bot_id>/
     config/ data/ logs/ plugins/ temp/
 ```
+
+WebUI 登录由宿主统一处理。固定密码登录使用 7 天有效期的 Cookie，Cookie 有效期内，关闭浏览器或重启宿主后仍可自动进入；检查登录状态不会延长 Cookie 有效期，Cookie 到期或被清除后需要重新登录。浏览器只保存随机票号，`sessions.sqlite3` 只保存绑定当前密码的票号摘要与登录来源；退出登录撤销当前会话，修改或重置密码撤销旧会话。临时密码和一分钟单次登录链接仍在宿主重启后失效。升级时保留尚未到期的旧会话，已经过期的会话需要重新登录。
 
 ## 管理 Bot
 

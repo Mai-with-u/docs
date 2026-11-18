@@ -30,7 +30,7 @@ title: 内部聊天
 
 ## 插件怎么接入
 
-插件用 SDK 2.17.0 的接口查询身份和发言，不要自己计算 `session_id`：
+插件通过 SDK 的 `ctx.internal_chat` 接口查询身份和发言，不要自己计算 `session_id`：
 
 ::: fields
 - **`ctx.internal_chat.identity()`** — 查询当前内部聊天身份。
@@ -39,25 +39,33 @@ title: 内部聊天
 
 需要让插件在桌宠里显示提示而不触发模型调用时，用 `ctx.desktop_pet.say(text)`：它只在桌面气泡里显示文字，不进入聊天记录、学习和记忆。
 
+## 组件作用域
+
+Tool 和回复扩展的 `platforms`、`chat_scope`、`allowed_session` 是组件声明的顶层字段，分别控制平台、聊天类型和指定会话，不进入模型调用参数。模型的工具参数 Schema 里不会出现这三项，LLM 也无法通过调用参数扩大作用域。
+
 ## 本地 SDK 联调
 
-需要本地 SDK 时，用环境变量指向 SDK 仓库再启动主程序：
+主程序当前要求 `maibot-plugin-sdk>=2.23.0`。升级 SDK 时应同时更新 MaiBot，确保 Host 读取同一声明格式。
+
+联调尚未发布到 PyPI 的 SDK 时，先安装主程序所需的本地 SDK，再设置源码路径启动：
 
 ::: code-group
 
 ```powershell [Windows PowerShell ~vscode-icons:file-type-powershell~]
+uv pip install -e ../maibot-plugin-sdk
 $env:MAIBOT_PLUGIN_SDK_PATH = (Resolve-Path ../maibot-plugin-sdk).Path
-uv run bot.py
+uv run --no-sync bot.py
 ```
 
 ```bash [Linux / macOS ~vscode-icons:file-type-shell~]
+uv pip install -e ../maibot-plugin-sdk
 export MAIBOT_PLUGIN_SDK_PATH="$(cd ../maibot-plugin-sdk && pwd)"
-uv run bot.py
+uv run --no-sync bot.py
 ```
 
 :::
 
-Runner 和版本校验会显式使用本地 SDK。主程序基础依赖仍兼容较低版本；使用新能力的插件 manifest 应声明要求的 SDK 版本，不满足时会报告版本不兼容。
+Runner 和版本校验会显式使用本地 SDK。使用 SDK 2.23.0 作用域声明的插件 manifest 也应要求 `maibot-plugin-sdk>=2.23.0`，不满足时会报告版本不兼容。
 
 ## 验证与排错
 

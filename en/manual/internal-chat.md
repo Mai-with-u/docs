@@ -30,7 +30,7 @@ Messages submitted from the desktop pet keep an interface-origin marker and do n
 
 ## How plugins join in
 
-Plugins query the identity and speak through the SDK 2.17.0 interfaces — never compute `session_id` themselves:
+Plugins query the identity and speak through the `ctx.internal_chat` SDK interfaces — never compute `session_id` themselves:
 
 ::: fields
 - **`ctx.internal_chat.identity()`** — Query the current internal chat identity.
@@ -39,25 +39,33 @@ Plugins query the identity and speak through the SDK 2.17.0 interfaces — never
 
 To show a hint in the pet without a model call, use `ctx.desktop_pet.say(text)`: it only displays text in a desktop bubble and never enters chat history, learning, or memory.
 
+## Component scope
+
+For Tools and reply extensions, `platforms`, `chat_scope`, and `allowed_session` are top-level declaration fields controlling the platform, the chat type, and specific sessions; they never enter model call parameters. They do not appear in a tool's parameter Schema, and the LLM cannot widen the scope through call arguments.
+
 ## Local SDK debugging
 
-To work against a local SDK, point an environment variable at the checkout before starting the main program:
+The main program currently requires `maibot-plugin-sdk>=2.23.0`. Upgrade MaiBot together with the SDK so the Host reads the same declaration format.
+
+To work against an SDK that is not on PyPI yet, install the local SDK the main program needs first, then point the source path at the checkout and start:
 
 ::: code-group
 
 ```powershell [Windows PowerShell ~vscode-icons:file-type-powershell~]
+uv pip install -e ../maibot-plugin-sdk
 $env:MAIBOT_PLUGIN_SDK_PATH = (Resolve-Path ../maibot-plugin-sdk).Path
-uv run bot.py
+uv run --no-sync bot.py
 ```
 
 ```bash [Linux / macOS ~vscode-icons:file-type-shell~]
+uv pip install -e ../maibot-plugin-sdk
 export MAIBOT_PLUGIN_SDK_PATH="$(cd ../maibot-plugin-sdk && pwd)"
-uv run bot.py
+uv run --no-sync bot.py
 ```
 
 :::
 
-The runner and version checks explicitly use the local SDK. Main-program base dependencies still tolerate older SDKs; plugins using new capabilities should declare the required SDK version in their manifest, and an unsatisfied version is reported as incompatible.
+The runner and version checks explicitly use the local SDK. A plugin manifest that uses the SDK 2.23.0 scope declarations should also require `maibot-plugin-sdk>=2.23.0`, and an unsatisfied version is reported as incompatible.
 
 ## Verify and troubleshoot
 
