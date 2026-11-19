@@ -218,3 +218,7 @@ member = await self.ctx.api.call(
 **标准模式下某个工具或扩展调用报错** — 标准模式只放行 OneBot v11 标准动作与消息段，QZone、厂商戳一戳、表情表态、文件上传、合并转发等扩展会被拒绝。需要这些能力时换回 `client_type = "auto"` 或 `napcat`。
 
 **通知不进来（戳一戳 / 撤回等）** — 确认 `[notice].enabled = true`，且对应类型开关已打开；未列出的通知类型默认丢弃，属正常行为。
+
+## SnowLuma 专属画像
+
+当 `client_type = "snowluma"` 时，适配器自动套用 SnowLuma 专属画像。该画像下 `[chat_abilities]` 中的 `enable_poke_tool`、`enable_emoji_like_tool` 等扩展工具**正常启用**（与 NapCat 画像一致，不受标准模式白名单限制）。
