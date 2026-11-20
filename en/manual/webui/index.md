@@ -49,8 +49,10 @@ The other item at the bottom of the sidebar is the update entry, which shows a n
 - **Mai settings** — Sectioned forms for `bot_config.toml`; see [Edit config in the browser](./config-management.md).
 - **Model management** — Providers, models, and task assignment; see [Model configuration](../configuration/model-config.md).
 - **Adapter settings** — Account identity, allowlists, and denylists; see [Adapter management](./adapter-management.md).
+- **Learning** — Review and maintain expressions, jargon, and emoji stickers; see [Learning](./learning.md).
 - **Detailed statistics** — Model calls, tokens, cost, and message counts; see [Statistics and observation](./statistics.md).
 - **Reasoning process** — Prompt stages and tool call records for each Planner and Replyer run.
+- **Logs** — Filter runtime logs by module and level, search, and export; see [Logs](./logs.md).
 - **Files** — Attachment upload, download, and text reading; see [Files and attachments](./files.md).
 - **Plugin extensions / Plugin market** — Install and manage plugins; see [Plugins](../plugins/).
 - **Data management** — Package export and import; see [Data management](./data-management.md).
