@@ -54,6 +54,7 @@ const manualSidebar: DefaultTheme.SidebarItem[] = [
       { text: 'uv 安装', link: '/manual/deployment/uv-tool' },
       { text: 'Windows 部署', link: '/manual/deployment/windows' },
       { text: 'Linux 部署', link: '/manual/deployment/linux' },
+      { text: 'Linux 桌面一键包（实验性）', link: '/manual/deployment/linux-onekey' },
       { text: 'Docker 部署', link: '/manual/deployment/docker' },
       { text: 'AI 安装', link: '/manual/deployment/installation-agent' },
     ]
